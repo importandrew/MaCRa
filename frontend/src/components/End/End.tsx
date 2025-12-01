@@ -1,0 +1,83 @@
+import { Button, Link, Spinner } from '@heroui/react';
+import { useCallback, useState } from 'react';
+import { useFetchGameResultData } from '../../providers/game/gameDataApi';
+import GameLogs from './GameLogs';
+import GameResultsTable from './GameResultsTable';
+
+export default function End() {
+  const { data, isError, isLoading, fetchData } = useFetchGameResultData(true);
+  const [isChartVisible, setIsChartVisible] = useState(false);
+  const [isLogsVisible, setIsLogsVisibale] = useState(false);
+
+  const showChart = () => {
+    setIsChartVisible(!isChartVisible);
+  };
+  const showLogs = () => {
+    setIsLogsVisibale(!isLogsVisible);
+  };
+
+  const onRefresh = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full w-screen my-auto justify-center items-center">
+        <Spinner label="Loading..." size="lg" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex w-screen h-full justify-center items-center">
+        <Button type="button" onPress={onRefresh}>
+          Refresh
+        </Button>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex flex-col h-full w-screen justify-center items-center gap-3">
+        <p className="mb-4 text-center text-3xl">No data available</p>
+        <Button type="button" onPress={onRefresh}>
+          Refresh
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col grow justify-center w-screen sm:max-w-[600px] h-full px-3 gap-3">
+      <GameResultsTable data={data} />
+      <div className="flex justify-center gap-3">
+        <Button
+          type="button"
+          onPress={showChart}
+          color="default"
+          variant="flat"
+        >
+          Show chart
+        </Button>
+        <Button
+          type="button"
+          onPress={showLogs}
+          color="secondary"
+          variant="flat"
+        >
+          Show logs
+        </Button>
+        <Button href="/" as={Link} color="primary" variant="flat">
+          Home
+        </Button>
+      </div>
+      <GameLogs
+        isChartVisible={isChartVisible}
+        isLogVisible={isLogsVisible}
+        gameId={data.id}
+      />
+    </div>
+  );
+}

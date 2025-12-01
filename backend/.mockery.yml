@@ -1,0 +1,30 @@
+all: false
+dir: '{{.InterfaceDir}}'
+filename: mocks_test.go
+force-file-write: true
+formatter: goimports
+generate: true
+include-auto-generated: false
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+packages:
+  github.com/importandrew/MaCRa/service/player:
+    interfaces:
+      PlayerRepo: {}
+  github.com/importandrew/MaCRa/service/game:
+    interfaces:
+      GameRepo: {}
+      GameEngine: {}
+      PlayerRepo: {}
+  github.com/importandrew/MaCRa/handler/player:
+    interfaces:
+      PlayerService: {}
+  github.com/importandrew/MaCRa/handler/game:
+    interfaces:
+      GameService: {}
+      PlayerService: {}

@@ -1,0 +1,50 @@
+name: Frontend Checks
+
+# Trigger the workflow on push or pull request events
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+# Define the jobs to run
+jobs:
+  lint:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18  # Replace with your desired Node.js version
+
+      - name: Install dependencies
+        run: cd ./frontend && npm install
+
+      - name: Run ESLint
+        run: cd ./frontend && npm run lint
+
+  build:
+    name: Run Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18  # Replace with your desired Node.js version
+
+      - name: Install dependencies
+        run: cd ./frontend && npm install
+
+      - name: Run Build
+        run: cd ./frontend && npm run build

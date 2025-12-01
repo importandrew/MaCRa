@@ -1,0 +1,23 @@
+.table-bottom-side,
+.table-top-side,
+.table-left-side,
+.table-right-side {
+  top: 50%;
+  left: 50%;
+}
+
+.table-bottom-side {
+  transform: translate(-50%, -50%);
+}
+
+.table-top-side {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+.table-left-side {
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.table-right-side {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
