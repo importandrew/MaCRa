@@ -57,7 +57,7 @@ func TestNow(t *testing.T) {
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
 				assert.Equal(t, 100, now.ID)
-				assert.Equal(t, 1, now.Round)
+				assert.Equal(t, 1, now.Round.Num)
 				assert.Equal(t, "Alice", now.Me.Name)
 				assert.Equal(t, models.East.Kanji(), now.Me.Wind)
 			},

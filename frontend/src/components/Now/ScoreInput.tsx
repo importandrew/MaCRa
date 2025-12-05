@@ -79,7 +79,7 @@ export default function ScroreInput({
         type="button"
         onPress={() => toggleForm()}
       >
-        {data.round.wind_num}
+        {data.round.kanji}
       </Button>
       <Form
         validationBehavior="native"

@@ -44,7 +44,7 @@ func TestPenalty(t *testing.T) {
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
 				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
-					return data.Outcome == models.FalseMahjong &&
+					return data.Outcome == models.Penalty &&
 						data.LoserID == 1 &&
 						data.Value == 10 &&
 						data.ForceNextRound == false
@@ -74,7 +74,7 @@ func TestPenalty(t *testing.T) {
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
 				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
-					return data.Outcome == models.FalseMahjong &&
+					return data.Outcome == models.Penalty &&
 						data.LoserID == 2 &&
 						data.Value == 10 &&
 						data.ForceNextRound == true

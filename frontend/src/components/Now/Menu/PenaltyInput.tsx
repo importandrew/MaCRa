@@ -41,7 +41,7 @@ export default function PenaltyInput({
 
     try {
       const roundResult = PostRequest(
-        `/api/game/${gameId}/penalty/${distributed ? 'false-mahjong' : 'default'}`,
+        `/api/game/${gameId}/${distributed ? 'false-mahjong' : 'penalty'}`,
         {
           loser,
           value,

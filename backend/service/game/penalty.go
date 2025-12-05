@@ -22,7 +22,7 @@ func (s *Service) Penalty(ctx context.Context, gameID, playerID, value int, forc
 
 	roundOutcome := models.RoundData{
 		Round:           game.Round(),
-		Outcome:         models.FalseMahjong,
+		Outcome:         models.Penalty,
 		LoserID:         playerID,
 		Value:           value,
 		EastStartScore:  score[players[models.East]].GP,

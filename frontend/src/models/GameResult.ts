@@ -6,8 +6,8 @@ export interface GameResult {
   player_results: {
     name: string;
     id: number;
-    GP: number;
-    TP: number;
+    gp: number;
+    tp: number;
   }[];
 }
 

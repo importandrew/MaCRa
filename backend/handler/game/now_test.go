@@ -29,8 +29,11 @@ func TestHandler_Now(t *testing.T) {
 					mock.Anything,
 					1,
 				).Return(models.GameNow{
-					ID:    100,
-					Round: 5,
+					ID: 100,
+					Round: models.Round{
+						Num:   5,
+						Kanji: "南1",
+					},
 					Me: models.PlayerWindScore{
 						ID:   1,
 						Name: "Player 1",
@@ -43,7 +46,7 @@ func TestHandler_Now(t *testing.T) {
 				err := json.Unmarshal(w.Body.Bytes(), &now)
 				assert.NoError(t, err)
 				assert.Equal(t, 100, now.ID)
-				assert.Equal(t, 5, now.Round)
+				assert.Equal(t, 5, now.Round.Num)
 				assert.Equal(t, 1, now.Me.ID)
 			},
 		},

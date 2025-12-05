@@ -45,9 +45,14 @@ func (s *Service) Now(ctx context.Context, playerID int) (models.GameNow, error)
 	oppScore := score[oppID].GP
 	leftScore := score[leftID].GP
 
+	round := game.Round()
+
 	now := models.GameNow{
-		ID:    game.ID(),
-		Round: game.Round(),
+		ID: game.ID(),
+		Round: models.Round{
+			Num:   round,
+			Kanji: models.RoundKanji(round),
+		},
 		Me: models.PlayerWindScore{
 			ID:    playerID,
 			Name:  me.Name,

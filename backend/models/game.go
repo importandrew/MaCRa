@@ -1,15 +1,29 @@
 package models
 
+import "fmt"
+
 type Game struct{}
 
 type GameNow struct {
-	ID    int `json:"id"`
-	Round int `json:"round"`
+	ID    int   `json:"id"`
+	Round Round `json:"round"`
 
 	Me    PlayerWindScore `json:"me"`
 	Right PlayerWindScore `json:"right"`
 	Opp   PlayerWindScore `json:"opp"`
 	Left  PlayerWindScore `json:"left"`
+}
+
+type Round struct {
+	Num   int    `json:"num"`
+	Kanji string `json:"kanji"`
+}
+
+func RoundKanji(round int) string {
+	wind := Wind((round - 1) / 4).Kanji()
+	num := (round-1)%4 + 1
+
+	return fmt.Sprintf("%s%d", wind, num)
 }
 
 type PlayerWindScore struct {

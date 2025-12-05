@@ -73,19 +73,19 @@ export default function Now() {
         <div className="relative self-center h-full w-full">
           <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {data.opposite.wind}{' '}
+              {data.opp.wind}{' '}
               {
                 <PlayerMenu
                   player={playersList.find(
-                    (player) => player.name === data.opposite.name
+                    (player) => player.name === data.opp.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
               }{' '}
-              {data.opposite.name}
+              {data.opp.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {data.opposite.score}
+              {data.opp.score}
             </span>
           </div>
         </div>

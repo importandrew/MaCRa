@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { Player } from '../../models/Player';
 import { WIND_LABELS, WIND_SYMBOLS } from '../../utils/constants';
 import { shuffleArray } from '../../utils/shuffleArray';
-import { PostRequest } from '../Request';
+import { GetRequest, PostRequest } from '../Request';
 import PlayerSelector from './PlayerSelector';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 
@@ -18,17 +18,16 @@ const useFetchPlayers = () => {
     const fetchPlayers = async () => {
       setIsLoading(true);
       try {
-        const body = { name: null };
-        const playersRequest = PostRequest('/api/draftable', body);
+        const playersRequest = GetRequest('/api/players/list');
         const response = await fetch(playersRequest);
-        const result = await response.json();
+        const result: Player[] | {error: string} = await response.json();
 
-        if (!response.ok) {
+        if (!response.ok && 'error' in result)  {
           toast.error(result.error);
           return;
         }
 
-        setSuggestions(result.players || []);
+        setSuggestions(result as Player[] || []);
       } catch (error) {
         toast.error('Failed to fetch players. Please try again.');
       } finally {

@@ -32,8 +32,8 @@ export default function GameResultsTable({ data }: { data: GameResult }) {
         {(item) => (
           <TableRow key={item.name}>
             <TableCell>{item.name}</TableCell>
-            <TableCell>{item.GP}</TableCell>
-            <TableCell>{item.TP}</TableCell>
+            <TableCell>{item.gp}</TableCell>
+            <TableCell>{item.tp}</TableCell>
           </TableRow>
         )}
       </TableBody>
