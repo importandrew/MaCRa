@@ -8,33 +8,6 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// type DBGameLive struct {
-// 	ID         int       `db:"id"`
-// 	Round      int       `db:"round"`
-// 	EastScore  int       `db:"east_score"`
-// 	SouthScore int       `db:"south_score"`
-// 	WestScore  int       `db:"west_score"`
-// 	NorthScore int       `db:"north_score"`
-// 	CreatedAt  time.Time `db:"created_at"`
-// }
-
-// type DBGameFinal struct {
-// 	ID        int `db:"id"`
-// 	EastID    int `db:"east_id"`
-// 	EastTP    int `db:"east_tp"`
-// 	EastGP    int `db:"east_gp"`
-// 	SouthID   int `db:"south_id"`
-// 	SouthTP   int `db:"south_tp"`
-// 	SouthGP   int `db:"south_gp"`
-// 	WestID    int `db:"west_id"`
-// 	WestTP    int `db:"west_tp"`
-// 	WestGP    int `db:"west_gp"`
-// 	NorthID   int `db:"north_id"`
-// 	NorthTP   int `db:"north_tp"`
-// 	NorthGP   int `db:"north_gp"`
-// 	CreatedAt int `db:"created_at"`
-// }
-
 func (s *Service) LoadLiveGames(ctx context.Context) error {
 	ids, err := s.gameRepo.LiveGames(ctx)
 	if err != nil {

@@ -42,7 +42,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	// authorized only handlers
 	authAPI := publicAPI.Group("/", h.authmw.IdentifyUser)
 	{
-		authAPI.POST("/game/:id/abort", h.game.Abort)
+		authAPI.DELETE("/game/:id/abort", h.game.Abort)
 		authAPI.GET("/game/:id/result", h.game.FinalResult)
 		authAPI.POST("/game/:id/false-mahjong", h.game.FalseMahjong)
 		authAPI.POST("/game/:id/penalty", h.game.Penalty)
@@ -52,6 +52,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			authAPI.POST("/new", h.game.New)
 			authAPI.GET("/now", h.game.Now)
 			authAPI.POST("/round", h.game.EnterRoundResult)
+			authAPI.GET("/last", h.game.Last)
 		}
 	}
 }

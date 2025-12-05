@@ -15,6 +15,7 @@ type GameRepo interface {
 	NewGame(ctx context.Context, seating [4]int) (int, error)
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)
 	Finalize(ctx context.Context, data models.FinalGameData) error
+	LastGame(ctx context.Context, playerID int) (int, error)
 }
 
 type PlayerRepo interface {

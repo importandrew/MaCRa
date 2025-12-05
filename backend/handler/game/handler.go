@@ -16,6 +16,7 @@ type GameService interface {
 	Penalty(ctx context.Context, gameID, playerID, value int, forceNextRound bool) error
 	Players(ctx context.Context, gameID int) (models.GamePlayers, error)
 	EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value, winnerID, loserID int) error
+	LastGameResult(ctx context.Context, playerID int) (models.GameResult, error)
 }
 
 type PlayerService interface {

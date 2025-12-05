@@ -42,8 +42,9 @@ func TestEnterRound(t *testing.T) {
 					3: {GP: -8},
 					4: {GP: -8},
 				})
-				mockGame.EXPECT().Round().Return(2) // Round advances after EnterRoundResult
+				mockGame.EXPECT().Round().Return(1) // Round advances after EnterRoundResult
 				mockGame.EXPECT().ID().Return(100)
+				mockGame.EXPECT().Status().Return(models.GameLive)
 				s.liveGames[100] = mockGame
 				return 100
 			},
@@ -77,8 +78,9 @@ func TestEnterRound(t *testing.T) {
 					3: {GP: -16},
 					4: {GP: -16},
 				})
-				mockGame.EXPECT().Round().Return(2)
+				mockGame.EXPECT().Round().Return(1)
 				mockGame.EXPECT().ID().Return(100)
+				mockGame.EXPECT().Status().Return(models.GameLive)
 				s.liveGames[100] = mockGame
 				return 100
 			},
@@ -112,8 +114,9 @@ func TestEnterRound(t *testing.T) {
 					3: {GP: 0},
 					4: {GP: 0},
 				})
-				mockGame.EXPECT().Round().Return(2)
+				mockGame.EXPECT().Round().Return(1)
 				mockGame.EXPECT().ID().Return(100)
+				mockGame.EXPECT().Status().Return(models.GameLive)
 				s.liveGames[100] = mockGame
 				return 100
 			},
@@ -157,6 +160,7 @@ func TestEnterRound(t *testing.T) {
 				mockGame := NewMockGameEngine(t)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 				mockGame.EXPECT().EnterRoundResult(5, 2, 1).Return(errors.New("hand score should be 8 or higher"))
+				mockGame.EXPECT().Round().Return(1)
 				s.liveGames[100] = mockGame
 				return 100
 			},
@@ -182,7 +186,7 @@ func TestEnterRound(t *testing.T) {
 					3: {GP: -8},
 					4: {GP: -8},
 				})
-				mockGame.EXPECT().Round().Return(2)
+				mockGame.EXPECT().Round().Return(1)
 				mockGame.EXPECT().ID().Return(100)
 				s.liveGames[100] = mockGame
 				return 100
@@ -230,6 +234,7 @@ func TestEnterRound_FinalRound_OK(t *testing.T) {
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 	mockGame.EXPECT().EnterRoundResult(8, 2, 1).Return(nil)
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
+	mockGame.EXPECT().Status().Return(models.GameEnded)
 	score := models.GameScore{
 		1: {GP: -2, TP: 0},
 		2: {GP: -1, TP: 0},
@@ -271,6 +276,7 @@ func TestEnterRound_FinalRound_Error(t *testing.T) {
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 	mockGame.EXPECT().EnterRoundResult(8, 2, 1).Return(nil)
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
+	mockGame.EXPECT().Status().Return(models.GameEnded)
 	score := models.GameScore{
 		1: {GP: -2, TP: 0},
 		2: {GP: -1, TP: 0},

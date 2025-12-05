@@ -229,6 +229,72 @@ func (_c *MockGameRepo_GameResult_Call) RunAndReturn(run func(ctx context.Contex
 	return _c
 }
 
+// LastGame provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) LastGame(ctx context.Context, playerID int) (int, error) {
+	ret := _mock.Called(ctx, playerID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LastGame")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (int, error)); ok {
+		return returnFunc(ctx, playerID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) int); ok {
+		r0 = returnFunc(ctx, playerID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, playerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_LastGame_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LastGame'
+type MockGameRepo_LastGame_Call struct {
+	*mock.Call
+}
+
+// LastGame is a helper method to define mock.On call
+//   - ctx context.Context
+//   - playerID int
+func (_e *MockGameRepo_Expecter) LastGame(ctx interface{}, playerID interface{}) *MockGameRepo_LastGame_Call {
+	return &MockGameRepo_LastGame_Call{Call: _e.mock.On("LastGame", ctx, playerID)}
+}
+
+func (_c *MockGameRepo_LastGame_Call) Run(run func(ctx context.Context, playerID int)) *MockGameRepo_LastGame_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_LastGame_Call) Return(n int, err error) *MockGameRepo_LastGame_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockGameRepo_LastGame_Call) RunAndReturn(run func(ctx context.Context, playerID int) (int, error)) *MockGameRepo_LastGame_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // LiveGames provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) LiveGames(ctx context.Context) ([]int, error) {
 	ret := _mock.Called(ctx)

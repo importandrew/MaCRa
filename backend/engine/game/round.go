@@ -41,8 +41,6 @@ func (g *Game) EnterRoundResult(hand, loser, winner int) error {
 		return errors.New("game is not live")
 	}
 
-	defer g.NextRound()
-
 	switch {
 	case loser == 0 && winner == 0:
 		g.draw()
@@ -51,13 +49,15 @@ func (g *Game) EnterRoundResult(hand, loser, winner int) error {
 			return ErrMinScore
 		}
 		g.self(hand, winner)
-	//TODO: validate bad cases, maybe on frontend side
+		//TODO: validate bad cases, maybe on frontend side
 	default:
 		if hand < 8 {
 			return ErrMinScore
 		}
 		g.deal(hand, loser, winner)
 	}
+
+	g.NextRound()
 
 	return nil
 }

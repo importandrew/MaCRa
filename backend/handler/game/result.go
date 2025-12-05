@@ -25,5 +25,3 @@ func (h Handler) FinalResult(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
-
-type FinalResult struct{}

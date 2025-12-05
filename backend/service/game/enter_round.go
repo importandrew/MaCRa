@@ -17,6 +17,8 @@ func (s *Service) EnterRound(
 		return err
 	}
 
+	round := game.Round()
+
 	err = game.EnterRoundResult(value, loserID, winnerID)
 	if err != nil {
 		return err
@@ -30,8 +32,6 @@ func (s *Service) EnterRound(
 	north := players[models.North]
 
 	score := game.Score()
-
-	round := game.Round()
 
 	roundOutcome := models.RoundData{
 		Round:           round,
@@ -50,7 +50,7 @@ func (s *Service) EnterRound(
 		return err
 	}
 
-	if round == 16 {
+	if game.Status() == models.GameEnded {
 		finalData := models.FinalGameData{
 			GameID: game.ID(),
 			East: models.FinalPlayerData{
