@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GameData, Outcome, PlayerOrder } from '../../models/GameData';
 import { PostRequest } from '../Request';
-import { OUTCOME_LABELS, getWindLabel } from '../../utils/constants';
+import { OUTCOME_LABELS } from '../../utils/constants';
 
 export default function ScroreInput({
   data,
@@ -56,7 +56,7 @@ export default function ScroreInput({
         return;
       }
 
-      if (data?.round === 16) {
+      if (data?.round.num == 16) {
         navigate('/last');
         return;
       }
@@ -79,7 +79,7 @@ export default function ScroreInput({
         type="button"
         onPress={() => toggleForm()}
       >
-        {getWindLabel(data.round)}
+        {data.round.wind_num}
       </Button>
       <Form
         validationBehavior="native"

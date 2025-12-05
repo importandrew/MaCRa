@@ -9,81 +9,50 @@ export const useFetchGameData = (isToastEnabled = false) => {
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState<GameData | null>(null);
   const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
-  const [hasLoadedPlayers, setHasLoadedPlayers] = useState(false);
 
-  const fetchGameData = useCallback(async () => {
+  const fetchGameData = async () => {
     setIsLoading(true);
-    setIsError(false);
     try {
       // Request game data
       const gameDataRequest = GetRequest('/api/now');
       const response = await fetch(gameDataRequest);
-
-      if (!response.ok) {
-        isToastEnabled && toast.error(
-          `${response.status} ${response.statusText} while processing URL /api/now`
-        );
-        setIsError(true);
-        setIsLoading(false);
-        return;
-      }
-
       const result: GameData | { error: string } = await response?.json();
 
       if ('error' in result) {
         isToastEnabled && toast.error(result.error);
         setIsError(true);
-        setIsLoading(false);
         return;
       }
 
       setData(result);
-      setIsError(false);
 
       // Request players list only once on game start or page refresh
-      // This ensures PlayerOrder remains consistent through game progression
-      if (hasLoadedPlayers) {
-        setIsLoading(false);
-        return;
-      }
+      if (playersList.length) return;
 
       const gamePlayersRequest = GetRequest(`/api/game/${result.id}/players`);
       const playersResponse = await fetch(gamePlayersRequest);
-
-      if (!playersResponse.ok) {
-        isToastEnabled && toast.error(
-          `${playersResponse.status} ${playersResponse.statusText} while processing URL /api/game/${result.id}/players`
-        );
-        setIsError(true);
-        setIsLoading(false);
-        return;
-      }
-
       const playersResult: GamePlayers | { error: string } =
         await playersResponse?.json();
 
       if ('error' in playersResult) {
         isToastEnabled && toast.error(playersResult.error);
         setIsError(true);
-        setIsLoading(false);
         return;
       }
 
       setPlayersList(playersResult.players);
-      setHasLoadedPlayers(true);
-      setIsError(false);
-      setIsLoading(false);
     } catch (error) {
       isToastEnabled &&
         toast.error('Failed to fetch game data. Please try again.');
       setIsError(true);
+    } finally {
       setIsLoading(false);
     }
-  }, [isToastEnabled, hasLoadedPlayers]);
+  };
 
   useEffect(() => {
     fetchGameData();
-  }, [fetchGameData]);
+  }, []);
 
   return { data, playersList, isLoading, isError, refetch: fetchGameData };
 };

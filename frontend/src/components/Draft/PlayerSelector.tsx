@@ -5,35 +5,34 @@ import PlayerId from './PlayerId';
 
 export default function PlayerSelector({
   wind,
-  inputValue,
+  index,
+  players,
   suggestions,
-  selectedKey,
   selectedKeys,
-  onInputChange,
-  onSelectionChange,
-  onClear,
-  onFocus,
-  onBlur,
+  handleSuggestionsChange,
 }: PlayerSelectorArgs) {
-  const handleSelectionChange = (playerId: Key | null) => {
-    onSelectionChange(playerId ? Number(playerId) : null);
+  const handleSuggestionClick = (playerId: Key | null, index: number) => {
+    if (!playerId) return;
+
+    players[index] = Number(playerId);
+    handleSuggestionsChange();
+  };
+
+  const onClear = () => {
+    delete players[index];
+    handleSuggestionsChange();
   };
 
   return (
     <Autocomplete
       label={wind}
       itemHeight={50}
-      inputValue={inputValue}
-      selectedKey={selectedKey}
+      selectedKey={selectedKeys[index]}
       isClearable={true}
       disabledKeys={selectedKeys}
       className="w-full md:w-[300px]"
-      onInputChange={(value) => onInputChange(value)}
-      onSelectionChange={handleSelectionChange}
+      onSelectionChange={(id) => handleSuggestionClick(id, index)}
       clearButtonProps={{ onPress: onClear }}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      allowsCustomValue={true}
     >
       {suggestions?.map((player) => (
         <AutocompleteItem

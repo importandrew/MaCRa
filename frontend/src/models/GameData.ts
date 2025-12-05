@@ -6,21 +6,20 @@ export interface GameData {
   id: number;
   me: PlayerScore;
   right: PlayerScore;
-  opp: PlayerScore;
+  opposite: PlayerScore;
   left: PlayerScore;
-  round: number;
+  round: RoundData;
 }
 
 export interface PlayerScore {
-  id: number;
   name: string;
-  wind: string;
+  wind: typeof WIND_SYMBOLS;
   score: number;
 }
 
 export interface RoundData {
   num: number;
-  wind_num: string;
+  wind_num: typeof WIND_SYMBOLS & number;
 }
 
 export interface PlayerOrder {
@@ -31,7 +30,7 @@ export interface PlayerOrder {
 export enum Outcome {
   Draw = 'draw',
   Self = 'self',
-  Deal = 'deal-in',
+  Deal = 'deal',
   Penalty = 'penalty',
   FalseMahjong = 'false mahjong',
 }

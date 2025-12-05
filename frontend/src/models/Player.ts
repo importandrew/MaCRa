@@ -7,14 +7,8 @@ export interface Player {
 export interface PlayerSelectorArgs {
   wind: string;
   index: number;
-  inputValue: string;
+  players: (number | undefined)[];
   suggestions: Player[];
-  selectedKey: string;
   selectedKeys: string[];
-  isFocused: boolean;
-  onInputChange: (value: string) => void;
-  onSelectionChange: (playerId: number | null) => void;
-  onClear: () => void;
-  onFocus: () => void;
-  onBlur: () => void;
+  handleSuggestionsChange: () => void;
 }

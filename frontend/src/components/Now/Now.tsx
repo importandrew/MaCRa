@@ -73,19 +73,19 @@ export default function Now() {
         <div className="relative self-center h-full w-full">
           <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {data.opp.wind}{' '}
+              {data.opposite.wind}{' '}
               {
                 <PlayerMenu
-                  player={playersList?.find(
-                    (player) => player.id === data.opp.id
+                  player={playersList.find(
+                    (player) => player.name === data.opposite.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
               }{' '}
-              {data.opp.name}
+              {data.opposite.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {data.opp.score}
+              {data.opposite.score}
             </span>
           </div>
         </div>
@@ -96,8 +96,8 @@ export default function Now() {
               {data.left.wind}{' '}
               {
                 <PlayerMenu
-                  player={playersList?.find(
-                    (player) => player.id === data.left.id
+                  player={playersList.find(
+                    (player) => player.name === data.left.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
@@ -118,8 +118,8 @@ export default function Now() {
               {data.right.wind}{' '}
               {
                 <PlayerMenu
-                  player={playersList?.find(
-                    (player) => player.id === data.right.id
+                  player={playersList.find(
+                    (player) => player.name === data.right.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
@@ -138,8 +138,8 @@ export default function Now() {
               {data.me.wind}{' '}
               {
                 <PlayerMenu
-                  player={playersList?.find(
-                    (player) => player.id === data.me.id
+                  player={playersList.find(
+                    (player) => player.name === data.me.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
