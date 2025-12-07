@@ -2,6 +2,7 @@ package player
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -33,9 +34,11 @@ func (r *Repo) ListByNameLimit(ctx context.Context, name string, limit int) ([]m
 		},
 	)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
-	defer rows.Close()
 
 	players, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Player])
 	if err != nil {

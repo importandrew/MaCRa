@@ -2,13 +2,10 @@ package player
 
 import (
 	"context"
-	"errors"
 
 	"github.com/importandrew/MaCRa/models"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var errBadCredentials = errors.New("email or password is incorrect")
 
 func (s *Service) Login(ctx context.Context, email, password string) (models.Player, error) {
 	storedPass, err := s.repo.GetPassByEmail(ctx, email)
@@ -17,7 +14,7 @@ func (s *Service) Login(ctx context.Context, email, password string) (models.Pla
 	}
 
 	if err = validatePassword(storedPass, password); err != nil {
-		return models.Player{}, errBadCredentials
+		return models.Player{}, models.ErrBadCredentials
 	}
 
 	player, err := s.repo.GetByEmail(ctx, email)

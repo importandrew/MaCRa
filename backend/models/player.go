@@ -1,14 +1,5 @@
 package models
 
-import (
-	"errors"
-)
-
-var (
-	ErrPlayerExists   = errors.New("player with this email already exists")
-	ErrPlayerNotFound = errors.New("player not found")
-)
-
 type GamePlayers struct {
 	ID      int      `json:"id"`
 	Players []Player `json:"players"`

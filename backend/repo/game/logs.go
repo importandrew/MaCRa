@@ -65,7 +65,6 @@ func (r *Repo) GameLog(ctx context.Context, gameID int) ([]models.RoundLog, erro
 		}
 		return nil, err
 	}
-	defer rows.Close()
 
 	dbRows, err := pgx.CollectRows(rows, pgx.RowToStructByName[RoundLog])
 	if err != nil {

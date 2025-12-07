@@ -8,8 +8,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var ErrPlayerNotFound = errors.New("player not found")
-
 func (r *Repo) Get(ctx context.Context, id int) (models.Player, error) {
 	conn, err := r.db.Acquire(ctx)
 	if err != nil {
@@ -25,7 +23,7 @@ func (r *Repo) Get(ctx context.Context, id int) (models.Player, error) {
 	player, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Player])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return models.Player{}, ErrPlayerNotFound
+			return models.Player{}, models.ErrPlayerNotFound
 		}
 		return models.Player{}, err
 	}
@@ -51,7 +49,7 @@ func (r *Repo) GetByEmail(ctx context.Context, email string) (models.Player, err
 	player, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Player])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return models.Player{}, ErrPlayerNotFound
+			return models.Player{}, models.ErrPlayerNotFound
 		}
 		return models.Player{}, err
 	}

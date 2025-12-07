@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/importandrew/MaCRa/models"
 	"github.com/importandrew/MaCRa/repo/database"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,7 +32,7 @@ func TestDelete(t *testing.T) {
 			preAddUsers:      []int{1},
 			emailToDelete:    "nonexistent@test.com",
 			expectedErr:      assert.Error,
-			expectedErrValue: ErrPlayerNotFound,
+			expectedErrValue: models.ErrPlayerNotFound,
 		},
 	}
 

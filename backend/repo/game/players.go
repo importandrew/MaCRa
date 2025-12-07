@@ -28,15 +28,10 @@ func (r *Repo) Players(ctx context.Context, gameID int) (models.StartingPlayers,
 	if err != nil {
 		return models.StartingPlayers{}, err
 	}
-	defer rows.Close()
 
 	players, err := pgx.CollectRows(rows, pgx.RowToStructByName[PlayerWind])
 	if err != nil {
 		return models.StartingPlayers{}, err
-	}
-
-	if len(players) == 0 {
-		return models.StartingPlayers{}, pgx.ErrNoRows
 	}
 
 	if len(players) != 4 {

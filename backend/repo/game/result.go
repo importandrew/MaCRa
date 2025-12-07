@@ -9,15 +9,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var errGameNotFound = errors.New("game not found")
-
-type PlayerResult struct {
-	TP   float32 `db:"tp"`
-	GP   int     `db:"gp"`
-	Name string  `db:"name"`
-	ID   int     `db:"id"`
-}
-
 func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, error) {
 	conn, err := r.db.Acquire(ctx)
 	if err != nil {
@@ -37,31 +28,20 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 		ORDER BY pr.tournament_points DESC`,
 		gameID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.GameResult{}, models.ErrGameNotFound
+		}
 		return models.GameResult{}, err
 	}
-	defer rows.Close()
 
-	playerResults, err := pgx.CollectRows(rows, pgx.RowToStructByName[PlayerResult])
+	playerResults, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.PlayerResult])
 	if err != nil {
 		return models.GameResult{}, err
 	}
 
-	if len(playerResults) == 0 {
-		return models.GameResult{}, errGameNotFound
-	}
-
 	result := models.GameResult{
 		ID:            gameID,
-		PlayerResults: make([]models.PlayerResult, 0, len(playerResults)),
-	}
-
-	for _, res := range playerResults {
-		result.PlayerResults = append(result.PlayerResults, models.PlayerResult{
-			Name: res.Name,
-			ID:   res.ID,
-			TP:   res.TP,
-			GP:   res.GP,
-		})
+		PlayerResults: playerResults,
 	}
 
 	return result, nil
@@ -88,14 +68,14 @@ func (r *Repo) LastGameResultByUserID(ctx context.Context, id int) (models.GameR
 	gameID, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return models.GameResult{}, fmt.Errorf("no games for player with ID %d found", id)
+			return models.GameResult{}, nil
 		}
 		return models.GameResult{}, err
 	}
 
 	finalResult, err := r.GameResult(ctx, gameID)
 	if err != nil {
-		return models.GameResult{}, err
+		return models.GameResult{}, fmt.Errorf("game result: %w", err)
 	}
 
 	return finalResult, nil

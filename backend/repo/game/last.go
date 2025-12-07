@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"errors"
 
 	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
@@ -23,6 +24,9 @@ func (r *Repo) LastGame(ctx context.Context, playerID int) (int, error) {
 		FETCH FIRST 1 ROWS ONLY`,
 		playerID, models.GameEnded)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, nil
+		}
 		return 0, err
 	}
 

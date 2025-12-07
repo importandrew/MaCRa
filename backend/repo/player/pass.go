@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -22,7 +23,7 @@ func (r *Repo) GetPassByEmail(ctx context.Context, email string) (string, error)
 	password, err := pgx.CollectOneRow(rows, pgx.RowTo[string])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", ErrPlayerNotFound
+			return "", models.ErrPlayerNotFound
 		}
 		return "", err
 	}

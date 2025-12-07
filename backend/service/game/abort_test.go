@@ -35,7 +35,7 @@ func TestAbort(t *testing.T) {
 				// Verify game is removed from liveGames
 				_, err := s.GetLiveGame(gameID)
 				assert.Error(t, err)
-				assert.Equal(t, errGameNotFound, err)
+				assert.Equal(t, models.ErrGameNotFound, err)
 			},
 		},
 		"repo error": {

@@ -20,19 +20,19 @@ type EnterRoundResultRequest struct {
 func (h Handler) EnterRoundResult(c *gin.Context) {
 	var req EnterRoundResultRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, fmt.Errorf("bind: %w", err))
+		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("bind: %w", err))
 		return
 	}
 
 	userID, err := authmw.GetUserIDFromContext(c)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	err = h.game.EnterRound(c.Request.Context(), userID, req.Outcome, req.Value, req.WinnerID, req.LoserID)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
 		return
 	}
 

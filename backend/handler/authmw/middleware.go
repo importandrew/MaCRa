@@ -1,22 +1,16 @@
 package authmw
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/importandrew/MaCRa/handler/httperr"
+	"github.com/importandrew/MaCRa/models"
 )
 
 const (
 	TokenKey   = "token"
 	userCtxKey = "userID"
-)
-
-var (
-	ErrNotFound    = errors.New("user id not found in context")
-	ErrInvalidType = errors.New("user id in context is of invalid type")
-	ErrEmptyToken  = errors.New("token is empty")
 )
 
 type Auth struct {
@@ -30,13 +24,13 @@ func NewAuth(jwt []byte) Auth {
 func (a Auth) IdentifyUser(c *gin.Context) {
 	cookie, err := c.Cookie(TokenKey)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusUnauthorized, ErrEmptyToken)
+		httperr.ErrorWithCode(c, http.StatusUnauthorized, models.ErrEmptyToken)
 		return
 	}
 
 	userID, err := identifyUserByToken(cookie, a.jwt)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusUnauthorized, err)
+		httperr.ErrorWithCode(c, http.StatusUnauthorized, err)
 		return
 	}
 
@@ -46,12 +40,12 @@ func (a Auth) IdentifyUser(c *gin.Context) {
 func GetUserIDFromContext(c *gin.Context) (int, error) {
 	value, ok := c.Get(userCtxKey)
 	if !ok {
-		return 0, ErrNotFound
+		return 0, models.ErrUserIDNotFound
 	}
 
 	id, ok := value.(int)
 	if !ok {
-		return 0, ErrInvalidType
+		return 0, models.ErrUserIDInvalidType
 	}
 
 	return id, nil

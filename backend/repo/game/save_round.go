@@ -20,7 +20,7 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 
 	players, err := r.Players(ctx, gameID)
 	if err != nil {
-		return err
+		return fmt.Errorf("players: %w", err)
 	}
 
 	// Check if a main outcome (deal, self, draw) already exists for this round
@@ -34,16 +34,16 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 			)`,
 			gameID, data.Round, mainOutcomes)
 		if err != nil {
-			return fmt.Errorf("check existing outcome: query: %w", err)
+			return fmt.Errorf("check existing outcome: %w", err)
 		}
 
 		exists, err := pgx.CollectOneRow(rows, pgx.RowTo[bool])
 		if err != nil {
-			return fmt.Errorf("check existing outcome: collect: %w", err)
+			return fmt.Errorf("check existing outcome: %w", err)
 		}
 
 		if exists {
-			return fmt.Errorf("non-penalty outcome already exists for game %d round %d", gameID, data.Round)
+			return fmt.Errorf("round %d: non-penalty outcome already exists ", data.Round)
 		}
 	}
 

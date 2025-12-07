@@ -34,7 +34,7 @@ func TestGet(t *testing.T) {
 			preAddUsers:      []int{1},
 			playerID:         2,
 			expectedErr:      assert.Error,
-			expectedErrValue: ErrPlayerNotFound,
+			expectedErrValue: models.ErrPlayerNotFound,
 		},
 	}
 
@@ -93,7 +93,7 @@ func TestGetPlayerByEmail(t *testing.T) {
 			preAddUsers:      []int{1},
 			email:            "nonexistent@test.com",
 			expectedErr:      assert.Error,
-			expectedErrValue: ErrPlayerNotFound,
+			expectedErrValue: models.ErrPlayerNotFound,
 		},
 	}
 

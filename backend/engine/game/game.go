@@ -1,14 +1,11 @@
 package game
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/importandrew/MaCRa/logger"
 	"github.com/importandrew/MaCRa/models"
 )
-
-var ErrMinScore = errors.New("hand score should be 8 or higher")
 
 type Game struct {
 	id             int
@@ -39,8 +36,7 @@ func NewGame(cfg Config) (*Game, error) {
 		score:          NewScore(cfg.Players),
 	}
 
-	log.Info("new game")
-	log.Info("in game", game.currentSeating)
+	log.Infof("playing: %v", cfg.Players)
 	return &game, nil
 }
 
@@ -50,7 +46,7 @@ func (g *Game) End() error {
 	}
 	g.status = models.GameEnded
 	g.score.CalculateTP()
-	logger.WithField("final result", g.score.Final()).Info("game successfully ended")
+	logger.WithField("final result", g.score.Final()).Info("game ended")
 
 	return nil
 }

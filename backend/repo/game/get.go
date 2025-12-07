@@ -22,7 +22,6 @@ func (r *Repo) LiveGames(ctx context.Context) ([]int, error) {
 		}
 		return nil, err
 	}
-	defer rows.Close()
 
 	gameIDs, err := pgx.CollectRows(rows, pgx.RowTo[int])
 	if err != nil {

@@ -109,7 +109,7 @@ func TestLogin(t *testing.T) {
 				mockRepo.AssertExpectations(t)
 				// Verify that bad credentials error is returned for wrong password
 				if testCase.password == wrongPassword {
-					assert.Equal(t, errBadCredentials, err)
+					assert.Equal(t, models.ErrBadCredentials, err)
 				}
 				return
 			}

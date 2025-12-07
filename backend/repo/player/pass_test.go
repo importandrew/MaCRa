@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/importandrew/MaCRa/models"
 	"github.com/importandrew/MaCRa/repo/database"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,7 +34,7 @@ func TestGetPassByEmail(t *testing.T) {
 			preAddUsers:      []int{1},
 			email:            "nonexistent@test.com",
 			expectedErr:      assert.Error,
-			expectedErrValue: ErrPlayerNotFound,
+			expectedErrValue: models.ErrPlayerNotFound,
 		},
 	}
 

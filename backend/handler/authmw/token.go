@@ -1,16 +1,13 @@
 package authmw
 
 import (
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/importandrew/MaCRa/models"
 )
 
 const expirationTime = 90 * 24 * time.Hour
-
-var ErrWrongClaims = errors.New("token claims are of wrong type")
-var ErrWrongSigningMethod = errors.New("invalid signing method")
 
 type UserClaims struct {
 	jwt.RegisteredClaims
@@ -33,7 +30,7 @@ func GenerateJWTToken(userID int, jwtKey []byte) (string, error) {
 func identifyUserByToken(token string, jwtKey []byte) (int, error) {
 	t, err := jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, ErrWrongSigningMethod
+			return nil, models.ErrWrongSigningMethod
 		}
 
 		return jwtKey, nil
@@ -45,7 +42,7 @@ func identifyUserByToken(token string, jwtKey []byte) (int, error) {
 
 	claims, ok := t.Claims.(*UserClaims)
 	if !ok {
-		return 0, ErrWrongClaims
+		return 0, models.ErrWrongClaims
 	}
 
 	return claims.UserID, nil

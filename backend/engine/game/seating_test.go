@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test full game progression
+// Test full game progression.
 func TestSeating_FullGame(t *testing.T) {
 	g, _ := NewGame(Config{
 		ID:      100,

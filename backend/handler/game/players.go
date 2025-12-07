@@ -13,13 +13,13 @@ func (h Handler) Players(c *gin.Context) {
 	strID := c.Param("id")
 	id, err := strconv.Atoi(strID)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
+		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
 		return
 	}
 
 	players, err := h.game.Players(c.Request.Context(), id)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
 		return
 	}
 

@@ -1,16 +1,13 @@
 package game
 
 import (
-	"errors"
-	"fmt"
+	"github.com/importandrew/MaCRa/models"
 )
-
-var errGameNotFound = errors.New("game not found")
 
 func (s *Service) GetLiveGame(gameID int) (GameEngine, error) {
 	g, ok := s.liveGames[gameID]
 	if !ok {
-		return nil, errGameNotFound
+		return nil, models.ErrGameNotFound
 	}
 
 	return g, nil
@@ -25,5 +22,5 @@ func (s *Service) CurrentGame(playerID int) (GameEngine, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no current game for player ID %d", playerID)
+	return nil, models.ErrGameNotFound
 }
