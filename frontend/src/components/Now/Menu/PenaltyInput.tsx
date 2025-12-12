@@ -9,7 +9,7 @@ import {
 import { FormEvent, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { PlayerOrder } from '../../../models/GameData';
-import { PostRequest } from '../../Request';
+import { globalFetch, PostRequest } from '../../Request';
 
 export default function PenaltyInput({
   players = [],
@@ -40,7 +40,7 @@ export default function PenaltyInput({
     e.preventDefault();
 
     try {
-      const roundResult = PostRequest(
+      const roundResultRequest = PostRequest(
         `/api/game/${gameId}/${distributed ? 'false-mahjong' : 'penalty'}`,
         {
           loser,
@@ -48,7 +48,7 @@ export default function PenaltyInput({
           force_next_round: forceNextRound,
         }
       );
-      const response = await fetch(roundResult);
+      const response = await globalFetch(roundResultRequest);
 
       if (!response.ok) {
         const result = await response.json();

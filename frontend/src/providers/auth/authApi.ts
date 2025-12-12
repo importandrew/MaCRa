@@ -1,9 +1,9 @@
-import { PostRequest } from '../../components/Request';
+import { globalFetch, PostRequest } from '../../components/Request';
 
 export async function fetchLogoutApi(): Promise<boolean> {
   try {
     const logoutRequest = PostRequest('/auth/logout');
-    const response = await fetch(logoutRequest);
+    const response = await globalFetch(logoutRequest);
 
     return response.ok;
   } catch (error) {

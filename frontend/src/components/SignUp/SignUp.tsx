@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import EmailInput from '../Login/EmailInput';
 import PasswordInput from '../Login/PasswordInput';
-import { PostRequest } from '../Request';
+import { globalFetch, PostRequest } from '../Request';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -33,7 +33,7 @@ export default function SignUpPage() {
         name,
       });
 
-      const response = await fetch(signupRequest);
+      const response = await globalFetch(signupRequest);
 
       if (!response.ok) {
         const result = await response.json();

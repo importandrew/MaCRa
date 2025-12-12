@@ -10,10 +10,10 @@ import {
 import { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AuthContext } from '../../providers/auth/AuthContext';
-import { PostRequest } from '../Request';
-import PasswordInput from './PasswordInput';
+import { AuthContext } from '../../providers/auth/authConstants';
+import { globalFetch, PostRequest } from '../Request';
 import EmailInput from './EmailInput';
+import PasswordInput from './PasswordInput';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,7 +32,7 @@ export default function LoginPage() {
         password,
       });
 
-      const response = await fetch(loginRequest);
+      const response = await globalFetch(loginRequest);
 
       if (!response.ok) {
         toast.error('Failed to login. Please try again.');

@@ -1,15 +1,7 @@
-import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
-import { AUTH_USER_DATA } from './authConstants';
-import { fetchLogoutApi } from './authApi';
-import { AuthCreateContext } from './authTypes';
+import { ReactNode, useCallback, useRef, useState } from 'react';
 import { UserData } from '../../models/UserData';
-
-export const AuthContext = createContext<AuthCreateContext>({
-  isAuthenticated: false,
-  signIn: () => {},
-  signOut: () => {},
-  navigateRef: { current: null },
-});
+import { fetchLogoutApi } from './authApi';
+import { AUTH_USER_DATA, AuthContext } from './authConstants';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigateRef = useRef<((path: string) => void) | null>(null);

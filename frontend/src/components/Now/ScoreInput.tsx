@@ -3,7 +3,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GameData, Outcome, PlayerOrder } from '../../models/GameData';
-import { PostRequest } from '../Request';
+import { globalFetch, PostRequest } from '../Request';
 import { OUTCOME_LABELS } from '../../utils/constants';
 
 export default function ScroreInput({
@@ -48,7 +48,7 @@ export default function ScroreInput({
         dealt: loser,
         score,
       });
-      const response = await fetch(roundResult);
+      const response = await globalFetch(roundResult);
 
       if (!response.ok) {
         const result = await response.json();
