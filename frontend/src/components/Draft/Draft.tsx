@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { Player } from '../../models/Player';
 import { WIND_LABELS, WIND_SYMBOLS } from '../../utils/constants';
 import { shuffleArray } from '../../utils/shuffleArray';
-import { GetRequest, PostRequest } from '../Request';
+import { GetRequest, globalFetch, PostRequest } from '../Request';
 import PlayerSelector from './PlayerSelector';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 
@@ -19,8 +19,8 @@ const useFetchPlayers = () => {
       setIsLoading(true);
       try {
         const playersRequest = GetRequest('/api/players/list');
-        const response = await fetch(playersRequest);
-        const result: Player[] | { error: string } = await response.json();
+        const response = await globalFetch(playersRequest);
+        const result: Player[] | {  error: string  } = await response.json();
 
         if (!response.ok && 'error' in result) {
           toast.error(result.error);
@@ -82,7 +82,7 @@ export default function Draft() {
 
     try {
       const draftRequest = PostRequest('/api/new', { players });
-      const response = await fetch(draftRequest);
+      const response = await globalFetch(draftRequest);
 
       if (!response.ok) {
         const result = await response.json();

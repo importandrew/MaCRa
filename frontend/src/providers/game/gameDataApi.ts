@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { GetRequest } from '../../components/Request';
+import { GetRequest, globalFetch } from '../../components/Request';
 import { GameData, GamePlayers, PlayerOrder } from '../../models/GameData';
 import { GameResult, GameRoundLogs } from '../../models/GameResult';
 
@@ -15,7 +15,7 @@ export const useFetchGameData = (isToastEnabled = false) => {
     try {
       // Request game data
       const gameDataRequest = GetRequest('/api/now');
-      const response = await fetch(gameDataRequest);
+      const response = await globalFetch(gameDataRequest);
       const result: GameData | { error: string } = await response?.json();
 
       if ('error' in result) {
@@ -30,7 +30,7 @@ export const useFetchGameData = (isToastEnabled = false) => {
       if (playersList.length) return;
 
       const gamePlayersRequest = GetRequest(`/api/game/${result.id}/players`);
-      const playersResponse = await fetch(gamePlayersRequest);
+      const playersResponse = await globalFetch(gamePlayersRequest);
       const playersResult: GamePlayers | { error: string } =
         await playersResponse?.json();
 
@@ -67,7 +67,8 @@ export const useFetchGameResultData = (isToastEnabled = false) => {
     setIsError(false);
 
     try {
-      const response = await fetch(GetRequest('/api/last'));
+      const lastGameRequest = GetRequest('/api/last');
+      const response = await globalFetch(lastGameRequest);
 
       if (!response.ok) {
         isToastEnabled &&
@@ -105,7 +106,8 @@ export const useFetchGameLogsData = (gameId: number | null) => {
     setIsError(false);
 
     try {
-      const response = await fetch(GetRequest(`/api/game/${gameId}/logs`));
+      const gameLogsRequest = GetRequest(`/api/game/${gameId}/logs`);
+      const response = await globalFetch(gameLogsRequest);
 
       if (!response.ok) {
         toast.error(
