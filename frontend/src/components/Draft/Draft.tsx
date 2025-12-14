@@ -20,14 +20,14 @@ const useFetchPlayers = () => {
       try {
         const playersRequest = GetRequest('/api/players/list');
         const response = await fetch(playersRequest);
-        const result: Player[] | {error: string} = await response.json();
+        const result: Player[] | { error: string } = await response.json();
 
-        if (!response.ok && 'error' in result)  {
+        if (!response.ok && 'error' in result) {
           toast.error(result.error);
           return;
         }
 
-        setSuggestions(result as Player[] || []);
+        setSuggestions((result as Player[]) || []);
       } catch (error) {
         toast.error('Failed to fetch players. Please try again.');
       } finally {

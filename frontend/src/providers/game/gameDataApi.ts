@@ -70,9 +70,10 @@ export const useFetchGameResultData = (isToastEnabled = false) => {
       const response = await fetch(GetRequest('/api/last'));
 
       if (!response.ok) {
-        isToastEnabled && toast.error(
-          `${response.status} ${response.statusText} while processing URL /api/last`
-        );
+        isToastEnabled &&
+          toast.error(
+            `${response.status} ${response.statusText} while processing URL /api/last`
+          );
         setIsError(true);
         return;
       }
