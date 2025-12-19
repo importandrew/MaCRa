@@ -5,6 +5,13 @@ import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import Layout from './Layout.tsx';
 import { AuthProvider } from './providers/auth/AuthContext.tsx';
+import HawkCatcher from '@hawk.so/javascript';
+
+new HawkCatcher({
+  token:
+    'REDACTED_HAWK_TOKEN',
+  consoleTracking: true,
+});
 
 ReactDOM.createRoot(document.getElementById('root') as Container).render(
   <React.StrictMode>
