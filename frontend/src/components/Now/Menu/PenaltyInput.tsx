@@ -10,6 +10,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { PlayerOrder } from '../../../models/GameData';
 import { globalFetch, PostRequest } from '../../Request';
+import { GameResult } from '../../../models/GameResult';
 
 export default function PenaltyInput({
   players = [],
@@ -39,28 +40,20 @@ export default function PenaltyInput({
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      const roundResultRequest = PostRequest(
-        `/api/game/${gameId}/${distributed ? 'false-mahjong' : 'penalty'}`,
-        {
-          loser,
-          value,
-          force_next_round: forceNextRound,
-        }
-      );
-      const response = await globalFetch(roundResultRequest);
-
-      if (!response.ok) {
-        const result = await response.json();
-        toast.error(`Failed to submit penalty results: ${result.error}`);
-        return;
+    const roundResultRequest = PostRequest(
+      `/api/game/${gameId}/${distributed ? 'false-mahjong' : 'penalty'}`,
+      {
+        loser,
+        value,
+        force_next_round: forceNextRound,
       }
+    );
+    const data = await globalFetch<GameResult>(roundResultRequest);
 
-      toast.warn('Penalty successfully added');
-      resetPenaltyResults();
-    } catch (error) {
-      toast.error('Failed to submit penalty results. Please try again.');
-    }
+    if (!data || 'error' in data) return;
+
+    toast.warn('Penalty successfully added');
+    resetPenaltyResults();
   };
 
   const handleIsDistributed = (value: boolean) => {

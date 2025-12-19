@@ -10,10 +10,10 @@ import {
 } from '@heroui/react';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import EmailInput from '../Login/EmailInput';
 import PasswordInput from '../Login/PasswordInput';
 import { globalFetch, PostRequest } from '../Request';
+import { toast } from 'react-toastify';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -26,27 +26,20 @@ export default function SignUpPage() {
   const handleSignup = useCallback(async () => {
     setIsLoading(true);
 
-    try {
-      const signupRequest = PostRequest('/auth/signup', {
-        email,
-        password,
-        name,
-      });
+    const signupRequest = PostRequest('/auth/signup', {
+      email,
+      password,
+      name,
+    });
 
-      const response = await globalFetch(signupRequest);
+    const data = await globalFetch<object>(signupRequest);
 
-      if (!response.ok) {
-        const result = await response.json();
-        toast.error(`Failed to sign up: ${result.error}`);
-        return;
-      }
-
+    if (data && !('error' in data)) {
+      toast.success('Registration successful! Now login, please');
       navigate('/login');
-    } catch (error) {
-      toast.error('Failed to sign up. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   }, [email, password, name, navigate]);
 
   return (

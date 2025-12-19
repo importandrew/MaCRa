@@ -1,7 +1,6 @@
 import { Button, Form, Input, Select, SelectItem } from '@heroui/react';
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { GameData, Outcome, PlayerOrder } from '../../models/GameData';
 import { globalFetch, PostRequest } from '../Request';
 import { OUTCOME_LABELS } from '../../utils/constants';
@@ -41,36 +40,25 @@ export default function ScroreInput({
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const roundResult = PostRequest('/api/round', {
-        outcome,
-        won: winner,
-        dealt: loser,
-        score,
-      });
-      const response = await globalFetch(roundResult);
+    const roundResult = PostRequest('/api/round', {
+      outcome,
+      won: winner,
+      dealt: loser,
+      score,
+    });
+    const data = await globalFetch<GameData>(roundResult);
 
-      if (!response.ok) {
-        const result = await response.json();
-        toast.error(`Failed to submit round results: ${result.error}`);
-        return;
-      }
-
-      if (data?.round.num == 16) {
-        navigate('/last');
-        return;
-      }
-
-      resetRoundResults();
-    } catch (error) {
-      toast.error('Failed to submit round results. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (data?.round?.num == 16) {
+      navigate('/last');
+      return;
     }
+
+    resetRoundResults();
+    setIsLoading(false);
   };
 
   return (
-    <div className="bg-white relative z-10 py-3 justify-self-center self-center items-center w-full text-5xl">
+    <div className="relative z-10 py-3 justify-self-center self-center items-center w-full text-5xl">
       <Button
         size="lg"
         variant="flat"
@@ -160,7 +148,8 @@ export default function ScroreInput({
             }
           >
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               isClearable={true}
               min="0"
               pattern="\d*"

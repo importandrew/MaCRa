@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 import { GetRequest, globalFetch } from '../../components/Request';
 import { GameData, GamePlayers, PlayerOrder } from '../../models/GameData';
 import { GameResult, GameRoundLogs } from '../../models/GameResult';
@@ -12,42 +11,37 @@ export const useFetchGameData = (isToastEnabled = false) => {
 
   const fetchGameData = async () => {
     setIsLoading(true);
-    try {
-      // Request game data
-      const gameDataRequest = GetRequest('/api/now');
-      const response = await globalFetch(gameDataRequest);
-      const result: GameData | { error: string } = await response?.json();
 
-      if ('error' in result) {
-        isToastEnabled && toast.error(result.error);
-        setIsError(true);
-        return;
-      }
+    const gameDataRequest = GetRequest('/api/now');
+    const data = await globalFetch<GameData>(gameDataRequest, {
+      isToastEnabled,
+    });
 
-      setData(result);
-
-      // Request players list only once on game start or page refresh
-      if (playersList.length) return;
-
-      const gamePlayersRequest = GetRequest(`/api/game/${result.id}/players`);
-      const playersResponse = await globalFetch(gamePlayersRequest);
-      const playersResult: GamePlayers | { error: string } =
-        await playersResponse?.json();
-
-      if ('error' in playersResult) {
-        isToastEnabled && toast.error(playersResult.error);
-        setIsError(true);
-        return;
-      }
-
-      setPlayersList(playersResult.players);
-    } catch (error) {
-      isToastEnabled &&
-        toast.error('Failed to fetch game data. Please try again.');
+    if (!data || 'error' in data) {
       setIsError(true);
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    setData(data);
+
+    // Request players list only once on game start or page refresh
+    if (playersList.length) {
+      setIsLoading(false);
+      return;
+    }
+
+    const gamePlayersRequest = GetRequest(`/api/game/${data.id}/players`);
+    const playersResult = await globalFetch<GamePlayers>(gamePlayersRequest, {
+      isToastEnabled,
+    });
+
+    if (!playersResult || 'error' in playersResult) {
+      setIsError(true);
+    }
+
+    setPlayersList(playersResult?.players || []);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -66,27 +60,19 @@ export const useFetchGameResultData = (isToastEnabled = false) => {
     setIsLoading(true);
     setIsError(false);
 
-    try {
-      const lastGameRequest = GetRequest('/api/last');
-      const response = await globalFetch(lastGameRequest);
+    const lastGameRequest = GetRequest('/api/last');
+    const data = await globalFetch<GameResult>(lastGameRequest, {
+      isToastEnabled,
+    });
 
-      if (!response.ok) {
-        isToastEnabled &&
-          toast.error(
-            `${response.status} ${response.statusText} while processing URL /api/last`
-          );
-        setIsError(true);
-        return;
-      }
-
-      const result = await response.json();
-      setData(result || []);
-    } catch (error) {
-      isToastEnabled && toast.error(`Failed to fetch data`);
+    if (!data || 'error' in data) {
       setIsError(true);
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    setData(data);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -105,26 +91,17 @@ export const useFetchGameLogsData = (gameId: number | null) => {
     setIsLoading(true);
     setIsError(false);
 
-    try {
-      const gameLogsRequest = GetRequest(`/api/game/${gameId}/logs`);
-      const response = await globalFetch(gameLogsRequest);
+    const gameLogsRequest = GetRequest(`/api/game/${gameId}/logs`);
+    const data = await globalFetch<GameRoundLogs>(gameLogsRequest);
 
-      if (!response.ok) {
-        toast.error(
-          `${response.status} ${response.statusText} while processing URL /api/game/${gameId}/logs`
-        );
-        setIsError(true);
-        return;
-      }
-
-      const result = await response.json();
-      setData(result || []);
-    } catch (error) {
-      toast.error(`Failed to fetch data`);
+    if (!data || 'error' in data) {
       setIsError(true);
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    setData(data);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {

@@ -9,11 +9,11 @@ import {
 } from '@heroui/react';
 import { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { globalFetch, PostRequest } from '../Request';
 import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
+import { UserData } from '../../models/UserData';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,27 +26,21 @@ export default function LoginPage() {
   const handleLogin = useCallback(async () => {
     setIsLoading(true);
 
-    try {
-      const loginRequest = PostRequest('/auth/login', {
-        email,
-        password,
-      });
+    const loginRequest = PostRequest('/auth/login', {
+      email,
+      password,
+    });
 
-      const response = await globalFetch(loginRequest);
+    const data = await globalFetch<UserData>(loginRequest);
 
-      if (!response.ok) {
-        toast.error('Failed to login. Please try again.');
-        return;
-      }
-
-      const data = await response.json();
-      signIn(data);
-      navigate('/');
-    } catch (error) {
-      toast.error('Failed to login. Please try again.');
-    } finally {
+    if (!data || 'error' in data) {
       setIsLoading(false);
+      return;
     }
+
+    signIn(data);
+    navigate('/');
+    setIsLoading(false);
   }, [email, password, signIn, navigate]);
 
   return (
