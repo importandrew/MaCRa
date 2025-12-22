@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,13 +31,13 @@ func (h Handler) Login(c *gin.Context) {
 
 	player, err := h.player.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 
 	token, err := authmw.GenerateJWTToken(player.ID, h.jwt)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, models.ErrGeneratingToken)
+		httperr.Error(c, fmt.Errorf("error generating token: %w", err))
 	}
 
 	if h.domain != "" {

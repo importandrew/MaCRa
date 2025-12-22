@@ -7,7 +7,7 @@ import (
 func (s *Service) GetLiveGame(gameID int) (GameEngine, error) {
 	g, ok := s.liveGames[gameID]
 	if !ok {
-		return nil, models.ErrGameNotFound
+		return nil, models.ErrGameNotLive
 	}
 
 	return g, nil

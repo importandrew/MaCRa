@@ -21,7 +21,7 @@ func (h Handler) List(c *gin.Context) {
 
 	players, err := h.player.ListByNameLimit(c.Request.Context(), req.Name, req.Limit)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

@@ -19,7 +19,7 @@ func (h Handler) FinalResult(c *gin.Context) {
 
 	result, err := h.game.GameResult(c.Request.Context(), id)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

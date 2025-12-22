@@ -23,7 +23,7 @@ type Config struct {
 	Rules   Rules
 }
 
-func NewGame(cfg Config) (*Game, error) {
+func NewGame(cfg Config) *Game {
 	log := logger.WithField("id", cfg.ID)
 
 	game := Game{
@@ -37,7 +37,7 @@ func NewGame(cfg Config) (*Game, error) {
 	}
 
 	log.Infof("playing: %v", cfg.Players)
-	return &game, nil
+	return &game
 }
 
 func (g *Game) End() error {

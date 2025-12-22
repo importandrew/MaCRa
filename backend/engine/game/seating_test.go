@@ -9,7 +9,7 @@ import (
 
 // Test full game progression.
 func TestSeating_FullGame(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 	})

@@ -17,14 +17,14 @@ func (r *Repo) LiveGames(ctx context.Context) ([]int, error) {
 
 	rows, err := conn.Query(ctx, `SELECT id FROM games WHERE status = $1`, models.GameLive)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
 	gameIDs, err := pgx.CollectRows(rows, pgx.RowTo[int])
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 

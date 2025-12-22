@@ -43,7 +43,7 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 		}
 
 		if exists {
-			return fmt.Errorf("round %d: non-penalty outcome already exists ", data.Round)
+			return fmt.Errorf("round %d: %w", data.Round, models.ErrOutcomeExists)
 		}
 	}
 

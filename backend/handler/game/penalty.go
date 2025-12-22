@@ -25,13 +25,13 @@ func (h Handler) Penalty(c *gin.Context) {
 
 	var req PenaltyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("bind: %w", err))
+		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
 
 	err = h.game.Penalty(c.Request.Context(), id, req.LoserID, req.Value, req.ForceNextRound)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

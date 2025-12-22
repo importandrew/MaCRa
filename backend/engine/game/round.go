@@ -8,8 +8,8 @@ import (
 )
 
 func (g *Game) NextRound() error {
-	if g.status != models.GameLive {
-		return fmt.Errorf("GameID %d: game is not live", g.id)
+	if !g.IsLive() {
+		return models.ErrGameNotLive
 	}
 	switch g.round {
 	case 4:
@@ -55,7 +55,10 @@ func (g *Game) EnterRoundResult(hand, loser, winner int) error {
 		g.deal(hand, loser, winner)
 	}
 
-	g.NextRound()
+	err := g.NextRound()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

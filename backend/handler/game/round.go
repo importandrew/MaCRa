@@ -26,13 +26,13 @@ func (h Handler) EnterRoundResult(c *gin.Context) {
 
 	userID, err := authmw.GetUserIDFromContext(c)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	err = h.game.EnterRound(c.Request.Context(), userID, req.Outcome, req.Value, req.WinnerID, req.LoserID)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

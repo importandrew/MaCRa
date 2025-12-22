@@ -3,7 +3,6 @@ package game
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
@@ -28,14 +27,14 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 		ORDER BY pr.tournament_points DESC`,
 		gameID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return models.GameResult{}, models.ErrGameNotFound
-		}
 		return models.GameResult{}, err
 	}
 
 	playerResults, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.PlayerResult])
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.GameResult{}, models.ErrGameNotFound
+		}
 		return models.GameResult{}, err
 	}
 
@@ -45,38 +44,4 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 	}
 
 	return result, nil
-}
-
-func (r *Repo) LastGameResultByUserID(ctx context.Context, id int) (models.GameResult, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return models.GameResult{}, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
-		SELECT g.id 
-		FROM games g
-		JOIN game_players gp ON g.id = gp.game_id
-		WHERE gp.player_id = $1 AND g.status = $2
-		ORDER BY g.finished_at DESC
-		FETCH FIRST 1 ROWS ONLY`,
-		id, models.GameEnded)
-	if err != nil {
-		return models.GameResult{}, err
-	}
-	gameID, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return models.GameResult{}, nil
-		}
-		return models.GameResult{}, err
-	}
-
-	finalResult, err := r.GameResult(ctx, gameID)
-	if err != nil {
-		return models.GameResult{}, fmt.Errorf("game result: %w", err)
-	}
-
-	return finalResult, nil
 }

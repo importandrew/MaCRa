@@ -16,14 +16,11 @@ var (
 	ErrUserNotInPlayers = errors.New("cannot create game without yourself")
 	ErrPlayerExists     = errors.New("player with this email already exists")
 
-	ErrWrongClaims        = errors.New("token claims are of wrong type")
-	ErrWrongSigningMethod = errors.New("invalid signing method")
-	ErrUserIDNotFound     = errors.New("user id not found in context")
-	ErrUserIDInvalidType  = errors.New("user id in context is of invalid type")
-	ErrEmptyToken         = errors.New("token is empty")
+	ErrJWTKeyEmpty = errors.New("jwt key is empty")
 
-	ErrJWTKeyEmpty     = errors.New("jwt key is empty")
-	ErrGeneratingToken = errors.New("error generating token")
+	ErrOutcomeExists = errors.New("non-penalty outcome already exists")
+
+	ErrValidatePlayers = errors.New("validate game players")
 )
 
 var Errors = map[error]int{
@@ -31,9 +28,7 @@ var Errors = map[error]int{
 	ErrBadCredentials:   http.StatusBadRequest,
 	ErrUserNotInPlayers: http.StatusBadRequest,
 	ErrMinScore:         http.StatusBadRequest,
-
-	// 403
-	ErrEmptyToken: http.StatusUnauthorized,
+	ErrValidatePlayers:  http.StatusBadRequest,
 
 	// 404
 	ErrGameNotFound:   http.StatusNotFound,
@@ -41,5 +36,6 @@ var Errors = map[error]int{
 	ErrGameNotLive:    http.StatusNotFound,
 
 	// 409
-	ErrPlayerExists: http.StatusConflict,
+	ErrPlayerExists:  http.StatusConflict,
+	ErrOutcomeExists: http.StatusConflict,
 }

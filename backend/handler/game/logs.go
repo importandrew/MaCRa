@@ -19,7 +19,7 @@ func (h Handler) Logs(c *gin.Context) {
 
 	log, err := h.game.Logs(c.Request.Context(), id)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
+		httperr.Error(c, err)
 		return
 	}
 

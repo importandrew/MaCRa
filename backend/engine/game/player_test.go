@@ -8,7 +8,7 @@ import (
 )
 
 func TestGame_Players(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -24,7 +24,7 @@ func TestGame_Players(t *testing.T) {
 }
 
 func TestGame_Left(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -41,7 +41,7 @@ func TestGame_Left(t *testing.T) {
 }
 
 func TestGame_Right(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -58,7 +58,7 @@ func TestGame_Right(t *testing.T) {
 }
 
 func TestGame_Opposite(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -75,7 +75,7 @@ func TestGame_Opposite(t *testing.T) {
 }
 
 func TestGame_CurrentWind(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -97,7 +97,7 @@ func TestGame_CurrentWind(t *testing.T) {
 }
 
 func TestGame_StartWind(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},

@@ -22,7 +22,7 @@ func (h Handler) SignUp(c *gin.Context) {
 
 	_, err := h.player.Add(c.Request.Context(), req.Email, req.Name, req.Password)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

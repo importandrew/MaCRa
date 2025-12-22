@@ -19,7 +19,7 @@ func (h Handler) Players(c *gin.Context) {
 
 	players, err := h.game.Players(c.Request.Context(), id)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

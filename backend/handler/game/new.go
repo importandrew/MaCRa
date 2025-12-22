@@ -23,18 +23,18 @@ func (h Handler) New(c *gin.Context) {
 
 	userID, err := authmw.GetUserIDFromContext(c)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	if !slices.Contains(req.Players, userID) {
-		httperr.ErrorWithCode(c, http.StatusNotAcceptable, models.ErrUserNotInPlayers)
+		httperr.Error(c, models.ErrUserNotInPlayers)
 		return
 	}
 
 	_, err = h.game.NewGame(c.Request.Context(), req.Players)
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

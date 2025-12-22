@@ -60,14 +60,14 @@ func (r *Repo) GameLog(ctx context.Context, gameID int) ([]models.RoundLog, erro
 		WHERE r.game_id = $1
 		ORDER BY r.round_number, r.event_sequence`, gameID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return []models.RoundLog{}, nil
-		}
 		return nil, err
 	}
 
 	dbRows, err := pgx.CollectRows(rows, pgx.RowToStructByName[RoundLog])
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return []models.RoundLog{}, nil
+		}
 		return nil, err
 	}
 
