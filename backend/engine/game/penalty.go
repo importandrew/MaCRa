@@ -1,21 +1,18 @@
 package game
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (g *Game) FalseMahjong(loser, value int, forceNextRound bool) error {
 	if !g.IsLive() {
-		return errors.New("game is not live")
+		return models.ErrGameNotLive
 	}
 
 	if value != 30 && value != 60 {
 		return fmt.Errorf("false mahjong penalty should be 30 or 60, got: %d", value)
-	}
-
-	if forceNextRound {
-		defer g.NextRound()
 	}
 
 	for id, ps := range g.score {
@@ -29,12 +26,16 @@ func (g *Game) FalseMahjong(loser, value int, forceNextRound bool) error {
 		}
 	}
 
+	if forceNextRound {
+		g.NextRound()
+	}
+
 	return nil
 }
 
 func (g *Game) Penalty(loser, value int, forceNextRound bool) error {
 	if !g.IsLive() {
-		return errors.New("game is not live")
+		return models.ErrGameNotLive
 	}
 
 	if forceNextRound {

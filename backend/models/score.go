@@ -20,23 +20,19 @@ type PlayerScore struct {
 	TP float32 // tournament points
 }
 
-var tpl = template.Must(template.New("score").Parse(
-	`{{range $player, $score := .}}{{$player.Name}}={{$score.GP}}{{"\t"}}{{end}}`,
-))
-
 func (s GameScore) String() string {
 	var output bytes.Buffer
-	_ = tpl.Execute(&output, s)
+	_ = template.Must(template.New("score").Parse(
+		`{{range $player, $score := .}}{{$player}}={{$score.GP}}{{"\t"}}{{end}}`,
+	)).Execute(&output, s)
 	return output.String()
 }
 
-var final = template.Must(template.New("score").Parse(
-	`{{range $player, $score := .}}{{$player.Name}}={{$score.GP}}({{$score.TP}}){{"\t"}}{{end}}`,
-))
-
 func (s GameScore) Final() string {
 	var output bytes.Buffer
-	_ = final.Execute(&output, s)
+	_ = template.Must(template.New("final").Parse(
+		`{{range $player, $score := .}}{{$player}}={{$score.GP}}({{$score.TP}}){{"\t"}}{{end}}`,
+	)).Execute(&output, s)
 	return output.String()
 }
 

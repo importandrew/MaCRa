@@ -15,7 +15,7 @@ func TestGame_NextRound(t *testing.T) {
 	}{
 		"ok": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -33,7 +33,7 @@ func TestGame_NextRound(t *testing.T) {
 		},
 		"ok round 5": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -54,7 +54,7 @@ func TestGame_NextRound(t *testing.T) {
 		},
 		"ok round 9": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -75,7 +75,7 @@ func TestGame_NextRound(t *testing.T) {
 		},
 		"ok round 12": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -92,7 +92,7 @@ func TestGame_NextRound(t *testing.T) {
 		},
 		"ok end": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -110,7 +110,7 @@ func TestGame_NextRound(t *testing.T) {
 		},
 		"game not live": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -148,7 +148,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 	}{
 		"ok deal in": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -170,7 +170,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 		},
 		"ok self": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -192,7 +192,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 		},
 		"ok draw": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -214,7 +214,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 		},
 		"invalid hand deal in": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -234,7 +234,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 		},
 		"invalid hand self": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -253,7 +253,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 		},
 		"game not live": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},

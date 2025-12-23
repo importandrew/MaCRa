@@ -6,11 +6,12 @@ import (
 	"slices"
 
 	"github.com/importandrew/MaCRa/engine/game"
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (s *Service) NewGame(ctx context.Context, playerIDs []int) (int, error) {
 	if err := validatePlayers(playerIDs); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %w", models.ErrValidatePlayers, err)
 	}
 
 	gameID, err := s.gameRepo.NewGame(ctx, [4]int(playerIDs))
@@ -24,10 +25,7 @@ func (s *Service) NewGame(ctx context.Context, playerIDs []int) (int, error) {
 		Rules:   game.Rules{},
 	}
 
-	g, err := game.NewGame(gameCfg)
-	if err != nil {
-		return 0, err
-	}
+	g := game.NewGame(gameCfg)
 
 	s.liveGames[g.ID()] = g
 

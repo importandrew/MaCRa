@@ -2,6 +2,8 @@ package player
 
 import (
 	"context"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) Delete(ctx context.Context, email string) error {
@@ -17,7 +19,7 @@ func (r *Repo) Delete(ctx context.Context, email string) error {
 	}
 
 	if res.RowsAffected() == 0 {
-		return ErrPlayerNotFound
+		return models.ErrPlayerNotFound
 	}
 
 	return nil

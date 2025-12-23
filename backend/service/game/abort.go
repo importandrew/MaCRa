@@ -2,7 +2,6 @@ package game
 
 import (
 	"context"
-	"errors"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -10,9 +9,6 @@ import (
 func (s *Service) Abort(ctx context.Context, gameID int) error {
 	_, err := s.GetLiveGame(gameID)
 	if err != nil {
-		if errors.Is(err, errGameNotFound) {
-			return errors.New("game is not live")
-		}
 		return err
 	}
 

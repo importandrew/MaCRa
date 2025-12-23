@@ -9,8 +9,10 @@ import (
 
 const expirationTime = 90 * 24 * time.Hour
 
-var ErrWrongClaims = errors.New("token claims are of wrong type")
-var ErrWrongSigningMethod = errors.New("invalid signing method")
+var (
+	ErrWrongClaims        = errors.New("token claims are of wrong type")
+	ErrWrongSigningMethod = errors.New("invalid signing method")
+)
 
 type UserClaims struct {
 	jwt.RegisteredClaims

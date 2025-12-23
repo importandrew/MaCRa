@@ -9,9 +9,8 @@ import (
 
 func TestNewGame(t *testing.T) {
 	testData := map[string]struct {
-		config      Config
-		expectedErr assert.ErrorAssertionFunc
-		check       func(*testing.T, *Game)
+		config Config
+		check  func(*testing.T, *Game)
 	}{
 		"ok": {
 			config: Config{
@@ -19,7 +18,6 @@ func TestNewGame(t *testing.T) {
 				Players: [4]int{1, 2, 3, 4},
 				Rules:   Rules{},
 			},
-			expectedErr: assert.NoError,
 			check: func(t *testing.T, g *Game) {
 				assert.Equal(t, 100, g.ID())
 				assert.Equal(t, models.GameLive, g.Status())
@@ -39,15 +37,10 @@ func TestNewGame(t *testing.T) {
 
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
-			got, err := NewGame(testCase.config)
-			testCase.expectedErr(t, err)
-			if err != nil {
-				assert.Nil(t, got)
-				return
-			}
-			assert.NotNil(t, got)
+			g := NewGame(testCase.config)
+			assert.NotNil(t, g)
 			if testCase.check != nil {
-				testCase.check(t, got)
+				testCase.check(t, g)
 			}
 		})
 	}
@@ -61,7 +54,7 @@ func TestGame_End(t *testing.T) {
 	}{
 		"ok": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -76,7 +69,7 @@ func TestGame_End(t *testing.T) {
 		},
 		"game already ended": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -107,7 +100,7 @@ func TestGame_End(t *testing.T) {
 }
 
 func TestGame_IsLive(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -120,7 +113,7 @@ func TestGame_IsLive(t *testing.T) {
 }
 
 func TestGame_ID(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      123,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -130,7 +123,7 @@ func TestGame_ID(t *testing.T) {
 }
 
 func TestGame_Status(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -143,7 +136,7 @@ func TestGame_Status(t *testing.T) {
 }
 
 func TestGame_Round(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},
@@ -156,7 +149,7 @@ func TestGame_Round(t *testing.T) {
 }
 
 func TestGame_Score(t *testing.T) {
-	g, _ := NewGame(Config{
+	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
 		Rules:   Rules{},

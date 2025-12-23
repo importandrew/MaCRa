@@ -1,7 +1,6 @@
 package game
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/importandrew/MaCRa/logger"
@@ -9,8 +8,8 @@ import (
 )
 
 func (g *Game) NextRound() error {
-	if g.status != models.GameLive {
-		return fmt.Errorf("GameID %d: game is not live", g.id)
+	if !g.IsLive() {
+		return models.ErrGameNotLive
 	}
 	switch g.round {
 	case 4:
@@ -38,7 +37,7 @@ func (g *Game) NextRound() error {
 
 func (g *Game) EnterRoundResult(hand, loser, winner int) error {
 	if !g.IsLive() {
-		return errors.New("game is not live")
+		return models.ErrGameNotLive
 	}
 
 	switch {
@@ -46,18 +45,20 @@ func (g *Game) EnterRoundResult(hand, loser, winner int) error {
 		g.draw()
 	case loser == 0:
 		if hand < 8 {
-			return ErrMinScore
+			return models.ErrMinScore
 		}
 		g.self(hand, winner)
-		//TODO: validate bad cases, maybe on frontend side
 	default:
 		if hand < 8 {
-			return ErrMinScore
+			return models.ErrMinScore
 		}
 		g.deal(hand, loser, winner)
 	}
 
-	g.NextRound()
+	err := g.NextRound()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -78,7 +79,8 @@ func (g *Game) self(hand, winner int) {
 		}
 	}
 
-	logger.WithField("result", fmt.Sprintf("self by %d (hand: %d)", winner, hand)).Info(g.score.String())
+	logger.WithField("result", fmt.Sprintf("self by %d (hand: %d)", winner, hand)).
+		Info(g.score.String())
 }
 
 func (g *Game) deal(hand, loser, winner int) {

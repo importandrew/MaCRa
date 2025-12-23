@@ -16,13 +16,13 @@ type SignupRequest struct {
 func (h Handler) SignUp(c *gin.Context) {
 	var req SignupRequest
 	if err := c.BindJSON(&req); err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, err)
+		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
 
 	_, err := h.player.Add(c.Request.Context(), req.Email, req.Name, req.Password)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

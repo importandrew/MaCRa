@@ -2,7 +2,6 @@ package game
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -17,11 +16,11 @@ func (r *Repo) SetStatus(ctx context.Context, gameID int, status models.GameStat
 
 	res, err := conn.Exec(ctx, `UPDATE games SET status = $1 WHERE id = $2`, status, gameID)
 	if err != nil {
-		return fmt.Errorf("set status for game %d: %w", gameID, err)
+		return err
 	}
 
 	if res.RowsAffected() == 0 {
-		return fmt.Errorf("set status for game %d: game not found", gameID)
+		return models.ErrGameNotFound
 	}
 
 	return nil

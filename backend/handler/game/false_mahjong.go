@@ -19,19 +19,19 @@ func (h Handler) FalseMahjong(c *gin.Context) {
 	strID := c.Param("id")
 	id, err := strconv.Atoi(strID)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
+		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
 		return
 	}
 
 	var req FalseMahjongRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, fmt.Errorf("bind: %w", err))
+		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
 
 	err = h.game.FalseMahjong(c.Request.Context(), id, req.LoserID, req.Value, req.ForceNextRound)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

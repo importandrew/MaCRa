@@ -1,13 +1,13 @@
 package game
 
 import (
-	"errors"
 	"net/http"
 	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/importandrew/MaCRa/handler/authmw"
 	"github.com/importandrew/MaCRa/handler/httperr"
+	"github.com/importandrew/MaCRa/models"
 )
 
 type NewGameRequest struct {
@@ -17,24 +17,24 @@ type NewGameRequest struct {
 func (h Handler) New(c *gin.Context) {
 	var req NewGameRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, err)
+		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
 
 	userID, err := authmw.GetUserIDFromContext(c)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	if !slices.Contains(req.Players, userID) {
-		httperr.ErrorResponse(c, http.StatusNotAcceptable, errors.New("cannot create game without yourself"))
+		httperr.Error(c, models.ErrUserNotInPlayers)
 		return
 	}
 
 	_, err = h.game.NewGame(c.Request.Context(), req.Players)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

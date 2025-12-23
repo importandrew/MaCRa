@@ -43,10 +43,7 @@ func (s *Service) loadGame(ctx context.Context, gameID int) error {
 		Rules:   game.Rules{},
 	}
 
-	g, err := game.NewGame(gameCfg)
-	if err != nil {
-		return err
-	}
+	g := game.NewGame(gameCfg)
 
 	roundLogs, err := s.gameRepo.GameLog(ctx, gameID)
 	if err != nil {

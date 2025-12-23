@@ -17,7 +17,7 @@ func TestGame_Penalty(t *testing.T) {
 	}{
 		"ok": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -39,7 +39,7 @@ func TestGame_Penalty(t *testing.T) {
 		},
 		"ok with force next round": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -58,7 +58,7 @@ func TestGame_Penalty(t *testing.T) {
 		},
 		"game not live": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -99,7 +99,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 	}{
 		"ok value 30": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -121,7 +121,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 		},
 		"ok value 60 with force next round": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -143,7 +143,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 		},
 		"invalid value": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
@@ -161,7 +161,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 		},
 		"game not live": {
 			setupGame: func() *Game {
-				g, _ := NewGame(Config{
+				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
 					Rules:   Rules{},
