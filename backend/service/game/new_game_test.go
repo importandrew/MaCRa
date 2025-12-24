@@ -69,7 +69,6 @@ func TestNewGame(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockGameRepo.AssertExpectations(t)
 				return
 			}
 
@@ -79,7 +78,6 @@ func TestNewGame(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, liveGame)
 			assert.Equal(t, gameID, liveGame.ID())
-			mockGameRepo.AssertExpectations(t)
 		})
 	}
 }

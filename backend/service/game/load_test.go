@@ -177,14 +177,12 @@ func TestLoadLiveGames(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockGameRepo.AssertExpectations(t)
 				return
 			}
 
 			if testCase.verifyGames != nil {
 				testCase.verifyGames(t, service)
 			}
-			mockGameRepo.AssertExpectations(t)
 		})
 	}
 }
@@ -251,7 +249,6 @@ func TestLoadGame_WithDifferentOutcomes(t *testing.T) {
 	// Game starts at round 1, "false mahjong" + "penalty" with ForceNextRound=true + "deal-in"
 	// means it's 3rd round now
 	assert.Equal(t, 3, g.Round())
-	mockGameRepo.AssertExpectations(t)
 }
 
 func TestLoadGame_InvalidLogError(t *testing.T) {
@@ -290,5 +287,4 @@ func TestLoadGame_InvalidLogError(t *testing.T) {
 	err := service.loadGame(ctx, 100)
 
 	assert.Error(t, err)
-	mockGameRepo.AssertExpectations(t)
 }

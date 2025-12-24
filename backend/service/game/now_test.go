@@ -114,14 +114,12 @@ func TestNow(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockPlayerRepo.AssertExpectations(t)
 				return
 			}
 
 			if testCase.checkNow != nil {
 				testCase.checkNow(t, now)
 			}
-			mockPlayerRepo.AssertExpectations(t)
 		})
 	}
 }

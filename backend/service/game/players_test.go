@@ -105,8 +105,6 @@ func TestPlayers(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockGameRepo.AssertExpectations(t)
-				mockPlayerRepo.AssertExpectations(t)
 				return
 			}
 
@@ -116,8 +114,6 @@ func TestPlayers(t *testing.T) {
 				assert.Equal(t, expected.ID, players.Players[i].ID)
 				assert.Equal(t, expected.Name, players.Players[i].Name)
 			}
-			mockGameRepo.AssertExpectations(t)
-			mockPlayerRepo.AssertExpectations(t)
 		})
 	}
 }

@@ -106,7 +106,6 @@ func TestLogin(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockRepo.AssertExpectations(t)
 				// Verify that bad credentials error is returned for wrong password
 				if testCase.password == wrongPassword {
 					assert.Equal(t, models.ErrBadCredentials, err)
@@ -116,7 +115,6 @@ func TestLogin(t *testing.T) {
 
 			assert.Equal(t, testCase.expectedPlayer.ID, player.ID)
 			assert.Equal(t, testCase.expectedPlayer.Name, player.Name)
-			mockRepo.AssertExpectations(t)
 		})
 	}
 }

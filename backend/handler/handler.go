@@ -44,14 +44,14 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	{
 		authAPI.DELETE("/game/:id/abort", h.game.Abort)
 		authAPI.GET("/game/:id/result", h.game.FinalResult)
-		authAPI.POST("/game/:id/false-mahjong", h.game.FalseMahjong)
-		authAPI.POST("/game/:id/penalty", h.game.Penalty)
 
 		// auto-detects user who called this api
 		{
 			authAPI.POST("/new", h.game.New)
 			authAPI.GET("/now", h.game.Now)
 			authAPI.POST("/round", h.game.EnterRoundResult)
+			authAPI.POST("/false-mahjong", h.game.FalseMahjong)
+			authAPI.POST("/penalty", h.game.Penalty)
 			authAPI.GET("/last", h.game.Last)
 		}
 	}

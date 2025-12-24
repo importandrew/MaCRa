@@ -115,7 +115,6 @@ func TestListByNameLimit(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockRepo.AssertExpectations(t)
 				return
 			}
 
@@ -124,7 +123,6 @@ func TestListByNameLimit(t *testing.T) {
 				assert.Equal(t, expectedPlayer.ID, players[i].ID)
 				assert.Equal(t, expectedPlayer.Name, players[i].Name)
 			}
-			mockRepo.AssertExpectations(t)
 		})
 	}
 }

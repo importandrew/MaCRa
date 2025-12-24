@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -18,6 +19,7 @@ func TestHandler_FalseMahjong(t *testing.T) {
 
 	testData := map[string]struct {
 		gameID       string
+		userID       int
 		requestBody  any
 		mockSetup    func(*MockGameService)
 		expectedCode int
@@ -25,6 +27,7 @@ func TestHandler_FalseMahjong(t *testing.T) {
 	}{
 		"ok": {
 			gameID: "100",
+			userID: 1,
 			requestBody: FalseMahjongRequest{
 				LoserID:        2,
 				Value:          30,
@@ -33,19 +36,28 @@ func TestHandler_FalseMahjong(t *testing.T) {
 			mockSetup: func(m *MockGameService) {
 				m.EXPECT().FalseMahjong(
 					mock.Anything,
-					100,
+					1,
 					2,
 					30,
 					false,
-				).Return(nil)
+				).Return(models.GameNow{
+					ID:     100,
+					Status: models.GameLive,
+					Round:  models.Round{Num: 1, Kanji: "東1"},
+				}, nil)
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				assert.Empty(t, w.Body.String())
+				var response models.GameNow
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, 100, response.ID)
+				assert.Equal(t, models.GameLive, response.Status)
 			},
 		},
 		"ok with force next round": {
 			gameID: "100",
+			userID: 1,
 			requestBody: FalseMahjongRequest{
 				LoserID:        3,
 				Value:          60,
@@ -54,31 +66,28 @@ func TestHandler_FalseMahjong(t *testing.T) {
 			mockSetup: func(m *MockGameService) {
 				m.EXPECT().FalseMahjong(
 					mock.Anything,
-					100,
+					1,
 					3,
 					60,
 					true,
-				).Return(nil)
+				).Return(models.GameNow{
+					ID:     100,
+					Status: models.GameLive,
+					Round:  models.Round{Num: 1, Kanji: "東1"},
+				}, nil)
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				assert.Empty(t, w.Body.String())
-			},
-		},
-		"invalid game id": {
-			gameID:       "not-a-number",
-			requestBody:  FalseMahjongRequest{LoserID: 2, Value: 30},
-			mockSetup:    func(m *MockGameService) {},
-			expectedCode: http.StatusBadRequest,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
+				var response models.GameNow
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Contains(t, response, "error")
+				assert.Equal(t, 100, response.ID)
+				assert.Equal(t, models.GameLive, response.Status)
 			},
 		},
 		"invalid json": {
 			gameID:       "100",
+			userID:       1,
 			requestBody:  "invalid json",
 			mockSetup:    func(m *MockGameService) {},
 			expectedCode: http.StatusBadRequest,
@@ -89,8 +98,24 @@ func TestHandler_FalseMahjong(t *testing.T) {
 				assert.Contains(t, response, "error")
 			},
 		},
+		"user id not in context": {
+			gameID: "100",
+			userID: 0,
+			requestBody: FalseMahjongRequest{
+				LoserID:        2,
+				Value:          30,
+				ForceNextRound: false,
+			},
+			mockSetup:    func(m *MockGameService) {},
+			expectedCode: http.StatusUnauthorized,
+			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
+				// When AbortWithStatus is called, no JSON body is written
+				assert.Empty(t, w.Body.String())
+			},
+		},
 		"service error": {
 			gameID: "100",
+			userID: 1,
 			requestBody: FalseMahjongRequest{
 				LoserID:        2,
 				Value:          30,
@@ -99,11 +124,11 @@ func TestHandler_FalseMahjong(t *testing.T) {
 			mockSetup: func(m *MockGameService) {
 				m.EXPECT().FalseMahjong(
 					mock.Anything,
-					100,
+					1,
 					2,
 					30,
 					false,
-				).Return(errors.New("game not found"))
+				).Return(models.GameNow{}, errors.New("game not found"))
 			},
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -140,6 +165,9 @@ func TestHandler_FalseMahjong(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request = req
 			c.Params = gin.Params{{Key: "id", Value: testCase.gameID}}
+			if testCase.userID > 0 {
+				c.Set("userID", testCase.userID)
+			}
 
 			handler.FalseMahjong(c)
 

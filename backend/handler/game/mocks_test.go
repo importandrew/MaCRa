@@ -96,20 +96,29 @@ func (_c *MockGameService_Abort_Call) RunAndReturn(run func(ctx context.Context,
 }
 
 // EnterRound provides a mock function for the type MockGameService
-func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int) error {
+func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int) (models.GameNow, error) {
 	ret := _mock.Called(ctx, playerID, outcome, value, winnerID, loserID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for EnterRound")
 	}
 
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int) error); ok {
+	var r0 models.GameNow
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int) (models.GameNow, error)); ok {
+		return returnFunc(ctx, playerID, outcome, value, winnerID, loserID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int) models.GameNow); ok {
 		r0 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(models.GameNow)
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Outcome, int, int, int) error); ok {
+		r1 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockGameService_EnterRound_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EnterRound'
@@ -166,31 +175,40 @@ func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, pla
 	return _c
 }
 
-func (_c *MockGameService_EnterRound_Call) Return(err error) *MockGameService_EnterRound_Call {
-	_c.Call.Return(err)
+func (_c *MockGameService_EnterRound_Call) Return(gameNow models.GameNow, err error) *MockGameService_EnterRound_Call {
+	_c.Call.Return(gameNow, err)
 	return _c
 }
 
-func (_c *MockGameService_EnterRound_Call) RunAndReturn(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int) error) *MockGameService_EnterRound_Call {
+func (_c *MockGameService_EnterRound_Call) RunAndReturn(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int) (models.GameNow, error)) *MockGameService_EnterRound_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // FalseMahjong provides a mock function for the type MockGameService
-func (_mock *MockGameService) FalseMahjong(ctx context.Context, gameID int, playerID int, value int, forceNextRound bool) error {
-	ret := _mock.Called(ctx, gameID, playerID, value, forceNextRound)
+func (_mock *MockGameService) FalseMahjong(ctx context.Context, playerID int, penalizedID int, value int, forceNextRound bool) (models.GameNow, error) {
+	ret := _mock.Called(ctx, playerID, penalizedID, value, forceNextRound)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FalseMahjong")
 	}
 
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, bool) error); ok {
-		r0 = returnFunc(ctx, gameID, playerID, value, forceNextRound)
-	} else {
-		r0 = ret.Error(0)
+	var r0 models.GameNow
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, bool) (models.GameNow, error)); ok {
+		return returnFunc(ctx, playerID, penalizedID, value, forceNextRound)
 	}
-	return r0
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, bool) models.GameNow); ok {
+		r0 = returnFunc(ctx, playerID, penalizedID, value, forceNextRound)
+	} else {
+		r0 = ret.Get(0).(models.GameNow)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int, int, bool) error); ok {
+		r1 = returnFunc(ctx, playerID, penalizedID, value, forceNextRound)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockGameService_FalseMahjong_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FalseMahjong'
@@ -200,15 +218,15 @@ type MockGameService_FalseMahjong_Call struct {
 
 // FalseMahjong is a helper method to define mock.On call
 //   - ctx context.Context
-//   - gameID int
 //   - playerID int
+//   - penalizedID int
 //   - value int
 //   - forceNextRound bool
-func (_e *MockGameService_Expecter) FalseMahjong(ctx interface{}, gameID interface{}, playerID interface{}, value interface{}, forceNextRound interface{}) *MockGameService_FalseMahjong_Call {
-	return &MockGameService_FalseMahjong_Call{Call: _e.mock.On("FalseMahjong", ctx, gameID, playerID, value, forceNextRound)}
+func (_e *MockGameService_Expecter) FalseMahjong(ctx interface{}, playerID interface{}, penalizedID interface{}, value interface{}, forceNextRound interface{}) *MockGameService_FalseMahjong_Call {
+	return &MockGameService_FalseMahjong_Call{Call: _e.mock.On("FalseMahjong", ctx, playerID, penalizedID, value, forceNextRound)}
 }
 
-func (_c *MockGameService_FalseMahjong_Call) Run(run func(ctx context.Context, gameID int, playerID int, value int, forceNextRound bool)) *MockGameService_FalseMahjong_Call {
+func (_c *MockGameService_FalseMahjong_Call) Run(run func(ctx context.Context, playerID int, penalizedID int, value int, forceNextRound bool)) *MockGameService_FalseMahjong_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -241,12 +259,12 @@ func (_c *MockGameService_FalseMahjong_Call) Run(run func(ctx context.Context, g
 	return _c
 }
 
-func (_c *MockGameService_FalseMahjong_Call) Return(err error) *MockGameService_FalseMahjong_Call {
-	_c.Call.Return(err)
+func (_c *MockGameService_FalseMahjong_Call) Return(gameNow models.GameNow, err error) *MockGameService_FalseMahjong_Call {
+	_c.Call.Return(gameNow, err)
 	return _c
 }
 
-func (_c *MockGameService_FalseMahjong_Call) RunAndReturn(run func(ctx context.Context, gameID int, playerID int, value int, forceNextRound bool) error) *MockGameService_FalseMahjong_Call {
+func (_c *MockGameService_FalseMahjong_Call) RunAndReturn(run func(ctx context.Context, playerID int, penalizedID int, value int, forceNextRound bool) (models.GameNow, error)) *MockGameService_FalseMahjong_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -582,20 +600,29 @@ func (_c *MockGameService_Now_Call) RunAndReturn(run func(ctx context.Context, p
 }
 
 // Penalty provides a mock function for the type MockGameService
-func (_mock *MockGameService) Penalty(ctx context.Context, gameID int, playerID int, value int, forceNextRound bool) error {
-	ret := _mock.Called(ctx, gameID, playerID, value, forceNextRound)
+func (_mock *MockGameService) Penalty(ctx context.Context, playerID int, penalizedID int, value int, forceNextRound bool) (models.GameNow, error) {
+	ret := _mock.Called(ctx, playerID, penalizedID, value, forceNextRound)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Penalty")
 	}
 
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, bool) error); ok {
-		r0 = returnFunc(ctx, gameID, playerID, value, forceNextRound)
-	} else {
-		r0 = ret.Error(0)
+	var r0 models.GameNow
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, bool) (models.GameNow, error)); ok {
+		return returnFunc(ctx, playerID, penalizedID, value, forceNextRound)
 	}
-	return r0
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, bool) models.GameNow); ok {
+		r0 = returnFunc(ctx, playerID, penalizedID, value, forceNextRound)
+	} else {
+		r0 = ret.Get(0).(models.GameNow)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int, int, bool) error); ok {
+		r1 = returnFunc(ctx, playerID, penalizedID, value, forceNextRound)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockGameService_Penalty_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Penalty'
@@ -605,15 +632,15 @@ type MockGameService_Penalty_Call struct {
 
 // Penalty is a helper method to define mock.On call
 //   - ctx context.Context
-//   - gameID int
 //   - playerID int
+//   - penalizedID int
 //   - value int
 //   - forceNextRound bool
-func (_e *MockGameService_Expecter) Penalty(ctx interface{}, gameID interface{}, playerID interface{}, value interface{}, forceNextRound interface{}) *MockGameService_Penalty_Call {
-	return &MockGameService_Penalty_Call{Call: _e.mock.On("Penalty", ctx, gameID, playerID, value, forceNextRound)}
+func (_e *MockGameService_Expecter) Penalty(ctx interface{}, playerID interface{}, penalizedID interface{}, value interface{}, forceNextRound interface{}) *MockGameService_Penalty_Call {
+	return &MockGameService_Penalty_Call{Call: _e.mock.On("Penalty", ctx, playerID, penalizedID, value, forceNextRound)}
 }
 
-func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, gameID int, playerID int, value int, forceNextRound bool)) *MockGameService_Penalty_Call {
+func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, playerID int, penalizedID int, value int, forceNextRound bool)) *MockGameService_Penalty_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -646,12 +673,12 @@ func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, gameID
 	return _c
 }
 
-func (_c *MockGameService_Penalty_Call) Return(err error) *MockGameService_Penalty_Call {
-	_c.Call.Return(err)
+func (_c *MockGameService_Penalty_Call) Return(gameNow models.GameNow, err error) *MockGameService_Penalty_Call {
+	_c.Call.Return(gameNow, err)
 	return _c
 }
 
-func (_c *MockGameService_Penalty_Call) RunAndReturn(run func(ctx context.Context, gameID int, playerID int, value int, forceNextRound bool) error) *MockGameService_Penalty_Call {
+func (_c *MockGameService_Penalty_Call) RunAndReturn(run func(ctx context.Context, playerID int, penalizedID int, value int, forceNextRound bool) (models.GameNow, error)) *MockGameService_Penalty_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -26,7 +26,7 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 	}{
 		"ok deal-in": {
 			requestBody: EnterRoundResultRequest{
-				Outcome:  models.Outcome("deal-in"),
+				Outcome:  models.Deal,
 				Value:    8,
 				WinnerID: 1,
 				LoserID:  2,
@@ -36,20 +36,28 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 				m.EXPECT().EnterRound(
 					mock.Anything,
 					1,
-					models.Outcome("deal-in"),
+					models.Deal,
 					8,
 					1,
 					2,
-				).Return(nil)
+				).Return(models.GameNow{
+					ID:     100,
+					Status: models.GameLive,
+					Round:  models.Round{Num: 1, Kanji: "東1"},
+				}, nil)
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				assert.Empty(t, w.Body.String())
+				var response models.GameNow
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, 100, response.ID)
+				assert.Equal(t, models.GameLive, response.Status)
 			},
 		},
 		"ok self": {
 			requestBody: EnterRoundResultRequest{
-				Outcome:  models.Outcome("self"),
+				Outcome:  models.Self,
 				Value:    10,
 				WinnerID: 1,
 				LoserID:  0,
@@ -59,20 +67,28 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 				m.EXPECT().EnterRound(
 					mock.Anything,
 					1,
-					models.Outcome("self"),
+					models.Self,
 					10,
 					1,
 					0,
-				).Return(nil)
+				).Return(models.GameNow{
+					ID:     100,
+					Status: models.GameLive,
+					Round:  models.Round{Num: 1, Kanji: "東1"},
+				}, nil)
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				assert.Empty(t, w.Body.String())
+				var response models.GameNow
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, 100, response.ID)
+				assert.Equal(t, models.GameLive, response.Status)
 			},
 		},
 		"ok draw": {
 			requestBody: EnterRoundResultRequest{
-				Outcome:  models.Outcome("draw"),
+				Outcome:  models.Draw,
 				Value:    0,
 				WinnerID: 0,
 				LoserID:  0,
@@ -82,15 +98,23 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 				m.EXPECT().EnterRound(
 					mock.Anything,
 					1,
-					models.Outcome("draw"),
+					models.Draw,
 					0,
 					0,
 					0,
-				).Return(nil)
+				).Return(models.GameNow{
+					ID:     100,
+					Status: models.GameLive,
+					Round:  models.Round{Num: 1, Kanji: "東1"},
+				}, nil)
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				assert.Empty(t, w.Body.String())
+				var response models.GameNow
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, 100, response.ID)
+				assert.Equal(t, models.GameLive, response.Status)
 			},
 		},
 		"invalid json": {
@@ -107,7 +131,7 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 		},
 		"user id not in context": {
 			requestBody: EnterRoundResultRequest{
-				Outcome:  models.Outcome("deal-in"),
+				Outcome:  models.Deal,
 				Value:    8,
 				WinnerID: 1,
 				LoserID:  2,
@@ -122,7 +146,7 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 		},
 		"service error": {
 			requestBody: EnterRoundResultRequest{
-				Outcome:  models.Outcome("deal-in"),
+				Outcome:  models.Deal,
 				Value:    8,
 				WinnerID: 1,
 				LoserID:  2,
@@ -132,11 +156,11 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 				m.EXPECT().EnterRound(
 					mock.Anything,
 					1,
-					models.Outcome("deal-in"),
+					models.Deal,
 					8,
 					1,
 					2,
-				).Return(errors.New("invalid hand"))
+				).Return(models.GameNow{}, errors.New("invalid hand"))
 			},
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {

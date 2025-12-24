@@ -88,7 +88,6 @@ func TestAbort(t *testing.T) {
 			if testCase.verifyGame != nil {
 				testCase.verifyGame(t, service, gameID)
 			}
-			mockGameRepo.AssertExpectations(t)
 		})
 	}
 }

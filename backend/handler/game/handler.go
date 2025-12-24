@@ -7,16 +7,17 @@ import (
 )
 
 type GameService interface {
+	FalseMahjong(ctx context.Context, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error)
+	Penalty(ctx context.Context, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error)
+	EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value, winnerID, loserID int) (models.GameNow, error)
+	Now(ctx context.Context, playerID int) (models.GameNow, error)
+	LastGameResult(ctx context.Context, playerID int) (models.GameResult, error)
+
 	Abort(ctx context.Context, gameID int) error
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)
 	Logs(ctx context.Context, gameID int) (models.GameLog, error)
-	Now(ctx context.Context, playerID int) (models.GameNow, error)
 	NewGame(ctx context.Context, playerIDs []int) (gameID int, err error)
-	FalseMahjong(ctx context.Context, gameID, playerID, value int, forceNextRound bool) error
-	Penalty(ctx context.Context, gameID, playerID, value int, forceNextRound bool) error
 	Players(ctx context.Context, gameID int) (models.GamePlayers, error)
-	EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value, winnerID, loserID int) error
-	LastGameResult(ctx context.Context, playerID int) (models.GameResult, error)
 }
 
 type PlayerService interface {

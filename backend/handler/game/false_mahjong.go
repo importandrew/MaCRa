@@ -1,11 +1,10 @@
 package game
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/importandrew/MaCRa/handler/authmw"
 	"github.com/importandrew/MaCRa/handler/httperr"
 )
 
@@ -16,24 +15,23 @@ type FalseMahjongRequest struct {
 }
 
 func (h Handler) FalseMahjong(c *gin.Context) {
-	strID := c.Param("id")
-	id, err := strconv.Atoi(strID)
-	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
-		return
-	}
-
 	var req FalseMahjongRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = h.game.FalseMahjong(c.Request.Context(), id, req.LoserID, req.Value, req.ForceNextRound)
+	userID, err := authmw.GetUserIDFromContext(c)
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	now, err := h.game.FalseMahjong(c.Request.Context(), userID, req.LoserID, req.Value, req.ForceNextRound)
 	if err != nil {
 		httperr.Error(c, err)
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, now)
 }

@@ -6,15 +6,15 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) FalseMahjong(ctx context.Context, gameID, playerID, value int, forceNextRound bool) error {
-	game, err := s.GetLiveGame(gameID)
+func (s *Service) FalseMahjong(ctx context.Context, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error) {
+	game, err := s.CurrentGame(playerID)
 	if err != nil {
-		return err
+		return models.GameNow{}, err
 	}
 
-	err = game.FalseMahjong(playerID, value, forceNextRound)
+	err = game.FalseMahjong(penalizedID, value, forceNextRound)
 	if err != nil {
-		return err
+		return models.GameNow{}, err
 	}
 
 	players := game.Players()
@@ -23,7 +23,7 @@ func (s *Service) FalseMahjong(ctx context.Context, gameID, playerID, value int,
 	roundOutcome := models.RoundData{
 		Round:           game.Round(),
 		Outcome:         models.FalseMahjong,
-		LoserID:         playerID,
+		LoserID:         penalizedID,
 		Value:           value,
 		EastStartScore:  score[players[models.East]].GP,
 		SouthStartScore: score[players[models.South]].GP,
@@ -34,8 +34,25 @@ func (s *Service) FalseMahjong(ctx context.Context, gameID, playerID, value int,
 
 	err = s.gameRepo.SaveRoundOutcome(ctx, game.ID(), roundOutcome)
 	if err != nil {
-		return err
+		return models.GameNow{}, err
 	}
 
-	return nil
+	if game.Status() == models.GameEnded {
+		err := s.finalize(ctx, game.ID(), score, players)
+		if err != nil {
+			return models.GameNow{}, err
+		}
+
+		return models.GameNow{
+			ID:     game.ID(),
+			Status: models.GameEnded,
+		}, nil
+	}
+
+	now, err := s.Now(ctx, playerID)
+	if err != nil {
+		return models.GameNow{}, err
+	}
+
+	return now, nil
 }

@@ -31,8 +31,8 @@ func TestHandler_Logs(t *testing.T) {
 				).Return(models.GameLog{
 					ID: 100,
 					RoundLogs: []models.RoundLog{
-						{Round: 1, Outcome: models.Outcome("draw")},
-						{Round: 2, Outcome: models.Outcome("deal-in")},
+						{Round: 1, Outcome: models.Draw},
+						{Round: 2, Outcome: models.Deal},
 					},
 				}, nil)
 			},

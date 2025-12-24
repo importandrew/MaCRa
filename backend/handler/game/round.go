@@ -30,11 +30,11 @@ func (h Handler) EnterRoundResult(c *gin.Context) {
 		return
 	}
 
-	err = h.game.EnterRound(c.Request.Context(), userID, req.Outcome, req.Value, req.WinnerID, req.LoserID)
+	now, err := h.game.EnterRound(c.Request.Context(), userID, req.Outcome, req.Value, req.WinnerID, req.LoserID)
 	if err != nil {
 		httperr.Error(c, err)
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, now)
 }
