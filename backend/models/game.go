@@ -1,10 +1,13 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type GameNow struct {
-	ID    int   `json:"id"`
-	Round Round `json:"round"`
+	ID     int        `json:"id"`
+	Status GameStatus `json:"status"`
+	Round  Round      `json:"round"`
 
 	Me    PlayerWindScore `json:"me"`
 	Right PlayerWindScore `json:"right"`

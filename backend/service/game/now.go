@@ -48,7 +48,8 @@ func (s *Service) Now(ctx context.Context, playerID int) (models.GameNow, error)
 	round := game.Round()
 
 	now := models.GameNow{
-		ID: game.ID(),
+		ID:     game.ID(),
+		Status: game.Status(),
 		Round: models.Round{
 			Num:   round,
 			Kanji: models.RoundKanji(round),

@@ -41,6 +41,7 @@ func TestNow(t *testing.T) {
 					4: {GP: 0},
 				})
 				mockGame.EXPECT().ID().Return(100)
+				mockGame.EXPECT().Status().Return(models.GameLive)
 				mockGame.EXPECT().Round().Return(1)
 				s.liveGames[100] = mockGame
 				return 100
