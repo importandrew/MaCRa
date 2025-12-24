@@ -3,7 +3,7 @@ import { GetRequest, globalFetch } from '../../components/Request';
 import { GameData, GamePlayers, PlayerOrder } from '../../models/GameData';
 import { GameResult, GameRoundLogs } from '../../models/GameResult';
 
-export const useFetchGameData = (isToastEnabled = false) => {
+export const useFetchGameData = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState<GameData | null>(null);
@@ -13,9 +13,7 @@ export const useFetchGameData = (isToastEnabled = false) => {
     setIsLoading(true);
 
     const gameDataRequest = GetRequest('/api/now');
-    const data = await globalFetch<GameData>(gameDataRequest, {
-      isToastEnabled,
-    });
+    const data = await globalFetch<GameData>(gameDataRequest);
 
     if (!data || 'error' in data) {
       setIsError(true);
@@ -32,9 +30,7 @@ export const useFetchGameData = (isToastEnabled = false) => {
     }
 
     const gamePlayersRequest = GetRequest(`/api/game/${data.id}/players`);
-    const playersResult = await globalFetch<GamePlayers>(gamePlayersRequest, {
-      isToastEnabled,
-    });
+    const playersResult = await globalFetch<GamePlayers>(gamePlayersRequest);
 
     if (!playersResult || 'error' in playersResult) {
       setIsError(true);

@@ -17,6 +17,7 @@ async function globalFetch<T>(
       isToastEnabled &&
         toast.error('Unauthorised request! Redirecting to login...');
       setTimeout(() => (window.location.href = '/login'), 3000);
+      return null;
     }
 
     // Global default error handler

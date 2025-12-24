@@ -10,7 +10,7 @@ const MainPage = () => {
     data: canContinueGame,
     isLoading,
     isError: canStartNewGame,
-  } = useFetchGameData(false);
+  } = useFetchGameData();
   const { data: canLoadLastGameResults } = useFetchGameResultData(false);
 
   if (isLoading) {

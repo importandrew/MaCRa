@@ -8,8 +8,7 @@ import './Now.css';
 import ScroreInput from './ScoreInput';
 
 export default function Now() {
-  const { data, playersList, isLoading, isError, refetch } =
-    useFetchGameData(true);
+  const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
