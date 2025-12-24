@@ -26,10 +26,9 @@ func TestNow(t *testing.T) {
 				mockGame := NewMockGameEngine(t)
 				// CurrentGame calls Players() to find the player
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				// Now() calls Left, Opposite, Right, then CurrentWind for each, then Score, ID, Round
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().Opposite(1).Return(3)
 				mockGame.EXPECT().Right(1).Return(2)
+				mockGame.EXPECT().Opposite(1).Return(3)
+				mockGame.EXPECT().Left(1).Return(4)
 				// CurrentWind is called in order: playerID, leftID, oppID, rightID
 				mockGame.EXPECT().CurrentWind(1).Return(models.East)
 				mockGame.EXPECT().CurrentWind(4).Return(models.North)

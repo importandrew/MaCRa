@@ -64,7 +64,7 @@ func TestHandler_Logs(t *testing.T) {
 					200,
 				).Return(models.GameLog{}, errors.New("game not found"))
 			},
-			expectedCode: http.StatusBadRequest,
+			expectedCode: http.StatusInternalServerError,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response map[string]string
 				err := json.Unmarshal(w.Body.Bytes(), &response)

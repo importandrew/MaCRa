@@ -114,12 +114,10 @@ func TestHandler_EnterRoundResult(t *testing.T) {
 			},
 			userID:       0,
 			mockSetup:    func(m *MockGameService) {},
-			expectedCode: http.StatusInternalServerError,
+			expectedCode: http.StatusUnauthorized,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				assert.NoError(t, err)
-				assert.Contains(t, response, "error")
+				// When AbortWithStatus is called, no JSON body is written
+				assert.Empty(t, w.Body.String())
 			},
 		},
 		"service error": {

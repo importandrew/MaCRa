@@ -21,7 +21,7 @@ func TestNewGame(t *testing.T) {
 		"ok": {
 			playerIDs: []int{1, 2, 3, 4},
 			mockSetup: func(m *MockGameRepo, playerIDs []int) {
-				m.On("NewGame", mock.Anything, [4]int{1, 2, 3, 4}).Return(100, nil)
+				m.EXPECT().NewGame(mock.Anything, [4]int{1, 2, 3, 4}).Return(100, nil)
 			},
 			expectedErr: assert.NoError,
 			expectedID:  100,
@@ -29,7 +29,7 @@ func TestNewGame(t *testing.T) {
 		"repo error": {
 			playerIDs: []int{1, 2, 3, 4},
 			mockSetup: func(m *MockGameRepo, playerIDs []int) {
-				m.On("NewGame", mock.Anything, [4]int{1, 2, 3, 4}).Return(0, errors.New("database error"))
+				m.EXPECT().NewGame(mock.Anything, [4]int{1, 2, 3, 4}).Return(0, errors.New("database error"))
 			},
 			expectedErr: assert.Error,
 		},

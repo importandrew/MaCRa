@@ -51,7 +51,7 @@ func TestEnterRound(t *testing.T) {
 			mockSetup: func(m *MockGameRepo, gameID int) {
 				// Round will be advanced by EnterRoundResult, so expect round + 1
 				// Scores will also change, so we just check the essential fields
-				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Round > 0 &&
 						data.Outcome == models.Deal &&
 						data.WinnerID == 1 &&
@@ -87,7 +87,7 @@ func TestEnterRound(t *testing.T) {
 			mockSetup: func(m *MockGameRepo, gameID int) {
 				// Round will be advanced by EnterRoundResult, so expect round + 1
 				// Scores will also change, so we just check the essential fields
-				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Round > 0 &&
 						data.Outcome == models.Self &&
 						data.WinnerID == 1 &&
@@ -123,7 +123,7 @@ func TestEnterRound(t *testing.T) {
 			mockSetup: func(m *MockGameRepo, gameID int) {
 				// Round will be advanced by EnterRoundResult, so expect round + 1
 				// Scores will also change, so we just check the essential fields
-				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Round > 0 &&
 						data.Outcome == models.Draw &&
 						data.WinnerID == 0 &&
@@ -192,7 +192,7 @@ func TestEnterRound(t *testing.T) {
 				return 100
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
-				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.Anything).Return(errors.New("database error"))
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.Anything).Return(errors.New("database error"))
 			},
 			expectedErr: assert.Error,
 		},
@@ -246,11 +246,11 @@ func TestEnterRound_FinalRound_OK(t *testing.T) {
 	mockGame.EXPECT().ID().Return(100)
 	service.liveGames[100] = mockGame
 
-	mockGameRepo.On("SaveRoundOutcome", mock.Anything, 100, mock.MatchedBy(func(data models.RoundData) bool {
+	mockGameRepo.EXPECT().SaveRoundOutcome(mock.Anything, 100, mock.MatchedBy(func(data models.RoundData) bool {
 		return data.Round == 16 && data.Outcome == models.Deal
 	})).Return(nil)
 
-	mockGameRepo.On("Finalize", mock.Anything, mock.MatchedBy(func(data models.FinalGameData) bool {
+	mockGameRepo.EXPECT().Finalize(mock.Anything, mock.MatchedBy(func(data models.FinalGameData) bool {
 		return data.GameID == 100 &&
 			data.East.ID == 1 &&
 			data.South.ID == 2 &&
@@ -288,8 +288,8 @@ func TestEnterRound_FinalRound_Error(t *testing.T) {
 	mockGame.EXPECT().ID().Return(100)
 	service.liveGames[100] = mockGame
 
-	mockGameRepo.On("SaveRoundOutcome", mock.Anything, 100, mock.Anything).Return(nil)
-	mockGameRepo.On("Finalize", mock.Anything, mock.Anything).Return(errors.New("finalization error"))
+	mockGameRepo.EXPECT().SaveRoundOutcome(mock.Anything, 100, mock.Anything).Return(nil)
+	mockGameRepo.EXPECT().Finalize(mock.Anything, mock.Anything).Return(errors.New("finalization error"))
 
 	ctx := context.Background()
 	err := service.EnterRound(ctx, 1, "deal-in", 8, 1, 2)

@@ -20,10 +20,10 @@ func TestLoadLiveGames(t *testing.T) {
 	}{
 		"ok single game": {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.On("LiveGames", mock.Anything).Return([]int{100}, nil)
+				mg.EXPECT().LiveGames(mock.Anything).Return([]int{100}, nil)
 
 				// Setup loadGame mocks
-				mg.On("Players", mock.Anything, 100).Return(
+				mg.EXPECT().Players(mock.Anything, 100).Return(
 					models.StartingPlayers{
 						East:  1,
 						South: 2,
@@ -32,7 +32,7 @@ func TestLoadLiveGames(t *testing.T) {
 					},
 					nil,
 				)
-				mg.On("GameLog", mock.Anything, 100).Return([]models.RoundLog{}, nil)
+				mg.EXPECT().GameLog(mock.Anything, 100).Return([]models.RoundLog{}, nil)
 			},
 			expectedErr: assert.NoError,
 			verifyGames: func(t *testing.T, s *Service) {
@@ -44,10 +44,10 @@ func TestLoadLiveGames(t *testing.T) {
 		},
 		"ok multiple games": {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.On("LiveGames", mock.Anything).Return([]int{100, 200}, nil)
+				mg.EXPECT().LiveGames(mock.Anything).Return([]int{100, 200}, nil)
 
 				// Game 100
-				mg.On("Players", mock.Anything, 100).Return(
+				mg.EXPECT().Players(mock.Anything, 100).Return(
 					models.StartingPlayers{
 						East:  1,
 						South: 2,
@@ -56,10 +56,10 @@ func TestLoadLiveGames(t *testing.T) {
 					},
 					nil,
 				)
-				mg.On("GameLog", mock.Anything, 100).Return([]models.RoundLog{}, nil)
+				mg.EXPECT().GameLog(mock.Anything, 100).Return([]models.RoundLog{}, nil)
 
 				// Game 200
-				mg.On("Players", mock.Anything, 200).Return(
+				mg.EXPECT().Players(mock.Anything, 200).Return(
 					models.StartingPlayers{
 						East:  5,
 						South: 6,
@@ -68,7 +68,7 @@ func TestLoadLiveGames(t *testing.T) {
 					},
 					nil,
 				)
-				mg.On("GameLog", mock.Anything, 200).Return([]models.RoundLog{}, nil)
+				mg.EXPECT().GameLog(mock.Anything, 200).Return([]models.RoundLog{}, nil)
 			},
 			expectedErr: assert.NoError,
 			verifyGames: func(t *testing.T, s *Service) {
@@ -83,9 +83,9 @@ func TestLoadLiveGames(t *testing.T) {
 		},
 		"ok game with round logs": {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.On("LiveGames", mock.Anything).Return([]int{100}, nil)
+				mg.EXPECT().LiveGames(mock.Anything).Return([]int{100}, nil)
 
-				mg.On("Players", mock.Anything, 100).Return(
+				mg.EXPECT().Players(mock.Anything, 100).Return(
 					models.StartingPlayers{
 						East:  1,
 						South: 2,
@@ -94,7 +94,7 @@ func TestLoadLiveGames(t *testing.T) {
 					},
 					nil,
 				)
-				mg.On("GameLog", mock.Anything, 100).Return(
+				mg.EXPECT().GameLog(mock.Anything, 100).Return(
 					[]models.RoundLog{
 						{
 							ID:            1,
@@ -121,14 +121,14 @@ func TestLoadLiveGames(t *testing.T) {
 		},
 		"live games error": {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.On("LiveGames", mock.Anything).Return(nil, errors.New("database error"))
+				mg.EXPECT().LiveGames(mock.Anything).Return(nil, errors.New("database error"))
 			},
 			expectedErr: assert.Error,
 		},
 		"players error": {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.On("LiveGames", mock.Anything).Return([]int{100}, nil)
-				mg.On("Players", mock.Anything, 100).Return(
+				mg.EXPECT().LiveGames(mock.Anything).Return([]int{100}, nil)
+				mg.EXPECT().Players(mock.Anything, 100).Return(
 					models.StartingPlayers{},
 					errors.New("database error"),
 				)
@@ -137,8 +137,8 @@ func TestLoadLiveGames(t *testing.T) {
 		},
 		"game log error": {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.On("LiveGames", mock.Anything).Return([]int{100}, nil)
-				mg.On("Players", mock.Anything, 100).Return(
+				mg.EXPECT().LiveGames(mock.Anything).Return([]int{100}, nil)
+				mg.EXPECT().Players(mock.Anything, 100).Return(
 					models.StartingPlayers{
 						East:  1,
 						South: 2,
@@ -147,13 +147,13 @@ func TestLoadLiveGames(t *testing.T) {
 					},
 					nil,
 				)
-				mg.On("GameLog", mock.Anything, 100).Return(nil, errors.New("database error"))
+				mg.EXPECT().GameLog(mock.Anything, 100).Return(nil, errors.New("database error"))
 			},
 			expectedErr: assert.Error,
 		},
 		"empty live games": {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.On("LiveGames", mock.Anything).Return([]int{}, nil)
+				mg.EXPECT().LiveGames(mock.Anything).Return([]int{}, nil)
 			},
 			expectedErr: assert.NoError,
 			verifyGames: func(t *testing.T, s *Service) {
@@ -194,7 +194,7 @@ func TestLoadGame_WithDifferentOutcomes(t *testing.T) {
 	mockPlayerRepo := NewMockPlayerRepo(t)
 	service := NewService(mockGameRepo, mockPlayerRepo)
 
-	mockGameRepo.On("Players", mock.Anything, 100).Return(
+	mockGameRepo.EXPECT().Players(mock.Anything, 100).Return(
 		models.StartingPlayers{
 			East:  1,
 			South: 2,
@@ -205,7 +205,7 @@ func TestLoadGame_WithDifferentOutcomes(t *testing.T) {
 	)
 
 	// Test loading game with different outcome types
-	mockGameRepo.On("GameLog", mock.Anything, 100).Return(
+	mockGameRepo.EXPECT().GameLog(mock.Anything, 100).Return(
 		[]models.RoundLog{
 			{
 				ID:             1,
@@ -259,7 +259,7 @@ func TestLoadGame_InvalidLogError(t *testing.T) {
 	mockPlayerRepo := NewMockPlayerRepo(t)
 	service := NewService(mockGameRepo, mockPlayerRepo)
 
-	mockGameRepo.On("Players", mock.Anything, 100).Return(
+	mockGameRepo.EXPECT().Players(mock.Anything, 100).Return(
 		models.StartingPlayers{
 			East:  1,
 			South: 2,
@@ -270,7 +270,7 @@ func TestLoadGame_InvalidLogError(t *testing.T) {
 	)
 
 	// Invalid log with hand value < 8
-	mockGameRepo.On("GameLog", mock.Anything, 100).Return(
+	mockGameRepo.EXPECT().GameLog(mock.Anything, 100).Return(
 		[]models.RoundLog{
 			{
 				ID:            1,

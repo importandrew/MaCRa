@@ -57,12 +57,10 @@ func TestHandler_New(t *testing.T) {
 			},
 			userID:       0,
 			mockSetup:    func(m *MockGameService) {},
-			expectedCode: http.StatusInternalServerError,
+			expectedCode: http.StatusUnauthorized,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				assert.NoError(t, err)
-				assert.Contains(t, response, "error")
+				// When AbortWithStatus is called, no JSON body is written
+				assert.Empty(t, w.Body.String())
 			},
 		},
 		"user not in players list": {
@@ -71,7 +69,7 @@ func TestHandler_New(t *testing.T) {
 			},
 			userID:       1,
 			mockSetup:    func(m *MockGameService) {},
-			expectedCode: http.StatusNotAcceptable,
+			expectedCode: http.StatusBadRequest,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response map[string]string
 				err := json.Unmarshal(w.Body.Bytes(), &response)

@@ -43,7 +43,7 @@ func TestFalseMahjong(t *testing.T) {
 				return 100
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
-				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Outcome == models.FalseMahjong &&
 						data.LoserID == 1 &&
 						data.Value == 30 &&
@@ -73,7 +73,7 @@ func TestFalseMahjong(t *testing.T) {
 				return 100
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
-				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Outcome == models.FalseMahjong &&
 						data.LoserID == 2 &&
 						data.Value == 60 &&
@@ -133,7 +133,7 @@ func TestFalseMahjong(t *testing.T) {
 				return 100
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
-				m.On("SaveRoundOutcome", mock.Anything, gameID, mock.Anything).Return(errors.New("database error"))
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.Anything).Return(errors.New("database error"))
 			},
 			expectedErr: assert.Error,
 		},
