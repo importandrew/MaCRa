@@ -7,8 +7,7 @@ import (
 )
 
 type GameService interface {
-	FalseMahjong(ctx context.Context, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error)
-	Penalty(ctx context.Context, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error)
+	Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error)
 	EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value, winnerID, loserID int) (models.GameNow, error)
 	Now(ctx context.Context, playerID int) (models.GameNow, error)
 	LastGameResult(ctx context.Context, playerID int) (models.GameResult, error)

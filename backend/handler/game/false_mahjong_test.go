@@ -34,8 +34,9 @@ func TestHandler_FalseMahjong(t *testing.T) {
 				ForceNextRound: false,
 			},
 			mockSetup: func(m *MockGameService) {
-				m.EXPECT().FalseMahjong(
+				m.EXPECT().Penalty(
 					mock.Anything,
+					models.FalseMahjong,
 					1,
 					2,
 					30,
@@ -64,8 +65,9 @@ func TestHandler_FalseMahjong(t *testing.T) {
 				ForceNextRound: true,
 			},
 			mockSetup: func(m *MockGameService) {
-				m.EXPECT().FalseMahjong(
+				m.EXPECT().Penalty(
 					mock.Anything,
+					models.FalseMahjong,
 					1,
 					3,
 					60,
@@ -122,8 +124,9 @@ func TestHandler_FalseMahjong(t *testing.T) {
 				ForceNextRound: false,
 			},
 			mockSetup: func(m *MockGameService) {
-				m.EXPECT().FalseMahjong(
+				m.EXPECT().Penalty(
 					mock.Anything,
+					models.FalseMahjong,
 					1,
 					2,
 					30,

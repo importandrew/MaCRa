@@ -305,7 +305,7 @@ func TestPenalty(t *testing.T) {
 			testCase.mockSetup(mockGameRepo, mockPlayerRepo, gameID)
 
 			ctx := context.Background()
-			now, err := service.Penalty(ctx, testCase.playerID, testCase.penalizedID, testCase.value, testCase.forceNextRound)
+			now, err := service.Penalty(ctx, models.Penalty, testCase.playerID, testCase.penalizedID, testCase.value, testCase.forceNextRound)
 
 			testCase.expectedErr(t, err)
 			if err != nil {

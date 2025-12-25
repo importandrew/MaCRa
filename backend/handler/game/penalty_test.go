@@ -36,6 +36,7 @@ func TestHandler_Penalty(t *testing.T) {
 			mockSetup: func(m *MockGameService) {
 				m.EXPECT().Penalty(
 					mock.Anything,
+					models.Penalty,
 					1,
 					2,
 					10,
@@ -66,6 +67,7 @@ func TestHandler_Penalty(t *testing.T) {
 			mockSetup: func(m *MockGameService) {
 				m.EXPECT().Penalty(
 					mock.Anything,
+					models.Penalty,
 					1,
 					3,
 					20,
@@ -124,6 +126,7 @@ func TestHandler_Penalty(t *testing.T) {
 			mockSetup: func(m *MockGameService) {
 				m.EXPECT().Penalty(
 					mock.Anything,
+					models.Penalty,
 					1,
 					2,
 					10,

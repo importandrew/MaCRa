@@ -2,17 +2,25 @@ package game
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) Penalty(ctx context.Context, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error) {
+func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error) {
 	game, err := s.CurrentGame(playerID)
 	if err != nil {
 		return models.GameNow{}, err
 	}
 
-	err = game.Penalty(penalizedID, value, forceNextRound)
+	switch penaltyType {
+	case models.Penalty:
+		err = game.Penalty(penalizedID, value, forceNextRound)
+	case models.FalseMahjong:
+		err = game.FalseMahjong(penalizedID, value, forceNextRound)
+	default:
+		return models.GameNow{}, fmt.Errorf("unexpected penalty type: %v", penaltyType)
+	}
 	if err != nil {
 		return models.GameNow{}, err
 	}
@@ -22,7 +30,7 @@ func (s *Service) Penalty(ctx context.Context, playerID, penalizedID, value int,
 
 	roundOutcome := models.RoundData{
 		Round:           game.Round(),
-		Outcome:         models.Penalty,
+		Outcome:         penaltyType,
 		LoserID:         penalizedID,
 		Value:           value,
 		EastStartScore:  score[players[models.East]].GP,

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/importandrew/MaCRa/handler/authmw"
 	"github.com/importandrew/MaCRa/handler/httperr"
+	"github.com/importandrew/MaCRa/models"
 )
 
 type FalseMahjongRequest struct {
@@ -27,7 +28,7 @@ func (h Handler) FalseMahjong(c *gin.Context) {
 		return
 	}
 
-	now, err := h.game.FalseMahjong(c.Request.Context(), userID, req.LoserID, req.Value, req.ForceNextRound)
+	now, err := h.game.Penalty(c.Request.Context(), models.FalseMahjong, userID, req.LoserID, req.Value, req.ForceNextRound)
 	if err != nil {
 		httperr.Error(c, err)
 		return
