@@ -17,6 +17,7 @@ type GameService interface {
 	Logs(ctx context.Context, gameID int) (models.GameLog, error)
 	NewGame(ctx context.Context, playerIDs []int) (gameID int, err error)
 	Players(ctx context.Context, gameID int) (models.GamePlayers, error)
+	HUD(ctx context.Context, gameID int, linger int) (models.GameHUD, error)
 }
 
 type PlayerService interface {

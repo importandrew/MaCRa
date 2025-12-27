@@ -615,6 +615,72 @@ func (_c *MockGameRepo_SetStatus_Call) RunAndReturn(run func(ctx context.Context
 	return _c
 }
 
+// Status provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) Status(ctx context.Context, gameID int) (models.GameStatus, error) {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Status")
+	}
+
+	var r0 models.GameStatus
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.GameStatus, error)); ok {
+		return returnFunc(ctx, gameID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.GameStatus); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Get(0).(models.GameStatus)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, gameID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_Status_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Status'
+type MockGameRepo_Status_Call struct {
+	*mock.Call
+}
+
+// Status is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) Status(ctx interface{}, gameID interface{}) *MockGameRepo_Status_Call {
+	return &MockGameRepo_Status_Call{Call: _e.mock.On("Status", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_Status_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_Status_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_Status_Call) Return(gameStatus models.GameStatus, err error) *MockGameRepo_Status_Call {
+	_c.Call.Return(gameStatus, err)
+	return _c
+}
+
+func (_c *MockGameRepo_Status_Call) RunAndReturn(run func(ctx context.Context, gameID int) (models.GameStatus, error)) *MockGameRepo_Status_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockPlayerRepo creates a new instance of MockPlayerRepo. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockPlayerRepo(t interface {
@@ -1390,6 +1456,103 @@ func (_c *MockGameEngine_Round_Call) Return(n int) *MockGameEngine_Round_Call {
 }
 
 func (_c *MockGameEngine_Round_Call) RunAndReturn(run func() int) *MockGameEngine_Round_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RoundStartPlayers provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) RoundStartPlayers() [4]int {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for RoundStartPlayers")
+	}
+
+	var r0 [4]int
+	if returnFunc, ok := ret.Get(0).(func() [4]int); ok {
+		r0 = returnFunc()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([4]int)
+		}
+	}
+	return r0
+}
+
+// MockGameEngine_RoundStartPlayers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RoundStartPlayers'
+type MockGameEngine_RoundStartPlayers_Call struct {
+	*mock.Call
+}
+
+// RoundStartPlayers is a helper method to define mock.On call
+func (_e *MockGameEngine_Expecter) RoundStartPlayers() *MockGameEngine_RoundStartPlayers_Call {
+	return &MockGameEngine_RoundStartPlayers_Call{Call: _e.mock.On("RoundStartPlayers")}
+}
+
+func (_c *MockGameEngine_RoundStartPlayers_Call) Run(run func()) *MockGameEngine_RoundStartPlayers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_RoundStartPlayers_Call) Return(ints [4]int) *MockGameEngine_RoundStartPlayers_Call {
+	_c.Call.Return(ints)
+	return _c
+}
+
+func (_c *MockGameEngine_RoundStartPlayers_Call) RunAndReturn(run func() [4]int) *MockGameEngine_RoundStartPlayers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RoundStartWind provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) RoundStartWind(id int) models.Wind {
+	ret := _mock.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RoundStartWind")
+	}
+
+	var r0 models.Wind
+	if returnFunc, ok := ret.Get(0).(func(int) models.Wind); ok {
+		r0 = returnFunc(id)
+	} else {
+		r0 = ret.Get(0).(models.Wind)
+	}
+	return r0
+}
+
+// MockGameEngine_RoundStartWind_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RoundStartWind'
+type MockGameEngine_RoundStartWind_Call struct {
+	*mock.Call
+}
+
+// RoundStartWind is a helper method to define mock.On call
+//   - id int
+func (_e *MockGameEngine_Expecter) RoundStartWind(id interface{}) *MockGameEngine_RoundStartWind_Call {
+	return &MockGameEngine_RoundStartWind_Call{Call: _e.mock.On("RoundStartWind", id)}
+}
+
+func (_c *MockGameEngine_RoundStartWind_Call) Run(run func(id int)) *MockGameEngine_RoundStartWind_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_RoundStartWind_Call) Return(wind models.Wind) *MockGameEngine_RoundStartWind_Call {
+	_c.Call.Return(wind)
+	return _c
+}
+
+func (_c *MockGameEngine_RoundStartWind_Call) RunAndReturn(run func(id int) models.Wind) *MockGameEngine_RoundStartWind_Call {
 	_c.Call.Return(run)
 	return _c
 }

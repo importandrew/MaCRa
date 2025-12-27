@@ -35,6 +35,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	{
 		publicAPI.GET("/game/:id/players", h.game.Players)
 		publicAPI.GET("/game/:id/logs", h.game.Logs)
+		publicAPI.GET("/game/:id/hud", h.game.HUD)
 
 		publicAPI.GET("/players/list", h.player.List)
 	}

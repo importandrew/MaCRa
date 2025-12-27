@@ -38,10 +38,30 @@ func (s *Seating) Wind(id int) models.Wind {
 	}))
 }
 
+func (s *Seating) Player(wind models.Wind) int {
+	return s[wind]
+}
+
 func (g *Game) CurrentWind(id int) models.Wind {
 	return g.currentSeating.Wind(id)
 }
 
 func (g *Game) StartWind(id int) models.Wind {
 	return g.startSeating.Wind(id)
+}
+
+func (g *Game) RoundStartWind(id int) models.Wind {
+	return g.roundSeating.Wind(id)
+}
+
+func (g *Game) PlayerByStartingSeat(seat models.Wind) int {
+	return g.startSeating[seat]
+}
+
+func (g *Game) PlayerBySeatInRound(round int, seat models.Wind) int {
+	return g.startSeating.Player(models.RoundSeats[round][seat])
+}
+
+func (g *Game) PlayerByWindInRound(round int, wind models.Wind) int {
+	return g.startSeating.Player(models.RoundWinds[round][wind])
 }

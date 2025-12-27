@@ -4,6 +4,10 @@ func (g *Game) Players() [4]int {
 	return g.startSeating
 }
 
+func (g *Game) RoundStartPlayers() [4]int {
+	return g.roundSeating
+}
+
 func (g *Game) Opposite(id int) int {
 	return g.currentSeating[(g.currentSeating.Wind(id)+2)%4]
 }

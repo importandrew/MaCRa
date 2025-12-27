@@ -13,17 +13,14 @@ func (g *Game) NextRound() error {
 	}
 	switch g.round {
 	case 4:
-		g.currentSeating = g.startSeating
-		g.currentSeating.ApplySouthNorthSeating()
+		g.roundSeating.ApplySouthNorthSeating()
+		g.currentSeating = g.roundSeating
 	case 8:
-		g.currentSeating = g.startSeating
-		g.currentSeating.ApplySouthNorthSeating()
-		g.currentSeating.ApplyWestSeating()
+		g.roundSeating.ApplyWestSeating()
+		g.currentSeating = g.roundSeating
 	case 12:
-		g.currentSeating = g.startSeating
-		g.currentSeating.ApplySouthNorthSeating()
-		g.currentSeating.ApplyWestSeating()
-		g.currentSeating.ApplySouthNorthSeating()
+		g.roundSeating.ApplySouthNorthSeating()
+		g.currentSeating = g.roundSeating
 	case 16:
 		return g.End()
 	default:

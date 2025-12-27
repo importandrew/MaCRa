@@ -7,6 +7,7 @@ import (
 )
 
 type GameRepo interface {
+	Status(ctx context.Context, gameID int) (models.GameStatus, error)
 	SetStatus(ctx context.Context, gameID int, status models.GameStatus) error
 	LiveGames(ctx context.Context) ([]int, error)
 	Players(ctx context.Context, gameID int) (models.StartingPlayers, error)
@@ -24,21 +25,27 @@ type PlayerRepo interface {
 
 type GameEngine interface {
 	ID() int
-	Round() int
 	Status() models.GameStatus
 	IsLive() bool
-	CurrentWind(id int) models.Wind
+	Round() int
 	End() error
+	NextRound() error
+	Score() models.GameScore
+
 	EnterRoundResult(hand int, loser int, winner int) error
 	FalseMahjong(loser int, value int, forceNextRound bool) error
-	Left(id int) int
-	NextRound() error
-	Opposite(id int) int
 	Penalty(loser int, value int, forceNextRound bool) error
-	Players() [4]int
+
+	Left(id int) int
 	Right(id int) int
+	Opposite(id int) int
+
 	StartWind(id int) models.Wind
-	Score() models.GameScore
+	CurrentWind(id int) models.Wind
+	RoundStartWind(id int) models.Wind
+
+	Players() [4]int
+	RoundStartPlayers() [4]int
 }
 
 type Service struct {

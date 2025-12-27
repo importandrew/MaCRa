@@ -30,3 +30,18 @@ type RoundLog struct {
 	NorthScore     int       `json:"north_score"`
 	CreatedAt      time.Time `json:"created_at"`
 }
+
+func (l RoundLog) Score(wind Wind) int {
+	switch wind {
+	case East:
+		return l.EastScore
+	case South:
+		return l.SouthScore
+	case West:
+		return l.WestScore
+	case North:
+		return l.NorthScore
+	default:
+		return -1234
+	}
+}

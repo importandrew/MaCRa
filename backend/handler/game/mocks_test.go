@@ -251,6 +251,78 @@ func (_c *MockGameService_GameResult_Call) RunAndReturn(run func(ctx context.Con
 	return _c
 }
 
+// HUD provides a mock function for the type MockGameService
+func (_mock *MockGameService) HUD(ctx context.Context, gameID int, linger int) (models.GameHUD, error) {
+	ret := _mock.Called(ctx, gameID, linger)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HUD")
+	}
+
+	var r0 models.GameHUD
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (models.GameHUD, error)); ok {
+		return returnFunc(ctx, gameID, linger)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) models.GameHUD); ok {
+		r0 = returnFunc(ctx, gameID, linger)
+	} else {
+		r0 = ret.Get(0).(models.GameHUD)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, gameID, linger)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameService_HUD_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HUD'
+type MockGameService_HUD_Call struct {
+	*mock.Call
+}
+
+// HUD is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+//   - linger int
+func (_e *MockGameService_Expecter) HUD(ctx interface{}, gameID interface{}, linger interface{}) *MockGameService_HUD_Call {
+	return &MockGameService_HUD_Call{Call: _e.mock.On("HUD", ctx, gameID, linger)}
+}
+
+func (_c *MockGameService_HUD_Call) Run(run func(ctx context.Context, gameID int, linger int)) *MockGameService_HUD_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameService_HUD_Call) Return(gameHUD models.GameHUD, err error) *MockGameService_HUD_Call {
+	_c.Call.Return(gameHUD, err)
+	return _c
+}
+
+func (_c *MockGameService_HUD_Call) RunAndReturn(run func(ctx context.Context, gameID int, linger int) (models.GameHUD, error)) *MockGameService_HUD_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // LastGameResult provides a mock function for the type MockGameService
 func (_mock *MockGameService) LastGameResult(ctx context.Context, playerID int) (models.GameResult, error) {
 	ret := _mock.Called(ctx, playerID)

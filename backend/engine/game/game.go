@@ -11,6 +11,7 @@ type Game struct {
 	id             int
 	startSeating   Seating
 	currentSeating Seating
+	roundSeating   Seating
 	status         models.GameStatus
 	round          int
 	rules          Rules
@@ -30,6 +31,7 @@ func NewGame(cfg Config) *Game {
 		id:             cfg.ID,
 		startSeating:   cfg.Players,
 		currentSeating: cfg.Players,
+		roundSeating:   cfg.Players,
 		status:         models.GameLive,
 		round:          1,
 		rules:          cfg.Rules,
