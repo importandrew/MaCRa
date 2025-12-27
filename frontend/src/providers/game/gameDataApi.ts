@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { GetRequest, globalFetch } from '../../components/Request';
 import { GameData, GamePlayers, PlayerOrder } from '../../models/GameData';
-import { GameResult, GameRoundLogs } from '../../models/GameResult';
+import {
+  GameResult,
+  GameRoundLogs,
+  PlayerStatus,
+} from '../../models/GameResult';
 
 export const useFetchGameData = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -107,4 +111,25 @@ export const useFetchGameLogsData = (gameId: number | null) => {
   }, [fetchData]);
 
   return { data, isError, isLoading, fetchData };
+};
+
+export const useFetchPlayerStatus = () => {
+  const [data, setData] = useState<PlayerStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
+    const playerStatusRequest = GetRequest('/api/main');
+    const data = await globalFetch<PlayerStatus>(playerStatusRequest);
+
+    setData(data);
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, isLoading, fetchData };
 };

@@ -14,8 +14,7 @@ async function globalFetch<T>(
     if (response.status === 401) {
       await fetchLogoutApi();
       localStorage.removeItem(AUTH_USER_DATA);
-      isToastEnabled &&
-        toast.error('Unauthorised request! Redirecting to login...');
+      toast.error('Unauthorised request! Redirecting to login...');
       setTimeout(() => (window.location.href = '/login'), 3000);
       return null;
     }

@@ -4,8 +4,8 @@ import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import PlayerMenu from './Menu/PlayerMenu';
 import TableMenu from './Menu/TableMenu';
-import './Now.css';
 import ScroreInput from './ScoreInput';
+import './Now.css';
 
 export default function Now() {
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();

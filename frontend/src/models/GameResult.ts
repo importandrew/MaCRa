@@ -42,3 +42,8 @@ export interface PreparedRoundLog {
   result: number | null;
   score_changes: [number, number, number, number] | null;
 }
+
+export interface PlayerStatus {
+  has_last: boolean;
+  has_current: boolean;
+}

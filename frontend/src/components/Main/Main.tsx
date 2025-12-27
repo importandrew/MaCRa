@@ -1,17 +1,9 @@
 import { Spinner } from '@heroui/react';
-import {
-  useFetchGameData,
-  useFetchGameResultData,
-} from '../../providers/game/gameDataApi';
+import { useFetchPlayerStatus } from '../../providers/game/gameDataApi';
 import MainButton from './Button';
 
 const MainPage = () => {
-  const {
-    data: canContinueGame,
-    isLoading,
-    isError: canStartNewGame,
-  } = useFetchGameData();
-  const { data: canLoadLastGameResults } = useFetchGameResultData(false);
+  const { data, isLoading } = useFetchPlayerStatus();
 
   if (isLoading) {
     return (
@@ -27,9 +19,9 @@ const MainPage = () => {
         Welcome to MaCRa
       </div>
       <div className="flex flex-col w-screen">
-        {canContinueGame && <MainButton text="Current game" link="/now" />}
-        {canLoadLastGameResults && <MainButton text="Last game" link="/last" />}
-        {canStartNewGame && <MainButton text="New game" link="/new" />}
+        {data?.has_current && <MainButton text="Current game" link="/now" />}
+        {data?.has_last && <MainButton text="Last game" link="/last" />}
+        {!data?.has_current && <MainButton text="New game" link="/new" />}
       </div>
     </div>
   );
