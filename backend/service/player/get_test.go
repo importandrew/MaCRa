@@ -64,13 +64,11 @@ func TestGet(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockRepo.AssertExpectations(t)
 				return
 			}
 
 			assert.Equal(t, testCase.expectedPlayer.ID, player.ID)
 			assert.Equal(t, testCase.expectedPlayer.Name, player.Name)
-			mockRepo.AssertExpectations(t)
 		})
 	}
 }

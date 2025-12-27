@@ -48,7 +48,7 @@ export default function ScroreInput({
     });
     const data = await globalFetch<GameData>(roundResult);
 
-    if (data?.round?.num == 16) {
+    if (data?.status === 'ended' || data?.status === 'aborted') {
       navigate('/last');
       return;
     }

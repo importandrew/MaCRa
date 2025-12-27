@@ -141,16 +141,12 @@ func TestLogs(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockGameRepo.AssertExpectations(t)
-				mockPlayerRepo.AssertExpectations(t)
 				return
 			}
 
 			if testCase.checkLog != nil {
 				testCase.checkLog(t, log)
 			}
-			mockGameRepo.AssertExpectations(t)
-			mockPlayerRepo.AssertExpectations(t)
 		})
 	}
 }

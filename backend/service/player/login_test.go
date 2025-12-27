@@ -29,11 +29,11 @@ func TestLogin(t *testing.T) {
 			email:    "alice@example.com",
 			password: validPassword,
 			mockSetup: func(m *MockPlayerRepo, email, password string) {
-				m.On("GetPassByEmail", mock.Anything, email).Return(
+				m.EXPECT().GetPassByEmail(mock.Anything, email).Return(
 					string(validHash),
 					nil,
 				)
-				m.On("GetByEmail", mock.Anything, email).Return(
+				m.EXPECT().GetByEmail(mock.Anything, email).Return(
 					models.Player{ID: 1, Name: "Alice"},
 					nil,
 				)
@@ -48,7 +48,7 @@ func TestLogin(t *testing.T) {
 			email:    "alice@example.com",
 			password: wrongPassword,
 			mockSetup: func(m *MockPlayerRepo, email, password string) {
-				m.On("GetPassByEmail", mock.Anything, email).Return(
+				m.EXPECT().GetPassByEmail(mock.Anything, email).Return(
 					string(validHash),
 					nil,
 				)
@@ -59,7 +59,7 @@ func TestLogin(t *testing.T) {
 			email:    "nonexistent@example.com",
 			password: validPassword,
 			mockSetup: func(m *MockPlayerRepo, email, password string) {
-				m.On("GetPassByEmail", mock.Anything, email).Return(
+				m.EXPECT().GetPassByEmail(mock.Anything, email).Return(
 					"",
 					models.ErrPlayerNotFound,
 				)
@@ -70,7 +70,7 @@ func TestLogin(t *testing.T) {
 			email:    "error@example.com",
 			password: validPassword,
 			mockSetup: func(m *MockPlayerRepo, email, password string) {
-				m.On("GetPassByEmail", mock.Anything, email).Return(
+				m.EXPECT().GetPassByEmail(mock.Anything, email).Return(
 					"",
 					errors.New("database error"),
 				)
@@ -81,11 +81,11 @@ func TestLogin(t *testing.T) {
 			email:    "alice@example.com",
 			password: validPassword,
 			mockSetup: func(m *MockPlayerRepo, email, password string) {
-				m.On("GetPassByEmail", mock.Anything, email).Return(
+				m.EXPECT().GetPassByEmail(mock.Anything, email).Return(
 					string(validHash),
 					nil,
 				)
-				m.On("GetByEmail", mock.Anything, email).Return(
+				m.EXPECT().GetByEmail(mock.Anything, email).Return(
 					models.Player{},
 					errors.New("database error"),
 				)
@@ -106,17 +106,15 @@ func TestLogin(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockRepo.AssertExpectations(t)
 				// Verify that bad credentials error is returned for wrong password
 				if testCase.password == wrongPassword {
-					assert.Equal(t, errBadCredentials, err)
+					assert.Equal(t, models.ErrBadCredentials, err)
 				}
 				return
 			}
 
 			assert.Equal(t, testCase.expectedPlayer.ID, player.ID)
 			assert.Equal(t, testCase.expectedPlayer.Name, player.Name)
-			mockRepo.AssertExpectations(t)
 		})
 	}
 }

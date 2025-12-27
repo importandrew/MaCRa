@@ -13,7 +13,9 @@ export const useFetchGameData = () => {
     setIsLoading(true);
 
     const gameDataRequest = GetRequest('/api/now');
-    const data = await globalFetch<GameData>(gameDataRequest);
+    const data = await globalFetch<GameData>(gameDataRequest, {
+      isToastEnabled: false,
+    });
 
     if (!data || 'error' in data) {
       setIsError(true);

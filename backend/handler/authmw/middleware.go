@@ -13,12 +13,6 @@ const (
 	userCtxKey = "userID"
 )
 
-var (
-	ErrNotFound    = errors.New("user id not found in context")
-	ErrInvalidType = errors.New("user id in context is of invalid type")
-	ErrEmptyToken  = errors.New("token is empty")
-)
-
 type Auth struct {
 	jwt []byte
 }
@@ -30,13 +24,17 @@ func NewAuth(jwt []byte) Auth {
 func (a Auth) IdentifyUser(c *gin.Context) {
 	cookie, err := c.Cookie(TokenKey)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusUnauthorized, ErrEmptyToken)
+		if errors.Is(err, http.ErrNoCookie) {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		httperr.Error(c, err)
 		return
 	}
 
 	userID, err := identifyUserByToken(cookie, a.jwt)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusUnauthorized, err)
+		httperr.ErrorWithCode(c, http.StatusUnauthorized, err)
 		return
 	}
 
@@ -46,12 +44,12 @@ func (a Auth) IdentifyUser(c *gin.Context) {
 func GetUserIDFromContext(c *gin.Context) (int, error) {
 	value, ok := c.Get(userCtxKey)
 	if !ok {
-		return 0, ErrNotFound
+		return 0, errors.New("user id not found in context")
 	}
 
 	id, ok := value.(int)
 	if !ok {
-		return 0, ErrInvalidType
+		return 0, errors.New("userID should be int")
 	}
 
 	return id, nil

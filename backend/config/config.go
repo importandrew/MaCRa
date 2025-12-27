@@ -2,8 +2,9 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 type Config struct {
@@ -34,7 +35,7 @@ func Read(path string) (Config, error) {
 
 func (c Config) Validate() error {
 	if c.JWTKey == "" {
-		return errors.New("jwt key is empty")
+		return models.ErrJWTKeyEmpty
 	}
 
 	return nil

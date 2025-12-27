@@ -31,8 +31,8 @@ func TestHandler_Logs(t *testing.T) {
 				).Return(models.GameLog{
 					ID: 100,
 					RoundLogs: []models.RoundLog{
-						{Round: 1, Outcome: models.Outcome("draw")},
-						{Round: 2, Outcome: models.Outcome("deal-in")},
+						{Round: 1, Outcome: models.Draw},
+						{Round: 2, Outcome: models.Deal},
 					},
 				}, nil)
 			},
@@ -64,7 +64,7 @@ func TestHandler_Logs(t *testing.T) {
 					200,
 				).Return(models.GameLog{}, errors.New("game not found"))
 			},
-			expectedCode: http.StatusBadRequest,
+			expectedCode: http.StatusInternalServerError,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response map[string]string
 				err := json.Unmarshal(w.Body.Bytes(), &response)

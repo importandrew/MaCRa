@@ -28,14 +28,14 @@ func TestAbort(t *testing.T) {
 				return 100
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
-				m.On("SetStatus", mock.Anything, gameID, models.GameAborted).Return(nil)
+				m.EXPECT().SetStatus(mock.Anything, gameID, models.GameAborted).Return(nil)
 			},
 			expectedErr: assert.NoError,
 			verifyGame: func(t *testing.T, s *Service, gameID int) {
 				// Verify game is removed from liveGames
 				_, err := s.GetLiveGame(gameID)
 				assert.Error(t, err)
-				assert.Equal(t, errGameNotFound, err)
+				assert.Equal(t, models.ErrGameNotLive, err)
 			},
 		},
 		"repo error": {
@@ -46,7 +46,7 @@ func TestAbort(t *testing.T) {
 				return 100
 			},
 			mockSetup: func(m *MockGameRepo, gameID int) {
-				m.On("SetStatus", mock.Anything, gameID, models.GameAborted).Return(errors.New("database error"))
+				m.EXPECT().SetStatus(mock.Anything, gameID, models.GameAborted).Return(errors.New("database error"))
 			},
 			expectedErr: assert.Error,
 			verifyGame: func(t *testing.T, s *Service, gameID int) {
@@ -88,7 +88,6 @@ func TestAbort(t *testing.T) {
 			if testCase.verifyGame != nil {
 				testCase.verifyGame(t, service, gameID)
 			}
-			mockGameRepo.AssertExpectations(t)
 		})
 	}
 }

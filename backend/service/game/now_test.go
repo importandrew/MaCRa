@@ -26,10 +26,9 @@ func TestNow(t *testing.T) {
 				mockGame := NewMockGameEngine(t)
 				// CurrentGame calls Players() to find the player
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				// Now() calls Left, Opposite, Right, then CurrentWind for each, then Score, ID, Round
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().Opposite(1).Return(3)
 				mockGame.EXPECT().Right(1).Return(2)
+				mockGame.EXPECT().Opposite(1).Return(3)
+				mockGame.EXPECT().Left(1).Return(4)
 				// CurrentWind is called in order: playerID, leftID, oppID, rightID
 				mockGame.EXPECT().CurrentWind(1).Return(models.East)
 				mockGame.EXPECT().CurrentWind(4).Return(models.North)
@@ -42,6 +41,7 @@ func TestNow(t *testing.T) {
 					4: {GP: 0},
 				})
 				mockGame.EXPECT().ID().Return(100)
+				mockGame.EXPECT().Status().Return(models.GameLive)
 				mockGame.EXPECT().Round().Return(1)
 				s.liveGames[100] = mockGame
 				return 100
@@ -114,14 +114,12 @@ func TestNow(t *testing.T) {
 
 			testCase.expectedErr(t, err)
 			if err != nil {
-				mockPlayerRepo.AssertExpectations(t)
 				return
 			}
 
 			if testCase.checkNow != nil {
 				testCase.checkNow(t, now)
 			}
-			mockPlayerRepo.AssertExpectations(t)
 		})
 	}
 }

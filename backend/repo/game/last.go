@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"errors"
 
 	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
@@ -28,6 +29,9 @@ func (r *Repo) LastGame(ctx context.Context, playerID int) (int, error) {
 
 	gameID, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, models.ErrGameNotFound
+		}
 		return 0, err
 	}
 

@@ -9,6 +9,7 @@ export interface GameData {
   opp: PlayerScore;
   left: PlayerScore;
   round: RoundData;
+  status: 'created' | 'live' | 'ended' | 'aborted';
 }
 
 export interface PlayerScore {

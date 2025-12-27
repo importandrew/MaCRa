@@ -13,13 +13,13 @@ func (h Handler) Abort(c *gin.Context) {
 	strID := c.Param("id")
 	id, err := strconv.Atoi(strID)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
+		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("id should be integer, got: %v", strID))
 		return
 	}
 
 	err = h.game.Abort(c.Request.Context(), id)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, fmt.Errorf("game abort: %w", err))
+		httperr.Error(c, err)
 		return
 	}
 

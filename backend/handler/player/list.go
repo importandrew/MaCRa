@@ -15,13 +15,13 @@ type ListNameLimit struct {
 func (h Handler) List(c *gin.Context) {
 	var req ListNameLimit
 	if err := c.BindQuery(&req); err != nil {
-		httperr.ErrorResponse(c, http.StatusBadRequest, err)
+		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
 
 	players, err := h.player.ListByNameLimit(c.Request.Context(), req.Name, req.Limit)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

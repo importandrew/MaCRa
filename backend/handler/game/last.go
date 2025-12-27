@@ -11,13 +11,13 @@ import (
 func (h Handler) Last(c *gin.Context) {
 	userID, err := authmw.GetUserIDFromContext(c)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	result, err := h.game.LastGameResult(c.Request.Context(), userID)
 	if err != nil {
-		httperr.ErrorResponse(c, http.StatusInternalServerError, err)
+		httperr.Error(c, err)
 		return
 	}
 

@@ -11,26 +11,20 @@ func (s *Service) EnterRound(
 	playerID int,
 	outcome models.Outcome,
 	value, winnerID, loserID int,
-) error {
+) (models.GameNow, error) {
 	game, err := s.CurrentGame(playerID)
 	if err != nil {
-		return err
+		return models.GameNow{}, err
 	}
 
 	round := game.Round()
 
 	err = game.EnterRoundResult(value, loserID, winnerID)
 	if err != nil {
-		return err
+		return models.GameNow{}, err
 	}
 
 	players := game.Players()
-
-	east := players[models.East]
-	south := players[models.South]
-	west := players[models.West]
-	north := players[models.North]
-
 	score := game.Score()
 
 	roundOutcome := models.RoundData{
@@ -39,49 +33,33 @@ func (s *Service) EnterRound(
 		WinnerID:        winnerID,
 		LoserID:         loserID,
 		Value:           value,
-		EastStartScore:  score[east].GP,
-		SouthStartScore: score[south].GP,
-		WestStartScore:  score[west].GP,
-		NorthStartScore: score[north].GP,
+		EastStartScore:  score[players[models.East]].GP,
+		SouthStartScore: score[players[models.South]].GP,
+		WestStartScore:  score[players[models.West]].GP,
+		NorthStartScore: score[players[models.North]].GP,
 	}
 
 	err = s.gameRepo.SaveRoundOutcome(ctx, game.ID(), roundOutcome)
 	if err != nil {
-		return err
+		return models.GameNow{}, err
 	}
 
 	if game.Status() == models.GameEnded {
-		finalData := models.FinalGameData{
-			GameID: game.ID(),
-			East: models.FinalPlayerData{
-				ID: east,
-				GP: score[east].GP,
-				TP: score[east].TP,
-			},
-			South: models.FinalPlayerData{
-				ID: south,
-				GP: score[south].GP,
-				TP: score[south].TP,
-			},
-			West: models.FinalPlayerData{
-				ID: west,
-				GP: score[west].GP,
-				TP: score[west].TP,
-			},
-			North: models.FinalPlayerData{
-				ID: north,
-				GP: score[north].GP,
-				TP: score[north].TP,
-			},
-		}
-
-		err = s.gameRepo.Finalize(ctx, finalData)
+		err := s.finalize(ctx, game.ID(), score, players)
 		if err != nil {
-			return err
+			return models.GameNow{}, err
 		}
 
-		delete(s.liveGames, game.ID())
+		return models.GameNow{
+			ID:     game.ID(),
+			Status: models.GameEnded,
+		}, nil
 	}
 
-	return nil
+	now, err := s.Now(ctx, playerID)
+	if err != nil {
+		return models.GameNow{}, err
+	}
+
+	return now, nil
 }

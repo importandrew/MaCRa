@@ -148,7 +148,7 @@ func TestHandler_Login(t *testing.T) {
 					"password123",
 				).Return(models.Player{}, models.ErrPlayerNotFound)
 			},
-			expectedCode: http.StatusInternalServerError,
+			expectedCode: http.StatusNotFound,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
 				var response map[string]string
 				err := json.Unmarshal(w.Body.Bytes(), &response)

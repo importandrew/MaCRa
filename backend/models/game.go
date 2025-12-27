@@ -1,12 +1,13 @@
 package models
 
-import "fmt"
-
-type Game struct{}
+import (
+	"fmt"
+)
 
 type GameNow struct {
-	ID    int   `json:"id"`
-	Round Round `json:"round"`
+	ID     int        `json:"id"`
+	Status GameStatus `json:"status"`
+	Round  Round      `json:"round"`
 
 	Me    PlayerWindScore `json:"me"`
 	Right PlayerWindScore `json:"right"`
@@ -19,6 +20,7 @@ type Round struct {
 	Kanji string `json:"kanji"`
 }
 
+//nolint:mnd
 func RoundKanji(round int) string {
 	wind := Wind((round - 1) / 4).Kanji()
 	num := (round-1)%4 + 1
@@ -31,11 +33,6 @@ type PlayerWindScore struct {
 	Name  string `json:"name"`
 	Wind  string `json:"wind"`
 	Score int    `json:"score"`
-}
-
-type NewGameResponse struct {
-	ID   int    `db:"id"`
-	Name string `db:"name"`
 }
 
 type GameResult struct {
