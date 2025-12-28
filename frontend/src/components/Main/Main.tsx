@@ -20,8 +20,8 @@ const MainPage = () => {
       </div>
       <div className="flex flex-col w-screen">
         {data?.has_current && <MainButton text="Current game" link="/now" />}
-        {data?.has_last && <MainButton text="Last game" link="/last" />}
         {!data?.has_current && <MainButton text="New game" link="/new" />}
+        {data?.has_last && <MainButton text="Last game" link="/last" />}
       </div>
     </div>
   );
