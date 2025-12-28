@@ -24,7 +24,7 @@ export default function ScroreInput({
   const [outcome, setOutcome] = useState('');
   const [winner, setWinner] = useState('');
   const [loser, setLoser] = useState('');
-  const [score, setScore] = useState(8);
+  const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const players: PlayerOrder[] = playersList || [];
 
@@ -36,7 +36,7 @@ export default function ScroreInput({
     setOutcome('');
     setWinner('');
     setLoser('');
-    setScore(8);
+    setScore(0);
     toggleForm();
   };
 
@@ -167,8 +167,9 @@ export default function ScroreInput({
               inputMode="numeric"
               isClearable={true}
               min="8"
-              defaultValue="8"
+              value={score ? score.toString() : ''}
               pattern="\d*"
+              autoComplete="off"
               label="Hand value"
               className="w-full md:w-[300px] inline-flex"
               onChange={(event) => {
