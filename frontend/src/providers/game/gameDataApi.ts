@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { GetRequest } from '../../components/Request';
+import { GetRequest, globalFetch } from '../../components/Request';
 import { GameData, GamePlayers, PlayerOrder } from '../../models/GameData';
-import { GameResult, GameRoundLogs } from '../../models/GameResult';
+import {
+  GameResult,
+  GameRoundLogs,
+  PlayerStatus,
+} from '../../models/GameResult';
 
-export const useFetchGameData = (isToastEnabled = false) => {
+export const useFetchGameData = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState<GameData | null>(null);
@@ -12,42 +15,35 @@ export const useFetchGameData = (isToastEnabled = false) => {
 
   const fetchGameData = async () => {
     setIsLoading(true);
-    try {
-      // Request game data
-      const gameDataRequest = GetRequest('/api/now');
-      const response = await fetch(gameDataRequest);
-      const result: GameData | { error: string } = await response?.json();
 
-      if ('error' in result) {
-        isToastEnabled && toast.error(result.error);
-        setIsError(true);
-        return;
-      }
+    const gameDataRequest = GetRequest('/api/now');
+    const data = await globalFetch<GameData>(gameDataRequest, {
+      isToastEnabled: false,
+    });
 
-      setData(result);
-
-      // Request players list only once on game start or page refresh
-      if (playersList.length) return;
-
-      const gamePlayersRequest = GetRequest(`/api/game/${result.id}/players`);
-      const playersResponse = await fetch(gamePlayersRequest);
-      const playersResult: GamePlayers | { error: string } =
-        await playersResponse?.json();
-
-      if ('error' in playersResult) {
-        isToastEnabled && toast.error(playersResult.error);
-        setIsError(true);
-        return;
-      }
-
-      setPlayersList(playersResult.players);
-    } catch (error) {
-      isToastEnabled &&
-        toast.error('Failed to fetch game data. Please try again.');
+    if (!data || 'error' in data) {
       setIsError(true);
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    setData(data);
+
+    // Request players list only once on game start or page refresh
+    if (playersList.length) {
+      setIsLoading(false);
+      return;
+    }
+
+    const gamePlayersRequest = GetRequest(`/api/game/${data.id}/players`);
+    const playersResult = await globalFetch<GamePlayers>(gamePlayersRequest);
+
+    if (!playersResult || 'error' in playersResult) {
+      setIsError(true);
+    }
+
+    setPlayersList(playersResult?.players || []);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -66,26 +62,19 @@ export const useFetchGameResultData = (isToastEnabled = false) => {
     setIsLoading(true);
     setIsError(false);
 
-    try {
-      const response = await fetch(GetRequest('/api/last'));
+    const lastGameRequest = GetRequest('/api/last');
+    const data = await globalFetch<GameResult>(lastGameRequest, {
+      isToastEnabled,
+    });
 
-      if (!response.ok) {
-        isToastEnabled &&
-          toast.error(
-            `${response.status} ${response.statusText} while processing URL /api/last`
-          );
-        setIsError(true);
-        return;
-      }
-
-      const result = await response.json();
-      setData(result || []);
-    } catch (error) {
-      isToastEnabled && toast.error(`Failed to fetch data`);
+    if (!data || 'error' in data) {
       setIsError(true);
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    setData(data);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -104,25 +93,17 @@ export const useFetchGameLogsData = (gameId: number | null) => {
     setIsLoading(true);
     setIsError(false);
 
-    try {
-      const response = await fetch(GetRequest(`/api/game/${gameId}/logs`));
+    const gameLogsRequest = GetRequest(`/api/game/${gameId}/logs`);
+    const data = await globalFetch<GameRoundLogs>(gameLogsRequest);
 
-      if (!response.ok) {
-        toast.error(
-          `${response.status} ${response.statusText} while processing URL /api/game/${gameId}/logs`
-        );
-        setIsError(true);
-        return;
-      }
-
-      const result = await response.json();
-      setData(result || []);
-    } catch (error) {
-      toast.error(`Failed to fetch data`);
+    if (!data || 'error' in data) {
       setIsError(true);
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    setData(data);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -130,4 +111,25 @@ export const useFetchGameLogsData = (gameId: number | null) => {
   }, [fetchData]);
 
   return { data, isError, isLoading, fetchData };
+};
+
+export const useFetchPlayerStatus = () => {
+  const [data, setData] = useState<PlayerStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
+    const playerStatusRequest = GetRequest('/api/main');
+    const data = await globalFetch<PlayerStatus>(playerStatusRequest);
+
+    setData(data);
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, isLoading, fetchData };
 };

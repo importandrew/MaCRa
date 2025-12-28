@@ -1,25 +1,29 @@
 import { Button, Form, Input, Select, SelectItem } from '@heroui/react';
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { GameData, Outcome, PlayerOrder } from '../../models/GameData';
-import { PostRequest } from '../Request';
+import {
+  GameData,
+  Outcome,
+  PlayerOrder,
+  RoundData,
+} from '../../models/GameData';
 import { OUTCOME_LABELS } from '../../utils/constants';
+import { globalFetch, PostRequest } from '../Request';
 
 export default function ScroreInput({
-  data,
+  kanji,
   playersList,
-  refetch,
+  setRoundData,
 }: {
-  data: GameData;
+  kanji: RoundData['kanji'];
   playersList: PlayerOrder[] | null;
-  refetch: () => void;
+  setRoundData: (_data: GameData) => void;
 }) {
   const navigate = useNavigate();
   const [isHidden, setIsHidden] = useState(true);
   const [outcome, setOutcome] = useState('');
-  const [winner, setWinner] = useState<number | null>(null);
-  const [loser, setLoser] = useState<number | null>(null);
+  const [winner, setWinner] = useState('');
+  const [loser, setLoser] = useState('');
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const players: PlayerOrder[] = playersList || [];
@@ -29,10 +33,9 @@ export default function ScroreInput({
   };
 
   const resetRoundResults = () => {
-    refetch();
     setOutcome('');
-    setWinner(null);
-    setLoser(null);
+    setWinner('');
+    setLoser('');
     setScore(0);
     toggleForm();
   };
@@ -41,36 +44,33 @@ export default function ScroreInput({
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const roundResult = PostRequest('/api/round', {
-        outcome,
-        won: winner,
-        dealt: loser,
-        score,
-      });
-      const response = await fetch(roundResult);
+    const roundResult = PostRequest('/api/round', {
+      outcome,
+      won: Number(winner),
+      dealt: Number(loser),
+      score,
+    });
+    const data = await globalFetch<GameData>(roundResult, {
+      isToastEnabled: true,
+    });
 
-      if (!response.ok) {
-        const result = await response.json();
-        toast.error(`Failed to submit round results: ${result.error}`);
-        return;
-      }
-
-      if (data?.round.num == 16) {
-        navigate('/last');
-        return;
-      }
-
-      resetRoundResults();
-    } catch (error) {
-      toast.error('Failed to submit round results. Please try again.');
-    } finally {
+    if (!data || 'error' in data) {
       setIsLoading(false);
+      return;
     }
+
+    if (data?.status === 'ended' || data?.status === 'aborted') {
+      navigate('/last');
+      return;
+    }
+
+    setRoundData(data);
+    resetRoundResults();
+    setIsLoading(false);
   };
 
   return (
-    <div className="bg-white relative z-10 py-3 justify-self-center self-center items-center w-full text-5xl">
+    <div className="relative z-10 py-3 justify-self-center self-center items-center w-full text-5xl">
       <Button
         size="lg"
         variant="flat"
@@ -79,7 +79,7 @@ export default function ScroreInput({
         type="button"
         onPress={() => toggleForm()}
       >
-        {data.round.kanji}
+        {kanji}
       </Button>
       <Form
         validationBehavior="native"
@@ -91,8 +91,9 @@ export default function ScroreInput({
             <Select
               label="Outcome"
               className="w-full md:w-[300px] inline-flex"
+              selectedKeys={outcome ? [outcome] : []}
               onChange={(event) => {
-                setOutcome(event.target.value);
+                setOutcome(event.target.value as Outcome);
               }}
               validate={(value) => {
                 return !value?.length ? 'Outcome is required' : null;
@@ -116,7 +117,8 @@ export default function ScroreInput({
             <Select
               label="Player won"
               className="w-full md:w-[300px] inline-flex"
-              onChange={(event) => setWinner(Number(event.target.value))}
+              selectedKeys={[winner]}
+              onChange={(event) => setWinner(event.target.value)}
               validate={(value) => {
                 if (outcome === Outcome.Draw) return null;
 
@@ -124,7 +126,7 @@ export default function ScroreInput({
               }}
             >
               {players.map((player) => (
-                <SelectItem key={player.id}>{player.name}</SelectItem>
+                <SelectItem key={String(player.id)}>{player.name}</SelectItem>
               ))}
             </Select>
           </div>
@@ -135,7 +137,8 @@ export default function ScroreInput({
             <Select
               label="Player dealt"
               className="w-full md:w-[300px] inline-flex"
-              onChange={(event) => setLoser(Number(event.target.value))}
+              selectedKeys={[loser]}
+              onChange={(event) => setLoser(event.target.value)}
               validate={(value) => {
                 if (outcome === Outcome.Draw || outcome === Outcome.Self)
                   return null;
@@ -144,7 +147,7 @@ export default function ScroreInput({
               }}
             >
               {players.map((player) => {
-                if (player.id === winner) {
+                if (player.id.toString() === winner) {
                   return null;
                 }
 
@@ -160,10 +163,13 @@ export default function ScroreInput({
             }
           >
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               isClearable={true}
-              min="0"
+              min="8"
+              value={score ? score.toString() : ''}
               pattern="\d*"
+              autoComplete="off"
               label="Hand value"
               className="w-full md:w-[300px] inline-flex"
               onChange={(event) => {
@@ -172,7 +178,10 @@ export default function ScroreInput({
               validate={(value) => {
                 if (outcome === Outcome.Draw) return null;
 
-                return !value.length ? 'Hand value is required' : null;
+                if (Number(value) < 8)
+                  return 'Hand score should be 8 or higher';
+
+                return !value.length ? 'Hand score is required' : null;
               }}
             />
           </div>

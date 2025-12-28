@@ -54,6 +54,9 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			authAPI.POST("/false-mahjong", h.game.FalseMahjong)
 			authAPI.POST("/penalty", h.game.Penalty)
 			authAPI.GET("/last", h.game.Last)
+
+			// won't abort on 401
+			authAPI.GET("/main", h.game.MainInfo)
 		}
 	}
 }

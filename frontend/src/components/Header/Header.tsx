@@ -1,14 +1,14 @@
 import {
+  Button,
+  Image,
+  Link,
   Navbar,
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  Link,
-  Button,
-  Image,
 } from '@heroui/react';
 import { useContext } from 'react';
-import { AuthContext } from '../../providers/auth/AuthContext';
+import { AuthContext } from '../../providers/auth/authConstants';
 import UserMenu from './UserMenu';
 
 export default function Header() {

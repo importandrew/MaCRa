@@ -37,7 +37,6 @@ export default function TableMenu({
             <PenaltyInput
               players={players}
               finedPlayerId={finedPlayerId}
-              gameId={gameId}
               setFinedPlayerId={setFinedPlayerId}
             />
           </AccordionItem>

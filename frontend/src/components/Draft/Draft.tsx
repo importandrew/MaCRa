@@ -3,11 +3,12 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Player } from '../../models/Player';
+import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import { WIND_LABELS, WIND_SYMBOLS } from '../../utils/constants';
 import { shuffleArray } from '../../utils/shuffleArray';
-import { GetRequest, PostRequest } from '../Request';
+import { GetRequest, globalFetch, PostRequest } from '../Request';
 import PlayerSelector from './PlayerSelector';
-import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { GameData } from '../../models/GameData';
 
 // Custom hook for fetching players
 const useFetchPlayers = () => {
@@ -17,22 +18,14 @@ const useFetchPlayers = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       setIsLoading(true);
-      try {
-        const playersRequest = GetRequest('/api/players/list');
-        const response = await fetch(playersRequest);
-        const result: Player[] | { error: string } = await response.json();
+      const playersRequest = GetRequest('/api/players/list');
+      const data = await globalFetch<Player[]>(playersRequest);
 
-        if (!response.ok && 'error' in result) {
-          toast.error(result.error);
-          return;
-        }
-
-        setSuggestions((result as Player[]) || []);
-      } catch (error) {
-        toast.error('Failed to fetch players. Please try again.');
-      } finally {
-        setIsLoading(false);
+      if (data) {
+        setSuggestions(data);
       }
+
+      setIsLoading(false);
     };
 
     fetchPlayers();
@@ -80,20 +73,12 @@ export default function Draft() {
       return;
     }
 
-    try {
-      const draftRequest = PostRequest('/api/new', { players });
-      const response = await fetch(draftRequest);
+    const draftRequest = PostRequest('/api/new', { players });
+    const data = await globalFetch<GameData>(draftRequest);
 
-      if (!response.ok) {
-        const result = await response.json();
-        toast.error(`Failed to submit draft: ${result.error}`);
-        return;
-      }
+    if (!data || 'error' in data) return;
 
-      navigate('/now');
-    } catch (error) {
-      toast.error('Failed to submit draft. Please try again.');
-    }
+    navigate('/now');
   };
 
   return (

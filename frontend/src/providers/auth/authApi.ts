@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { PostRequest } from '../../components/Request';
 
 export async function fetchLogoutApi(): Promise<boolean> {
@@ -7,7 +8,7 @@ export async function fetchLogoutApi(): Promise<boolean> {
 
     return response.ok;
   } catch (error) {
-    console.error('Network error during logout:', error);
+    toast('Network error during logout: ' + error);
     return false;
   }
 }

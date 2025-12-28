@@ -1,15 +1,17 @@
 import { Button, Spinner } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
+import { GameData } from '../../models/GameData';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
+import { RefreshIcon } from '../Icons/RefreshIcon';
 import PlayerMenu from './Menu/PlayerMenu';
 import TableMenu from './Menu/TableMenu';
 import './Now.css';
 import ScroreInput from './ScoreInput';
 
 export default function Now() {
-  const { data, playersList, isLoading, isError, refetch } =
-    useFetchGameData(true);
+  const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
+  const [roundData, setRoundData] = useState<GameData | null>(null);
   const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -27,6 +29,10 @@ export default function Now() {
   }, [refetch]);
 
   useEffect(() => {
+    if (data) {
+      setRoundData(data);
+    }
+
     if (finedPlayerId !== null) {
       openContextMenuOpen();
     }
@@ -35,7 +41,7 @@ export default function Now() {
       closeContextMenuOpen();
       refetch();
     }
-  }, [finedPlayerId]);
+  }, [finedPlayerId, data]);
 
   if (isLoading) {
     return (
@@ -55,7 +61,7 @@ export default function Now() {
     );
   }
 
-  if (!data) {
+  if (!roundData) {
     return (
       <div className="flex flex-col h-full w-screen justify-center items-center gap-3">
         <p className="mb-4 text-center text-3xl">No data available</p>
@@ -73,19 +79,19 @@ export default function Now() {
         <div className="relative self-center h-full w-full">
           <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {data.opp.wind}{' '}
+              {roundData.opp.wind}{' '}
               {
                 <PlayerMenu
                   player={playersList.find(
-                    (player) => player.name === data.opp.name
+                    (player) => player.name === roundData.opp.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
               }{' '}
-              {data.opp.name}
+              {roundData.opp.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {data.opp.score}
+              {roundData.opp.score}
             </span>
           </div>
         </div>
@@ -93,61 +99,76 @@ export default function Now() {
         <div className="relative self-center h-full w-full">
           <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {data.left.wind}{' '}
+              {roundData.left.wind}{' '}
               {
                 <PlayerMenu
                   player={playersList.find(
-                    (player) => player.name === data.left.name
+                    (player) => player.name === roundData.left.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
               }{' '}
-              {data.left.name}
+              {roundData.left.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {data.left.score}
+              {roundData.left.score}
             </span>
           </div>
         </div>
 
-        <ScroreInput data={data} playersList={playersList} refetch={refetch} />
+        <ScroreInput
+          kanji={roundData.round.kanji}
+          playersList={playersList}
+          setRoundData={setRoundData}
+        />
 
         <div className="relative self-center h-full w-full">
           <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {data.right.wind}{' '}
+              {roundData.right.wind}{' '}
               {
                 <PlayerMenu
                   player={playersList.find(
-                    (player) => player.name === data.right.name
+                    (player) => player.name === roundData.right.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
               }{' '}
-              {data.right.name}
+              {roundData.right.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {data.right.score}
+              {roundData.right.score}
             </span>
           </div>
         </div>
-        <div></div>
+        <div>
+          <Button
+            variant="light"
+            radius="full"
+            size="lg"
+            isIconOnly
+            onPress={refetch}
+            className="absolute z-100 left-0 bottom-0"
+          >
+            <RefreshIcon className="text-gray-400" />
+          </Button>
+        </div>
         <div className="relative self-center h-full w-full">
           <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {data.me.wind}{' '}
+              {roundData.me.wind}{' '}
               {
                 <PlayerMenu
                   player={playersList.find(
-                    (player) => player.name === data.me.name
+                    (player) => player.name === roundData.me.name
                   )}
                   setFinedPlayerId={setFinedPlayerId}
                 />
               }{' '}
-              {data.me.name}
+              {roundData.me.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {data.me.score}
+              {roundData.me.score}
             </span>
           </div>
         </div>
@@ -160,7 +181,7 @@ export default function Now() {
             <TableMenu
               players={playersList}
               finedPlayerId={finedPlayerId}
-              gameId={data.id}
+              gameId={roundData.id}
               setFinedPlayerId={setFinedPlayerId}
             />
           </ContextMenu>
