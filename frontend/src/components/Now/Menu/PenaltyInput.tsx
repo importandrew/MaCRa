@@ -15,12 +15,10 @@ import { GameResult } from '../../../models/GameResult';
 export default function PenaltyInput({
   players = [],
   finedPlayerId = null,
-  gameId = null,
   setFinedPlayerId,
 }: {
   players: PlayerOrder[] | null;
   finedPlayerId: number | null;
-  gameId: number | null;
   setFinedPlayerId: (value: number | null) => void;
 }) {
   const [loser, setLoser] = useState<number | null>(finedPlayerId);
@@ -41,7 +39,7 @@ export default function PenaltyInput({
     e.preventDefault();
 
     const roundResultRequest = PostRequest(
-      `/api/game/${gameId}/${distributed ? 'false-mahjong' : 'penalty'}`,
+      `/api/${distributed ? 'false-mahjong' : 'penalty'}`,
       {
         loser,
         value,
