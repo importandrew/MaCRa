@@ -3,6 +3,7 @@ package authmw
 import (
 	"errors"
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/importandrew/MaCRa/handler/httperr"
@@ -22,9 +23,18 @@ func NewAuth(jwt []byte) Auth {
 }
 
 func (a Auth) IdentifyUser(c *gin.Context) {
+	whitelist := []string{
+		"/api/main",
+	}
+
 	cookie, err := c.Cookie(TokenKey)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
+			if slices.Contains(whitelist, c.Request.URL.Path) {
+				c.Next()
+				return
+			}
+
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

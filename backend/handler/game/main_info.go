@@ -15,7 +15,10 @@ type MainInfo struct {
 func (h Handler) MainInfo(c *gin.Context) {
 	userID, err := authmw.GetUserIDFromContext(c)
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.JSON(http.StatusOK, MainInfo{
+			HasLast:    false,
+			HasCurrent: false,
+		})
 		return
 	}
 

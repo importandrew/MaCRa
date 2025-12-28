@@ -47,13 +47,15 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 
 		// auto-detects user who called this api
 		{
-			authAPI.GET("/main", h.game.MainInfo)
 			authAPI.POST("/new", h.game.New)
 			authAPI.GET("/now", h.game.Now)
 			authAPI.POST("/round", h.game.EnterRoundResult)
 			authAPI.POST("/false-mahjong", h.game.FalseMahjong)
 			authAPI.POST("/penalty", h.game.Penalty)
 			authAPI.GET("/last", h.game.Last)
+
+			// won't abort on 401
+			authAPI.GET("/main", h.game.MainInfo)
 		}
 	}
 }
