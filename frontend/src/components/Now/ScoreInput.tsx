@@ -167,6 +167,7 @@ export default function ScroreInput({
               type="text"
               inputMode="numeric"
               isClearable={true}
+              onClear={() => setScore(0)}
               min="8"
               value={score ? score.toString() : ''}
               pattern="\d*"
