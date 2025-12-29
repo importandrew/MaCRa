@@ -37,7 +37,6 @@ export default function ScroreInput({
     setWinner('');
     setLoser('');
     setScore(0);
-    toggleForm();
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -46,8 +45,8 @@ export default function ScroreInput({
 
     const roundResult = PostRequest('/api/round', {
       outcome,
-      won: Number(winner),
-      dealt: Number(loser),
+      won: Number(winner) || null,
+      dealt: Number(loser) || null,
       score,
     });
     const data = await globalFetch<GameData>(roundResult, {
@@ -66,6 +65,7 @@ export default function ScroreInput({
 
     setRoundData(data);
     resetRoundResults();
+    toggleForm();
     setIsLoading(false);
   };
 
@@ -93,6 +93,7 @@ export default function ScroreInput({
               className="w-full md:w-[300px] inline-flex"
               selectedKeys={outcome ? [outcome] : []}
               onChange={(event) => {
+                resetRoundResults();
                 setOutcome(event.target.value as Outcome);
               }}
               validate={(value) => {
