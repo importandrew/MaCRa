@@ -8,6 +8,7 @@ import PlayerMenu from './Menu/PlayerMenu';
 import TableMenu from './Menu/TableMenu';
 import './Now.css';
 import ScroreInput from './ScoreInput';
+import AnimatedScore from './AnimatedScore';
 
 export default function Now() {
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
@@ -91,7 +92,7 @@ export default function Now() {
               {roundData.opp.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {roundData.opp.score}
+              <AnimatedScore score={roundData.opp.score} />
             </span>
           </div>
         </div>
@@ -111,7 +112,7 @@ export default function Now() {
               {roundData.left.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {roundData.left.score}
+              <AnimatedScore score={roundData.left.score} />
             </span>
           </div>
         </div>
@@ -137,7 +138,7 @@ export default function Now() {
               {roundData.right.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {roundData.right.score}
+              <AnimatedScore score={roundData.right.score} />
             </span>
           </div>
         </div>
@@ -168,7 +169,7 @@ export default function Now() {
               {roundData.me.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              {roundData.me.score}
+              <AnimatedScore score={roundData.me.score} />
             </span>
           </div>
         </div>
