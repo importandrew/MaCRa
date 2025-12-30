@@ -21,3 +21,43 @@
 .table-right-side {
   transform: translate(-50%, -50%) rotate(90deg);
 }
+
+/* Score animation styles */
+.score-increase {
+  animation: spin-up 3s ease-in-out;
+}
+
+.score-decrease {
+  animation: spin-down 3s ease-in-out;
+}
+
+@keyframes spin-up {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    color: #10b981; /* green-500 */
+  }
+  50% {
+    transform: translateY(-10px) rotate(-180deg);
+    color: #10b981; /* green-500 */
+  }
+  100% {
+    transform: translateY(0) rotate(-360deg);
+    color: inherit;
+  }
+}
+
+@keyframes spin-down {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    color: #ef4444; /* red-500 */
+
+  }
+  50% {
+    transform: translateY(10px) rotate(180deg);
+    color: #ef4444; /* red-500 */
+  }
+  100% {
+    transform: translateY(0) rotate(360deg);
+    color: inherit;
+  }
+}
