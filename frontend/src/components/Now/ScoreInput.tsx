@@ -26,6 +26,7 @@ export default function ScroreInput({
   const [loser, setLoser] = useState('');
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [forseReset, setForseReset] = useState(1);
   const players: PlayerOrder[] = playersList || [];
 
   const toggleForm = () => {
@@ -107,86 +108,84 @@ export default function ScroreInput({
                 .splice(0, 3)}
             </Select>
           </div>
-          <div
-            id="winner"
-            className={
-              !(outcome == Outcome.Self || outcome == Outcome.Deal)
-                ? 'hidden'
-                : 'block'
-            }
-          >
-            <Select
-              label="Player won"
-              className="w-full md:w-[300px] inline-flex"
-              selectedKeys={[winner]}
-              onChange={(event) => setWinner(event.target.value)}
-              validate={(value) => {
-                if (outcome === Outcome.Draw) return null;
+          <>
+            {outcome == Outcome.Self || outcome == Outcome.Deal ? (
+              <div>
+                <Select
+                  label="Player won"
+                  className="w-full md:w-[300px] inline-flex"
+                  selectedKeys={[winner]}
+                  onChange={(event) => setWinner(event.target.value)}
+                  validate={(value) => {
+                    return !value?.length ? 'Winner is required' : null;
+                  }}
+                >
+                  {players.map((player) => (
+                    <SelectItem key={String(player.id)}>
+                      {player.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+            ) : null}
+          </>
 
-                return !value?.length ? 'Winner is required' : null;
-              }}
-            >
-              {players.map((player) => (
-                <SelectItem key={String(player.id)}>{player.name}</SelectItem>
-              ))}
-            </Select>
-          </div>
-          <div
-            id="loser"
-            className={outcome != Outcome.Deal || !winner ? 'hidden' : 'block'}
-          >
-            <Select
-              label="Player dealt"
-              className="w-full md:w-[300px] inline-flex"
-              selectedKeys={[loser]}
-              onChange={(event) => setLoser(event.target.value)}
-              validate={(value) => {
-                if (outcome === Outcome.Draw || outcome === Outcome.Self)
-                  return null;
+          <>
+            {outcome === Outcome.Deal ? (
+              <div>
+                <Select
+                  label="Player dealt"
+                  className="w-full md:w-[300px] inline-flex"
+                  selectedKeys={[loser]}
+                  onChange={(event) => setLoser(event.target.value)}
+                  validate={(value) => {
+                    return !value?.length ? 'Loser is required' : null;
+                  }}
+                >
+                  {players.map((player) => {
+                    if (player.id.toString() === winner) {
+                      return null;
+                    }
 
-                return !value?.length ? 'Loser is required' : null;
-              }}
-            >
-              {players.map((player) => {
-                if (player.id.toString() === winner) {
-                  return null;
-                }
+                    return (
+                      <SelectItem key={player.id}>{player.name}</SelectItem>
+                    );
+                  })}
+                </Select>
+              </div>
+            ) : null}
+          </>
 
-                return <SelectItem key={player.id}>{player.name}</SelectItem>;
-              })}
-            </Select>
-          </div>
-          <div
-            className={
-              !(outcome == Outcome.Self || outcome == Outcome.Deal)
-                ? 'hidden'
-                : 'block'
-            }
-          >
-            <Input
-              type="text"
-              inputMode="numeric"
-              isClearable={true}
-              onClear={() => setScore(0)}
-              min="8"
-              value={score ? score.toString() : ''}
-              pattern="\d*"
-              autoComplete="off"
-              label="Hand value"
-              className="w-full md:w-[300px] inline-flex"
-              onChange={(event) => {
-                setScore(+event.target.value);
-              }}
-              validate={(value) => {
-                if (outcome === Outcome.Draw) return null;
+          <>
+            {(outcome == Outcome.Self || outcome == Outcome.Deal) &&
+            forseReset ? (
+              <div>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  isClearable={true}
+                  onClear={() => {
+                    setScore(0);
+                    setForseReset(0);
+                    setTimeout(() => setForseReset(1));
+                  }}
+                  pattern="\d*"
+                  autoComplete="off"
+                  label="Hand value"
+                  className="w-full md:w-[300px] inline-flex"
+                  onChange={(event) => {
+                    setScore(+event.target.value);
+                  }}
+                  validate={(value) => {
+                    if (Number(value) < 8)
+                      return 'Hand score should be 8 or higher';
 
-                if (Number(value) < 8)
-                  return 'Hand score should be 8 or higher';
-
-                return !value.length ? 'Hand score is required' : null;
-              }}
-            />
-          </div>
+                    return !value ? 'Hand score is required' : null;
+                  }}
+                />
+              </div>
+            ) : null}
+          </>
           <div className="flex justify-center">
             <Button
               type="submit"
