@@ -35,7 +35,7 @@ func TestEnterRound(t *testing.T) {
 				// CurrentGame calls Players() to find the player
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 				// EnterRound calls EnterRoundResult, Players, Score, Round, ID
-				mockGame.EXPECT().EnterRoundResult(8, 2, 1).Return(nil)
+				mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 				mockGame.EXPECT().Score().Return(models.GameScore{
 					1: {GP: 32},
@@ -99,7 +99,7 @@ func TestEnterRound(t *testing.T) {
 			setupGame: func(s *Service, t *testing.T) int {
 				mockGame := NewMockGameEngine(t)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(8, 0, 1).Return(nil)
+				mockGame.EXPECT().EnterRoundResult(models.Self, 8, 0, 1).Return(nil)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 				mockGame.EXPECT().Score().Return(models.GameScore{
 					1: {GP: 48},
@@ -162,7 +162,7 @@ func TestEnterRound(t *testing.T) {
 			setupGame: func(s *Service, t *testing.T) int {
 				mockGame := NewMockGameEngine(t)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(0, 0, 0).Return(nil)
+				mockGame.EXPECT().EnterRoundResult(models.Draw, 0, 0, 0).Return(nil)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 				mockGame.EXPECT().Score().Return(models.GameScore{
 					1: {GP: 0},
@@ -242,7 +242,7 @@ func TestEnterRound(t *testing.T) {
 			setupGame: func(s *Service, t *testing.T) int {
 				mockGame := NewMockGameEngine(t)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(5, 2, 1).Return(errors.New("hand score should be 8 or higher"))
+				mockGame.EXPECT().EnterRoundResult(models.Deal, 5, 2, 1).Return(errors.New("hand score should be 8 or higher"))
 				mockGame.EXPECT().Round().Return(1)
 				s.liveGames[100] = mockGame
 				return 100
@@ -261,7 +261,7 @@ func TestEnterRound(t *testing.T) {
 			setupGame: func(s *Service, t *testing.T) int {
 				mockGame := NewMockGameEngine(t)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(8, 2, 1).Return(nil)
+				mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 				mockGame.EXPECT().Score().Return(models.GameScore{
 					1: {GP: 32},
@@ -288,7 +288,7 @@ func TestEnterRound(t *testing.T) {
 			setupGame: func(s *Service, t *testing.T) int {
 				mockGame := NewMockGameEngine(t)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(8, 2, 1).Return(nil)
+				mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
 				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 				mockGame.EXPECT().Status().Return(models.GameEnded)
 				score := models.GameScore{
@@ -367,7 +367,7 @@ func TestEnterRound_FinalRound_OK(t *testing.T) {
 	// Create a mock game engine set to round 16
 	mockGame := NewMockGameEngine(t)
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-	mockGame.EXPECT().EnterRoundResult(8, 2, 1).Return(nil)
+	mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 	mockGame.EXPECT().Status().Return(models.GameEnded)
 	score := models.GameScore{
@@ -410,7 +410,7 @@ func TestEnterRound_FinalRound_Error(t *testing.T) {
 	// Create a mock game engine set to round 16
 	mockGame := NewMockGameEngine(t)
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-	mockGame.EXPECT().EnterRoundResult(8, 2, 1).Return(nil)
+	mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
 	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
 	mockGame.EXPECT().Status().Return(models.GameEnded)
 	score := models.GameScore{

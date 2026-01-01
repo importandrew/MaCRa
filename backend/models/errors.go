@@ -7,9 +7,9 @@ import (
 
 // public errors.
 var (
-	ErrGameNotFound = errors.New("game not found")
-	ErrGameNotLive  = errors.New("game is not live")
-	ErrMinScore     = errors.New("hand score should be 8 or higher")
+	ErrGameNotFound             = errors.New("game not found")
+	ErrGameNotLive              = errors.New("game is not live")
+	ErrValidateEnterRoundResult = errors.New("round result validate")
 
 	ErrPlayerNotFound   = errors.New("player not found")
 	ErrBadCredentials   = errors.New("email or password is incorrect")
@@ -25,10 +25,10 @@ var (
 
 var Errors = map[error]int{
 	// 400
-	ErrBadCredentials:   http.StatusBadRequest,
-	ErrUserNotInPlayers: http.StatusBadRequest,
-	ErrMinScore:         http.StatusBadRequest,
-	ErrValidatePlayers:  http.StatusBadRequest,
+	ErrBadCredentials:           http.StatusBadRequest,
+	ErrUserNotInPlayers:         http.StatusBadRequest,
+	ErrValidateEnterRoundResult: http.StatusBadRequest,
+	ErrValidatePlayers:          http.StatusBadRequest,
 
 	// 404
 	ErrGameNotFound:   http.StatusNotFound,

@@ -897,16 +897,16 @@ func (_c *MockGameEngine_End_Call) RunAndReturn(run func() error) *MockGameEngin
 }
 
 // EnterRoundResult provides a mock function for the type MockGameEngine
-func (_mock *MockGameEngine) EnterRoundResult(hand int, loser int, winner int) error {
-	ret := _mock.Called(hand, loser, winner)
+func (_mock *MockGameEngine) EnterRoundResult(outcome models.Outcome, hand int, loser int, winner int) error {
+	ret := _mock.Called(outcome, hand, loser, winner)
 
 	if len(ret) == 0 {
 		panic("no return value specified for EnterRoundResult")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int, int, int) error); ok {
-		r0 = returnFunc(hand, loser, winner)
+	if returnFunc, ok := ret.Get(0).(func(models.Outcome, int, int, int) error); ok {
+		r0 = returnFunc(outcome, hand, loser, winner)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -919,18 +919,19 @@ type MockGameEngine_EnterRoundResult_Call struct {
 }
 
 // EnterRoundResult is a helper method to define mock.On call
+//   - outcome models.Outcome
 //   - hand int
 //   - loser int
 //   - winner int
-func (_e *MockGameEngine_Expecter) EnterRoundResult(hand interface{}, loser interface{}, winner interface{}) *MockGameEngine_EnterRoundResult_Call {
-	return &MockGameEngine_EnterRoundResult_Call{Call: _e.mock.On("EnterRoundResult", hand, loser, winner)}
+func (_e *MockGameEngine_Expecter) EnterRoundResult(outcome interface{}, hand interface{}, loser interface{}, winner interface{}) *MockGameEngine_EnterRoundResult_Call {
+	return &MockGameEngine_EnterRoundResult_Call{Call: _e.mock.On("EnterRoundResult", outcome, hand, loser, winner)}
 }
 
-func (_c *MockGameEngine_EnterRoundResult_Call) Run(run func(hand int, loser int, winner int)) *MockGameEngine_EnterRoundResult_Call {
+func (_c *MockGameEngine_EnterRoundResult_Call) Run(run func(outcome models.Outcome, hand int, loser int, winner int)) *MockGameEngine_EnterRoundResult_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int
+		var arg0 models.Outcome
 		if args[0] != nil {
-			arg0 = args[0].(int)
+			arg0 = args[0].(models.Outcome)
 		}
 		var arg1 int
 		if args[1] != nil {
@@ -940,10 +941,15 @@ func (_c *MockGameEngine_EnterRoundResult_Call) Run(run func(hand int, loser int
 		if args[2] != nil {
 			arg2 = args[2].(int)
 		}
+		var arg3 int
+		if args[3] != nil {
+			arg3 = args[3].(int)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -954,7 +960,7 @@ func (_c *MockGameEngine_EnterRoundResult_Call) Return(err error) *MockGameEngin
 	return _c
 }
 
-func (_c *MockGameEngine_EnterRoundResult_Call) RunAndReturn(run func(hand int, loser int, winner int) error) *MockGameEngine_EnterRoundResult_Call {
+func (_c *MockGameEngine_EnterRoundResult_Call) RunAndReturn(run func(outcome models.Outcome, hand int, loser int, winner int) error) *MockGameEngine_EnterRoundResult_Call {
 	_c.Call.Return(run)
 	return _c
 }

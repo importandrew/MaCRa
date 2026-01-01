@@ -19,7 +19,7 @@ func (s *Service) EnterRound(
 
 	round := game.Round()
 
-	err = game.EnterRoundResult(value, loserID, winnerID)
+	err = game.EnterRoundResult(outcome, value, loserID, winnerID)
 	if err != nil {
 		return models.GameNow{}, err
 	}

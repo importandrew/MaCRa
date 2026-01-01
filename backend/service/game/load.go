@@ -57,7 +57,7 @@ func (s *Service) loadGame(ctx context.Context, gameID int) error {
 		case models.Penalty:
 			err = g.Penalty(log.Loser, log.Value, log.ForceNextRound)
 		default:
-			err = g.EnterRoundResult(log.Value, log.Loser, log.Winner)
+			err = g.EnterRoundResult(log.Outcome, log.Value, log.Loser, log.Winner)
 		}
 		if err != nil {
 			return fmt.Errorf("log record %d game %d: %w", log.ID, gameID, err)

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/importandrew/MaCRa/logger"
@@ -32,24 +33,29 @@ func (g *Game) NextRound() error {
 	return nil
 }
 
-func (g *Game) EnterRoundResult(hand, loser, winner int) error {
+func (g *Game) EnterRoundResult(outcome models.Outcome, hand, loser, winner int) error {
 	if !g.IsLive() {
 		return models.ErrGameNotLive
 	}
 
-	switch {
-	case loser == 0 && winner == 0:
+	switch outcome {
+	case models.Draw:
+		if err := validateDraw(hand, loser, winner); err != nil {
+			return fmt.Errorf("%w: draw: %w", models.ErrValidateEnterRoundResult, err)
+		}
 		g.draw()
-	case loser == 0:
-		if hand < 8 {
-			return models.ErrMinScore
+	case models.Self:
+		if err := validateSelf(hand, loser, winner); err != nil {
+			return fmt.Errorf("%w: self: %w", models.ErrValidateEnterRoundResult, err)
 		}
 		g.self(hand, winner)
-	default:
-		if hand < 8 {
-			return models.ErrMinScore
+	case models.Deal:
+		if err := validateDeal(hand, loser, winner); err != nil {
+			return fmt.Errorf("%w: deal: %w", models.ErrValidateEnterRoundResult, err)
 		}
 		g.deal(hand, loser, winner)
+	default:
+		return fmt.Errorf("%w: invalid outcome: %s", models.ErrValidateEnterRoundResult, outcome)
 	}
 
 	err := g.NextRound()
@@ -60,8 +66,40 @@ func (g *Game) EnterRoundResult(hand, loser, winner int) error {
 	return nil
 }
 
+func validateDraw(hand, loser, winner int) error {
+	if hand != 0 {
+		return errors.New("hand score should be zero")
+	}
+
+	if winner != 0 {
+		return errors.New("absent winner is required")
+	}
+
+	if loser != 0 {
+		return errors.New("absent loser is required")
+	}
+
+	return nil
+}
+
 func (g *Game) draw() {
 	logger.WithField("result", "draw").Info(g.score.String())
+}
+
+func validateSelf(hand, loser, winner int) error {
+	if hand < 8 {
+		return errors.New("hand score should be 8 or higher")
+	}
+
+	if winner == 0 {
+		return errors.New("winner is required")
+	}
+
+	if loser != 0 {
+		return errors.New("absent loser is required")
+	}
+
+	return nil
 }
 
 func (g *Game) self(hand, winner int) {
@@ -78,6 +116,22 @@ func (g *Game) self(hand, winner int) {
 
 	logger.WithField("result", fmt.Sprintf("self by %d (hand: %d)", winner, hand)).
 		Info(g.score.String())
+}
+
+func validateDeal(hand, loser, winner int) error {
+	if hand < 8 {
+		return errors.New("hand score should be 8 or higher")
+	}
+
+	if winner == 0 {
+		return errors.New("winner is required")
+	}
+
+	if loser == 0 {
+		return errors.New("loser is required")
+	}
+
+	return nil
 }
 
 func (g *Game) deal(hand, loser, winner int) {

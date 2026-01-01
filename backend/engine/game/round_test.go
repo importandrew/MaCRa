@@ -140,6 +140,7 @@ func TestGame_NextRound(t *testing.T) {
 func TestGame_EnterRoundResult(t *testing.T) {
 	testData := map[string]struct {
 		setupGame   func() *Game
+		outcome     models.Outcome
 		hand        int
 		loser       int
 		winner      int
@@ -155,6 +156,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				})
 				return g
 			},
+			outcome:     models.Deal,
 			hand:        8,
 			loser:       2,
 			winner:      1,
@@ -177,6 +179,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				})
 				return g
 			},
+			outcome:     models.Self,
 			hand:        10,
 			loser:       0,
 			winner:      1,
@@ -199,6 +202,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				})
 				return g
 			},
+			outcome:     models.Draw,
 			hand:        0,
 			loser:       0,
 			winner:      0,
@@ -221,6 +225,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				})
 				return g
 			},
+			outcome:     models.Deal,
 			hand:        5,
 			loser:       2,
 			winner:      1,
@@ -241,6 +246,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				})
 				return g
 			},
+			outcome:     models.Self,
 			hand:        7,
 			loser:       0,
 			winner:      1,
@@ -261,6 +267,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				g.End()
 				return g
 			},
+			outcome:     models.Deal,
 			hand:        8,
 			loser:       2,
 			winner:      1,
@@ -271,7 +278,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			g := testCase.setupGame()
-			err := g.EnterRoundResult(testCase.hand, testCase.loser, testCase.winner)
+			err := g.EnterRoundResult(testCase.outcome, testCase.hand, testCase.loser, testCase.winner)
 			testCase.expectedErr(t, err)
 			if err != nil {
 				return

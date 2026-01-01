@@ -32,7 +32,7 @@ type GameEngine interface {
 	NextRound() error
 	Score() models.GameScore
 
-	EnterRoundResult(hand int, loser int, winner int) error
+	EnterRoundResult(outcome models.Outcome, hand int, loser int, winner int) error
 	FalseMahjong(loser int, value int, forceNextRound bool) error
 	Penalty(loser int, value int, forceNextRound bool) error
 
