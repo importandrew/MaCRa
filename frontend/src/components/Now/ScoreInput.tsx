@@ -26,7 +26,7 @@ export default function ScroreInput({
   const [loser, setLoser] = useState('');
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [forseReset, setForseReset] = useState(1);
+  const [error, setError] = useState({ errorMsg: '' });
   const players: PlayerOrder[] = playersList || [];
 
   const toggleForm = () => {
@@ -38,6 +38,7 @@ export default function ScroreInput({
     setWinner('');
     setLoser('');
     setScore(0);
+    setError({ errorMsg: '' });
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -157,30 +158,33 @@ export default function ScroreInput({
           </>
 
           <>
-            {(outcome == Outcome.Self || outcome == Outcome.Deal) &&
-            forseReset ? (
+            {outcome == Outcome.Self || outcome == Outcome.Deal ? (
               <div>
                 <Input
                   type="text"
                   inputMode="numeric"
                   isClearable={true}
+                  isInvalid={error.errorMsg !== ''}
                   onClear={() => {
                     setScore(0);
-                    setForseReset(0);
-                    setTimeout(() => setForseReset(1));
+                    setError({ errorMsg: '' });
                   }}
+                  onBlur={() => {
+                    if (score < 8 && score > 0) {
+                      setError({
+                        errorMsg: 'Hand score should be 8 or higher',
+                      });
+                    } else {
+                      setError({ errorMsg: '' });
+                    }
+                  }}
+                  errorMessage={error.errorMsg}
                   pattern="\d*"
                   autoComplete="off"
                   label="Hand value"
                   className="w-full md:w-[300px] inline-flex"
                   onChange={(event) => {
                     setScore(+event.target.value);
-                  }}
-                  validate={(value) => {
-                    if (Number(value) < 8)
-                      return 'Hand score should be 8 or higher';
-
-                    return !value ? 'Hand score is required' : null;
                   }}
                 />
               </div>
