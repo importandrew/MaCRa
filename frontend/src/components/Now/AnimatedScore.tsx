@@ -1,21 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
-
-interface AnimatedScoreProps {
-  score: number;
-  className?: string;
-}
+import { AnimatedScoreProps } from '../../models/GameData';
 
 export default function AnimatedScore({
   score,
+  playerId,
   className = '',
 }: AnimatedScoreProps) {
   const [displayScore, setDisplayScore] = useState(score);
   const [animationClass, setAnimationClass] = useState('');
   const prevScoreRef = useRef(score);
+  const prevPlayerIdRef = useRef(playerId);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
-  const animationDuration = 2000; // 3 second
+  const animationDuration = 2000; // 2 seconds
 
   // Clean up animation frames and timers
   const cleanup = () => {
@@ -66,9 +64,10 @@ export default function AnimatedScore({
 
   useEffect(() => {
     const prevScore = prevScoreRef.current;
+    const prevPlayerId = prevPlayerIdRef.current;
 
-    // Only trigger animation if score actually changed
-    if (score !== prevScore) {
+    // Only trigger animation if playerId hasn't changed and score actually changed
+    if (playerId === prevPlayerId && score !== prevScore) {
       // Clean up any existing animations
       cleanup();
 
@@ -78,16 +77,17 @@ export default function AnimatedScore({
 
       // Start the counting animation
       animateScoreChange(prevScore, score);
-
-      // Update previous score reference
-      prevScoreRef.current = score;
     }
+
+    // Update previous references
+    prevScoreRef.current = score;
+    prevPlayerIdRef.current = playerId;
 
     // Cleanup on unmount
     return () => {
       cleanup();
     };
-  }, [score]);
+  }, [score, playerId]);
 
   return (
     <span className={`${className} ${animationClass}`}>{displayScore}</span>

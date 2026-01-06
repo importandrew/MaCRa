@@ -92,7 +92,7 @@ export default function Now() {
               {roundData.opp.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.opp.score} />
+              <AnimatedScore score={roundData.opp.score} playerId={roundData.opp.id} />
             </span>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function Now() {
               {roundData.left.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.left.score} />
+              <AnimatedScore score={roundData.left.score} playerId={roundData.left.id} />
             </span>
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function Now() {
               {roundData.right.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.right.score} />
+              <AnimatedScore score={roundData.right.score} playerId={roundData.right.id} />
             </span>
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function Now() {
               {roundData.me.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.me.score} />
+              <AnimatedScore score={roundData.me.score} playerId={roundData.me.id} />
             </span>
           </div>
         </div>
