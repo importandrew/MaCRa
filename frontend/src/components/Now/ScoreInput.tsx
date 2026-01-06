@@ -186,6 +186,7 @@ export default function ScroreInput({
                   onChange={(event) => {
                     setScore(+event.target.value);
                   }}
+                  value={score === 0 ? '' : score.toString()}
                 />
               </div>
             ) : null}
