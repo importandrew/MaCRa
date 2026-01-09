@@ -26,7 +26,7 @@ export default function ScroreInput({
   const [loser, setLoser] = useState('');
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState({ errorMsg: '' });
+  const [error, setError] = useState('');
   const players: PlayerOrder[] = playersList || [];
 
   const toggleForm = () => {
@@ -38,7 +38,7 @@ export default function ScroreInput({
     setWinner('');
     setLoser('');
     setScore(0);
-    setError({ errorMsg: '' });
+    setError('');
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -121,11 +121,17 @@ export default function ScroreInput({
                     return !value?.length ? 'Winner is required' : null;
                   }}
                 >
-                  {players.map((player) => (
-                    <SelectItem key={String(player.id)}>
-                      {player.name}
-                    </SelectItem>
-                  ))}
+                  {players.map((player) => {
+                    if (player.id.toString() === loser) {
+                      return null;
+                    }
+
+                    return (
+                      <SelectItem key={String(player.id)}>
+                        {player.name}
+                      </SelectItem>
+                    );
+                  })}
                 </Select>
               </div>
             ) : null}
@@ -164,21 +170,19 @@ export default function ScroreInput({
                   type="text"
                   inputMode="numeric"
                   isClearable={true}
-                  isInvalid={error.errorMsg !== ''}
+                  isInvalid={error !== ''}
                   onClear={() => {
                     setScore(0);
-                    setError({ errorMsg: '' });
+                    setError('');
                   }}
                   onBlur={() => {
                     if (score < 8 && score > 0) {
-                      setError({
-                        errorMsg: 'Hand score should be 8 or higher',
-                      });
+                      setError('Hand score should be 8 or higher');
                     } else {
-                      setError({ errorMsg: '' });
+                      setError('');
                     }
                   }}
-                  errorMessage={error.errorMsg}
+                  errorMessage={error}
                   pattern="\d*"
                   autoComplete="off"
                   label="Hand value"
@@ -196,7 +200,7 @@ export default function ScroreInput({
               type="submit"
               variant="flat"
               color="primary"
-              isDisabled={!outcome}
+              isDisabled={!outcome || (outcome !== Outcome.Draw && score === 0)}
               isLoading={isLoading}
             >
               OK
