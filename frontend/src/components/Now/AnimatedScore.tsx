@@ -66,6 +66,9 @@ export default function AnimatedScore({
     const prevScore = prevScoreRef.current;
     const prevPlayerId = prevPlayerIdRef.current;
 
+    // Always update displayScore
+    setDisplayScore(score);
+
     // Only trigger animation if playerId hasn't changed and score actually changed
     if (playerId === prevPlayerId && score !== prevScore) {
       // Clean up any existing animations
