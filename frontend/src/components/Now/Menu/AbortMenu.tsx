@@ -19,7 +19,7 @@ export default function AbortMenu({ gameId }: { gameId: number | null }) {
 
     setIsAborting(true);
     const abortRequest = DeleteRequest(`/api/game/${gameId}/abort`);
-    const data = await globalFetch<{}>(abortRequest);
+    const data = await globalFetch<null>(abortRequest);
 
     if (!data) {
       setIsAborting(false);

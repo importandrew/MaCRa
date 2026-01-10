@@ -22,7 +22,7 @@ const useFetchPlayers = () => {
       const data = await globalFetch<Player[]>(playersRequest);
 
       if (!data) return;
-      
+
       setSuggestions(data);
       setIsLoading(false);
     };
