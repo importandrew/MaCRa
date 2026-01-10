@@ -26,10 +26,9 @@ async function globalFetch<T>(
     // Global default error handler
     if (!response.ok) {
       const data = await response.json();
-      const errorMsg = data.error;
       isToastEnabled &&
         addToast({
-          title: errorMsg,
+          title: `Error: ${data.error}`,
           color: 'danger',
         });
       return data;
@@ -61,4 +60,11 @@ function GetRequest(url: string): Request {
   });
 }
 
-export { globalFetch, GetRequest, PostRequest };
+function DeleteRequest(url: string): Request {
+  return new Request(import.meta.env.VITE_API_ADDR + url, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+}
+
+export { globalFetch, GetRequest, PostRequest, DeleteRequest };

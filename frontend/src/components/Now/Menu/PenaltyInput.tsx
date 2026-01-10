@@ -48,7 +48,7 @@ export default function PenaltyInput({
     );
     const data = await globalFetch<GameResult>(roundResultRequest);
 
-    if (!data || 'error' in data) return;
+    if (!data) return;
 
     addToast({
       title: 'Penalty successfully added',
