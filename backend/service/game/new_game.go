@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func (s *Service) NewGame(ctx context.Context, playerIDs []int) (int, error) {
-	if err := validatePlayers(playerIDs); err != nil {
+	if err := s.validatePlayers(playerIDs); err != nil {
 		return 0, fmt.Errorf("%w: %w", models.ErrValidatePlayers, err)
 	}
 
@@ -27,12 +28,12 @@ func (s *Service) NewGame(ctx context.Context, playerIDs []int) (int, error) {
 
 	g := game.NewGame(gameCfg)
 
-	s.liveGames[g.ID()] = g
+	s.liveGames[gameID] = g
 
-	return g.ID(), nil
+	return gameID, nil
 }
 
-func validatePlayers(playerIDs []int) error {
+func (s *Service) validatePlayers(playerIDs []int) error {
 	// len = 4
 	if len(playerIDs) != 4 {
 		return fmt.Errorf("expected four player IDs, got %v", len(playerIDs))
@@ -51,6 +52,22 @@ func validatePlayers(playerIDs []int) error {
 
 	if len(slices.Compact(sorted)) != 4 {
 		return fmt.Errorf("expected four unique players, got ids %v", playerIDs)
+	}
+
+	// disallow same player in several games at the same time
+	for _, id := range playerIDs {
+		g, err := s.CurrentGame(id)
+		if err != nil {
+			if !errors.Is(err, models.ErrGameNotFound) {
+				// unexpected error
+				return fmt.Errorf("current game: %w", err)
+			}
+			// ok, game not found
+			continue
+		}
+
+		// game for player found
+		return fmt.Errorf("player (ID %v) already in game (ID %v)", id, g.ID())
 	}
 
 	return nil

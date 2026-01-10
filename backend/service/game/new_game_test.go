@@ -127,7 +127,10 @@ func TestValidatePlayers(t *testing.T) {
 
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
-			err := validatePlayers(testCase.playerIDs)
+			mockGameRepo := NewMockGameRepo(t)
+			mockPlayerRepo := NewMockPlayerRepo(t)
+			service := NewService(mockGameRepo, mockPlayerRepo)
+			err := service.validatePlayers(testCase.playerIDs)
 			testCase.expectedErr(t, err)
 		})
 	}
