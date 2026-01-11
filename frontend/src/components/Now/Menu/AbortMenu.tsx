@@ -50,6 +50,7 @@ export default function AbortMenu({ gameId }: { gameId: number | null }) {
           handleAbort();
         }}
         isOpen={isOpen}
+        headerText="Confirm abort game"
         cancelText="Cancel"
         confirmText="Abort Game"
         prompt="Are you sure you want to abort this game? This action cannot be undone."

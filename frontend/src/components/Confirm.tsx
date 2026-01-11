@@ -12,6 +12,7 @@ export interface ConfirmProps {
   onClose: () => void;
   onConfirm: () => void;
   prompt: string;
+  headerText: string;
   cancelText: string;
   confirmText: string;
 }
@@ -23,7 +24,7 @@ export default function Confirm(props: ConfirmProps) {
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              Confirm Abort Game
+              {props.headerText}
             </ModalHeader>
             <ModalBody>
               <p>{props.prompt}</p>
