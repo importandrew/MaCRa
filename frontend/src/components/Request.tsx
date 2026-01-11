@@ -19,7 +19,7 @@ async function globalFetch<T>(
         description: 'Redirecting to login...',
         color: 'danger',
       });
-      setTimeout(() => (window.location.href = '/login'), 10000);
+      setTimeout(() => (window.location.href = '/login'), 3000);
       return null;
     }
 
