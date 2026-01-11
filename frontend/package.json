@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@hawk.so/javascript": "^3.2.11",
-    "@heroui/react": "^2.8.2",
+    "@heroui/react": "^2.8.7",
     "framer-motion": "^11.5.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

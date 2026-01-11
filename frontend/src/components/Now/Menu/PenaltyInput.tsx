@@ -7,7 +7,7 @@ import {
   RadioGroup,
 } from '@heroui/react';
 import { FormEvent, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { addToast } from '@heroui/react';
 import { PlayerOrder } from '../../../models/GameData';
 import { globalFetch, PostRequest } from '../../Request';
 import { GameResult } from '../../../models/GameResult';
@@ -50,7 +50,11 @@ export default function PenaltyInput({
 
     if (!data || 'error' in data) return;
 
-    toast.warn('Penalty successfully added');
+    
+    addToast({
+      title: 'Penalty successfully added',
+      color: 'warning',
+    });
     resetPenaltyResults();
   };
 
