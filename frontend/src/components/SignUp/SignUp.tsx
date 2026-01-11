@@ -34,13 +34,16 @@ export default function SignUpPage() {
 
     const data = await globalFetch<object>(signupRequest);
 
-    if (data && !('error' in data)) {
-      addToast({
+    if (!data) {
+      setIsLoading(false);
+      return;
+    }
+
+    addToast({
         title: 'Registration successful! Now login, please',
         color: 'success',
       });
-      navigate('/login');
-    }
+    navigate('/login');
 
     setIsLoading(false);
   }, [email, password, name, navigate]);

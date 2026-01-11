@@ -33,7 +33,7 @@ export default function LoginPage() {
 
     const data = await globalFetch<UserData>(loginRequest);
 
-    if (!data || 'error' in data) {
+    if (!data) {
       setIsLoading(false);
       return;
     }

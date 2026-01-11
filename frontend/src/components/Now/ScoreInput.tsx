@@ -55,7 +55,7 @@ export default function ScroreInput({
       isToastEnabled: true,
     });
 
-    if (!data || 'error' in data) {
+    if (!data) {
       setIsLoading(false);
       return;
     }

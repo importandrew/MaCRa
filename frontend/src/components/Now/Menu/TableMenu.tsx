@@ -10,6 +10,7 @@ import { ListIcon } from '../../Icons/ListIcon';
 import { WarningIcon } from '../../Icons/WarningIcon';
 import PenaltyInput from './PenaltyInput';
 import LogsMenu from './LogsMenu';
+import AbortMenu from './AbortMenu';
 import { FansMenu } from './FansMenu';
 
 export default function TableMenu({
@@ -26,7 +27,7 @@ export default function TableMenu({
   return (
     <>
       <DrawerHeader className="flex flex-col gap-3">Table menu</DrawerHeader>
-      <DrawerBody>
+      <DrawerBody className="flex flex-col">
         <Accordion defaultExpandedKeys={[finedPlayerId ? 'penalty' : '']}>
           <AccordionItem
             key="penalty"
@@ -54,9 +55,11 @@ export default function TableMenu({
             aria-label="Fans"
             title="Fans"
           >
-            <FansMenu></FansMenu>
+            <FansMenu />
           </AccordionItem>
         </Accordion>
+
+        <AbortMenu gameId={gameId} />
       </DrawerBody>
     </>
   );

@@ -21,10 +21,13 @@ const useFetchPlayers = () => {
       const playersRequest = GetRequest('/api/players/list');
       const data = await globalFetch<Player[]>(playersRequest);
 
-      if (data) {
-        setSuggestions(data);
+      if (!data) {
+        setIsLoading(false);
+        setSuggestions([]);
+        return;
       }
 
+      setSuggestions(data);
       setIsLoading(false);
     };
 
