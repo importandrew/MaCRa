@@ -50,7 +50,6 @@
   0% {
     transform: translateY(0) rotate(0deg);
     color: #ef4444; /* red-500 */
-
   }
   50% {
     transform: translateY(10px) rotate(180deg);

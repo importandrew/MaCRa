@@ -50,7 +50,6 @@ export default function PenaltyInput({
 
     if (!data || 'error' in data) return;
 
-    
     addToast({
       title: 'Penalty successfully added',
       color: 'warning',
