@@ -1,4 +1,4 @@
-import { toast } from 'react-toastify';
+import { addToast } from '@heroui/react';
 import { Button, useDisclosure } from '@heroui/react';
 import { DeleteRequest, globalFetch } from '../../Request';
 import { useState } from 'react';
@@ -24,7 +24,10 @@ export default function AbortMenu({ gameId }: { gameId: number | null }) {
     }
 
     setIsAborting(false);
-    toast.warn('Game aborted');
+    addToast({
+      title: 'Game aborted',
+      color: 'warning',
+    });
 
     navigate('/');
   };
