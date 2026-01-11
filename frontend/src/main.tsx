@@ -14,6 +14,7 @@ if (process.env.NODE_ENV === 'development') {
     token:
       'REDACTED_HAWK_TOKEN',
     consoleTracking: true,
+    context: {},
   });
 }
 
