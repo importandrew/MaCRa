@@ -20,6 +20,9 @@ function App() {
           timeout: 3000,
           shouldShowTimeoutProgress: true,
         }}
+        regionProps={{
+          className: 'z-200',
+        }}
       />
       <NavigateSetter />
       <Routes>

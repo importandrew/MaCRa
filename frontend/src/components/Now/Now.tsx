@@ -149,7 +149,7 @@ export default function Now() {
             size="lg"
             isIconOnly
             onPress={refetch}
-            className="absolute z-100 left-0 bottom-0"
+            className="absolute z-1 left-0 bottom-0"
           >
             <RefreshIcon className="text-gray-400" />
           </Button>
