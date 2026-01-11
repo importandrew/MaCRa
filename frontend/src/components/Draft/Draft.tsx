@@ -21,7 +21,11 @@ const useFetchPlayers = () => {
       const playersRequest = GetRequest('/api/players/list');
       const data = await globalFetch<Player[]>(playersRequest);
 
-      if (!data) return;
+      if (!data) {
+        setIsLoading(false);
+        setSuggestions([]);
+        return;
+      }
 
       setSuggestions(data);
       setIsLoading(false);
@@ -78,7 +82,7 @@ export default function Draft() {
     const draftRequest = PostRequest('/api/new', { players });
     const data = await globalFetch<GameData>(draftRequest);
 
-    if (!data) return;
+    if (!data || 'error' in data) return;
 
     navigate('/now');
   };

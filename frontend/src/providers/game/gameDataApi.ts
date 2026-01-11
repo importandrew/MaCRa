@@ -125,6 +125,7 @@ export const useFetchPlayerStatus = () => {
 
     if (!data) {
       setData(null);
+      setIsLoading(false);
       return;
     }
 

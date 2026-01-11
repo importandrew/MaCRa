@@ -34,7 +34,10 @@ export default function SignUpPage() {
 
     const data = await globalFetch<object>(signupRequest);
 
-    if (!data) return;
+    if (!data) {
+      setIsLoading(false);
+      return;
+    }
 
     addToast({
         title: 'Registration successful! Now login, please',
