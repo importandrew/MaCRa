@@ -9,7 +9,7 @@ import {
 
 export interface ConfirmProps {
   isOpen: boolean;
-  onClose: any;
+  onClose: () => void;
   onConfirm: () => void;
   prompt: string;
   cancelText: string;
