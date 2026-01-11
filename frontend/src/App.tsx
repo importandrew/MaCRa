@@ -7,7 +7,6 @@ import MainPage from './components/Main/Main';
 import Now from './components/Now/Now';
 import SignUpPage from './components/SignUp/SignUp';
 import NavigateSetter from './providers/auth/NavigateSetter';
-import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 function App() {
