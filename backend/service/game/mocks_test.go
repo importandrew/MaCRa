@@ -1325,6 +1325,171 @@ func (_c *MockGameEngine_Penalty_Call) RunAndReturn(run func(loser int, value in
 	return _c
 }
 
+// PlayerBySeatInRound provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) PlayerBySeatInRound(round int, seat models.Wind) int {
+	ret := _mock.Called(round, seat)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PlayerBySeatInRound")
+	}
+
+	var r0 int
+	if returnFunc, ok := ret.Get(0).(func(int, models.Wind) int); ok {
+		r0 = returnFunc(round, seat)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	return r0
+}
+
+// MockGameEngine_PlayerBySeatInRound_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlayerBySeatInRound'
+type MockGameEngine_PlayerBySeatInRound_Call struct {
+	*mock.Call
+}
+
+// PlayerBySeatInRound is a helper method to define mock.On call
+//   - round int
+//   - seat models.Wind
+func (_e *MockGameEngine_Expecter) PlayerBySeatInRound(round interface{}, seat interface{}) *MockGameEngine_PlayerBySeatInRound_Call {
+	return &MockGameEngine_PlayerBySeatInRound_Call{Call: _e.mock.On("PlayerBySeatInRound", round, seat)}
+}
+
+func (_c *MockGameEngine_PlayerBySeatInRound_Call) Run(run func(round int, seat models.Wind)) *MockGameEngine_PlayerBySeatInRound_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		var arg1 models.Wind
+		if args[1] != nil {
+			arg1 = args[1].(models.Wind)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_PlayerBySeatInRound_Call) Return(n int) *MockGameEngine_PlayerBySeatInRound_Call {
+	_c.Call.Return(n)
+	return _c
+}
+
+func (_c *MockGameEngine_PlayerBySeatInRound_Call) RunAndReturn(run func(round int, seat models.Wind) int) *MockGameEngine_PlayerBySeatInRound_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PlayerByStartingSeat provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) PlayerByStartingSeat(seat models.Wind) int {
+	ret := _mock.Called(seat)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PlayerByStartingSeat")
+	}
+
+	var r0 int
+	if returnFunc, ok := ret.Get(0).(func(models.Wind) int); ok {
+		r0 = returnFunc(seat)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	return r0
+}
+
+// MockGameEngine_PlayerByStartingSeat_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlayerByStartingSeat'
+type MockGameEngine_PlayerByStartingSeat_Call struct {
+	*mock.Call
+}
+
+// PlayerByStartingSeat is a helper method to define mock.On call
+//   - seat models.Wind
+func (_e *MockGameEngine_Expecter) PlayerByStartingSeat(seat interface{}) *MockGameEngine_PlayerByStartingSeat_Call {
+	return &MockGameEngine_PlayerByStartingSeat_Call{Call: _e.mock.On("PlayerByStartingSeat", seat)}
+}
+
+func (_c *MockGameEngine_PlayerByStartingSeat_Call) Run(run func(seat models.Wind)) *MockGameEngine_PlayerByStartingSeat_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 models.Wind
+		if args[0] != nil {
+			arg0 = args[0].(models.Wind)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_PlayerByStartingSeat_Call) Return(n int) *MockGameEngine_PlayerByStartingSeat_Call {
+	_c.Call.Return(n)
+	return _c
+}
+
+func (_c *MockGameEngine_PlayerByStartingSeat_Call) RunAndReturn(run func(seat models.Wind) int) *MockGameEngine_PlayerByStartingSeat_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PlayerByWindInRound provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) PlayerByWindInRound(round int, wind models.Wind) int {
+	ret := _mock.Called(round, wind)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PlayerByWindInRound")
+	}
+
+	var r0 int
+	if returnFunc, ok := ret.Get(0).(func(int, models.Wind) int); ok {
+		r0 = returnFunc(round, wind)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	return r0
+}
+
+// MockGameEngine_PlayerByWindInRound_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlayerByWindInRound'
+type MockGameEngine_PlayerByWindInRound_Call struct {
+	*mock.Call
+}
+
+// PlayerByWindInRound is a helper method to define mock.On call
+//   - round int
+//   - wind models.Wind
+func (_e *MockGameEngine_Expecter) PlayerByWindInRound(round interface{}, wind interface{}) *MockGameEngine_PlayerByWindInRound_Call {
+	return &MockGameEngine_PlayerByWindInRound_Call{Call: _e.mock.On("PlayerByWindInRound", round, wind)}
+}
+
+func (_c *MockGameEngine_PlayerByWindInRound_Call) Run(run func(round int, wind models.Wind)) *MockGameEngine_PlayerByWindInRound_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		var arg1 models.Wind
+		if args[1] != nil {
+			arg1 = args[1].(models.Wind)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_PlayerByWindInRound_Call) Return(n int) *MockGameEngine_PlayerByWindInRound_Call {
+	_c.Call.Return(n)
+	return _c
+}
+
+func (_c *MockGameEngine_PlayerByWindInRound_Call) RunAndReturn(run func(round int, wind models.Wind) int) *MockGameEngine_PlayerByWindInRound_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Players provides a mock function for the type MockGameEngine
 func (_mock *MockGameEngine) Players() [4]int {
 	ret := _mock.Called()

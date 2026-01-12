@@ -9,9 +9,9 @@ import (
 
 type Game struct {
 	id             int
-	startSeating   Seating
-	currentSeating Seating
-	roundSeating   Seating
+	startSeating   Seating // at the start of the game
+	currentSeating Seating // at the moment
+	roundSeating   Seating // at the round start (after 4, 8, 12 reseats). dont confuse with 'round' field
 	status         models.GameStatus
 	round          int
 	rules          Rules

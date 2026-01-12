@@ -46,6 +46,10 @@ type GameEngine interface {
 
 	Players() [4]int
 	RoundStartPlayers() [4]int
+
+	PlayerBySeatInRound(round int, seat models.Wind) int
+	PlayerByStartingSeat(seat models.Wind) int
+	PlayerByWindInRound(round int, wind models.Wind) int
 }
 
 type Service struct {
