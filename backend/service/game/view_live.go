@@ -15,7 +15,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 	score := game.Score()
 	round := game.Round()
 
-	playerScores := make([]models.PlayerWindScore, 0, 4)
+	playerScores := make([]models.PlayerWindScore, 0, len(models.Winds))
 	for _, wind := range models.Winds {
 		playerID := game.PlayerBySeatInRound(round, wind)
 

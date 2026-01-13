@@ -9,6 +9,7 @@ import (
 var (
 	ErrGameNotFound             = errors.New("game not found")
 	ErrGameNotLive              = errors.New("game is not live")
+	ErrGameNotEnded             = errors.New("game is not ended")
 	ErrValidateEnterRoundResult = errors.New("round result validate")
 
 	ErrPlayerNotFound   = errors.New("player not found")
@@ -34,6 +35,7 @@ var Errors = map[error]int{
 	ErrGameNotFound:   http.StatusNotFound,
 	ErrPlayerNotFound: http.StatusNotFound,
 	ErrGameNotLive:    http.StatusNotFound,
+	ErrGameNotEnded:   http.StatusNotFound,
 
 	// 409
 	ErrPlayerExists:  http.StatusConflict,

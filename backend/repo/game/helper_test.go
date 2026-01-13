@@ -271,3 +271,16 @@ func getPlayerResults(t *testing.T, conn *pgxpool.Conn, gameID int) []playerResu
 
 	return results
 }
+
+func setGameFinishedAt(t *testing.T, conn *pgxpool.Conn, gameID int) {
+	t.Helper()
+	ctx := context.Background()
+	_, err := conn.Exec(ctx, `
+		UPDATE games 
+		SET finished_at = CURRENT_TIMESTAMP 
+		WHERE id = $1`,
+		gameID)
+	if err != nil {
+		t.Fatalf("Failed to set finished_at: %v", err)
+	}
+}

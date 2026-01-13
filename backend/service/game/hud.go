@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Service) HUD(ctx context.Context, gameID int, linger int) (models.GameHUD, error) {
-	status, err := s.gameRepo.Status(ctx, gameID)
+	status, err := s.Status(ctx, gameID)
 	if err != nil {
 		return models.GameHUD{}, err
 	}
@@ -113,7 +113,7 @@ func (s *Service) liveHUD(ctx context.Context, gameID, linger int) (models.GameH
 func diff(logs []models.RoundLog, wind models.Wind) string {
 	count := len(logs)
 	lastIdx := count - 1
-	prevIdx := count - 2
+	prevIdx := count - 2 //nolint: mnd
 
 	switch count {
 	case 0:
