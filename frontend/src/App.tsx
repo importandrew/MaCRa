@@ -2,6 +2,7 @@ import { HeroUIProvider, ToastProvider } from '@heroui/react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import Draft from './components/Draft/Draft';
 import End from './components/End/End';
+import Live from './components/Live/Live';
 import LoginPage from './components/Login/Login';
 import MainPage from './components/Main/Main';
 import Now from './components/Now/Now';
@@ -32,6 +33,7 @@ function App() {
         <Route path="/now" element={<Now />} />
         <Route path="/last" element={<End />} />
         <Route path="/new" element={<Draft />} />
+        <Route path="/game/:id/live" element={<Live />} />
       </Routes>
     </HeroUIProvider>
   );

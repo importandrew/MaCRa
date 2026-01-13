@@ -5,8 +5,8 @@ import {
   DropdownMenu,
   DropdownItem,
 } from '@heroui/react';
-import { WarningIcon } from '../../Icons/WarningIcon';
 import { PlayerOrder } from '../../../models/GameData';
+import { WarningIcon } from '../../Icons/WarningIcon';
 import { UserIcon } from '../../Icons/UserIcon';
 
 export default function PlayerMenu({
@@ -16,12 +16,6 @@ export default function PlayerMenu({
   player: PlayerOrder | undefined;
   setFinedPlayerId: (id: number) => void;
 }) {
-  const initials = player?.name
-    .trim()
-    .split(' ')
-    .map((item: string) => item[0].toLocaleUpperCase())
-    .join('');
-
   const assignPenalty = (_event: unknown, id: number) => {
     setFinedPlayerId(id);
   };
@@ -34,7 +28,7 @@ export default function PlayerMenu({
           className="transition-transform"
           color="default"
           size="md"
-          name={initials}
+          name={player?.name || ''}
         />
       </DropdownTrigger>
       {player && (

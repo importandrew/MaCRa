@@ -40,9 +40,9 @@ export default function SignUpPage() {
     }
 
     addToast({
-        title: 'Registration successful! Now login, please',
-        color: 'success',
-      });
+      title: 'Registration successful! Now login, please',
+      color: 'success',
+    });
     navigate('/login');
 
     setIsLoading(false);
