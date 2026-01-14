@@ -31,7 +31,7 @@ async function globalFetch<T>(
           title: `Error: ${data.error}`,
           color: 'danger',
         });
-      return data;
+      return null;
     }
 
     const data = JSON.parse((await response.text()) || '{}');
