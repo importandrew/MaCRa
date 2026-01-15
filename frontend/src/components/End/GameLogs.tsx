@@ -9,7 +9,7 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react';
-import { ReactElement, useCallback } from 'react';
+import { useCallback } from 'react';
 import {
   Brush,
   CartesianGrid,
@@ -153,22 +153,6 @@ export default function GameLogs({
 
   const preparedData = transformGameDataForTable(data);
   const chartData = transformGameDataForChart(preparedData);
-
-  const getPlayerColumns = (
-    preparedData: PreparedGameRoundLogs
-  ): ReactElement => {
-    return (
-      <>
-        {preparedData.players.map((player) => (
-          <TableColumn align="end" key={player.id}>
-            <Tooltip content={player.id}>
-              <div>{player.name}</div>
-            </Tooltip>
-          </TableColumn>
-        ))}
-      </>
-    );
-  };
 
   const getColoredScore = (value: number | undefined) => {
     if (value === undefined) {
@@ -350,7 +334,13 @@ export default function GameLogs({
         >
           <TableHeader>
             <TableColumn align="end">#</TableColumn>
-            {getPlayerColumns(preparedData)}
+            {preparedData.players.map((player) => (
+              <TableColumn align="end" key={player.id}>
+                <Tooltip content={player.id}>
+                  <div>{player.name}</div>
+                </Tooltip>
+              </TableColumn>
+            )) as unknown as any}
             <TableColumn align="end">
               <Tooltip content={getLegend()}>Result</Tooltip>
             </TableColumn>

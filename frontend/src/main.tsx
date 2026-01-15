@@ -22,12 +22,7 @@ ReactDOM.createRoot(document.getElementById('root') as Container).render(
   <React.StrictMode>
     <AuthProvider>
       <Layout>
-        <BrowserRouter
-          future={{
-            v7_relativeSplatPath: true,
-            v7_startTransition: true,
-          }}
-        >
+        <BrowserRouter>
           <main className="flex grow light text-foreground bg-background">
             <App />
           </main>
