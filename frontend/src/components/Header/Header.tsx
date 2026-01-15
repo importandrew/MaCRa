@@ -18,7 +18,7 @@ export default function Header() {
     <Navbar maxWidth="full">
       <NavbarBrand className="gap-3">
         <Link color="foreground" href="/">
-          <Image src="../makura.png" className="h-10" />
+          <Image src="/makura.png" className="h-10" />
           <NavbarItem>MaCRa</NavbarItem>
         </Link>
       </NavbarBrand>

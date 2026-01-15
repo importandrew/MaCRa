@@ -18,6 +18,8 @@ type GameService interface {
 	NewGame(ctx context.Context, playerIDs []int) (gameID int, err error)
 	Players(ctx context.Context, gameID int) (models.GamePlayers, error)
 	HUD(ctx context.Context, gameID int, linger int) (models.GameHUD, error)
+	ViewLive(ctx context.Context, gameID int) (models.GameView, error)
+	Status(ctx context.Context, gameID int) (models.GameStatus, error)
 }
 
 type PlayerService interface {

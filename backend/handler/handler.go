@@ -36,6 +36,9 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 		publicAPI.GET("/game/:id/players", h.game.Players)
 		publicAPI.GET("/game/:id/logs", h.game.Logs)
 		publicAPI.GET("/game/:id/hud", h.game.HUD)
+		publicAPI.GET("/game/:id/live", h.game.ViewLive)
+		publicAPI.GET("/game/:id/result", h.game.FinalResult)
+		publicAPI.GET("/game/:id/status", h.game.Status)
 
 		publicAPI.GET("/players/list", h.player.List)
 	}
@@ -44,7 +47,6 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	authAPI := publicAPI.Group("/", h.authmw.IdentifyUser)
 	{
 		authAPI.DELETE("/game/:id/abort", h.game.Abort)
-		authAPI.GET("/game/:id/result", h.game.FinalResult)
 
 		// auto-detects user who called this api
 		{

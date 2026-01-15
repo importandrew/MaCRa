@@ -46,3 +46,11 @@ type PlayerResult struct {
 	TP   float32 `db:"tp" json:"tp"`
 	GP   int     `db:"gp" json:"gp"`
 }
+
+type GameView struct {
+	ID     int        `json:"id"`
+	Status GameStatus `json:"status"`
+	Round  Round      `json:"round"`
+
+	PlayerScores []PlayerWindScore `json:"player_scores"`
+}

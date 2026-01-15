@@ -22,6 +22,7 @@ func TestGameResult(t *testing.T) {
 		"ok sorted": {
 			gameID: 100,
 			mockSetup: func(m *MockGameRepo, gameID int) {
+				m.On("Status", mock.Anything, gameID).Return(models.GameEnded, nil)
 				m.On("GameResult", mock.Anything, gameID).Return(
 					models.GameResult{
 						ID: 100,
@@ -49,6 +50,7 @@ func TestGameResult(t *testing.T) {
 		"repo error": {
 			gameID: 100,
 			mockSetup: func(m *MockGameRepo, gameID int) {
+				m.On("Status", mock.Anything, gameID).Return(models.GameEnded, nil)
 				m.On("GameResult", mock.Anything, gameID).Return(
 					models.GameResult{},
 					errors.New("database error"),
@@ -59,6 +61,7 @@ func TestGameResult(t *testing.T) {
 		"empty result": {
 			gameID: 200,
 			mockSetup: func(m *MockGameRepo, gameID int) {
+				m.On("Status", mock.Anything, gameID).Return(models.GameEnded, nil)
 				m.On("GameResult", mock.Anything, gameID).Return(
 					models.GameResult{
 						ID:            200,
