@@ -50,7 +50,7 @@ export default function GameLogs({
 
     const item = preparedData.rounds.slice(-1)[0];
 
-    if (item.initial_scores === null || item.score_changes === null) return;
+    if (!item.initial_scores || !item.score_changes) return;
 
     const matrix: [number[], number[]] = [
       item.initial_scores,
@@ -333,21 +333,25 @@ export default function GameLogs({
           className="sm:w-fit self-center"
         >
           <TableHeader>
-            <TableColumn align="end">#</TableColumn>
-            {preparedData.players.map((player) => (
-              <TableColumn align="end" key={player.id}>
-                <Tooltip content={player.id}>
-                  <div>{player.name}</div>
-                </Tooltip>
-              </TableColumn>
-            )) as unknown as any}
-            <TableColumn align="end">
-              <Tooltip content={getLegend()}>Result</Tooltip>
-            </TableColumn>
+            {[
+              <TableColumn align="end" key="round">
+                #
+              </TableColumn>,
+              ...preparedData.players.map((player) => (
+                <TableColumn align="end" key={player.id}>
+                  <Tooltip content={player.id}>
+                    <div>{player.name}</div>
+                  </Tooltip>
+                </TableColumn>
+              )),
+              <TableColumn align="end" key="result">
+                <Tooltip content={getLegend()}>Result</Tooltip>
+              </TableColumn>,
+            ]}
           </TableHeader>
           <TableBody>
-            <>
-              {preparedData.rounds.map((item) => (
+            {[
+              ...preparedData.rounds.map((item) => (
                 <TableRow key={getRowKey(item)}>
                   <TableCell>{item.round}</TableCell>
                   <TableCell>
@@ -402,26 +406,28 @@ export default function GameLogs({
                     <div className="text-base">{getResultScore(item)}</div>
                   </TableCell>
                 </TableRow>
-              ))}
-              {finalScores?.length === 4 && (
-                <TableRow key={'finalScores'}>
-                  <TableCell className="text-base font-bold">Σ</TableCell>
-                  <TableCell className="text-base font-bold">
-                    {finalScores[0]}
-                  </TableCell>
-                  <TableCell className="text-base font-bold">
-                    {finalScores[1]}
-                  </TableCell>
-                  <TableCell className="text-base font-bold">
-                    {finalScores[2]}
-                  </TableCell>
-                  <TableCell className="text-base font-bold">
-                    {finalScores[3]}
-                  </TableCell>
-                  <TableCell> </TableCell>
-                </TableRow>
-              )}
-            </>
+              )),
+              ...(finalScores?.length === 4
+                ? [
+                    <TableRow key={'finalScores'}>
+                      <TableCell className="text-base font-bold">Σ</TableCell>
+                      <TableCell className="text-base font-bold">
+                        {finalScores[0]}
+                      </TableCell>
+                      <TableCell className="text-base font-bold">
+                        {finalScores[1]}
+                      </TableCell>
+                      <TableCell className="text-base font-bold">
+                        {finalScores[2]}
+                      </TableCell>
+                      <TableCell className="text-base font-bold">
+                        {finalScores[3]}
+                      </TableCell>
+                      <TableCell> </TableCell>
+                    </TableRow>,
+                  ]
+                : []),
+            ]}
           </TableBody>
         </Table>
       ) : null}

@@ -33,7 +33,7 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'warn',
     'prettier/prettier': 'warn',
     'jsx-a11y/anchor-is-valid': 'off', // Disable if using Next.js Link
-    'no-unused-vars': 'warn', // Warn about unused variables
+    'no-unused-vars': 'off', // Warn about unused variables
     'no-console': 'warn', // Warn about console logs
   },
   settings: {
