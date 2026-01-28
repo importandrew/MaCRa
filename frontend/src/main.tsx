@@ -15,6 +15,13 @@ if (process.env.NODE_ENV === 'development') {
       'REDACTED_HAWK_TOKEN',
     consoleTracking: true,
     context: {},
+    beforeSend: (event) => {
+      const titleIgnorePatterns = ['Script error.'];
+
+      if (titleIgnorePatterns.includes(event.title.trim())) return false;
+
+      return event;
+    },
   });
 }
 
