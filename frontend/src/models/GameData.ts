@@ -38,7 +38,11 @@ export enum Outcome {
 }
 
 export interface AnimatedScoreProps {
-  score: number;
+  scoreData: ScoreDataByPlayerIds;
   playerId: number;
   className?: string;
+}
+
+export interface ScoreDataByPlayerIds {
+  [playerId: number]: number;
 }

@@ -1,6 +1,7 @@
 import { Avatar, Button, Spinner } from '@heroui/react';
 import { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { PlayerScore } from '../../models/GameData';
 import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import { RefreshIcon } from '../Icons/RefreshIcon';
@@ -23,9 +24,9 @@ export default function Live() {
     refetch();
   }, [refetch]);
 
-  const getPlayer = (index: number) => {
+  const getPlayer = (index: number): PlayerScore => {
     if (!data || !data.player_scores || data.player_scores.length !== 4) {
-      return null;
+      return {} as PlayerScore;
     }
 
     const rotatedIndex = (index - rotationOffset + 4) % 4;
@@ -68,11 +69,18 @@ export default function Live() {
       </div>
     );
   }
-
+  
   const east = getPlayer(0);
   const south = getPlayer(1);
   const west = getPlayer(2);
   const north = getPlayer(3);
+
+  const scoreData = {
+    [east.id]: east.score,
+    [south.id]: south.score,
+    [west.id]: west.score,
+    [north.id]: north.score,
+  }
 
   if (!east || !south || !west || !north) {
     return (
@@ -102,7 +110,7 @@ export default function Live() {
               {west.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={west.score} />
+              <AnimatedScore scoreData={scoreData} playerId={west.id} />
             </span>
           </div>
         </div>
@@ -120,7 +128,7 @@ export default function Live() {
               {north.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={north.score} />
+              <AnimatedScore scoreData={scoreData} playerId={north.id} />
             </span>
           </div>
         </div>
@@ -166,7 +174,7 @@ export default function Live() {
               {south.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={south.score} />
+              <AnimatedScore scoreData={scoreData} playerId={south.id} />
             </span>
           </div>
         </div>
@@ -195,7 +203,7 @@ export default function Live() {
               {east.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={east.score} />
+              <AnimatedScore scoreData={scoreData} playerId={east.id} />
             </span>
           </div>
         </div>

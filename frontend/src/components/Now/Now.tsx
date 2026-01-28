@@ -44,6 +44,20 @@ export default function Now() {
     }
   }, [finedPlayerId, data]);
 
+  const { me, opp, left, right } = roundData || {
+    me: { id: 0 },
+    opp: { id: 0 },
+    left: { id: 0 },
+    right: { id: 0 },
+  };
+
+  const currentPlayersScore = {
+    [me.id]: me.score || 0,
+    [opp.id]: opp.score || 0,
+    [left.id]: left.score || 0,
+    [right.id]: right.score || 0,
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-screen my-auto justify-center items-center">
@@ -92,7 +106,10 @@ export default function Now() {
               {roundData.opp.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.opp.score} playerId={roundData.opp.id} />
+              <AnimatedScore
+                scoreData={currentPlayersScore}
+                playerId={roundData.opp.id}
+              />
             </span>
           </div>
         </div>
@@ -112,7 +129,10 @@ export default function Now() {
               {roundData.left.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.left.score} playerId={roundData.left.id} />
+              <AnimatedScore
+                scoreData={currentPlayersScore}
+                playerId={roundData.left.id}
+              />
             </span>
           </div>
         </div>
@@ -138,7 +158,10 @@ export default function Now() {
               {roundData.right.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.right.score} playerId={roundData.right.id} />
+              <AnimatedScore
+                scoreData={currentPlayersScore}
+                playerId={roundData.right.id}
+              />
             </span>
           </div>
         </div>
@@ -169,7 +192,10 @@ export default function Now() {
               {roundData.me.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={roundData.me.score} playerId={roundData.me.id} />
+              <AnimatedScore
+                scoreData={currentPlayersScore}
+                playerId={roundData.me.id}
+              />
             </span>
           </div>
         </div>

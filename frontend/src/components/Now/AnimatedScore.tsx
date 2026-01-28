@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatedScoreProps } from '../../models/GameData';
 
 export default function AnimatedScore({
-  score,
+  scoreData,
   playerId,
   className = '',
 }: AnimatedScoreProps) {
-  const [displayScore, setDisplayScore] = useState(score);
+  const [displayScore, setDisplayScore] = useState<number>(scoreData[playerId]);
   const [animationClass, setAnimationClass] = useState('');
-  const prevScoreRef = useRef(score);
-  const prevPlayerIdRef = useRef(playerId);
+  const prevScoreRef = useRef<number>(scoreData[playerId]);
+  const prevPlayerIdRef = useRef<number>(playerId);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -42,6 +42,7 @@ export default function AnimatedScore({
 
       // Calculate current score based on progress
       const currentScore = Math.round(start + (end - start) * easeOutQuart);
+
       setDisplayScore(currentScore);
 
       // Continue animation if not complete
@@ -63,34 +64,35 @@ export default function AnimatedScore({
   };
 
   useEffect(() => {
+    const currentScore = scoreData[playerId];
     const prevScore = prevScoreRef.current;
-    const prevPlayerId = prevPlayerIdRef.current;
 
-    // Always update displayScore
-    setDisplayScore(score);
+    if (playerId !== prevPlayerIdRef.current) {
+      setDisplayScore(currentScore);
+      prevPlayerIdRef.current = playerId;
+    }
 
-    // Only trigger animation if playerId hasn't changed and score actually changed
-    if (playerId === prevPlayerId && score !== prevScore) {
+    // Only trigger animation if score actually changed
+    if (currentScore !== prevScore) {
       // Clean up any existing animations
       cleanup();
 
       // Determine animation direction
-      const isIncreasing = score > prevScore;
+      const isIncreasing = currentScore > prevScore;
       setAnimationClass(isIncreasing ? 'score-increase' : 'score-decrease');
 
       // Start the counting animation
-      animateScoreChange(prevScore, score);
+      animateScoreChange(prevScore, currentScore);
     }
 
-    // Update previous references
-    prevScoreRef.current = score;
-    prevPlayerIdRef.current = playerId;
+    // Update ref for next render
+    prevScoreRef.current = currentScore;
 
     // Cleanup on unmount
     return () => {
       cleanup();
     };
-  }, [score, playerId]);
+  }, [scoreData, playerId]);
 
   return (
     <span className={`${className} ${animationClass}`}>{displayScore}</span>
