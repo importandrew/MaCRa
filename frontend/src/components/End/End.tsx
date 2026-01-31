@@ -9,13 +9,15 @@ export default function End() {
   const navigate = useNavigate();
   const { data, isError, isLoading, fetchData } = useFetchGameResultData(true);
   const [isChartVisible, setIsChartVisible] = useState(false);
-  const [isLogsVisible, setIsLogsVisibale] = useState(false);
+  const [isLogsVisible, setIsLogsVisible] = useState(false);
 
   const showChart = () => {
     setIsChartVisible(!isChartVisible);
+    setIsLogsVisible(false);
   };
   const showLogs = () => {
-    setIsLogsVisibale(!isLogsVisible);
+    setIsLogsVisible(!isLogsVisible);
+    setIsChartVisible(false);
   };
 
   const onRefresh = useCallback(() => {
@@ -68,7 +70,7 @@ export default function End() {
           color="default"
           variant="flat"
         >
-          Show chart
+          {isChartVisible ? "Hide chart" : "Show chart"}
         </Button>
         <Button
           type="button"
@@ -76,7 +78,7 @@ export default function End() {
           color="secondary"
           variant="flat"
         >
-          Show logs
+          {isLogsVisible ? "Hide logs" : "Show logs"}
         </Button>
         <Button
           type="button"
