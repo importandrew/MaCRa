@@ -61,7 +61,7 @@ export default function End() {
   return (
     <div className="flex flex-col grow justify-center w-screen sm:max-w-[600px] h-full px-3 gap-3">
       <GameResultsTable data={data} />
-      <div className="flex justify-center gap-3">
+      <div className="grid grid-cols-2 sm:flex sm:flex-row justify-center gap-3">
         <Button
           type="button"
           onPress={showChart}
