@@ -1,6 +1,6 @@
 import { Button, Form, Spinner } from '@heroui/react';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { addToast } from '@heroui/react';
 import { Player } from '../../models/Player';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
@@ -39,6 +39,7 @@ const useFetchPlayers = () => {
 
 export default function Draft() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [players, setPlayers] = useState<(number | undefined)[]>([]);
   const { suggestions, isLoading } = useFetchPlayers();
 
@@ -47,6 +48,19 @@ export default function Draft() {
     () => players.map((playerId) => playerId?.toString() || ''),
     [players]
   );
+
+  // Set initial player IDs if provided in location state
+  useEffect(() => {
+    if (location.state?.playerIds) {
+      const playerIds = location.state.playerIds as number[];
+      // Pad with undefined values if less than 4 players
+      const paddedPlayerIds: (number | undefined)[] = [...playerIds];
+      while (paddedPlayerIds.length < 4) {
+        paddedPlayerIds.push(undefined);
+      }
+      setPlayers(paddedPlayerIds.slice(0, 4));
+    }
+  }, [location.state]);
 
   // Handle player selection changes
   const handleSuggestionsChange = useCallback(() => {

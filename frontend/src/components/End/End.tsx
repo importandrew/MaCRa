@@ -1,24 +1,35 @@
 import { Button, Link, Spinner } from '@heroui/react';
 import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFetchGameResultData } from '../../providers/game/gameDataApi';
 import GameLogs from './GameLogs';
 import GameResultsTable from './GameResultsTable';
 
 export default function End() {
+  const navigate = useNavigate();
   const { data, isError, isLoading, fetchData } = useFetchGameResultData(true);
   const [isChartVisible, setIsChartVisible] = useState(false);
-  const [isLogsVisible, setIsLogsVisibale] = useState(false);
+  const [isLogsVisible, setIsLogsVisible] = useState(false);
 
   const showChart = () => {
     setIsChartVisible(!isChartVisible);
+    setIsLogsVisible(false);
   };
   const showLogs = () => {
-    setIsLogsVisibale(!isLogsVisible);
+    setIsLogsVisible(!isLogsVisible);
+    setIsChartVisible(false);
   };
 
   const onRefresh = useCallback(() => {
     fetchData();
   }, [fetchData]);
+
+  const playAgain = () => {
+    if (data) {
+      const playerIds = data.player_results.map(player => player.id);
+      navigate('/new', { state: { playerIds } });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -52,14 +63,14 @@ export default function End() {
   return (
     <div className="flex flex-col grow justify-center w-screen sm:max-w-[600px] h-full px-3 gap-3">
       <GameResultsTable data={data} />
-      <div className="flex justify-center gap-3">
+      <div className="grid grid-cols-2 sm:flex sm:flex-row justify-center gap-3">
         <Button
           type="button"
           onPress={showChart}
           color="default"
           variant="flat"
         >
-          Show chart
+          {isChartVisible ? "Hide chart" : "Show chart"}
         </Button>
         <Button
           type="button"
@@ -67,7 +78,15 @@ export default function End() {
           color="secondary"
           variant="flat"
         >
-          Show logs
+          {isLogsVisible ? "Hide logs" : "Show logs"}
+        </Button>
+        <Button
+          type="button"
+          onPress={playAgain}
+          color="success"
+          variant="flat"
+        >
+          Play Again
         </Button>
         <Button href="/" as={Link} color="primary" variant="flat">
           Home
