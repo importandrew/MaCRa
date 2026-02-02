@@ -1,15 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatedScoreProps } from '../../models/GameData';
+
+interface AnimatedScoreProps {
+  previousScores: Record<number, number>;
+  currentScores: Record<number, number>;
+  playerId: number;
+  className?: string;
+}
 
 export default function AnimatedScore({
-  scoreData,
+  previousScores,
+  currentScores,
   playerId,
   className = '',
 }: AnimatedScoreProps) {
-  const [displayScore, setDisplayScore] = useState<number>(scoreData[playerId]);
+  const previousScore = previousScores[playerId] ?? 0;
+  const currentScore = currentScores[playerId] ?? 0;
+
+  const [displayScore, setDisplayScore] = useState(currentScore);
   const [animationClass, setAnimationClass] = useState('');
-  const prevScoreRef = useRef<number>(scoreData[playerId]);
-  const prevPlayerIdRef = useRef<number>(playerId);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -64,35 +72,27 @@ export default function AnimatedScore({
   };
 
   useEffect(() => {
-    const currentScore = scoreData[playerId];
-    const prevScore = prevScoreRef.current;
-
-    if (playerId !== prevPlayerIdRef.current) {
-      setDisplayScore(currentScore);
-      prevPlayerIdRef.current = playerId;
-    }
-
     // Only trigger animation if score actually changed
-    if (currentScore !== prevScore) {
+    if (currentScore !== previousScore) {
       // Clean up any existing animations
       cleanup();
 
       // Determine animation direction
-      const isIncreasing = currentScore > prevScore;
+      const isIncreasing = currentScore > previousScore;
       setAnimationClass(isIncreasing ? 'score-increase' : 'score-decrease');
 
       // Start the counting animation
-      animateScoreChange(prevScore, currentScore);
+      animateScoreChange(previousScore, currentScore);
+    } else {
+      // Score hasn't changed, just update display
+      setDisplayScore(currentScore);
     }
-
-    // Update ref for next render
-    prevScoreRef.current = currentScore;
 
     // Cleanup on unmount
     return () => {
       cleanup();
     };
-  }, [scoreData, playerId]);
+  }, [currentScore]);
 
   return (
     <span className={`${className} ${animationClass}`}>{displayScore}</span>

@@ -1,5 +1,5 @@
 import { Button, Spinner } from '@heroui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameData } from '../../models/GameData';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
@@ -15,6 +15,20 @@ export default function Now() {
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [currentScores, setCurrentScores] = useState<Record<number, number>>({})
+  const currentScoresRef = useRef<Record<number, number>>({});
+  const [previousScores, setPreviousScores] = useState<Record<number, number>>(
+    () => {
+      // Initialize with player IDs as keys and zeros as values
+      if (playersList.length == 0) {
+        return {};
+      }
+      return playersList.reduce(
+        (acc, p) => ({ ...acc, [p.id]: 0 }),
+        {} as Record<number, number>
+      );
+    }
+  );
 
   const openContextMenuOpen = () => {
     setIsContextMenuOpen(true);
@@ -44,19 +58,25 @@ export default function Now() {
     }
   }, [finedPlayerId, data]);
 
-  const { me, opp, left, right } = roundData || {
-    me: { id: 0 },
-    opp: { id: 0 },
-    left: { id: 0 },
-    right: { id: 0 },
-  };
+  // Update currentScores when roundData changes, and save previous scores
+  useEffect(() => {
+    if (roundData) {
+      // Save current scores to previous before updating
+      if (currentScoresRef.current) {
+        setPreviousScores(currentScoresRef.current);
+      }
 
-  const currentPlayersScore = {
-    [me.id]: me.score || 0,
-    [opp.id]: opp.score || 0,
-    [left.id]: left.score || 0,
-    [right.id]: right.score || 0,
-  };
+      // Update current scores with new data
+      const newScores = {
+        [roundData.me.id]: roundData.me.score,
+        [roundData.right.id]: roundData.right.score,
+        [roundData.opp.id]: roundData.opp.score,
+        [roundData.left.id]: roundData.left.score,
+      };
+      currentScoresRef.current = newScores;
+      setCurrentScores(newScores);
+    }
+  }, [roundData]);
 
   if (isLoading) {
     return (
@@ -107,7 +127,8 @@ export default function Now() {
             </span>
             <span className="text-ellipsis overflow-hidden">
               <AnimatedScore
-                scoreData={currentPlayersScore}
+                previousScores={previousScores}
+                currentScores={currentScores}
                 playerId={roundData.opp.id}
               />
             </span>
@@ -130,7 +151,8 @@ export default function Now() {
             </span>
             <span className="text-ellipsis overflow-hidden">
               <AnimatedScore
-                scoreData={currentPlayersScore}
+                previousScores={previousScores}
+                currentScores={currentScores}
                 playerId={roundData.left.id}
               />
             </span>
@@ -159,7 +181,8 @@ export default function Now() {
             </span>
             <span className="text-ellipsis overflow-hidden">
               <AnimatedScore
-                scoreData={currentPlayersScore}
+                previousScores={previousScores}
+                currentScores={currentScores}
                 playerId={roundData.right.id}
               />
             </span>
@@ -193,7 +216,8 @@ export default function Now() {
             </span>
             <span className="text-ellipsis overflow-hidden">
               <AnimatedScore
-                scoreData={currentPlayersScore}
+                previousScores={previousScores}
+                currentScores={currentScores}
                 playerId={roundData.me.id}
               />
             </span>
