@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DeleteRequest,
   GetRequest,
@@ -160,6 +160,7 @@ export const useFetchLiveGameData = (gameId: number) => {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
+  const playersFetchedRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -176,8 +177,11 @@ export const useFetchLiveGameData = (gameId: number) => {
       return;
     }
 
+    // Always update the game data
+    setData(data);
+
     // Request players list only once on game start or page refresh
-    if (playersList.length) {
+    if (playersFetchedRef.current) {
       setIsLoading(false);
       return;
     }
@@ -190,7 +194,7 @@ export const useFetchLiveGameData = (gameId: number) => {
     }
 
     setPlayersList(playersResult?.players || []);
-    setData(data);
+    playersFetchedRef.current = true;
     setIsLoading(false);
   }, [gameId]);
 
