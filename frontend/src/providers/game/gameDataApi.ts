@@ -159,6 +159,7 @@ export const useFetchLiveGameData = (gameId: number) => {
   const [data, setData] = useState<GameView | null>(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -175,6 +176,20 @@ export const useFetchLiveGameData = (gameId: number) => {
       return;
     }
 
+    // Request players list only once on game start or page refresh
+    if (playersList.length) {
+      setIsLoading(false);
+      return;
+    }
+
+    const gamePlayersRequest = GetRequest(`/api/game/${data.id}/players`);
+    const playersResult = await globalFetch<GamePlayers>(gamePlayersRequest);
+
+    if (!playersResult) {
+      setIsError(true);
+    }
+
+    setPlayersList(playersResult?.players || []);
     setData(data);
     setIsLoading(false);
   }, [gameId]);
@@ -183,5 +198,5 @@ export const useFetchLiveGameData = (gameId: number) => {
     fetchData();
   }, [fetchData]);
 
-  return { data, isLoading, isError, refetch: fetchData };
+  return { data, playersList, isLoading, isError, refetch: fetchData };
 };

@@ -15,7 +15,9 @@ export default function Now() {
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [currentScores, setCurrentScores] = useState<Record<number, number>>({})
+  const [currentScores, setCurrentScores] = useState<Record<number, number>>(
+    {}
+  );
   const currentScoresRef = useRef<Record<number, number>>({});
   const [previousScores, setPreviousScores] = useState<Record<number, number>>(
     () => {
