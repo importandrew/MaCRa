@@ -71,7 +71,7 @@ export default function Live() {
       currentScoresRef.current = newScores;
       setCurrentScores(newScores);
     }
-  }, [data]);
+  }, [data, rotationOffset]);
 
   if (isLoading) {
     return (
