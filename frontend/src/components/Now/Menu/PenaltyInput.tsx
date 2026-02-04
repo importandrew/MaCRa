@@ -1,13 +1,6 @@
-import {
-  Button,
-  Checkbox,
-  Form,
-  Input,
-  Radio,
-  RadioGroup,
-} from '@heroui/react';
+import { Button, Checkbox, Form, Input, Radio, RadioGroup } from '@heroui/react';
 import { FormEvent, useEffect, useState } from 'react';
-import { addToast } from '@heroui/react';
+import { showToast } from '../../Toast';
 import { PlayerOrder } from '../../../models/GameData';
 import { globalFetch, PostRequest } from '../../Request';
 import { GameResult } from '../../../models/GameResult';
@@ -50,7 +43,7 @@ export default function PenaltyInput({
 
     if (!data) return;
 
-    addToast({
+    showToast({
       title: 'Penalty successfully added',
       color: 'warning',
     });

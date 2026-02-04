@@ -1,4 +1,4 @@
-import { addToast } from '@heroui/react';
+import { showToast } from '../../components/Toast';
 import { PostRequest } from '../../components/Request';
 
 export async function fetchLogoutApi(): Promise<boolean> {
@@ -8,8 +8,8 @@ export async function fetchLogoutApi(): Promise<boolean> {
 
     return response.ok;
   } catch (error) {
-    addToast({
-      title: 'Network error during logout: ' + error,
+    showToast({
+      title: `Network error during logout: ${error}`,
       color: 'danger',
     });
     return false;

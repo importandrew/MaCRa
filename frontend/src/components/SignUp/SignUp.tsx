@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import EmailInput from '../Login/EmailInput';
 import PasswordInput from '../Login/PasswordInput';
 import { globalFetch, PostRequest } from '../Request';
-import { addToast } from '@heroui/react';
+import { showToast } from '../Toast';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -39,7 +39,7 @@ export default function SignUpPage() {
       return;
     }
 
-    addToast({
+    showToast({
       title: 'Registration successful! Now login, please',
       color: 'success',
     });
