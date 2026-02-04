@@ -1,6 +1,6 @@
 import { fetchLogoutApi } from '../providers/auth/authApi';
 import { AUTH_USER_DATA } from '../providers/auth/authConstants';
-import { addToast } from '@heroui/react';
+import { showToast } from './Toast';
 
 async function globalFetch<T>(
   request: Request,
@@ -14,7 +14,7 @@ async function globalFetch<T>(
     if (response.status === 401) {
       await fetchLogoutApi();
       localStorage.removeItem(AUTH_USER_DATA);
-      addToast({
+      showToast({
         title: 'Unauthorized request!',
         description: 'Redirecting to login...',
         color: 'danger',
@@ -27,7 +27,7 @@ async function globalFetch<T>(
     if (!response.ok) {
       const data = await response.json();
       isToastEnabled &&
-        addToast({
+        showToast({
           title: `Error: ${data.error}`,
           color: 'danger',
         });
@@ -38,8 +38,8 @@ async function globalFetch<T>(
     return data;
   } catch (error) {
     isToastEnabled &&
-      addToast({
-        title: 'Error occured: ' + error,
+      showToast({
+        title: `Error: ${error}`,
         color: 'danger',
       });
     return null;

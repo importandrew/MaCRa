@@ -1,7 +1,7 @@
 import { Button, Form, Spinner } from '@heroui/react';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { addToast } from '@heroui/react';
+import { showToast } from '../Toast';
 import { Player } from '../../models/Player';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import { WIND_LABELS, WIND_SYMBOLS } from '../../utils/constants';
@@ -86,7 +86,7 @@ export default function Draft() {
     ).id;
 
     if (!players.includes(currentPlayerId)) {
-      addToast({
+      showToast({
         title: 'You should also pick youself to start the game',
         color: 'warning',
       });

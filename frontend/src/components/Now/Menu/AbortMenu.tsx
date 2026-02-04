@@ -1,10 +1,10 @@
-import { addToast } from '@heroui/react';
 import { Button, useDisclosure } from '@heroui/react';
 import { DeleteRequest, globalFetch } from '../../Request';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WarningIcon } from '../../Icons/WarningIcon';
 import Confirm from '../../Confirm';
+import { showToast } from '../../Toast';
 
 export default function AbortMenu({ gameId }: { gameId: number | null }) {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function AbortMenu({ gameId }: { gameId: number | null }) {
     }
 
     setIsAborting(false);
-    addToast({
+    showToast({
       title: 'Game aborted',
       color: 'warning',
     });
