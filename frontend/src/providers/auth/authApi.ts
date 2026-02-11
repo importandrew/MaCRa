@@ -29,7 +29,7 @@ export async function fetchProfileApi(): Promise<UserData | null> {
   }
 
   return {
-    id: String(data.id),
+    id: data.id,
     name: data.name,
   };
 }
@@ -45,7 +45,7 @@ export async function updateProfileApi(name: string): Promise<UserData | null> {
   }
 
   return {
-    id: String(data.id),
+    id: data.id,
     name: data.name,
   };
 }

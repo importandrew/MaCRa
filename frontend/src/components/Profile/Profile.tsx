@@ -101,7 +101,7 @@ export default function ProfilePage() {
           <CardBody>
             <Input
               label="User ID"
-              value={userData?.id || ''}
+              value={userData?.id.toString() || ''}
               isDisabled
               variant="bordered"
               fullWidth
