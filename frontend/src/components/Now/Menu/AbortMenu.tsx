@@ -34,18 +34,16 @@ export default function AbortMenu({ gameId }: { gameId: number | null }) {
 
   return (
     <>
-      <div className="mt-auto pt-4 flex justify-center">
-        <Button
-          color="danger"
-          variant="solid"
-          onPress={onOpen}
-          isDisabled={!gameId || isAborting}
-          className="w-1/2"
-          startContent={<WarningIcon className="text-white" />}
-        >
-          {isAborting ? 'Aborting...' : 'Abort Game'}
-        </Button>
-      </div>
+      <Button
+        color="danger"
+        variant="solid"
+        onPress={onOpen}
+        isDisabled={!gameId || isAborting}
+        className="w-1/2"
+        startContent={<WarningIcon className="text-white" />}
+      >
+        {isAborting ? 'Aborting...' : 'Abort Game'}
+      </Button>
       <Confirm
         onClose={onClose}
         onConfirm={() => {

@@ -47,6 +47,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	authAPI := publicAPI.Group("/", h.authmw.IdentifyUser)
 	{
 		authAPI.DELETE("/game/:id/abort", h.game.Abort)
+		authAPI.POST("/game/:id/finish", h.game.Finish)
 
 		// auto-detects user who called this api
 		{

@@ -86,6 +86,7 @@ export default function Draft() {
     ).id;
 
     if (!players.includes(currentPlayerId)) {
+      console.log(`${players}, ${currentPlayerId}`)
       showToast({
         title: 'You should also pick youself to start the game',
         color: 'warning',

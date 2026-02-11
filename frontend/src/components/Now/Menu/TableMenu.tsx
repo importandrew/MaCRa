@@ -11,6 +11,7 @@ import { WarningIcon } from '../../Icons/WarningIcon';
 import PenaltyInput from './PenaltyInput';
 import LogsMenu from './LogsMenu';
 import AbortMenu from './AbortMenu';
+import FinishMenu from './FinishMenu';
 import { FansMenu } from './FansMenu';
 
 export default function TableMenu({
@@ -59,7 +60,10 @@ export default function TableMenu({
           </AccordionItem>
         </Accordion>
 
-        <AbortMenu gameId={gameId} />
+        <div className="mt-auto pt-4 flex justify-center gap-3">
+          <FinishMenu gameId={gameId} />
+          <AbortMenu gameId={gameId} />
+        </div>
       </DrawerBody>
     </>
   );

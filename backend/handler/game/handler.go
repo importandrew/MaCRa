@@ -13,6 +13,7 @@ type GameService interface {
 	LastGameResult(ctx context.Context, playerID int) (models.GameResult, error)
 
 	Abort(ctx context.Context, gameID int) error
+	Finish(ctx context.Context, gameID int) error
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)
 	Logs(ctx context.Context, gameID int) (models.GameLog, error)
 	NewGame(ctx context.Context, playerIDs []int) (gameID int, err error)
