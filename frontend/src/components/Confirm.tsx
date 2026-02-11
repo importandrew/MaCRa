@@ -7,6 +7,14 @@ import {
   ModalFooter,
 } from '@heroui/react';
 
+type ButtonColor =
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'danger';
+
 export interface ConfirmProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,6 +23,7 @@ export interface ConfirmProps {
   headerText: string;
   cancelText: string;
   confirmText: string;
+  confirmButtonColor: ButtonColor;
 }
 
 export default function Confirm(props: ConfirmProps) {
@@ -33,7 +42,10 @@ export default function Confirm(props: ConfirmProps) {
               <Button color="default" variant="light" onPress={onClose}>
                 {props.cancelText}
               </Button>
-              <Button color="danger" onPress={props.onConfirm}>
+              <Button
+                color={props.confirmButtonColor}
+                onPress={props.onConfirm}
+              >
                 {props.confirmText}
               </Button>
             </ModalFooter>

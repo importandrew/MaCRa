@@ -60,7 +60,7 @@ export default function TableMenu({
           </AccordionItem>
         </Accordion>
 
-        <div className="mt-auto pt-4 flex justify-center gap-3">
+        <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
           <FinishMenu gameId={gameId} />
           <AbortMenu gameId={gameId} />
         </div>

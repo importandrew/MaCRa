@@ -54,7 +54,8 @@ export default function AbortMenu({ gameId }: { gameId: number | null }) {
         headerText="Confirm abort game"
         cancelText="Cancel"
         confirmText="Abort Game"
-        prompt="Are you sure you want to abort this game? This action cannot be undone."
+        prompt="Are you sure you want to abort this game? Game will NOT be counted. This action cannot be undone."
+        confirmButtonColor="danger"
       />
     </>
   );

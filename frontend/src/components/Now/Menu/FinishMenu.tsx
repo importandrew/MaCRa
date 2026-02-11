@@ -54,9 +54,9 @@ export default function FinishMenu({ gameId }: { gameId: number | null }) {
         headerText="Confirm finish game"
         cancelText="Cancel"
         confirmText="Finish Game"
-        prompt="Are you sure you want to finish this game? This action will finalize the result."
+        prompt="Are you sure you want to finish this game? Game will be counted. This action will finalize the result."
+        confirmButtonColor="primary"
       />
     </>
   );
 }
-
