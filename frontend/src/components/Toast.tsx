@@ -25,4 +25,3 @@ export function showToast({ title, description, color }: ShowToastParams) {
     },
   });
 }
-

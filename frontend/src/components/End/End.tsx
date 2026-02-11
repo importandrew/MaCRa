@@ -26,7 +26,7 @@ export default function End() {
 
   const playAgain = () => {
     if (data) {
-      const playerIds = data.player_results.map(player => player.id);
+      const playerIds = data.player_results.map((player) => player.id);
       navigate('/new', { state: { playerIds } });
     }
   };
@@ -70,7 +70,7 @@ export default function End() {
           color="default"
           variant="flat"
         >
-          {isChartVisible ? "Hide chart" : "Show chart"}
+          {isChartVisible ? 'Hide chart' : 'Show chart'}
         </Button>
         <Button
           type="button"
@@ -78,7 +78,7 @@ export default function End() {
           color="secondary"
           variant="flat"
         >
-          {isLogsVisible ? "Hide logs" : "Show logs"}
+          {isLogsVisible ? 'Hide logs' : 'Show logs'}
         </Button>
         <Button
           type="button"

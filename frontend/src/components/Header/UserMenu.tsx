@@ -3,6 +3,7 @@ import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
+  DropdownSection,
   DropdownTrigger,
 } from '@heroui/react';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
@@ -22,17 +23,17 @@ export default function UserMenu({ signOut }: { signOut: () => void }) {
           name={username}
         />
       </DropdownTrigger>
-      <DropdownMenu
-        disabledKeys={['profile']}
-        aria-label="User menu"
-        variant="flat"
-      >
-        <DropdownItem key="profile" className="h-14 gap-2">
-          <p className="font-semibold">{username}</p>
-        </DropdownItem>
-        <DropdownItem key="logout" color="danger" onPress={signOut}>
-          Log Out
-        </DropdownItem>
+      <DropdownMenu aria-label="User menu" variant="flat">
+        <DropdownSection title={username} showDivider>
+          <DropdownItem key="profile" href="/profile">
+            Profile
+          </DropdownItem>
+        </DropdownSection>
+        <DropdownSection>
+          <DropdownItem key="logout" className="text-danger" onPress={signOut}>
+            Log Out
+          </DropdownItem>
+        </DropdownSection>
       </DropdownMenu>
     </Dropdown>
   );

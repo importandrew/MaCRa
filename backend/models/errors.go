@@ -16,6 +16,8 @@ var (
 	ErrBadCredentials   = errors.New("email or password is incorrect")
 	ErrUserNotInPlayers = errors.New("cannot create game without yourself")
 	ErrPlayerExists     = errors.New("player with this email already exists")
+	ErrEmptyName        = errors.New("name cannot be empty")
+	ErrLongName         = errors.New("name cannot exceed 50 characters")
 
 	ErrJWTKeyEmpty = errors.New("jwt key is empty")
 
@@ -30,6 +32,8 @@ var Errors = map[error]int{
 	ErrUserNotInPlayers:         http.StatusBadRequest,
 	ErrValidateEnterRoundResult: http.StatusBadRequest,
 	ErrValidatePlayers:          http.StatusBadRequest,
+	ErrEmptyName:                http.StatusBadRequest,
+	ErrLongName:                 http.StatusBadRequest,
 
 	// 404
 	ErrGameNotFound:   http.StatusNotFound,

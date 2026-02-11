@@ -6,6 +6,7 @@ import Live from './components/Live/Live';
 import LoginPage from './components/Login/Login';
 import MainPage from './components/Main/Main';
 import Now from './components/Now/Now';
+import ProfilePage from './components/Profile/Profile';
 import SignUpPage from './components/SignUp/SignUp';
 import NavigateSetter from './providers/auth/NavigateSetter';
 import './App.css';
@@ -30,6 +31,7 @@ function App() {
         <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/now" element={<Now />} />
         <Route path="/last" element={<End />} />
         <Route path="/new" element={<Draft />} />
