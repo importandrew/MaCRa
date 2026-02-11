@@ -60,6 +60,14 @@ function GetRequest(url: string): Request {
   });
 }
 
+function PutRequest(url: string, body: unknown = {}): Request {
+  return new Request(import.meta.env.VITE_API_ADDR + url, {
+    method: 'PUT',
+    credentials: 'include',
+    body: JSON.stringify(body),
+  });
+}
+
 function DeleteRequest(url: string): Request {
   return new Request(import.meta.env.VITE_API_ADDR + url, {
     method: 'DELETE',
@@ -67,4 +75,4 @@ function DeleteRequest(url: string): Request {
   });
 }
 
-export { globalFetch, GetRequest, PostRequest, DeleteRequest };
+export { globalFetch, GetRequest, PostRequest, PutRequest, DeleteRequest };
