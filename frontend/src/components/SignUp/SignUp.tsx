@@ -68,7 +68,13 @@ export default function SignUpPage() {
                 placeholder="John Mah"
                 variant="bordered"
                 validate={(value: string) => {
-                  return !value.length ? 'Name is required' : null;
+                  if (!value.length) {
+                    return 'Name is required';
+                  }
+                  if (value.length > 50) {
+                    return 'Name is too long';
+                  }
+                  return null;
                 }}
                 onChange={(event) => setName(event.target.value)}
               />
