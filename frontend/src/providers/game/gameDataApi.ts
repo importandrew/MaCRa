@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { GetRequest, globalFetch } from '../../components/Request';
+import {
+  DeleteRequest,
+  GetRequest,
+  globalFetch,
+} from '../../components/Request';
 import { GameData, GamePlayers, PlayerOrder } from '../../models/GameData';
 import { GameView } from '../../models/GameView';
 import {
@@ -7,6 +11,12 @@ import {
   GameRoundLogs,
   PlayerStatus,
 } from '../../models/GameResult';
+
+export async function undoLastRound(gameId: number): Promise<boolean> {
+  const request = DeleteRequest(`/api/game/${gameId}/undo-round`);
+  const result = await globalFetch<null>(request);
+  return result !== null;
+}
 
 export const useFetchGameData = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +101,10 @@ export const useFetchGameLogsData = (gameId: number | null) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
+    if (gameId == null) {
+      setData(null);
+      return;
+    }
     setIsLoading(true);
     setIsError(false);
 
@@ -105,7 +119,7 @@ export const useFetchGameLogsData = (gameId: number | null) => {
 
     setData(data);
     setIsLoading(false);
-  }, []);
+  }, [gameId]);
 
   useEffect(() => {
     fetchData();

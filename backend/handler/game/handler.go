@@ -21,6 +21,7 @@ type GameService interface {
 	HUD(ctx context.Context, gameID int, linger int) (models.GameHUD, error)
 	ViewLive(ctx context.Context, gameID int) (models.GameView, error)
 	Status(ctx context.Context, gameID int) (models.GameStatus, error)
+	UndoLastRound(ctx context.Context, gameID int) error
 }
 
 type PlayerService interface {

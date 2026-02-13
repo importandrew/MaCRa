@@ -87,7 +87,7 @@ func TestGameResult(t *testing.T) {
 				playerIDs: [4]int{1, 2, 3, 4},
 			},
 			// Don't finalize the game, so no results - returns empty slice, not error
-			finalData: models.FinalGameData{},
+			finalData:   models.FinalGameData{},
 			gameID:      1,
 			expectedErr: assert.NoError,
 			checkResult: func(t *testing.T, result models.GameResult) {
@@ -105,7 +105,7 @@ func TestGameResult(t *testing.T) {
 				playerIDs: [4]int{1, 2, 3, 4},
 			},
 			// Don't finalize - testing non-existent game
-			finalData: models.FinalGameData{},
+			finalData:   models.FinalGameData{},
 			gameID:      999,
 			expectedErr: assert.NoError,
 			checkResult: func(t *testing.T, result models.GameResult) {

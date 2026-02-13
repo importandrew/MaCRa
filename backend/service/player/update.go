@@ -6,8 +6,6 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-var ()
-
 func (s *Service) Update(ctx context.Context, id int, name string) error {
 	if name == "" {
 		return models.ErrEmptyName

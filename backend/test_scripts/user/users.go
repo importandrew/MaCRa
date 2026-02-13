@@ -53,7 +53,7 @@ func TestUsers() []TestUser {
 	}
 
 	// fill to 100 users with random users
-	for _, s := range strings.Split(gen, "\n") {
+	for s := range strings.SplitSeq(gen, "\n") {
 		users = append(users, TestUser{Name: s, Email: s})
 	}
 

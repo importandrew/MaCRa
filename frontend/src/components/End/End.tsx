@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFetchGameResultData } from '../../providers/game/gameDataApi';
 import GameLogs from './GameLogs';
 import GameResultsTable from './GameResultsTable';
+import LogsMenu from '../Now/Menu/LogsMenu';
 
 export default function End() {
   const navigate = useNavigate();
@@ -92,11 +93,18 @@ export default function End() {
           Home
         </Button>
       </div>
-      <GameLogs
-        isChartVisible={isChartVisible}
-        isLogVisible={isLogsVisible}
-        gameId={data.id}
-      />
+      {isLogsVisible && (
+        <LogsMenu
+          gameId={data.id}
+          canUndoLastRound={data.can_undo_last_round}
+          onUndoSuccess={() => {
+            navigate('/now');
+          }}
+        />
+      )}
+      {isChartVisible && (
+        <GameLogs isChartVisible={true} isLogVisible={false} gameId={data.id} />
+      )}
     </div>
   );
 }

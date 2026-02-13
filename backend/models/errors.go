@@ -24,6 +24,9 @@ var (
 	ErrOutcomeExists = errors.New("non-penalty outcome already exists")
 
 	ErrValidatePlayers = errors.New("validate game players")
+
+	ErrNoRounds = errors.New("no rounds to undo")
+	ErrTooLate  = errors.New("too late to undo")
 )
 
 var Errors = map[error]int{
@@ -32,6 +35,8 @@ var Errors = map[error]int{
 	ErrUserNotInPlayers:         http.StatusBadRequest,
 	ErrValidateEnterRoundResult: http.StatusBadRequest,
 	ErrValidatePlayers:          http.StatusBadRequest,
+	ErrNoRounds:                 http.StatusBadRequest,
+	ErrTooLate:                  http.StatusBadRequest,
 	ErrEmptyName:                http.StatusBadRequest,
 	ErrLongName:                 http.StatusBadRequest,
 

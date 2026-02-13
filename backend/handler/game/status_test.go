@@ -32,7 +32,7 @@ func TestHandler_Status(t *testing.T) {
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
 				assert.Equal(t, float64(100), response["id"])
@@ -49,7 +49,7 @@ func TestHandler_Status(t *testing.T) {
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]interface{}
+				var response map[string]any
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
 				assert.Equal(t, float64(200), response["id"])

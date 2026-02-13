@@ -21,7 +21,7 @@ export default function LiveMenu({ gameId = null }: { gameId: number | null }) {
             aria-label="Logs"
             title="Logs"
           >
-            <LogsMenu gameId={gameId}></LogsMenu>
+            <LogsMenu gameId={gameId} canUndoLastRound={false} />
           </AccordionItem>
           <AccordionItem
             startContent={<BookIcon />}
