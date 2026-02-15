@@ -2,7 +2,9 @@ package game
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
@@ -15,7 +17,23 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 	}
 	defer conn.Release()
 
-	rows, err := conn.Query(ctx, `
+	rows, err := conn.Query(ctx,
+		`SELECT finished_at FROM games WHERE id = $1`,
+		gameID,
+	)
+	if err != nil {
+		return models.GameResult{}, err
+	}
+
+	finishedAt, err := pgx.CollectOneRow(rows, pgx.RowTo[sql.NullTime])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.GameResult{}, models.ErrGameNotFound
+		}
+		return models.GameResult{}, err
+	}
+
+	rows, err = conn.Query(ctx, `
 		SELECT 
 			pr.tournament_points AS tp,
 			pr.game_points AS gp,
@@ -41,6 +59,14 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 	result := models.GameResult{
 		ID:            gameID,
 		PlayerResults: playerResults,
+	}
+
+	if finishedAt.Valid {
+		result.FinishedAt = &finishedAt.Time
+
+		if result.FinishedAt.Add(models.UndoFinalRoundTimeout).After(time.Now()) {
+			result.CanUndoLastRound = true
+		}
 	}
 
 	return result, nil

@@ -130,7 +130,7 @@ func TestValidatePlayers(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
-			err := service.validatePlayers(testCase.playerIDs)
+			err := service.validatePlayers(testCase.playerIDs, nil)
 			testCase.expectedErr(t, err)
 		})
 	}

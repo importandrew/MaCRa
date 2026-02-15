@@ -38,63 +38,6 @@ func (_m *MockGameService) EXPECT() *MockGameService_Expecter {
 	return &MockGameService_Expecter{mock: &_m.Mock}
 }
 
-// Finish provides a mock function for the type MockGameService
-func (_mock *MockGameService) Finish(ctx context.Context, gameID int) error {
-	ret := _mock.Called(ctx, gameID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Finish")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
-		r0 = returnFunc(ctx, gameID)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockGameService_Finish_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Finish'
-type MockGameService_Finish_Call struct {
-	*mock.Call
-}
-
-// Finish is a helper method to define mock.On call
-//   - ctx context.Context
-//   - gameID int
-func (_e *MockGameService_Expecter) Finish(ctx interface{}, gameID interface{}) *MockGameService_Finish_Call {
-	return &MockGameService_Finish_Call{Call: _e.mock.On("Finish", ctx, gameID)}
-}
-
-func (_c *MockGameService_Finish_Call) Run(run func(ctx context.Context, gameID int)) *MockGameService_Finish_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 int
-		if args[1] != nil {
-			arg1 = args[1].(int)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockGameService_Finish_Call) Return(err error) *MockGameService_Finish_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockGameService_Finish_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockGameService_Finish_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // Abort provides a mock function for the type MockGameService
 func (_mock *MockGameService) Abort(ctx context.Context, gameID int) error {
 	ret := _mock.Called(ctx, gameID)
@@ -238,6 +181,63 @@ func (_c *MockGameService_EnterRound_Call) Return(gameNow models.GameNow, err er
 }
 
 func (_c *MockGameService_EnterRound_Call) RunAndReturn(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int) (models.GameNow, error)) *MockGameService_EnterRound_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Finish provides a mock function for the type MockGameService
+func (_mock *MockGameService) Finish(ctx context.Context, gameID int) error {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Finish")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockGameService_Finish_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Finish'
+type MockGameService_Finish_Call struct {
+	*mock.Call
+}
+
+// Finish is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameService_Expecter) Finish(ctx interface{}, gameID interface{}) *MockGameService_Finish_Call {
+	return &MockGameService_Finish_Call{Call: _e.mock.On("Finish", ctx, gameID)}
+}
+
+func (_c *MockGameService_Finish_Call) Run(run func(ctx context.Context, gameID int)) *MockGameService_Finish_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameService_Finish_Call) Return(err error) *MockGameService_Finish_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockGameService_Finish_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockGameService_Finish_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -862,6 +862,63 @@ func (_c *MockGameService_Status_Call) Return(gameStatus models.GameStatus, err 
 }
 
 func (_c *MockGameService_Status_Call) RunAndReturn(run func(ctx context.Context, gameID int) (models.GameStatus, error)) *MockGameService_Status_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UndoLastRound provides a mock function for the type MockGameService
+func (_mock *MockGameService) UndoLastRound(ctx context.Context, gameID int) error {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UndoLastRound")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockGameService_UndoLastRound_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UndoLastRound'
+type MockGameService_UndoLastRound_Call struct {
+	*mock.Call
+}
+
+// UndoLastRound is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameService_Expecter) UndoLastRound(ctx interface{}, gameID interface{}) *MockGameService_UndoLastRound_Call {
+	return &MockGameService_UndoLastRound_Call{Call: _e.mock.On("UndoLastRound", ctx, gameID)}
+}
+
+func (_c *MockGameService_UndoLastRound_Call) Run(run func(ctx context.Context, gameID int)) *MockGameService_UndoLastRound_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameService_UndoLastRound_Call) Return(err error) *MockGameService_UndoLastRound_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockGameService_UndoLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockGameService_UndoLastRound_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -11,7 +11,7 @@ import (
 )
 
 func (s *Service) NewGame(ctx context.Context, playerIDs []int) (int, error) {
-	if err := s.validatePlayers(playerIDs); err != nil {
+	if err := s.validatePlayers(playerIDs, nil); err != nil {
 		return 0, fmt.Errorf("%w: %w", models.ErrValidatePlayers, err)
 	}
 
@@ -33,7 +33,8 @@ func (s *Service) NewGame(ctx context.Context, playerIDs []int) (int, error) {
 	return gameID, nil
 }
 
-func (s *Service) validatePlayers(playerIDs []int) error {
+// currentGameID should be nil unless it's game reload (otherwise interferes with itself).
+func (s *Service) validatePlayers(playerIDs []int, currentGameID *int) error {
 	// len = 4
 	if len(playerIDs) != 4 {
 		return fmt.Errorf("expected four player IDs, got %v", len(playerIDs))
@@ -67,6 +68,10 @@ func (s *Service) validatePlayers(playerIDs []int) error {
 		}
 
 		// game for player found
+		if currentGameID != nil && g.ID() == *currentGameID {
+			// ok, it's reload
+			continue
+		}
 		return fmt.Errorf("player (ID %v) already in game (ID %v)", id, g.ID())
 	}
 

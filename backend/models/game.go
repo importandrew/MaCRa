@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 )
 
 type GameNow struct {
@@ -36,8 +37,10 @@ type PlayerWindScore struct {
 }
 
 type GameResult struct {
-	ID            int            `json:"id"`
-	PlayerResults []PlayerResult `json:"player_results"`
+	ID               int            `json:"id"`
+	FinishedAt       *time.Time     `json:"finished_at"`
+	CanUndoLastRound bool           `json:"can_undo_last_round"`
+	PlayerResults    []PlayerResult `json:"player_results"`
 }
 
 type PlayerResult struct {

@@ -3,6 +3,8 @@ import { Player } from './Player';
 
 export interface GameResult {
   id: number;
+  finished_at: string; // ISO 8601 from backend
+  can_undo_last_round: boolean;
   player_results: {
     name: string;
     id: number;

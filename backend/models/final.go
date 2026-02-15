@@ -1,5 +1,9 @@
 package models
 
+import "time"
+
+const UndoFinalRoundTimeout = 1 * time.Hour
+
 type FinalGameData struct {
 	GameID int
 	East   FinalPlayerData

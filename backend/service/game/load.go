@@ -37,6 +37,10 @@ func (s *Service) loadGame(ctx context.Context, gameID int) error {
 		players.North,
 	})
 
+	if err := s.validatePlayers(seating[:], &gameID); err != nil {
+		return err
+	}
+
 	gameCfg := game.Config{
 		ID:      gameID,
 		Players: seating,

@@ -45,8 +45,8 @@ func TestLastGame(t *testing.T) {
 					finished:  true,
 				},
 			},
-			playerID:    1,
-			expectedErr: assert.NoError,
+			playerID:     1,
+			expectedErr:  assert.NoError,
 			expectedGame: 1,
 		},
 		"ok multiple games": {
@@ -70,8 +70,8 @@ func TestLastGame(t *testing.T) {
 					finished:  true,
 				},
 			},
-			playerID:    1,
-			expectedErr: assert.NoError,
+			playerID:     1,
+			expectedErr:  assert.NoError,
 			expectedGame: 2, // Should return the most recent (highest ID)
 		},
 		"ok filters by status": {
@@ -95,13 +95,13 @@ func TestLastGame(t *testing.T) {
 					finished:  true,
 				},
 			},
-			playerID:    1,
-			expectedErr: assert.NoError,
+			playerID:     1,
+			expectedErr:  assert.NoError,
 			expectedGame: 2, // Should return only ended game
 		},
 		"not found": {
 			preAddPlayers: []int{1, 2, 3, 4},
-			preAddGames:   []struct {
+			preAddGames: []struct {
 				gameID    int
 				playerIDs [4]int
 				status    models.GameStatus

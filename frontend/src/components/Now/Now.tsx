@@ -184,6 +184,7 @@ export default function Now() {
               finedPlayerId={finedPlayerId}
               gameId={roundData.id}
               setFinedPlayerId={setFinedPlayerId}
+              onRefetchNow={refetch}
             />
           </ContextMenu>
         </div>

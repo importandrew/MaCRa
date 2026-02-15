@@ -38,6 +38,63 @@ func (_m *MockGameRepo) EXPECT() *MockGameRepo_Expecter {
 	return &MockGameRepo_Expecter{mock: &_m.Mock}
 }
 
+// DeleteLastRound provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) DeleteLastRound(ctx context.Context, gameID int) error {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteLastRound")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockGameRepo_DeleteLastRound_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteLastRound'
+type MockGameRepo_DeleteLastRound_Call struct {
+	*mock.Call
+}
+
+// DeleteLastRound is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) DeleteLastRound(ctx interface{}, gameID interface{}) *MockGameRepo_DeleteLastRound_Call {
+	return &MockGameRepo_DeleteLastRound_Call{Call: _e.mock.On("DeleteLastRound", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_DeleteLastRound_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_DeleteLastRound_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_DeleteLastRound_Call) Return(err error) *MockGameRepo_DeleteLastRound_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockGameRepo_DeleteLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockGameRepo_DeleteLastRound_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Finalize provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) Finalize(ctx context.Context, data models.FinalGameData) error {
 	ret := _mock.Called(ctx, data)
@@ -677,6 +734,63 @@ func (_c *MockGameRepo_Status_Call) Return(gameStatus models.GameStatus, err err
 }
 
 func (_c *MockGameRepo_Status_Call) RunAndReturn(run func(ctx context.Context, gameID int) (models.GameStatus, error)) *MockGameRepo_Status_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Unfinalize provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) Unfinalize(ctx context.Context, gameID int) error {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Unfinalize")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockGameRepo_Unfinalize_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Unfinalize'
+type MockGameRepo_Unfinalize_Call struct {
+	*mock.Call
+}
+
+// Unfinalize is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) Unfinalize(ctx interface{}, gameID interface{}) *MockGameRepo_Unfinalize_Call {
+	return &MockGameRepo_Unfinalize_Call{Call: _e.mock.On("Unfinalize", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_Unfinalize_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_Unfinalize_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_Unfinalize_Call) Return(err error) *MockGameRepo_Unfinalize_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockGameRepo_Unfinalize_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockGameRepo_Unfinalize_Call {
 	_c.Call.Return(run)
 	return _c
 }

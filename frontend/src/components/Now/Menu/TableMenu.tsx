@@ -19,11 +19,13 @@ export default function TableMenu({
   finedPlayerId = null,
   gameId = null,
   setFinedPlayerId,
+  onRefetchNow,
 }: {
   players: PlayerOrder[] | null;
   finedPlayerId: number | null;
   gameId: number | null;
   setFinedPlayerId: (value: number | null) => void;
+  onRefetchNow?: () => void;
 }) {
   return (
     <>
@@ -48,7 +50,13 @@ export default function TableMenu({
             aria-label="Logs"
             title="Logs"
           >
-            <LogsMenu gameId={gameId}></LogsMenu>
+            <div className="flex flex-col gap-2">
+              <LogsMenu
+                gameId={gameId}
+                canUndoLastRound={true}
+                onUndoSuccess={onRefetchNow}
+              />
+            </div>
           </AccordionItem>
           <AccordionItem
             startContent={<BookIcon />}

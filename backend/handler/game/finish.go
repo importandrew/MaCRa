@@ -25,4 +25,3 @@ func (h Handler) Finish(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
-
