@@ -2,6 +2,8 @@ import { Button } from '@heroui/react';
 import { useState } from 'react';
 import GameLogs from '../../End/GameLogs';
 import Confirm from '../../Confirm';
+import { showToast } from '../../Toast';
+import { UndoIcon } from '../../Icons/UndoIcon';
 import { undoLastRound } from '../../../providers/game/gameDataApi';
 
 export default function LogsMenu({
@@ -23,6 +25,7 @@ export default function LogsMenu({
     const ok = await undoLastRound(gameId);
     setUndoLoading(false);
     if (ok) {
+      showToast({ title: 'Last round undone', color: 'warning' });
       onUndoSuccess?.();
     }
   };
@@ -37,9 +40,11 @@ export default function LogsMenu({
       {canUndoLastRound && (
         <>
           <Button
+            className="w-1/2 self-center"
             color="default"
             variant="flat"
             size="sm"
+            startContent={<UndoIcon />}
             onPress={() => setConfirmOpen(true)}
             isLoading={undoLoading}
             isDisabled={gameId == null}
