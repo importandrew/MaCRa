@@ -39,6 +39,7 @@ export default function GameResultsTable({ data }: { data: GameResult }) {
         </span>
       </div>
       <Table
+        isStriped
         removeWrapper
         defaultSelectedKeys={[currentPlayer]}
         color="primary"

@@ -234,6 +234,7 @@ export default function GameLogs({
         <div className="overflow-x-auto flex flex-col justify-center mb-3">
           <Table
             defaultSelectedKeys={['finalScores']}
+            isStriped
             removeWrapper
             aria-label="Game logs"
             color="default"
