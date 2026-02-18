@@ -239,7 +239,7 @@ export default function GameLogs({
             aria-label="Game logs"
             color="default"
             selectionMode="single"
-            className="sm:w-fit self-center"
+            className="w-full self-center z-10"
           >
             <TableHeader>
               {[
@@ -247,7 +247,7 @@ export default function GameLogs({
                   #
                 </TableColumn>,
                 ...preparedData.players.map((player) => (
-                  <TableColumn className="sm:max-w-fit max-w-[62px]" align="end" key={player.id}>
+                  <TableColumn className="md:w-1/4 max-w-[58px]" align="end" key={player.id}>
                     <Tooltip content={player.id}>
                       <div className="overflow-hidden text-ellipsis">
                         {player.name}
