@@ -231,7 +231,15 @@ export default function GameLogs({
       {isChartVisible ? <GameChart preparedData={preparedData} /> : null}
 
       {isLogVisible ? (
-        <div className="overflow-x-auto flex flex-col justify-center mb-3">
+        <div
+          className={
+            'overflow-hidden flex flex-col justify-center mb-3 w-full ' +
+            '[&_table]:w-full [&_table]:table-fixed [&_:is(th,td)]:box-border ' +
+            '[&_:is(th,td):first-child]:w-10 [&_:is(th,td):first-child]:min-w-10 ' +
+            '[&_:is(th,td):last-child]:w-10 [&_:is(th,td):last-child]:min-w-10 ' +
+            '[&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:w-[calc((100%-5rem)/4)] [&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:min-w-0'
+          }
+        >
           <Table
             defaultSelectedKeys={['finalScores']}
             isStriped
@@ -243,11 +251,15 @@ export default function GameLogs({
           >
             <TableHeader>
               {[
-                <TableColumn className="sm:max-w-fit max-w-[30px]" align="end" key="round">
+                <TableColumn className="min-w-0" align="end" key="round">
                   #
                 </TableColumn>,
                 ...preparedData.players.map((player) => (
-                  <TableColumn className="md:w-1/4 max-w-[58px]" align="end" key={player.id}>
+                  <TableColumn
+                    className="min-w-0 overflow-hidden"
+                    align="end"
+                    key={player.id}
+                  >
                     <Tooltip content={player.id}>
                       <div className="overflow-hidden text-ellipsis">
                         {player.name}
@@ -255,7 +267,7 @@ export default function GameLogs({
                     </Tooltip>
                   </TableColumn>
                 )),
-                <TableColumn className="sm:max-w-fit max-w-[30px]" align="end" key="result">
+                <TableColumn className="min-w-0" align="end" key="result">
                   <Tooltip content={getLegend()}>Δ</Tooltip>
                 </TableColumn>,
               ]}
