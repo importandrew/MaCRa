@@ -1,5 +1,5 @@
 import { Avatar, Button, Spinner } from '@heroui/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
@@ -11,9 +11,26 @@ import LiveMenu from './Menu/LiveMenu';
 export default function Live() {
   const { id } = useParams<{ id: string }>();
   const gameId = id ? parseInt(id, 10) : 0;
-  const { data, isLoading, isError, refetch } = useFetchLiveGameData(gameId);
+  const { data, playersList, isLoading, isError, refetch } =
+    useFetchLiveGameData(gameId);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [rotationOffset, setRotationOffset] = useState(0);
+  const [currentScores, setCurrentScores] = useState<Record<number, number>>(
+    {}
+  );
+  const currentScoresRef = useRef<Record<number, number>>({});
+  const [previousScores, setPreviousScores] = useState<Record<number, number>>(
+    () => {
+      // Initialize with player IDs as keys and zeros as values
+      if (playersList.length == 0) {
+        return {};
+      }
+      return playersList.reduce(
+        (acc, p) => ({ ...acc, [p.id]: 0 }),
+        {} as Record<number, number>
+      );
+    }
+  );
 
   const closeContextMenuOpen = () => {
     setIsContextMenuOpen(false);
@@ -23,13 +40,9 @@ export default function Live() {
     refetch();
   }, [refetch]);
 
-  const getPlayer = (index: number) => {
-    if (!data || !data.player_scores || data.player_scores.length !== 4) {
-      return null;
-    }
-
+  const getRotatedIndex = (index: number): number => {
     const rotatedIndex = (index - rotationOffset + 4) % 4;
-    return data.player_scores[rotatedIndex];
+    return rotatedIndex;
   };
 
   const rotateCounterClockwise = () => {
@@ -39,6 +52,26 @@ export default function Live() {
   const rotateClockwise = () => {
     setRotationOffset((prev) => (prev - 1 + 4) % 4);
   };
+
+  // Update currentScores when roundData changes, and save previous scores
+  useEffect(() => {
+    if (data) {
+      // Save current scores to previous before updating
+      if (currentScoresRef.current) {
+        setPreviousScores(currentScoresRef.current);
+      }
+
+      // Update current scores with new data
+      const newScores = {
+        [data.player_scores[0].id]: data.player_scores[0].score,
+        [data.player_scores[1].id]: data.player_scores[1].score,
+        [data.player_scores[2].id]: data.player_scores[2].score,
+        [data.player_scores[3].id]: data.player_scores[3].score,
+      };
+      currentScoresRef.current = newScores;
+      setCurrentScores(newScores);
+    }
+  }, [data, rotationOffset]);
 
   if (isLoading) {
     return (
@@ -58,7 +91,12 @@ export default function Live() {
     );
   }
 
-  if (!data || !data.player_scores || data.player_scores.length !== 4) {
+  if (
+    !data ||
+    !data.player_scores ||
+    data.player_scores.length !== 4 ||
+    playersList.length !== 4
+  ) {
     return (
       <div className="flex flex-col h-full w-screen justify-center items-center gap-3">
         <p className="mb-4 text-center text-3xl">No data available</p>
@@ -69,21 +107,10 @@ export default function Live() {
     );
   }
 
-  const east = getPlayer(0);
-  const south = getPlayer(1);
-  const west = getPlayer(2);
-  const north = getPlayer(3);
-
-  if (!east || !south || !west || !north) {
-    return (
-      <div className="flex flex-col h-full w-screen justify-center items-center gap-3">
-        <p className="mb-4 text-center text-3xl">Invalid game data</p>
-        <Button type="button" onPress={onRefresh}>
-          Refresh
-        </Button>
-      </div>
-    );
-  }
+  const bot = data.player_scores[getRotatedIndex(0)];
+  const right = data.player_scores[getRotatedIndex(1)];
+  const top = data.player_scores[getRotatedIndex(2)];
+  const left = data.player_scores[getRotatedIndex(3)];
 
   return (
     <div className="flex justify-center h-full w-screen text-2xl">
@@ -92,17 +119,21 @@ export default function Live() {
         <div className="relative self-center h-full w-full">
           <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {west.wind}{' '}
+              {top.wind}{' '}
               <Avatar
                 className="transition-transform"
                 color="default"
                 size="md"
-                name={west.name}
+                name={top.name}
               />{' '}
-              {west.name}
+              {top.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={west.score} />
+              <AnimatedScore
+                previousScores={previousScores}
+                currentScores={currentScores}
+                playerId={top.id}
+              />
             </span>
           </div>
         </div>
@@ -110,17 +141,21 @@ export default function Live() {
         <div className="relative self-center h-full w-full">
           <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {north.wind}{' '}
+              {left.wind}{' '}
               <Avatar
                 className="transition-transform"
                 color="default"
                 size="md"
-                name={north.name}
+                name={left.name}
               />{' '}
-              {north.name}
+              {left.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={north.score} />
+              <AnimatedScore
+                previousScores={previousScores}
+                currentScores={currentScores}
+                playerId={left.id}
+              />
             </span>
           </div>
         </div>
@@ -156,17 +191,21 @@ export default function Live() {
         <div className="relative self-center h-full w-full">
           <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {south.wind}{' '}
+              {right.wind}{' '}
               <Avatar
                 className="transition-transform"
                 color="default"
                 size="md"
-                name={south.name}
+                name={right.name}
               />{' '}
-              {south.name}
+              {right.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={south.score} />
+              <AnimatedScore
+                previousScores={previousScores}
+                currentScores={currentScores}
+                playerId={right.id}
+              />
             </span>
           </div>
         </div>
@@ -185,17 +224,21 @@ export default function Live() {
         <div className="relative self-center h-full w-full">
           <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
             <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-              {east.wind}{' '}
+              {bot.wind}{' '}
               <Avatar
                 className="transition-transform"
                 color="default"
                 size="md"
-                name={east.name}
+                name={bot.name}
               />{' '}
-              {east.name}
+              {bot.name}
             </span>
             <span className="text-ellipsis overflow-hidden">
-              <AnimatedScore score={east.score} />
+              <AnimatedScore
+                previousScores={previousScores}
+                currentScores={currentScores}
+                playerId={bot.id}
+              />
             </span>
           </div>
         </div>

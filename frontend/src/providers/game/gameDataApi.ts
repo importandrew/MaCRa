@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DeleteRequest,
   GetRequest,
@@ -159,6 +159,8 @@ export const useFetchLiveGameData = (gameId: number) => {
   const [data, setData] = useState<GameView | null>(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
+  const playersFetchedRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -175,7 +177,24 @@ export const useFetchLiveGameData = (gameId: number) => {
       return;
     }
 
+    // Always update the game data
     setData(data);
+
+    // Request players list only once on game start or page refresh
+    if (playersFetchedRef.current) {
+      setIsLoading(false);
+      return;
+    }
+
+    const gamePlayersRequest = GetRequest(`/api/game/${data.id}/players`);
+    const playersResult = await globalFetch<GamePlayers>(gamePlayersRequest);
+
+    if (!playersResult) {
+      setIsError(true);
+    }
+
+    setPlayersList(playersResult?.players || []);
+    playersFetchedRef.current = true;
     setIsLoading(false);
   }, [gameId]);
 
@@ -183,5 +202,5 @@ export const useFetchLiveGameData = (gameId: number) => {
     fetchData();
   }, [fetchData]);
 
-  return { data, isLoading, isError, refetch: fetchData };
+  return { data, playersList, isLoading, isError, refetch: fetchData };
 };

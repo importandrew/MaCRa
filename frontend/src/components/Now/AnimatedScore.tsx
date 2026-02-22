@@ -1,21 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface AnimatedScoreProps {
-  score: number;
+  previousScores: Record<number, number>;
+  currentScores: Record<number, number>;
+  playerId: number;
   className?: string;
 }
 
 export default function AnimatedScore({
-  score,
+  previousScores,
+  currentScores,
+  playerId,
   className = '',
 }: AnimatedScoreProps) {
-  const [displayScore, setDisplayScore] = useState(score);
+  const previousScore = previousScores[playerId] ?? 0;
+  const currentScore = currentScores[playerId] ?? 0;
+
+  const [displayScore, setDisplayScore] = useState(currentScore);
   const [animationClass, setAnimationClass] = useState('');
-  const prevScoreRef = useRef(score);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
-  const animationDuration = 2000; // 3 second
+  const animationDuration = 2000; // 2 seconds
 
   // Clean up animation frames and timers
   const cleanup = () => {
@@ -44,6 +50,7 @@ export default function AnimatedScore({
 
       // Calculate current score based on progress
       const currentScore = Math.round(start + (end - start) * easeOutQuart);
+
       setDisplayScore(currentScore);
 
       // Continue animation if not complete
@@ -65,29 +72,27 @@ export default function AnimatedScore({
   };
 
   useEffect(() => {
-    const prevScore = prevScoreRef.current;
-
     // Only trigger animation if score actually changed
-    if (score !== prevScore) {
+    if (currentScore !== previousScore) {
       // Clean up any existing animations
       cleanup();
 
       // Determine animation direction
-      const isIncreasing = score > prevScore;
+      const isIncreasing = currentScore > previousScore;
       setAnimationClass(isIncreasing ? 'score-increase' : 'score-decrease');
 
       // Start the counting animation
-      animateScoreChange(prevScore, score);
-
-      // Update previous score reference
-      prevScoreRef.current = score;
+      animateScoreChange(previousScore, currentScore);
+    } else {
+      // Score hasn't changed, just update display
+      setDisplayScore(currentScore);
     }
 
     // Cleanup on unmount
     return () => {
       cleanup();
     };
-  }, [score]);
+  }, [currentScore]);
 
   return (
     <span className={`${className} ${animationClass}`}>{displayScore}</span>

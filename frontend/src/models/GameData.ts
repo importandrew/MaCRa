@@ -16,6 +16,7 @@ export interface PlayerScore {
   name: string;
   wind: typeof WIND_SYMBOLS;
   score: number;
+  id: number;
 }
 
 export interface RoundData {
@@ -34,4 +35,14 @@ export enum Outcome {
   Deal = 'deal-in',
   Penalty = 'penalty',
   FalseMahjong = 'false mahjong',
+}
+
+export interface AnimatedScoreProps {
+  scoreData: ScoreDataByPlayerIds;
+  playerId: number;
+  className?: string;
+}
+
+export interface ScoreDataByPlayerIds {
+  [playerId: number]: number;
 }
