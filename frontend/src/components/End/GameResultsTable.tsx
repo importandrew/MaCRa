@@ -40,10 +40,12 @@ export default function GameResultsTable({ data }: { data: GameResult }) {
       </div>
       <Table
         isStriped
+        removeWrapper
         defaultSelectedKeys={[currentPlayer]}
         color="primary"
         selectionMode="single"
         aria-label="Game results table"
+        className="z-10"
       >
         <TableHeader>
           <TableColumn align="start">NAME</TableColumn>

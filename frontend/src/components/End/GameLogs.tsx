@@ -231,112 +231,129 @@ export default function GameLogs({
       {isChartVisible ? <GameChart preparedData={preparedData} /> : null}
 
       {isLogVisible ? (
-        <Table
-          defaultSelectedKeys={['finalScores']}
-          isStriped
-          aria-label="Game logs"
-          color="default"
-          selectionMode="single"
-          className="sm:w-fit self-center"
+        <div
+          className={
+            'overflow-hidden flex flex-col justify-center mb-3 w-full ' +
+            '[&_table]:w-full [&_table]:table-fixed [&_:is(th,td)]:box-border ' +
+            '[&_:is(th,td):first-child]:w-10 [&_:is(th,td):first-child]:min-w-10 ' +
+            '[&_:is(th,td):last-child]:w-10 [&_:is(th,td):last-child]:min-w-10 ' +
+            '[&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:w-[calc((100%-5rem)/4)] [&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:min-w-0'
+          }
         >
-          <TableHeader>
-            {[
-              <TableColumn align="end" key="round">
-                #
-              </TableColumn>,
-              ...preparedData.players.map((player) => (
-                <TableColumn align="end" key={player.id}>
-                  <Tooltip content={player.id}>
-                    <div>{player.name}</div>
-                  </Tooltip>
-                </TableColumn>
-              )),
-              <TableColumn align="end" key="result">
-                <Tooltip content={getLegend()}>Result</Tooltip>
-              </TableColumn>,
-            ]}
-          </TableHeader>
-          <TableBody>
-            {[
-              ...preparedData.rounds.map((item) => (
-                <TableRow key={getRowKey(item)}>
-                  <TableCell>{item.round}</TableCell>
-                  <TableCell>
-                    <div className="text-base">
-                      {getSignedScore(item.initial_scores[0])}
-                    </div>
-                    <div
-                      className={
-                        'text-xs ' + getColoredScore(item.score_changes?.[0])
-                      }
-                    >
-                      {getSignedScore(item.score_changes?.[0])}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-base">
-                      {getSignedScore(item.initial_scores[1])}
-                    </div>
-                    <div
-                      className={
-                        'text-xs ' + getColoredScore(item.score_changes?.[1])
-                      }
-                    >
-                      {getSignedScore(item.score_changes?.[1])}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-base">
-                      {getSignedScore(item.initial_scores[2])}
-                    </div>
-                    <div
-                      className={
-                        'text-xs ' + getColoredScore(item.score_changes?.[2])
-                      }
-                    >
-                      {getSignedScore(item.score_changes?.[2])}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-base">
-                      {getSignedScore(item.initial_scores[3])}
-                    </div>
-                    <div
-                      className={
-                        'text-xs ' + getColoredScore(item.score_changes?.[3])
-                      }
-                    >
-                      {getSignedScore(item.score_changes?.[3])}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-base">{getResultScore(item)}</div>
-                  </TableCell>
-                </TableRow>
-              )),
-              ...(finalScores?.length === 4
-                ? [
-                    <TableRow key={'finalScores'}>
-                      <TableCell className="text-base font-bold">Σ</TableCell>
-                      <TableCell className="text-base font-bold">
-                        {finalScores[0]}
-                      </TableCell>
-                      <TableCell className="text-base font-bold">
-                        {finalScores[1]}
-                      </TableCell>
-                      <TableCell className="text-base font-bold">
-                        {finalScores[2]}
-                      </TableCell>
-                      <TableCell className="text-base font-bold">
-                        {finalScores[3]}
-                      </TableCell>
-                      <TableCell> </TableCell>
-                    </TableRow>,
-                  ]
-                : []),
-            ]}
-          </TableBody>
-        </Table>
+          <Table
+            defaultSelectedKeys={['finalScores']}
+            isStriped
+            removeWrapper
+            aria-label="Game logs"
+            color="default"
+            selectionMode="single"
+            className="w-full self-center z-10"
+          >
+            <TableHeader>
+              {[
+                <TableColumn className="min-w-0" align="end" key="round">
+                  #
+                </TableColumn>,
+                ...preparedData.players.map((player) => (
+                  <TableColumn
+                    className="min-w-0 overflow-hidden"
+                    align="end"
+                    key={player.id}
+                  >
+                    <Tooltip content={player.id}>
+                      <div className="overflow-hidden text-ellipsis">
+                        {player.name}
+                      </div>
+                    </Tooltip>
+                  </TableColumn>
+                )),
+                <TableColumn className="min-w-0" align="end" key="result">
+                  <Tooltip content={getLegend()}>Δ</Tooltip>
+                </TableColumn>,
+              ]}
+            </TableHeader>
+            <TableBody>
+              {[
+                ...preparedData.rounds.map((item) => (
+                  <TableRow key={getRowKey(item)}>
+                    <TableCell>{item.round}</TableCell>
+                    <TableCell>
+                      <div className="text-base">
+                        {getSignedScore(item.initial_scores[0])}
+                      </div>
+                      <div
+                        className={
+                          'text-xs ' + getColoredScore(item.score_changes?.[0])
+                        }
+                      >
+                        {getSignedScore(item.score_changes?.[0])}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-base">
+                        {getSignedScore(item.initial_scores[1])}
+                      </div>
+                      <div
+                        className={
+                          'text-xs ' + getColoredScore(item.score_changes?.[1])
+                        }
+                      >
+                        {getSignedScore(item.score_changes?.[1])}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-base">
+                        {getSignedScore(item.initial_scores[2])}
+                      </div>
+                      <div
+                        className={
+                          'text-xs ' + getColoredScore(item.score_changes?.[2])
+                        }
+                      >
+                        {getSignedScore(item.score_changes?.[2])}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-base">
+                        {getSignedScore(item.initial_scores[3])}
+                      </div>
+                      <div
+                        className={
+                          'text-xs ' + getColoredScore(item.score_changes?.[3])
+                        }
+                      >
+                        {getSignedScore(item.score_changes?.[3])}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-base">{getResultScore(item)}</div>
+                    </TableCell>
+                  </TableRow>
+                )),
+                ...(finalScores?.length === 4
+                  ? [
+                      <TableRow key={'finalScores'}>
+                        <TableCell className="text-base font-bold">Σ</TableCell>
+                        <TableCell className="text-base font-bold">
+                          {finalScores[0]}
+                        </TableCell>
+                        <TableCell className="text-base font-bold">
+                          {finalScores[1]}
+                        </TableCell>
+                        <TableCell className="text-base font-bold">
+                          {finalScores[2]}
+                        </TableCell>
+                        <TableCell className="text-base font-bold">
+                          {finalScores[3]}
+                        </TableCell>
+                        <TableCell> </TableCell>
+                      </TableRow>,
+                    ]
+                  : []),
+              ]}
+            </TableBody>
+          </Table>
+        </div>
       ) : null}
     </>
   );
