@@ -14,6 +14,7 @@ import (
 	"github.com/importandrew/MaCRa/server"
 	gsvc "github.com/importandrew/MaCRa/service/game"
 	psvc "github.com/importandrew/MaCRa/service/player"
+	"github.com/spf13/pflag"
 )
 
 const (
@@ -23,7 +24,11 @@ const (
 func main() {
 	ctx := context.Background()
 
-	cfg, err := config.Read(defaultConfigPath)
+	var configPath string
+	pflag.StringVarP(&configPath, "config", "c", defaultConfigPath, "path to config file")
+	pflag.Parse()
+
+	cfg, err := config.Read(configPath)
 	if err != nil {
 		logger.Fatalf("cfg read: %v\n", err)
 	}
