@@ -116,6 +116,74 @@ func (_c *MockPlayerRepo_Add_Call) RunAndReturn(run func(ctx context.Context, em
 	return _c
 }
 
+// GameHistory provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) GameHistory(ctx context.Context, playerID int) ([]int, error) {
+	ret := _mock.Called(ctx, playerID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GameHistory")
+	}
+
+	var r0 []int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) ([]int, error)); ok {
+		return returnFunc(ctx, playerID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) []int); ok {
+		r0 = returnFunc(ctx, playerID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]int)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, playerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPlayerRepo_GameHistory_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GameHistory'
+type MockPlayerRepo_GameHistory_Call struct {
+	*mock.Call
+}
+
+// GameHistory is a helper method to define mock.On call
+//   - ctx context.Context
+//   - playerID int
+func (_e *MockPlayerRepo_Expecter) GameHistory(ctx interface{}, playerID interface{}) *MockPlayerRepo_GameHistory_Call {
+	return &MockPlayerRepo_GameHistory_Call{Call: _e.mock.On("GameHistory", ctx, playerID)}
+}
+
+func (_c *MockPlayerRepo_GameHistory_Call) Run(run func(ctx context.Context, playerID int)) *MockPlayerRepo_GameHistory_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_GameHistory_Call) Return(ints []int, err error) *MockPlayerRepo_GameHistory_Call {
+	_c.Call.Return(ints, err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_GameHistory_Call) RunAndReturn(run func(ctx context.Context, playerID int) ([]int, error)) *MockPlayerRepo_GameHistory_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Get provides a mock function for the type MockPlayerRepo
 func (_mock *MockPlayerRepo) Get(ctx context.Context, id int) (models.Player, error) {
 	ret := _mock.Called(ctx, id)

@@ -18,7 +18,7 @@ const useFetchPlayers = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       setIsLoading(true);
-      const playersRequest = GetRequest('/api/players/list');
+      const playersRequest = GetRequest('/api/player/list');
       const data = await globalFetch<Player[]>(playersRequest);
 
       if (!data) {

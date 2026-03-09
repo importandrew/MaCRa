@@ -13,6 +13,7 @@ type PlayerRepo interface {
 	GetPassByEmail(ctx context.Context, email string) (string, error)
 	ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error)
 	Update(ctx context.Context, id int, name string) error
+	GameHistory(ctx context.Context, playerID int) ([]int, error)
 }
 
 type Service struct {
