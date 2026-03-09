@@ -57,3 +57,8 @@ type GameView struct {
 
 	PlayerScores []PlayerWindScore `json:"player_scores"`
 }
+
+type PlayerHistory struct {
+	ID      int   `json:"id"`
+	GameIDs []int `json:"game_ids"`
+}

@@ -152,7 +152,7 @@ func TestHandler_List(t *testing.T) {
 
 			handler := NewHandler(mockPlayerService, "", nil)
 
-			req := httptest.NewRequest(http.MethodGet, "/api/players/list", nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/player/list", nil)
 			q := req.URL.Query()
 			for key, value := range testCase.queryParams {
 				q.Add(key, value)
