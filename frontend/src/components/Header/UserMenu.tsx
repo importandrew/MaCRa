@@ -18,6 +18,7 @@ export default function UserMenu({ signOut }: { signOut: () => void }) {
         <Avatar
           as="button"
           className="transition-transform"
+          style={{ cursor: 'pointer' }}
           color="default"
           size="md"
           name={username}

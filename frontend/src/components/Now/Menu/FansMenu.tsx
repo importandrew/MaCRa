@@ -10,9 +10,18 @@ import {
 
 export function FansMenu() {
   return (
-    <>
+    <div
+      className={
+        'overflow-hidden flex flex-col justify-center mb-3 w-full ' +
+        '[&_table]:w-full [&_table]:table-fixed [&_:is(th,td)]:box-border ' +
+        '[&_:is(th,td):first-child]:w-10 [&_:is(th,td):first-child]:min-w-10 ' +
+        '[&_:is(th,td):last-child]:w-10 [&_:is(th,td):last-child]:min-w-10 ' +
+        '[&_:is(th,td):nth-child(n+2):nth-child(-n+2)]:w-[calc((100%-5rem)/3)] [&_:is(th,td):nth-child(n+2):nth-child(-n+2)]:min-w-0'
+      }
+    >
       <Table
         isStriped
+        removeWrapper
         color="default"
         selectionMode="single"
         aria-label="Fans list"
@@ -59,8 +68,8 @@ export function FansMenu() {
             <TableCell>4</TableCell>
             <TableCell>Nine Gates</TableCell>
             <TableCell>
-              Holding the 1,1,1,2,3,4,5,6,7,8,9,9,9 tiles in any one of the
-              suits, creating the nine-sided wait of 1,2,3,4,5,6,7,8,9. (Fully
+              Holding the 1-1-1-2-3-4-5-6-7-8-9-9-9 tiles in any one of the
+              suits, creating the nine-sided wait of 1-2-3-4-5-6-7-8-9. (Fully
               Concealed Hand may be combined if Self-Drawn).
             </TableCell>
             <TableCell>88</TableCell>
@@ -761,6 +770,6 @@ export function FansMenu() {
           Same, but cooler.jpg
         </Link>
       </div>
-    </>
+    </div>
   );
 }

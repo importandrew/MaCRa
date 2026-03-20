@@ -1,6 +1,6 @@
 import { Button, Link, Spinner } from '@heroui/react';
 import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useFetchGameResultData } from '../../providers/game/gameDataApi';
 import GameLogs from './GameLogs';
 import GameResultsTable from './GameResultsTable';
@@ -8,7 +8,9 @@ import LogsMenu from '../Now/Menu/LogsMenu';
 
 export default function End() {
   const navigate = useNavigate();
-  const { data, isError, isLoading, fetchData } = useFetchGameResultData(true);
+  const { id } = useParams<{ id: string }>();
+  const gameId = id ? parseInt(id, 10) : 0;
+  const { data, isError, isLoading, fetchData } = useFetchGameResultData(true, gameId);
   const [isChartVisible, setIsChartVisible] = useState(false);
   const [isLogsVisible, setIsLogsVisible] = useState(false);
 

@@ -46,3 +46,26 @@ export interface AnimatedScoreProps {
 export interface ScoreDataByPlayerIds {
   [playerId: number]: number;
 }
+
+export interface HistoryProps {
+  playerId?: number;
+}
+
+export interface GamesHistoryData {
+  id: number; // player id
+  game_ids: number[];
+}
+
+export interface GameResultsData {
+  id: number;
+  finished_at: string;
+  can_undo_last_round: boolean;
+  player_results: PlayerResults[];
+}
+
+export interface PlayerResults {
+  name: string;
+  id: number;
+  tp: number;
+  gp: number;
+}

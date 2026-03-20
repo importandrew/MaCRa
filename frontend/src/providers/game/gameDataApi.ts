@@ -4,19 +4,127 @@ import {
   GetRequest,
   globalFetch,
 } from '../../components/Request';
-import { GameData, GamePlayers, PlayerOrder } from '../../models/GameData';
-import { GameView } from '../../models/GameView';
+import {
+  GameData,
+  GamePlayers,
+  GamesHistoryData,
+  PlayerOrder,
+} from '../../models/GameData';
 import {
   GameResult,
   GameRoundLogs,
   PlayerStatus,
 } from '../../models/GameResult';
+import { GameView } from '../../models/GameView';
 
 export async function undoLastRound(gameId: number): Promise<boolean> {
   const request = DeleteRequest(`/api/game/${gameId}/undo-round`);
   const result = await globalFetch<null>(request);
   return result !== null;
 }
+
+export const useFetchPlayerGamesHistory = (playerId: number) => {
+  const [data, setData] = useState<GamesHistoryData | null>(null);
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
+    const request = GetRequest(`/api/player/${playerId}/game-history`);
+    const result = await globalFetch<GamesHistoryData>(request);
+
+    if (!result) {
+      setIsError(true);
+      setIsLoading(false);
+      return;
+    }
+
+    setData(result);
+    setIsLoading(false);
+  }, [playerId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, isError, isLoading, refetch: fetchData };
+};
+
+export const useFetchPlayerGameResults = (gameId: number) => {
+  const [data, setData] = useState<GameResult | null>(null);
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
+    const request = GetRequest(`/api/game/${gameId}/result`);
+    const result = await globalFetch<GameResult>(request);
+
+    if (!result) {
+      setIsError(true);
+      setIsLoading(false);
+      return;
+    }
+
+    setData(result);
+    setIsLoading(false);
+  }, [gameId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, isError, isLoading, refetch: fetchData };
+};
+
+export const useFetchAllGameResults = (gameIds: number[]) => {
+  const [data, setData] = useState<Record<number, GameResult> | null>(null);
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    if (gameIds.length === 0) {
+      setData({});
+      return;
+    }
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const promises = gameIds.map((id) => {
+        const request = GetRequest(`/api/game/${id}/result`);
+        return globalFetch<GameResult>(request);
+      });
+      const results = await Promise.all(promises);
+      const map: Record<number, GameResult> = {};
+      let anyError = false;
+      results.forEach((result, index) => {
+        const id = gameIds[index];
+        if (result) {
+          map[id] = result;
+        } else {
+          anyError = true;
+        }
+      });
+      setData(map);
+      if (anyError) {
+        setIsError(true);
+      }
+    } catch (error) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [gameIds]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, isError, isLoading, refetch: fetchData };
+};
 
 export const useFetchGameData = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +172,10 @@ export const useFetchGameData = () => {
   return { data, playersList, isLoading, isError, refetch: fetchGameData };
 };
 
-export const useFetchGameResultData = (isToastEnabled = false) => {
+export const useFetchGameResultData = (
+  isToastEnabled = false,
+  gameId?: number
+) => {
   const [data, setData] = useState<GameResult | null>(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -74,9 +185,14 @@ export const useFetchGameResultData = (isToastEnabled = false) => {
     setIsError(false);
 
     const lastGameRequest = GetRequest('/api/last');
-    const data = await globalFetch<GameResult>(lastGameRequest, {
-      isToastEnabled,
-    });
+    const gameResultsByIdRequest = GetRequest(`/api/game/${gameId}/result`);
+
+    const data = await globalFetch<GameResult>(
+      gameId ? gameResultsByIdRequest : lastGameRequest,
+      {
+        isToastEnabled,
+      }
+    );
 
     if (!data) {
       setIsError(true);
