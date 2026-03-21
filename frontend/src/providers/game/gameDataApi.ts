@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DeleteRequest,
   GetRequest,
+  globalBatchFetch,
   globalFetch,
 } from '../../components/Request';
 import {
@@ -79,7 +80,7 @@ export const useFetchPlayerGameResults = (gameId: number) => {
   return { data, isError, isLoading, refetch: fetchData };
 };
 
-export const useFetchAllGameResults = (gameIds: number[]) => {
+export const useFetchBatchGameResults = (gameIds: number[]) => {
   const [data, setData] = useState<Record<number, GameResult> | null>(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,31 +93,32 @@ export const useFetchAllGameResults = (gameIds: number[]) => {
     setIsLoading(true);
     setIsError(false);
 
-    try {
-      const promises = gameIds.map((id) => {
-        const request = GetRequest(`/api/game/${id}/result`);
-        return globalFetch<GameResult>(request);
-      });
-      const results = await Promise.all(promises);
-      const map: Record<number, GameResult> = {};
-      let anyError = false;
-      results.forEach((result, index) => {
+    const requests = gameIds.map((id) => {
+      return GetRequest(`/api/game/${id}/result`);
+    });
+
+    const results = await globalBatchFetch<GameResult>(requests);
+
+    if (!results) {
+      setIsError(true);
+      setIsLoading(false);
+      return;
+    }
+
+    const data: Record<number, GameResult> = results.reduce(
+      (acc: Record<number, GameResult>, result: GameResult, index: number) => {
         const id = gameIds[index];
         if (result) {
-          map[id] = result;
-        } else {
-          anyError = true;
+          acc[id] = result;
         }
-      });
-      setData(map);
-      if (anyError) {
-        setIsError(true);
-      }
-    } catch (error) {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
+
+        return acc;
+      },
+      {} as Record<number, GameResult>
+    );
+
+    setData(data);
+    setIsLoading(false);
   }, [gameIds]);
 
   useEffect(() => {
@@ -172,10 +174,7 @@ export const useFetchGameData = () => {
   return { data, playersList, isLoading, isError, refetch: fetchGameData };
 };
 
-export const useFetchGameResultData = (
-  isToastEnabled = false,
-  gameId?: number
-) => {
+export const useFetchGameResultData = (gameId?: number) => {
   const [data, setData] = useState<GameResult | null>(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -190,7 +189,7 @@ export const useFetchGameResultData = (
     const data = await globalFetch<GameResult>(
       gameId ? gameResultsByIdRequest : lastGameRequest,
       {
-        isToastEnabled,
+        isToastEnabled: true,
       }
     );
 
@@ -293,7 +292,6 @@ export const useFetchLiveGameData = (gameId: number) => {
       return;
     }
 
-    // Always update the game data
     setData(data);
 
     // Request players list only once on game start or page refresh

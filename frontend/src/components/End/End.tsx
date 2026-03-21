@@ -10,7 +10,7 @@ export default function End() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const gameId = id ? parseInt(id, 10) : 0;
-  const { data, isError, isLoading, fetchData } = useFetchGameResultData(true, gameId);
+  const { data, isError, isLoading, fetchData } = useFetchGameResultData(gameId);
   const [isChartVisible, setIsChartVisible] = useState(false);
   const [isLogsVisible, setIsLogsVisible] = useState(false);
 

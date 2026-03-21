@@ -4,7 +4,7 @@ import { HistoryProps } from '../../models/GameData';
 import { UserData } from '../../models/UserData';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import {
-  useFetchAllGameResults,
+  useFetchBatchGameResults,
   useFetchPlayerGamesHistory,
 } from '../../providers/game/gameDataApi';
 import { ChevronRightIcon } from '../Icons/ChevronRightIcon';
@@ -55,7 +55,7 @@ const History = (props: HistoryProps) => {
     data: resultsMap,
     isLoading: resultsLoading,
     isError: resultsError,
-  } = useFetchAllGameResults(data?.game_ids || []);
+  } = useFetchBatchGameResults(data?.game_ids || []);
 
   const onRefresh = useCallback(() => {
     refetch();
@@ -145,7 +145,13 @@ const History = (props: HistoryProps) => {
             <ListboxItem
               key={item.key}
               textValue={item.label}
-              startContent={item.finished ? <UsersIcon /> : <PlayCircleIcon />}
+              startContent={
+                item.finished ? (
+                  <UsersIcon fontSize={32} />
+                ) : (
+                  <PlayCircleIcon fontSize={32} />
+                )
+              }
               endContent={<ItemCounter />}
             >
               <div className="flex flex-col gap-1">
