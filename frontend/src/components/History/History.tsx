@@ -1,5 +1,6 @@
-import { Button, Listbox, ListboxItem, Spinner, cn } from '@heroui/react';
+import { Listbox, ListboxItem, cn } from '@heroui/react';
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HistoryProps } from '../../models/GameData';
 import { UserData } from '../../models/UserData';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
@@ -9,8 +10,8 @@ import {
 } from '../../providers/game/gameDataApi';
 import { ChevronRightIcon } from '../Icons/ChevronRightIcon';
 import { PlayCircleIcon } from '../Icons/PlayCircleIcon';
-import { useNavigate } from 'react-router-dom';
 import { UsersIcon } from '../Icons/UsersIcon';
+import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 
 export const ListboxWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="w-full max-w-[600px] md:border-small p-3 rounded-small border-default-200 dark:border-default-100">
@@ -65,34 +66,10 @@ const History = (props: HistoryProps) => {
     navigate(`/game/${id}/history`);
   };
 
-  if (isLoading || resultsLoading) {
-    return (
-      <div className="flex flex-col h-full w-screen my-auto justify-center items-center">
-        <Spinner label="Loading..." size="lg" />
-      </div>
-    );
-  }
-
-  if (isError || resultsError) {
-    return (
-      <div className="flex w-screen h-full justify-center items-center">
-        <Button type="button" onPress={onRefresh}>
-          Refresh
-        </Button>
-      </div>
-    );
-  }
-
-  if (!data || !resultsMap) {
-    return (
-      <div className="flex flex-col h-full w-screen justify-center items-center gap-3">
-        <p className="mb-4 text-center text-3xl">No data available</p>
-        <Button type="button" onPress={onRefresh}>
-          Refresh
-        </Button>
-      </div>
-    );
-  }
+  const isLoadingState = isLoading || resultsLoading;
+  const isErrorState = isError || resultsError;
+  const hasNoDataState =
+    !isLoadingState && !isErrorState && (!data || data.game_ids.length === 0);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -112,61 +89,70 @@ const History = (props: HistoryProps) => {
     return playerResult;
   };
 
-  const items = data.game_ids.map((id) => {
-    const playerResult = getPlayerResult(id);
-    const result = resultsMap?.[id];
-    const label = playerResult
-      ? `TP: ${playerResult.tp}, GP: ${playerResult.gp}`
-      : resultsLoading
-        ? 'Loading...'
-        : resultsError
-          ? 'Error loading results'
-          : 'No result data';
+  const items = data
+    ? data.game_ids.map((id) => {
+        const playerResult = getPlayerResult(id);
+        const result = resultsMap?.[id];
+        const label = playerResult
+          ? `TP: ${playerResult.tp}, GP: ${playerResult.gp}`
+          : resultsLoading
+            ? 'Loading...'
+            : resultsError
+              ? 'Error loading results'
+              : 'No result data';
 
-    return {
-      key: id,
-      label,
-      finished: !result?.can_undo_last_round,
-      date: formatDate(result?.finished_at || ''),
-    };
-  });
+        return {
+          key: id,
+          label,
+          finished: !result?.can_undo_last_round,
+          date: formatDate(result?.finished_at || ''),
+        };
+      })
+    : [];
 
   return (
-    <div className="flex flex-col h-full w-screen md:w-[600px] justify-center items-center md:my-3">
-      <ListboxWrapper>
-        <Listbox
-          aria-label="Played games history"
-          variant="flat"
-          color="primary"
-          items={items}
-          onAction={(key) => handleAction(Number(key))}
-        >
-          {(item) => (
-            <ListboxItem
-              key={item.key}
-              textValue={item.label}
-              startContent={
-                item.finished ? (
-                  <UsersIcon fontSize={32} />
-                ) : (
-                  <PlayCircleIcon fontSize={32} />
-                )
-              }
-              endContent={<ItemCounter />}
-            >
-              <div className="flex flex-col gap-1">
-                <span>{item.label}</span>
-                <div className="px-2 py-1 w-auto rounded-small bg-primary-100">
-                  <span className="text-tiny text-default-600">
-                    {item.date}
-                  </span>
+    <LoadingTemplate
+      isLoading={isLoadingState}
+      isError={isErrorState}
+      hasNoData={hasNoDataState}
+      onRefresh={onRefresh}
+    >
+      <div className="flex flex-col h-full w-screen md:w-[600px] justify-center items-center md:my-3">
+        <ListboxWrapper>
+          <Listbox
+            aria-label="Played games history"
+            variant="flat"
+            color="primary"
+            items={items}
+            onAction={(key) => handleAction(Number(key))}
+          >
+            {(item) => (
+              <ListboxItem
+                key={item.key}
+                textValue={item.label}
+                startContent={
+                  item.finished ? (
+                    <UsersIcon fontSize={32} />
+                  ) : (
+                    <PlayCircleIcon fontSize={32} />
+                  )
+                }
+                endContent={<ItemCounter />}
+              >
+                <div className="flex flex-col gap-1">
+                  <span>{item.label}</span>
+                  <div className="px-2 py-1 w-auto rounded-small bg-primary-100">
+                    <span className="text-tiny text-default-600">
+                      {item.date}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </ListboxItem>
-          )}
-        </Listbox>
-      </ListboxWrapper>
-    </div>
+              </ListboxItem>
+            )}
+          </Listbox>
+        </ListboxWrapper>
+      </div>
+    </LoadingTemplate>
   );
 };
 
