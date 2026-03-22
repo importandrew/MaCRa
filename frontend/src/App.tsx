@@ -2,7 +2,7 @@ import { HeroUIProvider, ToastProvider } from '@heroui/react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css';
 import Draft from './components/Draft/Draft';
-import GameResults from './components/GameResults/GameResults';
+import GameResult from './components/GameResult/GameResult';
 import History from './components/History/History';
 import Live from './components/Live/Live';
 import LoginPage from './components/Login/Login';
@@ -34,10 +34,10 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/now" element={<CurrentGame />} />
-        <Route path="/last" element={<GameResults />} />
+        <Route path="/last" element={<GameResult />} />
         <Route path="/new" element={<Draft />} />
         <Route path="/history" element={<History />} />
-        <Route path="/game/:id/result" element={<GameResults />} />
+        <Route path="/game/:id/result" element={<GameResult />} />
         <Route path="/game/:id/live" element={<Live />} />
       </Routes>
     </HeroUIProvider>

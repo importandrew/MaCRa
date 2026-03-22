@@ -11,7 +11,7 @@ import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import { getDateTimeFormatted } from '../../utils/date-tools';
 
 // Table component for rendering game results
-export default function GameResultsTable({ data }: { data: GameResult }) {
+export default function GameResultTable({ data }: { data: GameResult }) {
   const currentPlayer = JSON.parse(
     localStorage.getItem(AUTH_USER_DATA) || '{}'
   ).name;

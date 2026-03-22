@@ -109,7 +109,7 @@ const History = (props: HistoryProps) => {
       hasNoData={hasNoDataState}
       onRefresh={onRefresh}
     >
-      <div className="flex flex-col h-full w-screen md:w-[600px] justify-center items-center md:my-3">
+      <div className="flex flex-col h-full w-screen md:w-[600px] justify-start items-center md:my-3 px-3 md:px-0">
         <ListboxWrapper>
           <Listbox
             aria-label="Played games history"

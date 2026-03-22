@@ -5,9 +5,9 @@ import { useFetchGameResultData } from '../../providers/game/gameDataApi';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import LogsMenu from '../CurrentGame/Menu/LogsMenu';
 import GameLogs from './GameLogs';
-import GameResultsTable from './GameResultsTable';
+import GameResultTable from './GameResultTable';
 
-export default function GameResults() {
+export default function GameResult() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const gameId = id ? parseInt(id, 10) : 0;
@@ -45,7 +45,7 @@ export default function GameResults() {
     >
       {data ? (
         <div className="flex flex-col grow justify-center w-screen sm:max-w-[600px] h-full px-3 gap-3">
-          <GameResultsTable data={data} />
+          <GameResultTable data={data} />
           <div className="grid grid-cols-2 sm:flex sm:flex-row justify-center gap-3">
             <Button
               type="button"
