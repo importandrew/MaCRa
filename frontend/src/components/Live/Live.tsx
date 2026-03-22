@@ -5,8 +5,8 @@ import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import { RefreshIcon } from '../Icons/RefreshIcon';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
-import AnimatedScore from '../Now/AnimatedScore';
-import '../Now/Now.css';
+import AnimatedScore from '../CurrentGame/AnimatedScore';
+import '../CurrentGame/CurrentGame.css';
 import LiveMenu from './Menu/LiveMenu';
 
 export default function Live() {

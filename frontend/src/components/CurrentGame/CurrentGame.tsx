@@ -8,10 +8,10 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from './AnimatedScore';
 import PlayerMenu from './Menu/PlayerMenu';
 import TableMenu from './Menu/TableMenu';
-import './Now.css';
+import './CurrentGame.css';
 import ScroreInput from './ScoreInput';
 
-export default function Now() {
+export default function CurrentGame() {
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);

@@ -34,7 +34,7 @@ async function globalFetch<T>(
       return null;
     }
 
-    const data = (await response.json()) || {};
+    const data = JSON.parse((await response.text()) || '{}');
     return data;
   } catch (error) {
     isToastEnabled &&

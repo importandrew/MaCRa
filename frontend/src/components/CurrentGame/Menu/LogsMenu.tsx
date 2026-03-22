@@ -1,6 +1,6 @@
 import { Button } from '@heroui/react';
 import { useState } from 'react';
-import GameLogs from '../../End/GameLogs';
+import GameLogs from '../../GameResults/GameLogs';
 import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
 import { UndoIcon } from '../../Icons/UndoIcon';

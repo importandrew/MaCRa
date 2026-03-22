@@ -1,5 +1,5 @@
 import { Listbox, ListboxItem, cn } from '@heroui/react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HistoryProps } from '../../models/GameData';
 import { UserData } from '../../models/UserData';
@@ -8,13 +8,12 @@ import {
   useFetchBatchGameResults,
   useFetchPlayerGamesHistory,
 } from '../../providers/game/gameDataApi';
+import { getDateTimeFormatted } from '../../utils/date-tools';
 import { ChevronRightIcon } from '../Icons/ChevronRightIcon';
-import { PlayCircleIcon } from '../Icons/PlayCircleIcon';
-import { UsersIcon } from '../Icons/UsersIcon';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 
 export const ListboxWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="w-full max-w-[600px] md:border-small p-3 rounded-small border-default-200 dark:border-default-100">
+  <div className="w-full max-w-[600px] md:border-small rounded-small border-default-200 dark:border-default-100">
     {children}
   </div>
 );
@@ -52,33 +51,26 @@ const History = (props: HistoryProps) => {
   const { data, isLoading, isError, refetch } =
     useFetchPlayerGamesHistory(playerId);
 
+  const gameIds = useMemo(() => data?.game_ids || [], [data?.game_ids]);
+
   const {
     data: resultsMap,
     isLoading: resultsLoading,
     isError: resultsError,
-  } = useFetchBatchGameResults(data?.game_ids || []);
+  } = useFetchBatchGameResults(gameIds);
 
   const onRefresh = useCallback(() => {
     refetch();
   }, [refetch]);
 
   const handleAction = (id: number) => {
-    navigate(`/game/${id}/history`);
+    navigate(`/game/${id}/result`);
   };
 
   const isLoadingState = isLoading || resultsLoading;
   const isErrorState = isError || resultsError;
   const hasNoDataState =
     !isLoadingState && !isErrorState && (!data || data.game_ids.length === 0);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const getPlayerResult = (gameId: number) => {
     const result = resultsMap?.[gameId];
@@ -104,8 +96,8 @@ const History = (props: HistoryProps) => {
         return {
           key: id,
           label,
-          finished: !result?.can_undo_last_round,
-          date: formatDate(result?.finished_at || ''),
+          date: getDateTimeFormatted(result?.finished_at || ''),
+          isLastInList: id === data.game_ids[data.game_ids.length - 1],
         };
       })
     : [];
@@ -130,18 +122,12 @@ const History = (props: HistoryProps) => {
               <ListboxItem
                 key={item.key}
                 textValue={item.label}
-                startContent={
-                  item.finished ? (
-                    <UsersIcon fontSize={32} />
-                  ) : (
-                    <PlayCircleIcon fontSize={32} />
-                  )
-                }
+                showDivider={!item.isLastInList}
                 endContent={<ItemCounter />}
               >
                 <div className="flex flex-col gap-1">
                   <span>{item.label}</span>
-                  <div className="px-2 py-1 w-auto rounded-small bg-primary-100">
+                  <div className="w-auto rounded-small">
                     <span className="text-tiny text-default-600">
                       {item.date}
                     </span>

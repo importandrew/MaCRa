@@ -6,8 +6,8 @@ import {
 } from '@heroui/react';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
-import LogsMenu from '../../Now/Menu/LogsMenu';
-import { FansMenu } from '../../Now/Menu/FansMenu';
+import LogsMenu from '../../CurrentGame/Menu/LogsMenu';
+import { FansMenu } from '../../CurrentGame/Menu/FansMenu';
 
 export default function LiveMenu({ gameId = null }: { gameId: number | null }) {
   return (

@@ -3,11 +3,11 @@ import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFetchGameResultData } from '../../providers/game/gameDataApi';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
-import LogsMenu from '../Now/Menu/LogsMenu';
+import LogsMenu from '../CurrentGame/Menu/LogsMenu';
 import GameLogs from './GameLogs';
 import GameResultsTable from './GameResultsTable';
 
-export default function End() {
+export default function GameResults() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const gameId = id ? parseInt(id, 10) : 0;

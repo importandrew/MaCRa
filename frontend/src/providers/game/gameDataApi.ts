@@ -86,10 +86,6 @@ export const useFetchBatchGameResults = (gameIds: number[]) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
-    if (gameIds.length === 0) {
-      setData({});
-      return;
-    }
     setIsLoading(true);
     setIsError(false);
 

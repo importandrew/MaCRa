@@ -5,7 +5,12 @@ import { Button } from '@heroui/react';
 function MainButton(props: MainButtonProps) {
   return (
     <Button color={props.color || 'primary'} variant="flat" size="lg">
-      <Link to={props.link}>{props.text}</Link>
+      <Link
+        className="flex flex-col justify-center h-full w-full"
+        to={props.link}
+      >
+        {props.text}
+      </Link>
     </Button>
   );
 }
