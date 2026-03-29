@@ -85,7 +85,6 @@ export default function CurrentGame() {
     <LoadingTemplate
       isLoading={isLoading}
       isError={isError}
-      hasNoData={!roundData}
       onRefresh={onRefresh}
     >
       {roundData ? (

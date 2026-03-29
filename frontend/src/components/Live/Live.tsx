@@ -78,17 +78,11 @@ export default function Live() {
   const right = data && data.player_scores[getRotatedIndex(1)];
   const top = data && data.player_scores[getRotatedIndex(2)];
   const left = data && data.player_scores[getRotatedIndex(3)];
-  const hasNoData =
-    !data ||
-    !data.player_scores ||
-    data.player_scores.length !== 4 ||
-    playersList.length !== 4;
 
   return (
     <LoadingTemplate
       isLoading={isLoading}
       isError={isError}
-      hasNoData={hasNoData}
       onRefresh={onRefresh}
     >
       {data && bot && right && top && left ? (

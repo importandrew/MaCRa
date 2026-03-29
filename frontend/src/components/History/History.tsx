@@ -37,7 +37,6 @@ export const IconWrapper = ({
 
 export const ItemCounter = () => (
   <div className="flex items-center gap-1 text-default-400">
-    <span className="text-small">{}</span>
     <ChevronRightIcon className="text-xl" />
   </div>
 );
@@ -69,8 +68,6 @@ const History = (props: HistoryProps) => {
 
   const isLoadingState = isLoading || resultsLoading;
   const isErrorState = isError || resultsError;
-  const hasNoDataState =
-    !isLoadingState && !isErrorState && (!data || data.game_ids.length === 0);
 
   const getPlayerResult = (gameId: number) => {
     const result = resultsMap?.[gameId];
@@ -83,35 +80,35 @@ const History = (props: HistoryProps) => {
 
   const items = data
     ? data.game_ids.map((id) => {
-        const playerResult = getPlayerResult(id);
-        const result = resultsMap?.[id];
-        const label = playerResult
-          ? `TP: ${playerResult.tp}, GP: ${playerResult.gp}`
-          : resultsLoading
-            ? 'Loading...'
-            : resultsError
-              ? 'Error loading results'
-              : 'No result data';
+      const playerResult = getPlayerResult(id);
+      const result = resultsMap?.[id];
+      const label = playerResult
+        ? `TP: ${playerResult.tp}, GP: ${playerResult.gp}`
+        : resultsLoading
+          ? 'Loading...'
+          : resultsError
+            ? 'Error loading results'
+            : 'No result data';
 
-        return {
-          key: id,
-          label,
-          date: getDateTimeFormatted(result?.finished_at || ''),
-          isLastInList: id === data.game_ids[data.game_ids.length - 1],
-        };
-      })
+      return {
+        key: id,
+        label,
+        date: getDateTimeFormatted(result?.finished_at || ''),
+        isLastInList: id === data.game_ids[data.game_ids.length - 1],
+      };
+    })
     : [];
 
   return (
     <LoadingTemplate
       isLoading={isLoadingState}
       isError={isErrorState}
-      hasNoData={hasNoDataState}
       onRefresh={onRefresh}
     >
       <div className="flex flex-col h-full w-screen md:w-[600px] justify-start items-center md:my-3 px-3 md:px-0">
         <ListboxWrapper>
           <Listbox
+            emptyContent={<p className="text-center text-3xl">No games played yet</p>}
             aria-label="Played games history"
             variant="flat"
             color="primary"

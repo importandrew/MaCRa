@@ -1,8 +1,14 @@
 import { Spinner, Button } from '@heroui/react';
-import { LoadingTemplateProps } from '../../models/LoadingTemplate';
+
+interface LoadingTemplateProps {
+  isLoading: boolean;
+  isError: boolean;
+  onRefresh: () => void;
+  children: React.ReactNode;
+}
 
 const LoadingTemplate = (props: LoadingTemplateProps) => {
-  const { isLoading, isError, hasNoData, onRefresh, children } = props;
+  const { isLoading, isError, onRefresh, children } = props;
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-auto my-auto justify-center items-center">
@@ -13,20 +19,10 @@ const LoadingTemplate = (props: LoadingTemplateProps) => {
 
   if (isError) {
     return (
-      <div className="fflex flex-col h-full w-auto my-auto justify-center items-center">
+      <div className="flex flex-col h-full w-auto my-auto justify-center items-center">
+        <p className="mb-4 text-center text-3xl">Error</p>
         <Button type="button" onPress={onRefresh}>
-          Refresh
-        </Button>
-      </div>
-    );
-  }
-
-  if (hasNoData) {
-    return (
-      <div className="flex flex-col h-full w-auto my-auto justify-center items-center gap-3">
-        <p className="mb-4 text-center text-3xl">No data available</p>
-        <Button type="button" onPress={onRefresh}>
-          Refresh
+          Try again
         </Button>
       </div>
     );

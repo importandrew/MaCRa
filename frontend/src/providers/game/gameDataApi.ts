@@ -134,9 +134,7 @@ export const useFetchGameData = () => {
     setIsLoading(true);
 
     const gameDataRequest = GetRequest('/api/now');
-    const data = await globalFetch<GameData>(gameDataRequest, {
-      isToastEnabled: true,
-    });
+    const data = await globalFetch<GameData>(gameDataRequest);
 
     if (!data) {
       setIsError(true);
@@ -183,10 +181,7 @@ export const useFetchGameResultData = (gameId?: number) => {
     const gameResultsByIdRequest = GetRequest(`/api/game/${gameId}/result`);
 
     const data = await globalFetch<GameResult>(
-      gameId ? gameResultsByIdRequest : lastGameRequest,
-      {
-        isToastEnabled: true,
-      }
+      gameId ? gameResultsByIdRequest : lastGameRequest
     );
 
     if (!data) {
@@ -278,9 +273,7 @@ export const useFetchLiveGameData = (gameId: number) => {
     setIsError(false);
 
     const liveGameRequest = GetRequest(`/api/game/${gameId}/live`);
-    const data = await globalFetch<GameView>(liveGameRequest, {
-      isToastEnabled: false,
-    });
+    const data = await globalFetch<GameView>(liveGameRequest);
 
     if (!data) {
       setIsError(true);

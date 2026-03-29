@@ -41,7 +41,6 @@ export default function GameResult() {
       isLoading={isLoading}
       isError={isError}
       onRefresh={onRefresh}
-      hasNoData={!data}
     >
       {data ? (
         <div className="flex flex-col grow justify-center w-screen sm:max-w-[600px] h-full px-3 gap-3">
