@@ -1,29 +1,17 @@
 import {
   Table,
-  TableHeader,
-  TableColumn,
   TableBody,
-  TableRow,
   TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
 } from '@heroui/react';
 import { GameResult } from '../../models/GameResult';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
-
-function formatFinishedAt(iso: string): string {
-  if (!iso) return '—';
-
-  const d = new Date(iso);
-  const time = d.toLocaleTimeString(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const date = d.toLocaleDateString(undefined, { dateStyle: 'short' });
-
-  return `${time} ${date}`;
-}
+import { getDateTimeFormatted } from '../../utils/date-tools';
 
 // Table component for rendering game results
-export default function GameResultsTable({ data }: { data: GameResult }) {
+export default function GameResultTable({ data }: { data: GameResult }) {
   const currentPlayer = JSON.parse(
     localStorage.getItem(AUTH_USER_DATA) || '{}'
   ).name;
@@ -35,7 +23,7 @@ export default function GameResultsTable({ data }: { data: GameResult }) {
           Game #{data.id}
         </span>
         <span className="text-sm text-default-500">
-          {formatFinishedAt(data.finished_at)}
+          {getDateTimeFormatted(data.finished_at)}
         </span>
       </div>
       <Table

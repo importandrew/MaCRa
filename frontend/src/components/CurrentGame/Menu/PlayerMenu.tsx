@@ -26,6 +26,7 @@ export default function PlayerMenu({
         <Avatar
           as="button"
           className="transition-transform"
+          style={{ cursor: 'pointer' }}
           color="default"
           size="md"
           name={player?.name || ''}

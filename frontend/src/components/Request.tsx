@@ -46,6 +46,30 @@ async function globalFetch<T>(
   }
 }
 
+async function globalBatchFetch<T>(
+  requests: Request[],
+  params?: { isToastEnabled: boolean }
+): Promise<T[] | null> {
+  const { isToastEnabled = true } = params || {};
+  try {
+    const responses = await Promise.all(
+      requests.map((request) => fetch(request))
+    );
+
+    const data = await Promise.all(
+      responses.map((response) => response.json())
+    );
+    return data;
+  } catch (error) {
+    isToastEnabled &&
+      showToast({
+        title: `Error: ${error}`,
+        color: 'danger',
+      });
+    return null;
+  }
+}
+
 function PostRequest(url: string, body: unknown = {}): Request {
   return new Request(import.meta.env.VITE_API_ADDR + url, {
     method: 'POST',
@@ -75,4 +99,11 @@ function DeleteRequest(url: string): Request {
   });
 }
 
-export { globalFetch, GetRequest, PostRequest, PutRequest, DeleteRequest };
+export {
+  globalFetch,
+  globalBatchFetch,
+  GetRequest,
+  PostRequest,
+  PutRequest,
+  DeleteRequest,
+};
