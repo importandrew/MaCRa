@@ -50,12 +50,21 @@ func TestHandler_Login(t *testing.T) {
 			},
 			checkCookie: func(t *testing.T, w *httptest.ResponseRecorder) {
 				cookies := w.Result().Cookies()
-				assert.Len(t, cookies, 1)
-				assert.Equal(t, "token", cookies[0].Name)
-				assert.NotEmpty(t, cookies[0].Value)
-				assert.Equal(t, "example.com", cookies[0].Domain)
-				assert.True(t, cookies[0].Secure)
-				assert.True(t, cookies[0].HttpOnly)
+				assert.Len(t, cookies, 2)
+
+				auth := cookies[0]
+				assert.Equal(t, "token", auth.Name)
+				assert.NotEmpty(t, auth.Value)
+				assert.Equal(t, "example.com", auth.Domain)
+				assert.True(t, auth.Secure)
+				assert.True(t, auth.HttpOnly)
+				assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)
+
+				legacy := cookies[1]
+				assert.Equal(t, "token", legacy.Name)
+				assert.Empty(t, legacy.Value)
+				assert.Equal(t, -1, legacy.MaxAge)
+				assert.Equal(t, models.DefaultDomain, legacy.Domain)
 			},
 		},
 		"ok without domain": {
@@ -81,12 +90,21 @@ func TestHandler_Login(t *testing.T) {
 			},
 			checkCookie: func(t *testing.T, w *httptest.ResponseRecorder) {
 				cookies := w.Result().Cookies()
-				assert.Len(t, cookies, 1)
-				assert.Equal(t, "token", cookies[0].Name)
-				assert.NotEmpty(t, cookies[0].Value)
-				assert.Equal(t, models.DefaultDomain, cookies[0].Domain)
-				assert.True(t, cookies[0].Secure)
-				assert.True(t, cookies[0].HttpOnly)
+				assert.Len(t, cookies, 2)
+
+				auth := cookies[0]
+				assert.Equal(t, "token", auth.Name)
+				assert.NotEmpty(t, auth.Value)
+				assert.Empty(t, auth.Domain)
+				assert.True(t, auth.Secure)
+				assert.True(t, auth.HttpOnly)
+				assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)
+
+				legacy := cookies[1]
+				assert.Equal(t, "token", legacy.Name)
+				assert.Empty(t, legacy.Value)
+				assert.Equal(t, -1, legacy.MaxAge)
+				assert.Equal(t, models.DefaultDomain, legacy.Domain)
 			},
 		},
 		"invalid json": {

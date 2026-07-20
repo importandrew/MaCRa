@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/importandrew/MaCRa/handler/authmw"
 	"github.com/importandrew/MaCRa/handler/httperr"
-	"github.com/importandrew/MaCRa/models"
 )
 
 type LoginRequest struct {
@@ -20,7 +19,7 @@ type LoginResponse struct {
 	Name string `json:"name"`
 }
 
-const cookieTTL = 90 * 24 * 60 * 60 // 3 months in sec
+const cookieTTL = 400 * 24 * 60 * 60 // 400 days in sec (max)
 
 func (h Handler) Login(c *gin.Context) {
 	var req LoginRequest
@@ -40,12 +39,7 @@ func (h Handler) Login(c *gin.Context) {
 		httperr.Error(c, fmt.Errorf("error generating token: %w", err))
 	}
 
-	if h.domain != "" {
-		c.SetCookie(authmw.TokenKey, token, cookieTTL, "/", h.domain, true, true)
-	} else {
-		c.SetSameSite(http.SameSiteNoneMode)
-		c.SetCookie(authmw.TokenKey, token, cookieTTL, "/", models.DefaultDomain, true, true)
-	}
+	h.writeAuthCookie(c, token, cookieTTL)
 
 	c.JSON(http.StatusOK, LoginResponse{
 		ID:   player.ID,
