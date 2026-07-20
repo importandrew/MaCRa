@@ -7,12 +7,13 @@ import (
 )
 
 func NewServer(origins ...string) *gin.Engine {
-	// gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
 
 	corsCfg := cors.DefaultConfig()
 	corsCfg.AllowOrigins = append(corsCfg.AllowOrigins, "https://"+models.DefaultDomain)
+	corsCfg.AllowOrigins = append(corsCfg.AllowOrigins, "https://"+models.DevDomain)
 	corsCfg.AllowOrigins = append(corsCfg.AllowOrigins, origins...)
 	corsCfg.AllowCredentials = true
 

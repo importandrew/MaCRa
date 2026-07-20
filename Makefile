@@ -3,6 +3,11 @@ build:
 	$(MAKE) -C backend build
 	$(MAKE) -C frontend build
 
+.PHONY: build-dev
+build-dev:
+	$(MAKE) -C backend build
+	$(MAKE) -C frontend build-dev
+
 .PHONY: deploy
 deploy:
 	$(MAKE) -C backend deploy

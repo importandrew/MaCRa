@@ -5,6 +5,10 @@ DEV_DIR := /opt/macra-dist-dev
 build:
 	npm run build
 
+.PHONY: build-dev
+build-dev:
+	npm run build-dev
+
 .PHONY: deploy
 deploy:
 	scp -i $(MACRA_SSHKEY) -r dist $(MACRA_HOST):~/
