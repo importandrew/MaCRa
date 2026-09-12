@@ -8,6 +8,8 @@ import { useEventCapabilities } from '../../../providers/event/useEventCapabilit
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
 import LogsMenu from '../../CurrentGame/Menu/LogsMenu';
+import AbortMenu from '../../CurrentGame/Menu/AbortMenu';
+import FinishMenu from '../../CurrentGame/Menu/FinishMenu';
 import { FansMenu } from '../../CurrentGame/Menu/FansMenu';
 
 export default function LiveMenu({
@@ -21,6 +23,8 @@ export default function LiveMenu({
 }) {
   const { hasCapability } = useEventCapabilities(eventId ?? null);
   const canUndoLastRound = hasCapability('undo_round');
+  const canAbort = hasCapability('abort_game');
+  const canFinish = hasCapability('finish_game');
 
   return (
     <>
@@ -49,6 +53,11 @@ export default function LiveMenu({
             <FansMenu />
           </AccordionItem>
         </Accordion>
+
+        <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
+          <FinishMenu gameId={gameId} canFinish={canFinish} />
+          <AbortMenu gameId={gameId} canAbort={canAbort} />
+        </div>
       </DrawerBody>
     </>
   );
