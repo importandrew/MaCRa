@@ -34,7 +34,6 @@ export default function TableMenu({
 
   const canAbort = eventMe?.capabilities.includes('abort_game') ?? false;
   const canUndo = eventMe?.capabilities.includes('undo_round') ?? false;
-  const canFinish = eventMe?.capabilities.includes('finish_game') ?? false;
 
   return (
     <>
@@ -78,7 +77,7 @@ export default function TableMenu({
         </Accordion>
 
         <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
-          <FinishMenu gameId={gameId} canFinish={canFinish} />
+          <FinishMenu gameId={gameId} canFinish />
           <AbortMenu gameId={gameId} canAbort={canAbort} />
         </div>
       </DrawerBody>
