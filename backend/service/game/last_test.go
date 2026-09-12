@@ -22,7 +22,7 @@ func TestLastGameResult(t *testing.T) {
 		"ok": {
 			playerID: 1,
 			mockSetup: func(m *MockGameRepo, playerID int) {
-				m.On("LastGame", mock.Anything, playerID).Return(100, nil)
+				m.On("LastGame", mock.Anything, playerID, testEventID).Return(100, nil)
 				m.On("Status", mock.Anything, 100).Return(models.GameEnded, nil)
 				m.On("GameResult", mock.Anything, 100).Return(
 					models.GameResult{
@@ -47,14 +47,14 @@ func TestLastGameResult(t *testing.T) {
 		"last game error": {
 			playerID: 1,
 			mockSetup: func(m *MockGameRepo, playerID int) {
-				m.On("LastGame", mock.Anything, playerID).Return(0, errors.New("game not found"))
+				m.On("LastGame", mock.Anything, playerID, testEventID).Return(0, errors.New("game not found"))
 			},
 			expectedErr: assert.Error,
 		},
 		"game result error": {
 			playerID: 1,
 			mockSetup: func(m *MockGameRepo, playerID int) {
-				m.On("LastGame", mock.Anything, playerID).Return(100, nil)
+				m.On("LastGame", mock.Anything, playerID, testEventID).Return(100, nil)
 				m.On("Status", mock.Anything, 100).Return(models.GameEnded, nil)
 				m.On("GameResult", mock.Anything, 100).Return(
 					models.GameResult{},
@@ -73,8 +73,7 @@ func TestLastGameResult(t *testing.T) {
 
 			testCase.mockSetup(mockGameRepo, testCase.playerID)
 
-			ctx := context.Background()
-			result, err := service.LastGameResult(ctx, testCase.playerID)
+			result, err := service.LastGameResult(context.Background(), testCase.playerID, testEventID)
 
 			testCase.expectedErr(t, err)
 			if err != nil {

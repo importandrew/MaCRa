@@ -2,15 +2,20 @@ import { Link } from 'react-router-dom';
 import { MainButtonProps } from '../../models/Button';
 import { Button } from '@heroui/react';
 
-function MainButton(props: MainButtonProps) {
+function MainButton({
+  text,
+  link = '/',
+  onPress,
+  color = 'primary',
+}: MainButtonProps) {
   return (
-    <Button color={props.color || 'primary'} variant="flat" size="lg">
-      <Link
-        className="flex flex-col justify-center h-full w-full"
-        to={props.link}
-      >
-        {props.text}
-      </Link>
+    <Button
+      {...(onPress ? { onPress } : { as: Link, to: link })}
+      color={color}
+      variant="flat"
+      size="lg"
+    >
+      {text}
     </Button>
   );
 }

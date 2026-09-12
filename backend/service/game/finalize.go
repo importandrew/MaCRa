@@ -41,7 +41,5 @@ func (s *Service) finalize(ctx context.Context, gameID int, score models.GameSco
 		return err
 	}
 
-	delete(s.liveGames, gameID)
-
 	return nil
 }

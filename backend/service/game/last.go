@@ -7,8 +7,8 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) LastGameResult(ctx context.Context, playerID int) (models.GameResult, error) {
-	gameID, err := s.gameRepo.LastGame(ctx, playerID)
+func (s *Service) LastGameResult(ctx context.Context, playerID, eventID int) (models.GameResult, error) {
+	gameID, err := s.gameRepo.LastGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameResult{}, fmt.Errorf("find last game: %w", err)
 	}

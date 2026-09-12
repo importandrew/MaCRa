@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { HistoryProps } from '../../models/GameData';
 import { UserData } from '../../models/UserData';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { getStoredEventId } from '../../providers/event/eventConstants';
 import {
   useFetchBatchGameResults,
   useFetchPlayerGamesHistory,
@@ -50,20 +51,21 @@ const History = (props: HistoryProps) => {
   const { data, isLoading, isError, refetch } =
     useFetchPlayerGamesHistory(playerId);
 
+  const eventId = getStoredEventId() ?? 0;
   const gameIds = useMemo(() => data?.game_ids || [], [data?.game_ids]);
 
   const {
     data: resultsMap,
     isLoading: resultsLoading,
     isError: resultsError,
-  } = useFetchBatchGameResults(gameIds);
+  } = useFetchBatchGameResults(gameIds, eventId);
 
   const onRefresh = useCallback(() => {
     refetch();
   }, [refetch]);
 
   const handleAction = (id: number) => {
-    navigate(`/game/${id}/result`);
+    navigate(`/event/${eventId}/game/${id}`);
   };
 
   const isLoadingState = isLoading || resultsLoading;
@@ -80,23 +82,23 @@ const History = (props: HistoryProps) => {
 
   const items = data
     ? data.game_ids.map((id) => {
-      const playerResult = getPlayerResult(id);
-      const result = resultsMap?.[id];
-      const label = playerResult
-        ? `TP: ${playerResult.tp}, GP: ${playerResult.gp}`
-        : resultsLoading
-          ? 'Loading...'
-          : resultsError
-            ? 'Error loading results'
-            : 'No result data';
+        const playerResult = getPlayerResult(id);
+        const result = resultsMap?.[id];
+        const label = playerResult
+          ? `TP: ${playerResult.tp}, GP: ${playerResult.gp}`
+          : resultsLoading
+            ? 'Loading...'
+            : resultsError
+              ? 'Error loading results'
+              : 'No result data';
 
-      return {
-        key: id,
-        label,
-        date: getDateTimeFormatted(result?.finished_at || ''),
-        isLastInList: id === data.game_ids[data.game_ids.length - 1],
-      };
-    })
+        return {
+          key: id,
+          label,
+          date: getDateTimeFormatted(result?.finished_at || ''),
+          isLastInList: id === data.game_ids[data.game_ids.length - 1],
+        };
+      })
     : [];
 
   return (
@@ -108,7 +110,9 @@ const History = (props: HistoryProps) => {
       <div className="flex flex-col h-full w-screen md:w-[600px] justify-start items-center md:my-3 px-3 md:px-0">
         <ListboxWrapper>
           <Listbox
-            emptyContent={<p className="text-center text-3xl">No games played yet</p>}
+            emptyContent={
+              <p className="text-center text-3xl">No games played yet</p>
+            }
             aria-label="Played games history"
             variant="flat"
             color="primary"

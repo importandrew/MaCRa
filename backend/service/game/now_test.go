@@ -12,47 +12,16 @@ import (
 
 func TestNow(t *testing.T) {
 	testData := map[string]struct {
-		playerID  int
-		setupGame func(*Service, *testing.T) int
-
-		mockSetup func(*MockPlayerRepo, int, int)
-
+		playerID    int
+		mockSetup   func(*MockGameRepo, *MockPlayerRepo)
 		expectedErr assert.ErrorAssertionFunc
 		checkNow    func(*testing.T, models.GameNow)
 	}{
 		"ok": {
 			playerID: 1,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				// CurrentGame calls Players() to find the player
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Right(1).Return(2)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Left(1).Return(4)
-				// CurrentWind is called in order: playerID, leftID, oppID, rightID
-				mockGame.EXPECT().CurrentWind(1).Return(models.East)
-				mockGame.EXPECT().CurrentWind(4).Return(models.North)
-				mockGame.EXPECT().CurrentWind(3).Return(models.West)
-				mockGame.EXPECT().CurrentWind(2).Return(models.South)
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 0},
-					2: {GP: 0},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				mockGame.EXPECT().Round().Return(1)
-				s.liveGames[100] = mockGame
-				return 100
-			},
-			mockSetup: func(mp *MockPlayerRepo, playerID, gameID int) {
-				// Player 1 is East, so:
-				// Left = 4 (North), Right = 2 (South), Opp = 3 (West)
-				mp.On("Get", mock.Anything, 1).Return(models.Player{ID: 1, Name: "Alice"}, nil)
-				mp.On("Get", mock.Anything, 2).Return(models.Player{ID: 2, Name: "Bob"}, nil)
-				mp.On("Get", mock.Anything, 3).Return(models.Player{ID: 3, Name: "Charlie"}, nil)
-				mp.On("Get", mock.Anything, 4).Return(models.Player{ID: 4, Name: "David"}, nil)
+			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
+				expectCurrentGame(mg, 1, 100, nil, 1)
+				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
@@ -64,36 +33,15 @@ func TestNow(t *testing.T) {
 		},
 		"player not in game": {
 			playerID: 999,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				// CurrentGame calls Players() to find the player
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				s.liveGames[100] = mockGame
-				return 100
-			},
-			mockSetup: func(mp *MockPlayerRepo, playerID, gameID int) {
-				// No player repo calls expected
+			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
+				mg.EXPECT().CurrentGame(mock.Anything, 999, testEventID).Return(0, models.ErrGameNotFound)
 			},
 			expectedErr: assert.Error,
 		},
 		"player repo error": {
 			playerID: 1,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				// CurrentGame calls Players() to find the player
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				// Now() calls Left, Opposite, Right, then CurrentWind for each
-				// If playerRepo.Get fails, CurrentWind won't be called, but we need to set up
-				// the calls that happen before the error
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Right(1).Return(2)
-				// CurrentWind calls happen after playerRepo.Get, so they won't be called if Get fails
-				// But Score, ID, Round are called after CurrentWind, so they also won't be called
-				s.liveGames[100] = mockGame
-				return 100
-			},
-			mockSetup: func(mp *MockPlayerRepo, playerID, gameID int) {
+			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
+				expectCurrentGame(mg, 1, 100, nil, 1)
 				mp.On("Get", mock.Anything, 1).Return(models.Player{}, errors.New("player not found"))
 			},
 			expectedErr: assert.Error,
@@ -106,11 +54,9 @@ func TestNow(t *testing.T) {
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
-			gameID := testCase.setupGame(service, t)
-			testCase.mockSetup(mockPlayerRepo, testCase.playerID, gameID)
+			testCase.mockSetup(mockGameRepo, mockPlayerRepo)
 
-			ctx := context.Background()
-			now, err := service.Now(ctx, testCase.playerID)
+			now, err := service.Now(context.Background(), testCase.playerID, testEventID)
 
 			testCase.expectedErr(t, err)
 			if err != nil {

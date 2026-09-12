@@ -88,7 +88,7 @@ export default function CurrentGame() {
       onRefresh={onRefresh}
     >
       {roundData ? (
-        <div className="flex justify-center h-full w-screen text-2xl">
+        <div className="flex justify-center h-full w-screen text-lg">
           <div className="grid w-screen grid-cols-[25%_50%_25%] grid-rows-[20%_60%_20%] text-center">
             <div></div>
             <div className="relative self-center h-full w-full">

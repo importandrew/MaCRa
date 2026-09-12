@@ -6,8 +6,8 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) Now(ctx context.Context, playerID int) (models.GameNow, error) {
-	game, err := s.CurrentGame(playerID)
+func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNow, error) {
+	game, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}

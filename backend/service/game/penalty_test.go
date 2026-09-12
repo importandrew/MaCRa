@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
@@ -16,65 +17,29 @@ func TestPenalty(t *testing.T) {
 		penalizedID    int
 		value          int
 		forceNextRound bool
-		setupGame      func(*Service, *testing.T) int
-
-		mockSetup func(*MockGameRepo, *MockPlayerRepo, int)
-
-		expectedErr assert.ErrorAssertionFunc
-		checkNow    func(*testing.T, models.GameNow)
+		mockSetup      func(*MockGameRepo, *MockPlayerRepo, int)
+		expectedErr    assert.ErrorAssertionFunc
+		checkNow       func(*testing.T, models.GameNow)
 	}{
 		"ok": {
 			playerID:       1,
 			penalizedID:    1,
 			value:          10,
 			forceNextRound: false,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Penalty(1, 10, false).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: -10},
-					2: {GP: 0},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().Round().Return(1)
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				// Now() is called after Penalty
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4}) // CurrentGame in Now()
-				mockGame.EXPECT().Right(1).Return(2)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().CurrentWind(1).Return(models.East)
-				mockGame.EXPECT().CurrentWind(4).Return(models.North)
-				mockGame.EXPECT().CurrentWind(3).Return(models.West)
-				mockGame.EXPECT().CurrentWind(2).Return(models.South)
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: -10},
-					2: {GP: 0},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				mockGame.EXPECT().Round().Return(1)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				penaltyLog := models.RoundLog{
+					ID: 1, Round: 1, EventSequence: 1,
+					Outcome: models.Penalty, Loser: 1, Value: 10,
+					CreatedAt: time.Now(),
+				}
+				expectCurrentGameLoads(m, 1, gameID, [][]models.RoundLog{{}, {penaltyLog}})
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Outcome == models.Penalty &&
 						data.LoserID == 1 &&
 						data.Value == 10 &&
 						data.ForceNextRound == false
 				})).Return(nil)
-				// Now() calls playerRepo.Get for each player
-				mp.On("Get", mock.Anything, 1).Return(models.Player{ID: 1, Name: "Alice"}, nil)
-				mp.On("Get", mock.Anything, 2).Return(models.Player{ID: 2, Name: "Bob"}, nil)
-				mp.On("Get", mock.Anything, 3).Return(models.Player{ID: 3, Name: "Charlie"}, nil)
-				mp.On("Get", mock.Anything, 4).Return(models.Player{ID: 4, Name: "David"}, nil)
+				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
@@ -88,53 +53,20 @@ func TestPenalty(t *testing.T) {
 			penalizedID:    2,
 			value:          10,
 			forceNextRound: true,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Penalty(2, 10, true).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 0},
-					2: {GP: -10},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().Round().Return(2)
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				// Now() is called after Penalty
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4}) // CurrentGame in Now()
-				mockGame.EXPECT().Right(1).Return(2)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().CurrentWind(1).Return(models.East)
-				mockGame.EXPECT().CurrentWind(2).Return(models.South)
-				mockGame.EXPECT().CurrentWind(3).Return(models.West)
-				mockGame.EXPECT().CurrentWind(4).Return(models.North)
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 0},
-					2: {GP: -10},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				mockGame.EXPECT().Round().Return(2)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				penaltyLog := models.RoundLog{
+					ID: 1, Round: 1, EventSequence: 1,
+					Outcome: models.Penalty, Loser: 2, Value: 10, ForceNextRound: true,
+					CreatedAt: time.Now(),
+				}
+				expectCurrentGameLoads(m, 1, gameID, [][]models.RoundLog{{}, {penaltyLog}})
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Outcome == models.Penalty &&
 						data.LoserID == 2 &&
 						data.Value == 10 &&
 						data.ForceNextRound == true
 				})).Return(nil)
-				// Now() calls playerRepo.Get for each player
-				mp.On("Get", mock.Anything, 1).Return(models.Player{ID: 1, Name: "Alice"}, nil)
-				mp.On("Get", mock.Anything, 2).Return(models.Player{ID: 2, Name: "Bob"}, nil)
-				mp.On("Get", mock.Anything, 3).Return(models.Player{ID: 3, Name: "Charlie"}, nil)
-				mp.On("Get", mock.Anything, 4).Return(models.Player{ID: 4, Name: "David"}, nil)
+				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
@@ -148,86 +80,36 @@ func TestPenalty(t *testing.T) {
 			penalizedID:    1,
 			value:          10,
 			forceNextRound: false,
-			setupGame: func(s *Service, t *testing.T) int {
-				// Don't add game
-				return 999
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
-				// No mock setup needed
+				m.EXPECT().CurrentGame(mock.Anything, 999, testEventID).Return(0, models.ErrGameNotFound)
 			},
 			expectedErr: assert.Error,
-			checkNow:    nil,
 		},
 		"repo error": {
 			playerID:       1,
 			penalizedID:    1,
 			value:          10,
 			forceNextRound: false,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Penalty(1, 10, false).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 0},
-					2: {GP: 0},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().Round().Return(1)
-				mockGame.EXPECT().ID().Return(100)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectCurrentGame(m, 1, gameID, nil, 1)
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.Anything).Return(errors.New("database error"))
 			},
 			expectedErr: assert.Error,
-			checkNow:    nil,
 		},
 		"round 16 with forceNextRound false": {
 			playerID:       1,
 			penalizedID:    1,
 			value:          10,
 			forceNextRound: false,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				// CurrentGame is called first
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Penalty(1, 10, false).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				score := models.GameScore{
-					1: {GP: -10, TP: 0},
-					2: {GP: 0, TP: 0},
-					3: {GP: 0, TP: 0},
-					4: {GP: 0, TP: 0},
-				}
-				mockGame.EXPECT().Score().Return(score)
-				mockGame.EXPECT().Round().Return(16)
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				// Now() is called after Penalty
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4}) // CurrentGame in Now()
-				mockGame.EXPECT().Right(1).Return(2)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().CurrentWind(1).Return(models.East)
-				mockGame.EXPECT().CurrentWind(2).Return(models.South)
-				mockGame.EXPECT().CurrentWind(3).Return(models.West)
-				mockGame.EXPECT().CurrentWind(4).Return(models.North)
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: -10},
-					2: {GP: 0},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				mockGame.EXPECT().Round().Return(16)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				logs := drawRoundLogs(15)
+				penaltyLog := models.RoundLog{
+					ID: 16, Round: 16, EventSequence: 1,
+					Outcome: models.Penalty, Loser: 1, Value: 10,
+					CreatedAt: time.Now(),
+				}
+				secondLoad := append(append([]models.RoundLog{}, logs...), penaltyLog)
+				expectCurrentGameLoads(m, 1, gameID, [][]models.RoundLog{logs, secondLoad})
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Round == 16 &&
 						data.Outcome == models.Penalty &&
@@ -235,11 +117,7 @@ func TestPenalty(t *testing.T) {
 						data.Value == 10 &&
 						data.ForceNextRound == false
 				})).Return(nil)
-				// Now() calls playerRepo.Get for each player
-				mp.On("Get", mock.Anything, 1).Return(models.Player{ID: 1, Name: "Alice"}, nil)
-				mp.On("Get", mock.Anything, 2).Return(models.Player{ID: 2, Name: "Bob"}, nil)
-				mp.On("Get", mock.Anything, 3).Return(models.Player{ID: 3, Name: "Charlie"}, nil)
-				mp.On("Get", mock.Anything, 4).Return(models.Player{ID: 4, Name: "David"}, nil)
+				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
@@ -253,25 +131,9 @@ func TestPenalty(t *testing.T) {
 			penalizedID:    1,
 			value:          10,
 			forceNextRound: true,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Penalty(1, 10, true).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				score := models.GameScore{
-					1: {GP: -10, TP: 0},
-					2: {GP: 0, TP: 0},
-					3: {GP: 0, TP: 0},
-					4: {GP: 0, TP: 0},
-				}
-				mockGame.EXPECT().Score().Return(score)
-				mockGame.EXPECT().Round().Return(16)
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameEnded)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				logs := drawRoundLogs(15)
+				expectCurrentGame(m, 1, gameID, logs, 1)
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Round == 16 &&
 						data.Outcome == models.Penalty &&
@@ -301,11 +163,17 @@ func TestPenalty(t *testing.T) {
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
-			gameID := testCase.setupGame(service, t)
-			testCase.mockSetup(mockGameRepo, mockPlayerRepo, gameID)
+			testCase.mockSetup(mockGameRepo, mockPlayerRepo, 100)
 
-			ctx := context.Background()
-			now, err := service.Penalty(ctx, models.Penalty, testCase.playerID, testCase.penalizedID, testCase.value, testCase.forceNextRound)
+			now, err := service.Penalty(
+				context.Background(),
+				models.Penalty,
+				testCase.playerID,
+				testCase.penalizedID,
+				testCase.value,
+				testCase.forceNextRound,
+				testEventID,
+			)
 
 			testCase.expectedErr(t, err)
 			if err != nil {

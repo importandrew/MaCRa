@@ -9,7 +9,8 @@ import {
 import { FormEvent, useEffect, useState } from 'react';
 import { showToast } from '../../Toast';
 import { PlayerOrder } from '../../../models/GameData';
-import { globalFetch, PostRequest } from '../../Request';
+import { authFetch, PostRequest, eventPath } from '../../Request';
+import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { GameResult } from '../../../models/GameResult';
 
 export default function PenaltyInput({
@@ -38,15 +39,18 @@ export default function PenaltyInput({
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const eventId = getStoredEventId();
+    if (!eventId) return;
+
     const roundResultRequest = PostRequest(
-      `/api/${distributed ? 'false-mahjong' : 'penalty'}`,
+      eventPath(eventId, distributed ? '/false-mahjong' : '/penalty'),
       {
         loser,
         value,
         force_next_round: forceNextRound,
       }
     );
-    const data = await globalFetch<GameResult>(roundResultRequest);
+    const data = await authFetch<GameResult>(roundResultRequest);
 
     if (!data) return;
 

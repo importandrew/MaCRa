@@ -2,22 +2,22 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/importandrew/MaCRa/handler/authmw"
-	"github.com/importandrew/MaCRa/handler/game"
+	"github.com/importandrew/MaCRa/handler/event"
+	"github.com/importandrew/MaCRa/handler/middleware"
 	"github.com/importandrew/MaCRa/handler/player"
 )
 
 type Handler struct {
-	game   game.Handler
+	event  event.Handler
 	player player.Handler
-	authmw authmw.Auth
+	authmw middleware.Auth
 }
 
-func New(game game.Handler, player player.Handler, jwt []byte) Handler {
+func New(eventHandler event.Handler, player player.Handler, jwt []byte) Handler {
 	return Handler{
-		game:   game,
+		event:  eventHandler,
 		player: player,
-		authmw: authmw.NewAuth(jwt),
+		authmw: middleware.NewAuth(jwt),
 	}
 }
 
@@ -30,41 +30,69 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 		auth.POST("/logout", h.player.Logout)
 	}
 
-	// public handlers
-	publicAPI := router.Group("/api")
+	// main api
+	api := router.Group("/api", h.authmw.SetUserID)
 	{
-		publicAPI.GET("/game/:id/players", h.game.Players)
-		publicAPI.GET("/game/:id/logs", h.game.Logs)
-		publicAPI.GET("/game/:id/hud", h.game.HUD)
-		publicAPI.GET("/game/:id/live", h.game.ViewLive)
-		publicAPI.GET("/game/:id/result", h.game.FinalResult)
-		publicAPI.GET("/game/:id/status", h.game.Status)
+		api.GET("/event", h.event.ListVisible)
 
-		publicAPI.GET("/player/list", h.player.List)
-		publicAPI.GET("/player/:id/game-history", h.player.GameHistory)
-	}
-
-	// authorized only handlers
-	authAPI := publicAPI.Group("/", h.authmw.IdentifyUser)
-	{
-		authAPI.DELETE("/game/:id/abort", h.game.Abort)
-		authAPI.POST("/game/:id/finish", h.game.Finish)
-		authAPI.DELETE("/game/:id/undo-round", h.game.UndoLastRound)
-
-		// auto-detects user who called this api
+		eventAccess := api.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess)
 		{
-			authAPI.POST("/new", h.game.New)
-			authAPI.GET("/now", h.game.Now)
-			authAPI.POST("/round", h.game.EnterRoundResult)
-			authAPI.POST("/false-mahjong", h.game.FalseMahjong)
-			authAPI.POST("/penalty", h.game.Penalty)
-			authAPI.GET("/last", h.game.Last)
+			eventAccess.GET("", h.event.Get)
+			eventAccess.GET("/main", h.event.MainInfo)
+			eventAccess.GET("/me", h.event.GetMe)
+			eventAccess.GET("/ratings", h.event.Ratings)
+			eventAccess.GET("/games", h.event.ListGames)
 
-			authAPI.GET("/profile", h.player.GetProfile)
-			authAPI.PUT("/profile", h.player.UpdateProfile)
+			eventGame := eventAccess.Group("/game/:gameId", middleware.RequireGame, h.event.GameBelongsToEvent)
+			{
+				eventGame.GET("/live", h.event.GameViewLive)
+				eventGame.GET("/result", h.event.GameResult)
+				eventGame.GET("/players", h.event.GamePlayers)
+				eventGame.GET("/logs", h.event.GameLogs)
+				eventGame.GET("/hud", h.event.GameHUD)
+				eventGame.GET("/status", h.event.GameStatus)
+			}
+		}
 
-			// won't abort on 401
-			authAPI.GET("/main", h.game.MainInfo)
+		// required auth
+		required := api.Group("", middleware.RequireUser)
+		{
+			required.GET("/players", h.player.List)
+			required.GET("/profile", h.player.GetProfile)
+			required.PUT("/profile", h.player.UpdateProfile)
+
+			required.POST("/event", h.event.Create)
+
+			event := api.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess)
+			{
+				event.PATCH("", h.event.Update)
+				event.POST("/finish", h.event.FinishEvent)
+
+				event.GET("/members", h.event.ListMembers)
+				event.POST("/members", h.event.AddMembers)
+				event.DELETE("/members", h.event.RemoveMember)
+
+				event.GET("/game-history", h.event.GameHistory)
+				event.GET("/player/:playerId/game-history", middleware.RequirePlayer, h.event.PlayerGameHistory)
+
+				// user relative game block
+				{
+					event.POST("/new", h.event.NewGame)
+					event.GET("/now", h.event.Now)
+					event.GET("/last", h.event.Last)
+					event.POST("/round", h.event.EnterRoundResult)
+					event.POST("/penalty", h.event.Penalty)
+					event.POST("/false-mahjong", h.event.FalseMahjong)
+				}
+
+				// explicit game block
+				eventGame := event.Group("/game/:gameId", middleware.RequireGame, h.event.GameBelongsToEvent)
+				{
+					eventGame.DELETE("/abort", h.event.Abort)
+					eventGame.DELETE("/undo-round", h.event.UndoLastRound)
+					eventGame.POST("/finish", h.event.FinishGame)
+				}
+			}
 		}
 	}
 }

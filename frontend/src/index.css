@@ -1,2 +1,9 @@
 @import 'tailwindcss';
 @config "../tailwind.config.js";
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+}

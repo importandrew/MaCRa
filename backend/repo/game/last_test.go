@@ -153,7 +153,7 @@ func TestLastGame(t *testing.T) {
 				}
 			}
 
-			gameID, err := repo.LastGame(ctx, testCase.playerID)
+			gameID, err := repo.LastGame(ctx, testCase.playerID, testEventID)
 			testCase.expectedErr(t, err)
 			if err != nil {
 				return

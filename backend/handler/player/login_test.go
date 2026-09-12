@@ -67,7 +67,7 @@ func TestHandler_Login(t *testing.T) {
 				assert.Equal(t, models.DefaultDomain, legacy.Domain)
 			},
 		},
-		"ok without domain": {
+		"ok without domain http": {
 			requestBody: LoginRequest{
 				Email:    "test@example.com",
 				Password: "password123",
@@ -95,16 +95,37 @@ func TestHandler_Login(t *testing.T) {
 				auth := cookies[0]
 				assert.Equal(t, "token", auth.Name)
 				assert.NotEmpty(t, auth.Value)
-				assert.Empty(t, auth.Domain)
-				assert.True(t, auth.Secure)
+				assert.Equal(t, "", auth.Domain)
+				assert.False(t, auth.Secure)
 				assert.True(t, auth.HttpOnly)
 				assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)
 
 				legacy := cookies[1]
 				assert.Equal(t, "token", legacy.Name)
 				assert.Empty(t, legacy.Value)
-				assert.Equal(t, -1, legacy.MaxAge)
 				assert.Equal(t, models.DefaultDomain, legacy.Domain)
+			},
+		},
+		"ok http lan mismatched cookie domain": {
+			requestBody: LoginRequest{
+				Email:    "test@example.com",
+				Password: "password123",
+			},
+			domain: "localhost",
+			mockSetup: func(m *MockPlayerService) {
+				m.EXPECT().Login(
+					mock.Anything,
+					"test@example.com",
+					"password123",
+				).Return(models.Player{ID: 3, Name: "LAN User"}, nil)
+			},
+			expectedCode: http.StatusOK,
+			checkCookie: func(t *testing.T, w *httptest.ResponseRecorder) {
+				cookies := w.Result().Cookies()
+				assert.Len(t, cookies, 2)
+				assert.Equal(t, "", cookies[0].Domain)
+				assert.False(t, cookies[0].Secure)
+				assert.Equal(t, models.DefaultDomain, cookies[1].Domain)
 			},
 		},
 		"invalid json": {
@@ -193,6 +214,15 @@ func TestHandler_Login(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBuffer(bodyBytes))
 			req.Header.Set("Content-Type", "application/json")
+			switch testCase.domain {
+			case "example.com":
+				req.Host = "example.com"
+				req.Header.Set("X-Forwarded-Proto", "https")
+			case "localhost":
+				req.Host = "mj.home:3001"
+			default:
+				req.Host = "mj.home:3001"
+			}
 
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)

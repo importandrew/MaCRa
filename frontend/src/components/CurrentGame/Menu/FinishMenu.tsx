@@ -1,12 +1,19 @@
 import { Button, useDisclosure } from '@heroui/react';
-import { PostRequest, globalFetch } from '../../Request';
+import { PostRequest, authFetch, eventGamePath } from '../../Request';
+import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WarningIcon } from '../../Icons/WarningIcon';
 import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
 
-export default function FinishMenu({ gameId }: { gameId: number | null }) {
+export default function FinishMenu({
+  gameId,
+  canFinish = false,
+}: {
+  gameId: number | null;
+  canFinish?: boolean;
+}) {
   const navigate = useNavigate();
   const [isFinishing, setIsFinishing] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -14,9 +21,14 @@ export default function FinishMenu({ gameId }: { gameId: number | null }) {
   const handleFinish = async () => {
     if (!gameId) return;
 
+    const eventId = getStoredEventId();
+    if (!eventId) return;
+
     setIsFinishing(true);
-    const finishRequest = PostRequest(`/api/game/${gameId}/finish`);
-    const data = await globalFetch<null>(finishRequest);
+    const finishRequest = PostRequest(
+      eventGamePath(eventId, gameId, '/finish')
+    );
+    const data = await authFetch<null>(finishRequest);
 
     if (!data) {
       setIsFinishing(false);
@@ -31,6 +43,10 @@ export default function FinishMenu({ gameId }: { gameId: number | null }) {
 
     navigate('/last');
   };
+
+  if (!canFinish) {
+    return null;
+  }
 
   return (
     <>

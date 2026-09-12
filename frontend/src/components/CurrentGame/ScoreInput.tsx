@@ -8,7 +8,8 @@ import {
   RoundData,
 } from '../../models/GameData';
 import { OUTCOME_LABELS } from '../../utils/constants';
-import { globalFetch, PostRequest } from '../Request';
+import { authFetch, PostRequest, eventPath } from '../Request';
+import { getStoredEventId } from '../../providers/event/eventConstants';
 
 export default function ScroreInput({
   kanji,
@@ -45,13 +46,19 @@ export default function ScroreInput({
     e.preventDefault();
     setIsLoading(true);
 
-    const roundResult = PostRequest('/api/round', {
+    const eventId = getStoredEventId();
+    if (!eventId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const roundResult = PostRequest(eventPath(eventId, '/round'), {
       outcome,
       won: Number(winner) || null,
       dealt: Number(loser) || null,
       score,
     });
-    const data = await globalFetch<GameData>(roundResult, {
+    const data = await authFetch<GameData>(roundResult, {
       isToastEnabled: true,
     });
 

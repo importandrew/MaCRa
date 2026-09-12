@@ -1,6 +1,6 @@
 import { Avatar, Button } from '@heroui/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import { RefreshIcon } from '../Icons/RefreshIcon';
@@ -10,10 +10,15 @@ import '../CurrentGame/CurrentGame.css';
 import LiveMenu from './Menu/LiveMenu';
 
 export default function Live() {
-  const { id } = useParams<{ id: string }>();
-  const gameId = id ? parseInt(id, 10) : 0;
-  const { data, playersList, isLoading, isError, refetch } =
-    useFetchLiveGameData(gameId);
+  const navigate = useNavigate();
+  const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
+    eventId: string;
+    gameId: string;
+  }>();
+  const eventId = eventIdParam ? parseInt(eventIdParam, 10) : 0;
+  const gameId = gameIdParam ? parseInt(gameIdParam, 10) : 0;
+  const { data, playersList, isLoading, isError, isForbidden, refetch } =
+    useFetchLiveGameData(eventId, gameId);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [rotationOffset, setRotationOffset] = useState(0);
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
@@ -83,10 +88,12 @@ export default function Live() {
     <LoadingTemplate
       isLoading={isLoading}
       isError={isError}
+      isForbidden={isForbidden}
       onRefresh={onRefresh}
+      onGoHome={() => navigate('/')}
     >
       {data && bot && right && top && left ? (
-        <div className="flex justify-center h-full w-screen text-2xl">
+        <div className="flex justify-center h-full w-screen">
           <div className="grid w-screen grid-cols-[25%_50%_25%] grid-rows-[20%_60%_20%] text-center">
             <div></div>
             <div className="relative self-center h-full w-full">
@@ -221,7 +228,12 @@ export default function Live() {
                 setIsOpen={setIsContextMenuOpen}
                 onClose={closeContextMenuOpen}
               >
-                <LiveMenu gameId={data.id} />
+                <LiveMenu
+                  gameId={data.id}
+                  eventId={eventId}
+                  onUndoSuccess={refetch}
+                />
+             
               </ContextMenu>
             </div>
           </div>

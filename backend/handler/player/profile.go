@@ -4,25 +4,16 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/importandrew/MaCRa/handler/authmw"
 	"github.com/importandrew/MaCRa/handler/httperr"
+	"github.com/importandrew/MaCRa/handler/reqctx"
 )
-
-type ProfileResponse struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
 
 type UpdateProfileRequest struct {
 	Name string `json:"name"`
 }
 
 func (h Handler) GetProfile(c *gin.Context) {
-	userID, err := authmw.GetUserIDFromContext(c)
-	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusUnauthorized, err)
-		return
-	}
+	userID := reqctx.GetUserID(c)
 
 	player, err := h.player.Get(c.Request.Context(), userID)
 	if err != nil {
@@ -30,18 +21,11 @@ func (h Handler) GetProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ProfileResponse{
-		ID:   player.ID,
-		Name: player.Name,
-	})
+	c.JSON(http.StatusOK, player)
 }
 
 func (h Handler) UpdateProfile(c *gin.Context) {
-	userID, err := authmw.GetUserIDFromContext(c)
-	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusUnauthorized, err)
-		return
-	}
+	userID := reqctx.GetUserID(c)
 
 	var req UpdateProfileRequest
 	if err := c.BindJSON(&req); err != nil {
@@ -61,8 +45,5 @@ func (h Handler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ProfileResponse{
-		ID:   player.ID,
-		Name: player.Name,
-	})
+	c.JSON(http.StatusOK, player)
 }

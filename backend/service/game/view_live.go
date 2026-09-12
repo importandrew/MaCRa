@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, error) {
-	game, err := s.GetLiveGame(gameID)
+	game, err := s.LiveGame(ctx, gameID)
 	if err != nil {
 		return models.GameView{}, err
 	}

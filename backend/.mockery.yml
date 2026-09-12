@@ -21,10 +21,13 @@ packages:
       GameRepo: {}
       GameEngine: {}
       PlayerRepo: {}
+  github.com/importandrew/MaCRa/service/event:
+    interfaces:
+      EventRepo: {}
   github.com/importandrew/MaCRa/handler/player:
     interfaces:
       PlayerService: {}
-  github.com/importandrew/MaCRa/handler/game:
+  github.com/importandrew/MaCRa/handler/event:
     interfaces:
+      EventService: {}
       GameService: {}
-      PlayerService: {}

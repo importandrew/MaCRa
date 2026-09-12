@@ -52,7 +52,6 @@ export interface HistoryProps {
 }
 
 export interface GamesHistoryData {
-  id: number; // player id
   game_ids: number[];
 }
 

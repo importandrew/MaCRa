@@ -7,8 +7,8 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool) (models.GameNow, error) {
-	game, err := s.CurrentGame(playerID)
+func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int) (models.GameNow, error) {
+	game, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}
@@ -57,7 +57,7 @@ func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playe
 		}, nil
 	}
 
-	now, err := s.Now(ctx, playerID)
+	now, err := s.Now(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}

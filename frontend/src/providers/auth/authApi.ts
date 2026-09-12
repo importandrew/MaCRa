@@ -1,6 +1,6 @@
 import { showToast } from '../../components/Toast';
 import { GetRequest, PostRequest, PutRequest } from '../../components/Request';
-import { globalFetch } from '../../components/Request';
+import { authFetch } from '../../components/Request';
 import { UserData } from '../../models/UserData';
 
 export async function fetchLogoutApi(): Promise<boolean> {
@@ -20,7 +20,7 @@ export async function fetchLogoutApi(): Promise<boolean> {
 
 export async function fetchProfileApi(): Promise<UserData | null> {
   const profileRequest = GetRequest('/api/profile');
-  const data = await globalFetch<{ id: number; name: string }>(profileRequest, {
+  const data = await authFetch<{ id: number; name: string }>(profileRequest, {
     isToastEnabled: true,
   });
 
@@ -36,7 +36,7 @@ export async function fetchProfileApi(): Promise<UserData | null> {
 
 export async function updateProfileApi(name: string): Promise<UserData | null> {
   const updateRequest = PutRequest('/api/profile', { name });
-  const data = await globalFetch<{ id: number; name: string }>(updateRequest, {
+  const data = await authFetch<{ id: number; name: string }>(updateRequest, {
     isToastEnabled: true,
   });
 

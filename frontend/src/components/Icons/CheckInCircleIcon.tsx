@@ -6,26 +6,29 @@ export const CheckInCircleIcon = (
 ) => {
   return (
     <svg
-      fill="#000000"
-      width="32px"
-      height="32px"
-      viewBox="0 0 36 36"
-      version="1.1"
-      preserveAspectRatio="xMidYMid meet"
+      className="w-6 h-6 text-gray-800 dark:text-white"
+      aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      viewBox="0 0 24 24"
       {...props}
     >
       <path
-        // stroke="currentColor"
-        className="clr-i-outline clr-i-outline-path-1"
-        d="M18,6A12,12,0,1,0,30,18,12,12,0,0,0,18,6Zm0,22A10,10,0,1,1,28,18,10,10,0,0,1,18,28Z"
-      ></path>
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"
+      />
       <path
-        // stroke="currentColor"
-        className="clr-i-outline clr-i-outline-path-2"
-        d="M16.34,23.74l-5-5a1,1,0,0,1,1.41-1.41l3.59,3.59,6.78-6.78a1,1,0,0,1,1.41,1.41Z"
-      ></path>
-      <rect x="0" y="0" width="32" height="32" fillOpacity="0" />
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="m8.5 12 2.5 2.5 4.5-5"
+      />
     </svg>
   );
 };

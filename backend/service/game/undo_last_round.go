@@ -29,9 +29,5 @@ func (s *Service) UndoLastRound(ctx context.Context, gameID int) error {
 		return fmt.Errorf("unexpected game status: %v", status)
 	}
 
-	if err := s.loadGame(ctx, gameID); err != nil {
-		return fmt.Errorf("load game: %w", err)
-	}
-
 	return nil
 }

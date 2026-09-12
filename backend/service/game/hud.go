@@ -55,7 +55,7 @@ func (s *Service) liveHUD(ctx context.Context, gameID, linger int) (models.GameH
 		return models.GameHUD{}, err
 	}
 
-	game, err := s.GetLiveGame(gameID)
+	game, err := s.LiveGame(ctx, gameID)
 	if err != nil {
 		return models.GameHUD{}, err
 	}

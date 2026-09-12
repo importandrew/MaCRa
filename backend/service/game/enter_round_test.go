@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
@@ -17,10 +18,7 @@ func TestEnterRound(t *testing.T) {
 		value     int
 		winnerID  int
 		loserID   int
-		setupGame func(*Service, *testing.T) int
-
 		mockSetup func(*MockGameRepo, *MockPlayerRepo, int)
-
 		expectedErr assert.ErrorAssertionFunc
 		checkNow    func(*testing.T, models.GameNow)
 	}{
@@ -30,64 +28,26 @@ func TestEnterRound(t *testing.T) {
 			value:    8,
 			winnerID: 1,
 			loserID:  2,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				// CurrentGame calls Players() to find the player
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				// EnterRound calls EnterRoundResult, Players, Score, Round, ID
-				mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 32},
-					2: {GP: -16},
-					3: {GP: -8},
-					4: {GP: -8},
-				})
-				mockGame.EXPECT().Round().Return(1) // Round advances after EnterRoundResult
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				// Now() is called after EnterRound, which calls CurrentGame again
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4}) // CurrentGame in Now()
-				mockGame.EXPECT().Right(1).Return(2)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().CurrentWind(1).Return(models.East)
-				mockGame.EXPECT().CurrentWind(4).Return(models.North)
-				mockGame.EXPECT().CurrentWind(3).Return(models.West)
-				mockGame.EXPECT().CurrentWind(2).Return(models.South)
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 32},
-					2: {GP: -16},
-					3: {GP: -8},
-					4: {GP: -8},
-				})
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				mockGame.EXPECT().Round().Return(1)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
-				// Round will be advanced by EnterRoundResult, so expect round + 1
-				// Scores will also change, so we just check the essential fields
+				dealLog := models.RoundLog{
+					ID: 1, Round: 1, EventSequence: 1,
+					Outcome: models.Deal, Winner: 1, Loser: 2, Value: 8,
+					CreatedAt: time.Now(),
+				}
+				expectCurrentGameLoads(m, 1, gameID, [][]models.RoundLog{{}, {dealLog}})
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
-					return data.Round > 0 &&
-						data.Outcome == models.Deal &&
+					return data.Outcome == models.Deal &&
 						data.WinnerID == 1 &&
 						data.LoserID == 2 &&
 						data.Value == 8
 				})).Return(nil)
-				// Now() calls playerRepo.Get for each player
-				mp.On("Get", mock.Anything, 1).Return(models.Player{ID: 1, Name: "Alice"}, nil)
-				mp.On("Get", mock.Anything, 2).Return(models.Player{ID: 2, Name: "Bob"}, nil)
-				mp.On("Get", mock.Anything, 3).Return(models.Player{ID: 3, Name: "Charlie"}, nil)
-				mp.On("Get", mock.Anything, 4).Return(models.Player{ID: 4, Name: "David"}, nil)
+				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
 				assert.Equal(t, 100, now.ID)
 				assert.Equal(t, models.GameLive, now.Status)
-				assert.Equal(t, 1, now.Round.Num)
+				assert.Equal(t, 2, now.Round.Num)
 			},
 		},
 		"ok self": {
@@ -96,56 +56,20 @@ func TestEnterRound(t *testing.T) {
 			value:    8,
 			winnerID: 1,
 			loserID:  0,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(models.Self, 8, 0, 1).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 48},
-					2: {GP: -16},
-					3: {GP: -16},
-					4: {GP: -16},
-				})
-				mockGame.EXPECT().Round().Return(1)
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				// Now() is called after EnterRound
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Right(1).Return(2)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().CurrentWind(1).Return(models.East)
-				mockGame.EXPECT().CurrentWind(4).Return(models.North)
-				mockGame.EXPECT().CurrentWind(3).Return(models.West)
-				mockGame.EXPECT().CurrentWind(2).Return(models.South)
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 48},
-					2: {GP: -16},
-					3: {GP: -16},
-					4: {GP: -16},
-				})
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				mockGame.EXPECT().Round().Return(1)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
-				// Round will be advanced by EnterRoundResult, so expect round + 1
-				// Scores will also change, so we just check the essential fields
+				selfLog := models.RoundLog{
+					ID: 1, Round: 1, EventSequence: 1,
+					Outcome: models.Self, Winner: 1, Loser: 0, Value: 8,
+					CreatedAt: time.Now(),
+				}
+				expectCurrentGameLoads(m, 1, gameID, [][]models.RoundLog{{}, {selfLog}})
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
-					return data.Round > 0 &&
-						data.Outcome == models.Self &&
+					return data.Outcome == models.Self &&
 						data.WinnerID == 1 &&
 						data.LoserID == 0 &&
 						data.Value == 8
 				})).Return(nil)
-				// Now() calls playerRepo.Get for each player
-				mp.On("Get", mock.Anything, 1).Return(models.Player{ID: 1, Name: "Alice"}, nil)
-				mp.On("Get", mock.Anything, 2).Return(models.Player{ID: 2, Name: "Bob"}, nil)
-				mp.On("Get", mock.Anything, 3).Return(models.Player{ID: 3, Name: "Charlie"}, nil)
-				mp.On("Get", mock.Anything, 4).Return(models.Player{ID: 4, Name: "David"}, nil)
+				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
@@ -159,56 +83,20 @@ func TestEnterRound(t *testing.T) {
 			value:    0,
 			winnerID: 0,
 			loserID:  0,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(models.Draw, 0, 0, 0).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 0},
-					2: {GP: 0},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().Round().Return(1)
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				// Now() is called after EnterRound
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Right(1).Return(2)
-				mockGame.EXPECT().Opposite(1).Return(3)
-				mockGame.EXPECT().Left(1).Return(4)
-				mockGame.EXPECT().CurrentWind(1).Return(models.East)
-				mockGame.EXPECT().CurrentWind(4).Return(models.North)
-				mockGame.EXPECT().CurrentWind(3).Return(models.West)
-				mockGame.EXPECT().CurrentWind(2).Return(models.South)
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 0},
-					2: {GP: 0},
-					3: {GP: 0},
-					4: {GP: 0},
-				})
-				mockGame.EXPECT().ID().Return(100)
-				mockGame.EXPECT().Status().Return(models.GameLive)
-				mockGame.EXPECT().Round().Return(1)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
-				// Round will be advanced by EnterRoundResult, so expect round + 1
-				// Scores will also change, so we just check the essential fields
+				drawLog := models.RoundLog{
+					ID: 1, Round: 1, EventSequence: 1,
+					Outcome: models.Draw, Winner: 0, Loser: 0, Value: 0,
+					CreatedAt: time.Now(),
+				}
+				expectCurrentGameLoads(m, 1, gameID, [][]models.RoundLog{{}, {drawLog}})
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
-					return data.Round > 0 &&
-						data.Outcome == models.Draw &&
+					return data.Outcome == models.Draw &&
 						data.WinnerID == 0 &&
 						data.LoserID == 0 &&
 						data.Value == 0
 				})).Return(nil)
-				// Now() calls playerRepo.Get for each player
-				mp.On("Get", mock.Anything, 1).Return(models.Player{ID: 1, Name: "Alice"}, nil)
-				mp.On("Get", mock.Anything, 2).Return(models.Player{ID: 2, Name: "Bob"}, nil)
-				mp.On("Get", mock.Anything, 3).Return(models.Player{ID: 3, Name: "Charlie"}, nil)
-				mp.On("Get", mock.Anything, 4).Return(models.Player{ID: 4, Name: "David"}, nil)
+				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
 			checkNow: func(t *testing.T, now models.GameNow) {
@@ -222,33 +110,19 @@ func TestEnterRound(t *testing.T) {
 			value:    8,
 			winnerID: 1,
 			loserID:  2,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
-				// No mock setup needed
+				m.EXPECT().CurrentGame(mock.Anything, 999, testEventID).Return(0, models.ErrGameNotFound)
 			},
 			expectedErr: assert.Error,
 		},
 		"game engine error invalid hand value": {
 			playerID: 1,
 			outcome:  models.Deal,
-			value:    5, // Less than 8, should fail
+			value:    5,
 			winnerID: 1,
 			loserID:  2,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(models.Deal, 5, 2, 1).Return(errors.New("hand score should be 8 or higher"))
-				mockGame.EXPECT().Round().Return(1)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
-				// No mock setup needed as game engine will return error
+				expectCurrentGame(m, 1, gameID, nil, 1)
 			},
 			expectedErr: assert.Error,
 		},
@@ -258,23 +132,8 @@ func TestEnterRound(t *testing.T) {
 			value:    8,
 			winnerID: 1,
 			loserID:  2,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Score().Return(models.GameScore{
-					1: {GP: 32},
-					2: {GP: -16},
-					3: {GP: -8},
-					4: {GP: -8},
-				})
-				mockGame.EXPECT().Round().Return(1)
-				mockGame.EXPECT().ID().Return(100)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectCurrentGame(m, 1, gameID, nil, 1)
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.Anything).Return(errors.New("database error"))
 			},
 			expectedErr: assert.Error,
@@ -285,25 +144,9 @@ func TestEnterRound(t *testing.T) {
 			value:    8,
 			winnerID: 1,
 			loserID:  2,
-			setupGame: func(s *Service, t *testing.T) int {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				mockGame.EXPECT().Status().Return(models.GameEnded)
-				score := models.GameScore{
-					1: {GP: -2, TP: 0},
-					2: {GP: -1, TP: 0},
-					3: {GP: 1, TP: 0},
-					4: {GP: 2, TP: 0},
-				}
-				mockGame.EXPECT().Score().Return(score)
-				mockGame.EXPECT().Round().Return(16)
-				mockGame.EXPECT().ID().Return(100)
-				s.liveGames[100] = mockGame
-				return 100
-			},
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				logs := drawRoundLogs(15)
+				expectCurrentGame(m, 1, gameID, logs, 1)
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.Round == 16 &&
 						data.Outcome == models.Deal &&
@@ -333,17 +176,16 @@ func TestEnterRound(t *testing.T) {
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
-			gameID := testCase.setupGame(service, t)
-			testCase.mockSetup(mockGameRepo, mockPlayerRepo, gameID)
+			testCase.mockSetup(mockGameRepo, mockPlayerRepo, 100)
 
-			ctx := context.Background()
 			now, err := service.EnterRound(
-				ctx,
+				context.Background(),
 				testCase.playerID,
 				testCase.outcome,
 				testCase.value,
 				testCase.winnerID,
 				testCase.loserID,
+				testEventID,
 			)
 
 			testCase.expectedErr(t, err)
@@ -359,27 +201,12 @@ func TestEnterRound(t *testing.T) {
 }
 
 func TestEnterRound_FinalRound_OK(t *testing.T) {
-	// Test the special case where round 16 triggers finalization
 	mockGameRepo := NewMockGameRepo(t)
 	mockPlayerRepo := NewMockPlayerRepo(t)
 	service := NewService(mockGameRepo, mockPlayerRepo)
 
-	// Create a mock game engine set to round 16
-	mockGame := NewMockGameEngine(t)
-	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-	mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
-	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-	mockGame.EXPECT().Status().Return(models.GameEnded)
-	score := models.GameScore{
-		1: {GP: -2, TP: 0},
-		2: {GP: -1, TP: 0},
-		3: {GP: 1, TP: 0},
-		4: {GP: 2, TP: 0},
-	}
-	mockGame.EXPECT().Score().Return(score)
-	mockGame.EXPECT().Round().Return(16)
-	mockGame.EXPECT().ID().Return(100)
-	service.liveGames[100] = mockGame
+	logs := drawRoundLogs(15)
+	expectCurrentGame(mockGameRepo, 1, 100, logs, 1)
 
 	mockGameRepo.EXPECT().SaveRoundOutcome(mock.Anything, 100, mock.MatchedBy(func(data models.RoundData) bool {
 		return data.Round == 16 && data.Outcome == models.Deal
@@ -393,8 +220,7 @@ func TestEnterRound_FinalRound_OK(t *testing.T) {
 			data.North.ID == 4
 	})).Return(nil)
 
-	ctx := context.Background()
-	now, err := service.EnterRound(ctx, 1, models.Deal, 8, 1, 2)
+	now, err := service.EnterRound(context.Background(), 1, models.Deal, 8, 1, 2, testEventID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 100, now.ID)
@@ -402,33 +228,17 @@ func TestEnterRound_FinalRound_OK(t *testing.T) {
 }
 
 func TestEnterRound_FinalRound_Error(t *testing.T) {
-	// Test error handling when finalization fails
 	mockGameRepo := NewMockGameRepo(t)
 	mockPlayerRepo := NewMockPlayerRepo(t)
 	service := NewService(mockGameRepo, mockPlayerRepo)
 
-	// Create a mock game engine set to round 16
-	mockGame := NewMockGameEngine(t)
-	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-	mockGame.EXPECT().EnterRoundResult(models.Deal, 8, 2, 1).Return(nil)
-	mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-	mockGame.EXPECT().Status().Return(models.GameEnded)
-	score := models.GameScore{
-		1: {GP: -2, TP: 0},
-		2: {GP: -1, TP: 0},
-		3: {GP: 1, TP: 0},
-		4: {GP: 2, TP: 0},
-	}
-	mockGame.EXPECT().Score().Return(score)
-	mockGame.EXPECT().Round().Return(16)
-	mockGame.EXPECT().ID().Return(100)
-	service.liveGames[100] = mockGame
+	logs := drawRoundLogs(15)
+	expectCurrentGame(mockGameRepo, 1, 100, logs, 1)
 
 	mockGameRepo.EXPECT().SaveRoundOutcome(mock.Anything, 100, mock.Anything).Return(nil)
 	mockGameRepo.EXPECT().Finalize(mock.Anything, mock.Anything).Return(errors.New("finalization error"))
 
-	ctx := context.Background()
-	_, err := service.EnterRound(ctx, 1, models.Deal, 8, 1, 2)
+	_, err := service.EnterRound(context.Background(), 1, models.Deal, 8, 1, 2, testEventID)
 
 	assert.Error(t, err)
 }

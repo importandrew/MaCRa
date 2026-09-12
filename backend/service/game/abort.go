@@ -7,17 +7,19 @@ import (
 )
 
 func (s *Service) Abort(ctx context.Context, gameID int) error {
-	_, err := s.GetLiveGame(gameID)
+	status, err := s.gameRepo.Status(ctx, gameID)
 	if err != nil {
 		return err
+	}
+
+	if status != models.GameLive {
+		return models.ErrGameNotLive
 	}
 
 	err = s.gameRepo.SetStatus(ctx, gameID, models.GameAborted)
 	if err != nil {
 		return err
 	}
-
-	delete(s.liveGames, gameID)
 
 	return nil
 }

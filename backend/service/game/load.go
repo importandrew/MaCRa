@@ -1,74 +1,82 @@
 package game
 
-import (
-	"context"
-	"fmt"
+// func (s *Service) LoadLiveGames(ctx context.Context) error {
+// 	games, err := s.gameRepo.LiveGames(ctx)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	"github.com/importandrew/MaCRa/engine/game"
-	"github.com/importandrew/MaCRa/models"
-)
+// 	// sort games by event
+// 	eventGames := make(map[int][]int)
+// 	for _, game := range games {
+// 		_, ok := eventGames[game.EventID]
+// 		if !ok {
+// 			eventGames[game.EventID] = make([]int, 0)
+// 		}
+// 		eventGames[game.EventID] = append(eventGames[game.EventID], game.GameID)
+// 	}
 
-func (s *Service) LoadLiveGames(ctx context.Context) error {
-	ids, err := s.gameRepo.LiveGames(ctx)
-	if err != nil {
-		return err
-	}
+// 	for eventID, gameIDs := range eventGames {
+// 		for _, gameID := range gameIDs {
+// 			err = s.loadGame(ctx, eventID, gameID)
+// 			if err != nil {
+// 				return fmt.Errorf("load game (event ID %d, game ID %d): %w", eventID, gameID, err)
+// 			}
+// 		}
+// 	}
 
-	for _, id := range ids {
-		err = s.loadGame(ctx, id)
-		if err != nil {
-			return fmt.Errorf("load game %d: %w", id, err)
-		}
-	}
+// 	return nil
+// }
 
-	return nil
-}
+// func (s *Service) loadGame(ctx context.Context, eventID, gameID int) error {
+// 	players, err := s.gameRepo.Players(ctx, gameID)
+// 	if err != nil {
+// 		return err
+// 	}
 
-func (s *Service) loadGame(ctx context.Context, gameID int) error {
-	players, err := s.gameRepo.Players(ctx, gameID)
-	if err != nil {
-		return err
-	}
+// 	seating := game.Seating([4]int{
+// 		players.East,
+// 		players.South,
+// 		players.West,
+// 		players.North,
+// 	})
 
-	seating := game.Seating([4]int{
-		players.East,
-		players.South,
-		players.West,
-		players.North,
-	})
+// 	if err := s.validatePlayers(seating[:], eventID, &gameID); err != nil {
+// 		return err
+// 	}
 
-	if err := s.validatePlayers(seating[:], &gameID); err != nil {
-		return err
-	}
+// 	gameCfg := game.Config{
+// 		ID:      gameID,
+// 		Players: seating,
+// 		Rules:   game.Rules{},
+// 	}
 
-	gameCfg := game.Config{
-		ID:      gameID,
-		Players: seating,
-		Rules:   game.Rules{},
-	}
+// 	g := game.NewGame(gameCfg)
 
-	g := game.NewGame(gameCfg)
+// 	roundLogs, err := s.gameRepo.GameLog(ctx, gameID)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	roundLogs, err := s.gameRepo.GameLog(ctx, gameID)
-	if err != nil {
-		return err
-	}
+// 	for _, log := range roundLogs {
+// 		switch log.Outcome {
+// 		case models.FalseMahjong:
+// 			err = g.FalseMahjong(log.Loser, log.Value, log.ForceNextRound)
+// 		case models.Penalty:
+// 			err = g.Penalty(log.Loser, log.Value, log.ForceNextRound)
+// 		default:
+// 			err = g.EnterRoundResult(log.Outcome, log.Value, log.Loser, log.Winner)
+// 		}
+// 		if err != nil {
+// 			return fmt.Errorf("log record %d game %d: %w", log.ID, gameID, err)
+// 		}
+// 	}
 
-	for _, log := range roundLogs {
-		switch log.Outcome {
-		case models.FalseMahjong:
-			err = g.FalseMahjong(log.Loser, log.Value, log.ForceNextRound)
-		case models.Penalty:
-			err = g.Penalty(log.Loser, log.Value, log.ForceNextRound)
-		default:
-			err = g.EnterRoundResult(log.Outcome, log.Value, log.Loser, log.Winner)
-		}
-		if err != nil {
-			return fmt.Errorf("log record %d game %d: %w", log.ID, gameID, err)
-		}
-	}
+// 	_, ok := s.liveGames[eventID]
+// 	if !ok {
+// 		s.liveGames[eventID] = make(map[int]GameEngine)
+// 	}
+// 	s.liveGames[eventID][gameID] = g
 
-	s.liveGames[gameID] = g
-
-	return nil
-}
+// 	return nil
+// }

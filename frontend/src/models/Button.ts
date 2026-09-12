@@ -1,6 +1,7 @@
 export interface MainButtonProps {
   text: string;
-  link: string;
+  link?: string;
+  onPress?: () => void;
   color?:
     | 'primary'
     | 'default'

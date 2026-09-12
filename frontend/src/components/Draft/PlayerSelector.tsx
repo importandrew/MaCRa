@@ -1,7 +1,5 @@
-import { Key } from 'react';
-import { Autocomplete, AutocompleteItem } from '@heroui/react';
 import { PlayerSelectorArgs } from '../../models/Player';
-import PlayerId from './PlayerId';
+import PlayerAutocomplete from '../PlayerAutocomplete';
 
 export default function PlayerSelector({
   wind,
@@ -11,37 +9,24 @@ export default function PlayerSelector({
   selectedKeys,
   handleSuggestionsChange,
 }: PlayerSelectorArgs) {
-  const handleSuggestionClick = (playerId: Key | null, index: number) => {
-    if (!playerId) return;
+  const selectedKey = selectedKeys[index] || null;
 
-    players[index] = Number(playerId);
-    handleSuggestionsChange();
-  };
-
-  const onClear = () => {
-    delete players[index];
+  const handleSelectionChange = (playerId: number | null) => {
+    if (playerId == null) {
+      delete players[index];
+    } else {
+      players[index] = playerId;
+    }
     handleSuggestionsChange();
   };
 
   return (
-    <Autocomplete
+    <PlayerAutocomplete
       label={wind}
-      itemHeight={50}
-      selectedKey={selectedKeys[index]}
-      isClearable={true}
-      disabledKeys={selectedKeys}
-      className="w-full md:w-[300px]"
-      onSelectionChange={(id) => handleSuggestionClick(id, index)}
-      clearButtonProps={{ onPress: onClear }}
-    >
-      {suggestions?.map((player) => (
-        <AutocompleteItem
-          key={player.id}
-          endContent={<PlayerId id={player.id} />}
-        >
-          {player.name}
-        </AutocompleteItem>
-      ))}
-    </Autocomplete>
+      items={suggestions}
+      selectedKey={selectedKey}
+      disabledKeys={selectedKeys.filter(Boolean)}
+      onSelectionChange={handleSelectionChange}
+    />
   );
 }

@@ -38,6 +38,78 @@ func (_m *MockGameRepo) EXPECT() *MockGameRepo_Expecter {
 	return &MockGameRepo_Expecter{mock: &_m.Mock}
 }
 
+// CurrentGame provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) CurrentGame(ctx context.Context, playerID int, eventID int) (int, error) {
+	ret := _mock.Called(ctx, playerID, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CurrentGame")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (int, error)); ok {
+		return returnFunc(ctx, playerID, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) int); ok {
+		r0 = returnFunc(ctx, playerID, eventID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, playerID, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_CurrentGame_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CurrentGame'
+type MockGameRepo_CurrentGame_Call struct {
+	*mock.Call
+}
+
+// CurrentGame is a helper method to define mock.On call
+//   - ctx context.Context
+//   - playerID int
+//   - eventID int
+func (_e *MockGameRepo_Expecter) CurrentGame(ctx interface{}, playerID interface{}, eventID interface{}) *MockGameRepo_CurrentGame_Call {
+	return &MockGameRepo_CurrentGame_Call{Call: _e.mock.On("CurrentGame", ctx, playerID, eventID)}
+}
+
+func (_c *MockGameRepo_CurrentGame_Call) Run(run func(ctx context.Context, playerID int, eventID int)) *MockGameRepo_CurrentGame_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_CurrentGame_Call) Return(n int, err error) *MockGameRepo_CurrentGame_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockGameRepo_CurrentGame_Call) RunAndReturn(run func(ctx context.Context, playerID int, eventID int) (int, error)) *MockGameRepo_CurrentGame_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteLastRound provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) DeleteLastRound(ctx context.Context, gameID int) error {
 	ret := _mock.Called(ctx, gameID)
@@ -91,6 +163,72 @@ func (_c *MockGameRepo_DeleteLastRound_Call) Return(err error) *MockGameRepo_Del
 }
 
 func (_c *MockGameRepo_DeleteLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockGameRepo_DeleteLastRound_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// EventID provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) EventID(ctx context.Context, gameID int) (int, error) {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for EventID")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (int, error)); ok {
+		return returnFunc(ctx, gameID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) int); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, gameID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_EventID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EventID'
+type MockGameRepo_EventID_Call struct {
+	*mock.Call
+}
+
+// EventID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) EventID(ctx interface{}, gameID interface{}) *MockGameRepo_EventID_Call {
+	return &MockGameRepo_EventID_Call{Call: _e.mock.On("EventID", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_EventID_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_EventID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_EventID_Call) Return(n int, err error) *MockGameRepo_EventID_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockGameRepo_EventID_Call) RunAndReturn(run func(ctx context.Context, gameID int) (int, error)) *MockGameRepo_EventID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -286,9 +424,149 @@ func (_c *MockGameRepo_GameResult_Call) RunAndReturn(run func(ctx context.Contex
 	return _c
 }
 
+// GameResults provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) GameResults(ctx context.Context, gameIDs []int) (map[int]models.GameResult, error) {
+	ret := _mock.Called(ctx, gameIDs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GameResults")
+	}
+
+	var r0 map[int]models.GameResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []int) (map[int]models.GameResult, error)); ok {
+		return returnFunc(ctx, gameIDs)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []int) map[int]models.GameResult); ok {
+		r0 = returnFunc(ctx, gameIDs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[int]models.GameResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, []int) error); ok {
+		r1 = returnFunc(ctx, gameIDs)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_GameResults_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GameResults'
+type MockGameRepo_GameResults_Call struct {
+	*mock.Call
+}
+
+// GameResults is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameIDs []int
+func (_e *MockGameRepo_Expecter) GameResults(ctx interface{}, gameIDs interface{}) *MockGameRepo_GameResults_Call {
+	return &MockGameRepo_GameResults_Call{Call: _e.mock.On("GameResults", ctx, gameIDs)}
+}
+
+func (_c *MockGameRepo_GameResults_Call) Run(run func(ctx context.Context, gameIDs []int)) *MockGameRepo_GameResults_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []int
+		if args[1] != nil {
+			arg1 = args[1].([]int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_GameResults_Call) Return(intToGameResult map[int]models.GameResult, err error) *MockGameRepo_GameResults_Call {
+	_c.Call.Return(intToGameResult, err)
+	return _c
+}
+
+func (_c *MockGameRepo_GameResults_Call) RunAndReturn(run func(ctx context.Context, gameIDs []int) (map[int]models.GameResult, error)) *MockGameRepo_GameResults_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsPlayerInGame provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) IsPlayerInGame(ctx context.Context, gameID int, playerID int) (bool, error) {
+	ret := _mock.Called(ctx, gameID, playerID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsPlayerInGame")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (bool, error)); ok {
+		return returnFunc(ctx, gameID, playerID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) bool); ok {
+		r0 = returnFunc(ctx, gameID, playerID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, gameID, playerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_IsPlayerInGame_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPlayerInGame'
+type MockGameRepo_IsPlayerInGame_Call struct {
+	*mock.Call
+}
+
+// IsPlayerInGame is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+//   - playerID int
+func (_e *MockGameRepo_Expecter) IsPlayerInGame(ctx interface{}, gameID interface{}, playerID interface{}) *MockGameRepo_IsPlayerInGame_Call {
+	return &MockGameRepo_IsPlayerInGame_Call{Call: _e.mock.On("IsPlayerInGame", ctx, gameID, playerID)}
+}
+
+func (_c *MockGameRepo_IsPlayerInGame_Call) Run(run func(ctx context.Context, gameID int, playerID int)) *MockGameRepo_IsPlayerInGame_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_IsPlayerInGame_Call) Return(b bool, err error) *MockGameRepo_IsPlayerInGame_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockGameRepo_IsPlayerInGame_Call) RunAndReturn(run func(ctx context.Context, gameID int, playerID int) (bool, error)) *MockGameRepo_IsPlayerInGame_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // LastGame provides a mock function for the type MockGameRepo
-func (_mock *MockGameRepo) LastGame(ctx context.Context, playerID int) (int, error) {
-	ret := _mock.Called(ctx, playerID)
+func (_mock *MockGameRepo) LastGame(ctx context.Context, playerID int, eventID int) (int, error) {
+	ret := _mock.Called(ctx, playerID, eventID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LastGame")
@@ -296,16 +574,16 @@ func (_mock *MockGameRepo) LastGame(ctx context.Context, playerID int) (int, err
 
 	var r0 int
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (int, error)); ok {
-		return returnFunc(ctx, playerID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (int, error)); ok {
+		return returnFunc(ctx, playerID, eventID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) int); ok {
-		r0 = returnFunc(ctx, playerID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) int); ok {
+		r0 = returnFunc(ctx, playerID, eventID)
 	} else {
 		r0 = ret.Get(0).(int)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
-		r1 = returnFunc(ctx, playerID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, playerID, eventID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -320,11 +598,12 @@ type MockGameRepo_LastGame_Call struct {
 // LastGame is a helper method to define mock.On call
 //   - ctx context.Context
 //   - playerID int
-func (_e *MockGameRepo_Expecter) LastGame(ctx interface{}, playerID interface{}) *MockGameRepo_LastGame_Call {
-	return &MockGameRepo_LastGame_Call{Call: _e.mock.On("LastGame", ctx, playerID)}
+//   - eventID int
+func (_e *MockGameRepo_Expecter) LastGame(ctx interface{}, playerID interface{}, eventID interface{}) *MockGameRepo_LastGame_Call {
+	return &MockGameRepo_LastGame_Call{Call: _e.mock.On("LastGame", ctx, playerID, eventID)}
 }
 
-func (_c *MockGameRepo_LastGame_Call) Run(run func(ctx context.Context, playerID int)) *MockGameRepo_LastGame_Call {
+func (_c *MockGameRepo_LastGame_Call) Run(run func(ctx context.Context, playerID int, eventID int)) *MockGameRepo_LastGame_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -334,9 +613,14 @@ func (_c *MockGameRepo_LastGame_Call) Run(run func(ctx context.Context, playerID
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -347,76 +631,14 @@ func (_c *MockGameRepo_LastGame_Call) Return(n int, err error) *MockGameRepo_Las
 	return _c
 }
 
-func (_c *MockGameRepo_LastGame_Call) RunAndReturn(run func(ctx context.Context, playerID int) (int, error)) *MockGameRepo_LastGame_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// LiveGames provides a mock function for the type MockGameRepo
-func (_mock *MockGameRepo) LiveGames(ctx context.Context) ([]int, error) {
-	ret := _mock.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for LiveGames")
-	}
-
-	var r0 []int
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]int, error)); ok {
-		return returnFunc(ctx)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []int); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]int)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockGameRepo_LiveGames_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LiveGames'
-type MockGameRepo_LiveGames_Call struct {
-	*mock.Call
-}
-
-// LiveGames is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockGameRepo_Expecter) LiveGames(ctx interface{}) *MockGameRepo_LiveGames_Call {
-	return &MockGameRepo_LiveGames_Call{Call: _e.mock.On("LiveGames", ctx)}
-}
-
-func (_c *MockGameRepo_LiveGames_Call) Run(run func(ctx context.Context)) *MockGameRepo_LiveGames_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockGameRepo_LiveGames_Call) Return(ints []int, err error) *MockGameRepo_LiveGames_Call {
-	_c.Call.Return(ints, err)
-	return _c
-}
-
-func (_c *MockGameRepo_LiveGames_Call) RunAndReturn(run func(ctx context.Context) ([]int, error)) *MockGameRepo_LiveGames_Call {
+func (_c *MockGameRepo_LastGame_Call) RunAndReturn(run func(ctx context.Context, playerID int, eventID int) (int, error)) *MockGameRepo_LastGame_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // NewGame provides a mock function for the type MockGameRepo
-func (_mock *MockGameRepo) NewGame(ctx context.Context, seating [4]int) (int, error) {
-	ret := _mock.Called(ctx, seating)
+func (_mock *MockGameRepo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, error) {
+	ret := _mock.Called(ctx, seating, eventID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for NewGame")
@@ -424,16 +646,16 @@ func (_mock *MockGameRepo) NewGame(ctx context.Context, seating [4]int) (int, er
 
 	var r0 int
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, [4]int) (int, error)); ok {
-		return returnFunc(ctx, seating)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, [4]int, int) (int, error)); ok {
+		return returnFunc(ctx, seating, eventID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, [4]int) int); ok {
-		r0 = returnFunc(ctx, seating)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, [4]int, int) int); ok {
+		r0 = returnFunc(ctx, seating, eventID)
 	} else {
 		r0 = ret.Get(0).(int)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, [4]int) error); ok {
-		r1 = returnFunc(ctx, seating)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, [4]int, int) error); ok {
+		r1 = returnFunc(ctx, seating, eventID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -448,11 +670,12 @@ type MockGameRepo_NewGame_Call struct {
 // NewGame is a helper method to define mock.On call
 //   - ctx context.Context
 //   - seating [4]int
-func (_e *MockGameRepo_Expecter) NewGame(ctx interface{}, seating interface{}) *MockGameRepo_NewGame_Call {
-	return &MockGameRepo_NewGame_Call{Call: _e.mock.On("NewGame", ctx, seating)}
+//   - eventID int
+func (_e *MockGameRepo_Expecter) NewGame(ctx interface{}, seating interface{}, eventID interface{}) *MockGameRepo_NewGame_Call {
+	return &MockGameRepo_NewGame_Call{Call: _e.mock.On("NewGame", ctx, seating, eventID)}
 }
 
-func (_c *MockGameRepo_NewGame_Call) Run(run func(ctx context.Context, seating [4]int)) *MockGameRepo_NewGame_Call {
+func (_c *MockGameRepo_NewGame_Call) Run(run func(ctx context.Context, seating [4]int, eventID int)) *MockGameRepo_NewGame_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -462,9 +685,14 @@ func (_c *MockGameRepo_NewGame_Call) Run(run func(ctx context.Context, seating [
 		if args[1] != nil {
 			arg1 = args[1].([4]int)
 		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -475,7 +703,7 @@ func (_c *MockGameRepo_NewGame_Call) Return(n int, err error) *MockGameRepo_NewG
 	return _c
 }
 
-func (_c *MockGameRepo_NewGame_Call) RunAndReturn(run func(ctx context.Context, seating [4]int) (int, error)) *MockGameRepo_NewGame_Call {
+func (_c *MockGameRepo_NewGame_Call) RunAndReturn(run func(ctx context.Context, seating [4]int, eventID int) (int, error)) *MockGameRepo_NewGame_Call {
 	_c.Call.Return(run)
 	return _c
 }

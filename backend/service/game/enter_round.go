@@ -11,8 +11,9 @@ func (s *Service) EnterRound(
 	playerID int,
 	outcome models.Outcome,
 	value, winnerID, loserID int,
+	eventID int,
 ) (models.GameNow, error) {
-	game, err := s.CurrentGame(playerID)
+	game, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}
@@ -56,7 +57,7 @@ func (s *Service) EnterRound(
 		}, nil
 	}
 
-	now, err := s.Now(ctx, playerID)
+	now, err := s.Now(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}

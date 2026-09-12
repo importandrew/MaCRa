@@ -6,35 +6,40 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/importandrew/MaCRa/engine/game"
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) NewGame(ctx context.Context, playerIDs []int) (int, error) {
-	if err := s.validatePlayers(playerIDs, nil); err != nil {
+// NewGame checks if players do not currently participate in game in this event.
+// Whether players belong to the event is checked in event service.
+func (s *Service) NewGame(ctx context.Context, playerIDs []int, eventID int) (int, error) {
+	if err := s.validatePlayers(ctx, playerIDs, eventID); err != nil {
 		return 0, fmt.Errorf("%w: %w", models.ErrValidatePlayers, err)
 	}
 
-	gameID, err := s.gameRepo.NewGame(ctx, [4]int(playerIDs))
+	gameID, err := s.gameRepo.NewGame(ctx, [4]int(playerIDs), eventID)
 	if err != nil {
 		return 0, err
 	}
 
-	gameCfg := game.Config{
-		ID:      gameID,
-		Players: game.Seating(playerIDs),
-		Rules:   game.Rules{},
-	}
+	// gameCfg := game.Config{
+	// 	ID:      gameID,
+	// 	Players: game.Seating(playerIDs),
+	// 	Rules:   game.Rules{},
+	// }
 
-	g := game.NewGame(gameCfg)
+	// g := game.NewGame(gameCfg)
 
-	s.liveGames[gameID] = g
+	// _, ok := s.liveGames[eventID]
+	// if !ok {
+	// 	s.liveGames[eventID] = make(map[int]GameEngine)
+	// }
+	// s.liveGames[eventID][gameID] = g
 
 	return gameID, nil
 }
 
 // currentGameID should be nil unless it's game reload (otherwise interferes with itself).
-func (s *Service) validatePlayers(playerIDs []int, currentGameID *int) error {
+func (s *Service) validatePlayers(ctx context.Context, playerIDs []int, eventID int) error {
 	// len = 4
 	if len(playerIDs) != 4 {
 		return fmt.Errorf("expected four player IDs, got %v", len(playerIDs))
@@ -56,8 +61,8 @@ func (s *Service) validatePlayers(playerIDs []int, currentGameID *int) error {
 	}
 
 	// disallow same player in several games at the same time
-	for _, id := range playerIDs {
-		g, err := s.CurrentGame(id)
+	for _, playerID := range playerIDs {
+		gameID, err := s.gameRepo.CurrentGame(ctx, playerID, eventID)
 		if err != nil {
 			if !errors.Is(err, models.ErrGameNotFound) {
 				// unexpected error
@@ -67,12 +72,7 @@ func (s *Service) validatePlayers(playerIDs []int, currentGameID *int) error {
 			continue
 		}
 
-		// game for player found
-		if currentGameID != nil && g.ID() == *currentGameID {
-			// ok, it's reload
-			continue
-		}
-		return fmt.Errorf("player (ID %v) already in game (ID %v)", id, g.ID())
+		return fmt.Errorf("player (ID %v) already in game (ID %v)", playerID, gameID)
 	}
 
 	return nil

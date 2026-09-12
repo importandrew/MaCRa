@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *Repo) NewGame(ctx context.Context, seating [4]int) (int, error) {
+func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, error) {
 	conn, err := r.db.Acquire(ctx)
 	if err != nil {
 		return 0, err
@@ -31,10 +31,10 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int) (int, error) {
 
 	// Insert game and get ID
 	rows, err := tx.Query(ctx, `
-		INSERT INTO games(created_at, status) 
-		VALUES($1, $2)
+		INSERT INTO games(created_at, status, event_id) 
+		VALUES($1, $2, $3)
 		RETURNING id`,
-		now, models.GameLive)
+		now, models.GameLive, eventID)
 	if err != nil {
 		return 0, err
 	}

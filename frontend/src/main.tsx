@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM, { Container } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import HawkCatcher from '@hawk.so/javascript';
 import App from './App.tsx';
 import './index.css';
-import { BrowserRouter } from 'react-router-dom';
-import Layout from './Layout.tsx';
 import { AuthProvider } from './providers/auth/AuthContext.tsx';
-import HawkCatcher from '@hawk.so/javascript';
+import { EventProvider } from './providers/event/EventContext.tsx';
 
 if (process.env.NODE_ENV === 'development') {
   // DEBUG mode in Console
@@ -28,13 +28,11 @@ if (process.env.NODE_ENV === 'development') {
 ReactDOM.createRoot(document.getElementById('root') as Container).render(
   <React.StrictMode>
     <AuthProvider>
-      <Layout>
+      <EventProvider>
         <BrowserRouter>
-          <main className="flex grow light text-foreground bg-background">
-            <App />
-          </main>
+          <App />
         </BrowserRouter>
-      </Layout>
+      </EventProvider>
     </AuthProvider>
   </React.StrictMode>
 );

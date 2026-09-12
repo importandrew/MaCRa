@@ -8,10 +8,12 @@ import { undoLastRound } from '../../../providers/game/gameDataApi';
 
 export default function LogsMenu({
   gameId,
+  eventId,
   canUndoLastRound = false,
   onUndoSuccess,
 }: {
   gameId: number | null;
+  eventId?: number;
   canUndoLastRound?: boolean;
   onUndoSuccess?: () => void;
 }) {
@@ -22,7 +24,7 @@ export default function LogsMenu({
     if (gameId == null) return;
     setConfirmOpen(false);
     setUndoLoading(true);
-    const ok = await undoLastRound(gameId);
+    const ok = await undoLastRound(gameId, eventId);
     setUndoLoading(false);
     if (ok) {
       showToast({ title: 'Last round undone', color: 'warning' });
@@ -36,6 +38,7 @@ export default function LogsMenu({
         isChartVisible={false}
         isLogVisible={true}
         gameId={gameId}
+        eventId={eventId}
       ></GameLogs>
       {canUndoLastRound && (
         <>

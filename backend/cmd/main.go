@@ -5,13 +5,15 @@ import (
 
 	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/handler"
-	ghndl "github.com/importandrew/MaCRa/handler/game"
+	ehndl "github.com/importandrew/MaCRa/handler/event"
 	phndl "github.com/importandrew/MaCRa/handler/player"
 	"github.com/importandrew/MaCRa/logger"
 	"github.com/importandrew/MaCRa/repo/database"
+	erepo "github.com/importandrew/MaCRa/repo/event"
 	grepo "github.com/importandrew/MaCRa/repo/game"
 	prepo "github.com/importandrew/MaCRa/repo/player"
 	"github.com/importandrew/MaCRa/server"
+	esvc "github.com/importandrew/MaCRa/service/event"
 	gsvc "github.com/importandrew/MaCRa/service/game"
 	psvc "github.com/importandrew/MaCRa/service/player"
 	"github.com/spf13/pflag"
@@ -47,19 +49,17 @@ func main() {
 	// repo
 	gameRepo := grepo.NewRepo(db)
 	playerRepo := prepo.NewRepo(db)
+	eventRepo := erepo.NewRepo(db)
 
 	// service
 	gameService := gsvc.NewService(gameRepo, playerRepo)
 	playerService := psvc.NewService(playerRepo)
+	eventService := esvc.NewService(eventRepo, gameService, playerService)
 
 	// handler
-	gameHandler := ghndl.NewHandler(gameService, playerService)
+	eventHandler := ehndl.NewHandler(eventService, gameService)
 	playerHandler := phndl.NewHandler(playerService, cfg.CookieDomain, []byte(cfg.JWTKey))
-	h := handler.New(gameHandler, playerHandler, []byte(cfg.JWTKey))
-
-	if err := gameService.LoadLiveGames(ctx); err != nil {
-		logger.Errorf("load games: %v", err)
-	}
+	h := handler.New(eventHandler, playerHandler, []byte(cfg.JWTKey))
 
 	// server
 	router := server.NewServer(cfg.AllowOrigins...)

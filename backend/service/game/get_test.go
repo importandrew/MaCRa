@@ -1,26 +1,25 @@
 package game
 
 import (
+	"context"
 	"testing"
 
+	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestGetLiveGame(t *testing.T) {
+func TestLiveGame(t *testing.T) {
 	testData := map[string]struct {
 		gameID      int
-		setupGame   func(*Service, *testing.T) int
+		mockSetup   func(*MockGameRepo, int)
 		expectedErr assert.ErrorAssertionFunc
 		checkGame   func(*testing.T, GameEngine)
 	}{
 		"ok": {
 			gameID: 100,
-			setupGame: func(s *Service, t *testing.T) int {
-				// Create a mock game engine and add it to liveGames
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().ID().Return(100)
-				s.liveGames[100] = mockGame
-				return 100
+			mockSetup: func(m *MockGameRepo, gameID int) {
+				expectLiveGame(m, gameID, nil)
 			},
 			expectedErr: assert.NoError,
 			checkGame: func(t *testing.T, g GameEngine) {
@@ -28,11 +27,10 @@ func TestGetLiveGame(t *testing.T) {
 				assert.Equal(t, 100, g.ID())
 			},
 		},
-		"game not found": {
+		"game not live": {
 			gameID: 999,
-			setupGame: func(s *Service, t *testing.T) int {
-				// Don't add any games
-				return 999
+			mockSetup: func(m *MockGameRepo, gameID int) {
+				m.EXPECT().Status(mock.Anything, gameID).Return(models.GameEnded, nil)
 			},
 			expectedErr: assert.Error,
 		},
@@ -44,9 +42,9 @@ func TestGetLiveGame(t *testing.T) {
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
-			expectedGameID := testCase.setupGame(service, t)
+			testCase.mockSetup(mockGameRepo, testCase.gameID)
 
-			g, err := service.GetLiveGame(expectedGameID)
+			g, err := service.LiveGame(context.Background(), testCase.gameID)
 
 			testCase.expectedErr(t, err)
 			if err != nil {
@@ -64,22 +62,18 @@ func TestGetLiveGame(t *testing.T) {
 func TestCurrentGame(t *testing.T) {
 	testData := map[string]struct {
 		playerID    int
-		setupGame   func(*Service, *testing.T)
+		mockSetup   func(*MockGameRepo)
 		expectedErr assert.ErrorAssertionFunc
 		checkGame   func(*testing.T, GameEngine, int)
 	}{
 		"ok": {
 			playerID: 1,
-			setupGame: func(s *Service, t *testing.T) {
-				mockGame := NewMockGameEngine(t)
-				// CurrentGame calls Players() during iteration, and checkGame calls it again
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4}).Times(2)
-				s.liveGames[100] = mockGame
+			mockSetup: func(m *MockGameRepo) {
+				expectCurrentGame(m, 1, 100, nil, 1)
 			},
 			expectedErr: assert.NoError,
 			checkGame: func(t *testing.T, g GameEngine, playerID int) {
 				assert.NotNil(t, g)
-				// Verify player is in the game
 				players := g.Players()
 				found := false
 				for _, id := range players {
@@ -93,41 +87,17 @@ func TestCurrentGame(t *testing.T) {
 		},
 		"player not in any game": {
 			playerID: 999,
-			setupGame: func(s *Service, t *testing.T) {
-				mockGame := NewMockGameEngine(t)
-				mockGame.EXPECT().Players().Return([4]int{1, 2, 3, 4})
-				s.liveGames[100] = mockGame
+			mockSetup: func(m *MockGameRepo) {
+				m.EXPECT().CurrentGame(mock.Anything, 999, testEventID).Return(0, models.ErrGameNotFound)
 			},
 			expectedErr: assert.Error,
 		},
 		"no live games": {
 			playerID: 1,
-			setupGame: func(s *Service, t *testing.T) {
-				// Don't add any games
+			mockSetup: func(m *MockGameRepo) {
+				m.EXPECT().CurrentGame(mock.Anything, 1, testEventID).Return(0, models.ErrGameNotFound)
 			},
 			expectedErr: assert.Error,
-		},
-		"multiple games": {
-			playerID: 5,
-			setupGame: func(s *Service, t *testing.T) {
-				// First game - Players() may or may not be called depending on map iteration order
-				mockGame1 := NewMockGameEngine(t)
-				mockGame1.EXPECT().Players().Return([4]int{1, 2, 3, 4}).Maybe()
-				s.liveGames[100] = mockGame1
-
-				// Second game with player 5 - Players() will always be called (either first or after game1)
-				// If checked first, it finds player 5 and returns early
-				// If checked second, it finds player 5 after game1 doesn't have the player
-				mockGame2 := NewMockGameEngine(t)
-				mockGame2.EXPECT().Players().Return([4]int{5, 6, 7, 8})
-				mockGame2.EXPECT().ID().Return(200)
-				s.liveGames[200] = mockGame2
-			},
-			expectedErr: assert.NoError,
-			checkGame: func(t *testing.T, g GameEngine, playerID int) {
-				assert.NotNil(t, g)
-				assert.Equal(t, 200, g.ID())
-			},
 		},
 	}
 
@@ -137,9 +107,9 @@ func TestCurrentGame(t *testing.T) {
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
-			testCase.setupGame(service, t)
+			testCase.mockSetup(mockGameRepo)
 
-			g, err := service.CurrentGame(testCase.playerID)
+			g, err := service.CurrentGame(context.Background(), testCase.playerID, testEventID)
 
 			testCase.expectedErr(t, err)
 			if err != nil {

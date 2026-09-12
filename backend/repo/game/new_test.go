@@ -66,8 +66,9 @@ func TestNewGame(t *testing.T) {
 			for _, id := range testCase.preAddPlayers {
 				createTestUser(t, conn, id)
 			}
+			createTestEvent(t, conn)
 
-			gameID, err := repo.NewGame(ctx, testCase.seating)
+			gameID, err := repo.NewGame(ctx, testCase.seating, testEventID)
 			testCase.expectedErr(t, err)
 			if err != nil {
 				return

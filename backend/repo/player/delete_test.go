@@ -24,12 +24,13 @@ func TestDelete(t *testing.T) {
 		expectedErrValue error
 	}{
 		"ok": {
-			preAddUsers:   []int{1, 2},
-			emailToDelete: "1@test.com",
+			// User id 1 is referenced as owner of the system default event (migration 000004); delete a different user.
+			preAddUsers:   []int{2, 3},
+			emailToDelete: "2@test.com",
 			expectedErr:   assert.NoError,
 		},
 		"not found": {
-			preAddUsers:      []int{1},
+			preAddUsers:      []int{2},
 			emailToDelete:    "nonexistent@test.com",
 			expectedErr:      assert.Error,
 			expectedErrValue: models.ErrPlayerNotFound,

@@ -25,12 +25,17 @@ export default function GameLogs({
   isChartVisible = false,
   isLogVisible = false,
   gameId,
+  eventId,
 }: {
   isChartVisible: boolean;
   isLogVisible: boolean;
   gameId: number | null;
+  eventId?: number;
 }) {
-  const { data, isError, isLoading, fetchData } = useFetchGameLogsData(gameId);
+  const { data, isError, isLoading, fetchData } = useFetchGameLogsData(
+    gameId,
+    eventId
+  );
 
   function getFinalScores() {
     if (!preparedData || !preparedData.rounds.length) {

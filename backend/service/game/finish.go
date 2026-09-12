@@ -4,7 +4,7 @@ import "context"
 
 // Finish ends a live game, finalizes its result and removes it from liveGames.
 func (s *Service) Finish(ctx context.Context, gameID int) error {
-	game, err := s.GetLiveGame(gameID)
+	game, err := s.LiveGame(ctx, gameID)
 	if err != nil {
 		return err
 	}

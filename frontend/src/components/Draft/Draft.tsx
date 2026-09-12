@@ -4,44 +4,48 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { showToast } from '../Toast';
 import { Player } from '../../models/Player';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { useFetchEventMembers } from '../../providers/event/eventApi';
+import { getStoredEventId } from '../../providers/event/eventConstants';
+import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
 import { WIND_LABELS, WIND_SYMBOLS } from '../../utils/constants';
 import { shuffleArray } from '../../utils/shuffleArray';
-import { GetRequest, globalFetch, PostRequest } from '../Request';
+import { authFetch, PostRequest, eventPath } from '../Request';
 import PlayerSelector from './PlayerSelector';
-import { GameData } from '../../models/GameData';
-
-// Custom hook for fetching players
-const useFetchPlayers = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<Player[]>([]);
-
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      setIsLoading(true);
-      const playersRequest = GetRequest('/api/player/list');
-      const data = await globalFetch<Player[]>(playersRequest);
-
-      if (!data) {
-        setIsLoading(false);
-        setSuggestions([]);
-        return;
-      }
-
-      setSuggestions(data);
-      setIsLoading(false);
-    };
-
-    fetchPlayers();
-  }, []);
-
-  return { suggestions, isLoading };
-};
 
 export default function Draft() {
   const navigate = useNavigate();
   const location = useLocation();
   const [players, setPlayers] = useState<(number | undefined)[]>([]);
-  const { suggestions, isLoading } = useFetchPlayers();
+  const eventId = getStoredEventId();
+  const { data: members, isLoading: membersLoading } =
+    useFetchEventMembers(eventId);
+  const {
+    hasCapability,
+    isLoading: capsLoading,
+    me,
+  } = useEventCapabilities(eventId);
+
+  const suggestions: Player[] = useMemo(
+    () =>
+      (members ?? [])
+        .filter((member) => member.roles.includes('player'))
+        .map((member) => ({
+          id: member.user_id,
+          name: member.name,
+        })),
+    [members]
+  );
+
+  useEffect(() => {
+    if (capsLoading || me === null) return;
+    if (!hasCapability('create_game')) {
+      showToast({
+        title: 'You cannot start a game in this event',
+        color: 'warning',
+      });
+      navigate('/');
+    }
+  }, [capsLoading, me, hasCapability, navigate]);
 
   // Derived state for selectedKeys
   const selectedKeys = useMemo(
@@ -93,8 +97,18 @@ export default function Draft() {
       return;
     }
 
-    const draftRequest = PostRequest('/api/new', { players });
-    const data = await globalFetch<GameData>(draftRequest);
+    const eventId = getStoredEventId();
+    if (!eventId) {
+      showToast({
+        title: 'No event selected',
+        description: 'Please select an event first',
+        color: 'warning',
+      });
+      return;
+    }
+
+    const draftRequest = PostRequest(eventPath(eventId, '/new'), { players });
+    const data = await authFetch<{ id: number }>(draftRequest);
 
     if (!data || 'error' in data) return;
 
@@ -103,7 +117,7 @@ export default function Draft() {
 
   return (
     <div className="flex flex-col justify-center grow w-screen h-full my-auto">
-      {isLoading ? (
+      {membersLoading || capsLoading ? (
         <Spinner label="Loading..." size="lg" />
       ) : (
         <Form

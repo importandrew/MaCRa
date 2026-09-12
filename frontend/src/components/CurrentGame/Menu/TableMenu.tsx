@@ -5,6 +5,8 @@ import {
   DrawerHeader,
 } from '@heroui/react';
 import { PlayerOrder } from '../../../models/GameData';
+import { useFetchEventMe } from '../../../providers/event/eventApi';
+import { useEvent } from '../../../providers/event/eventConstants';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
 import { WarningIcon } from '../../Icons/WarningIcon';
@@ -27,6 +29,13 @@ export default function TableMenu({
   setFinedPlayerId: (value: number | null) => void;
   onRefetchNow?: () => void;
 }) {
+  const { selectedEventId } = useEvent();
+  const { data: eventMe } = useFetchEventMe(selectedEventId);
+
+  const canAbort = eventMe?.capabilities.includes('abort_game') ?? false;
+  const canUndo = eventMe?.capabilities.includes('undo_round') ?? false;
+  const canFinish = eventMe?.capabilities.includes('finish_game') ?? false;
+
   return (
     <>
       <DrawerHeader className="flex flex-col gap-3">Table menu</DrawerHeader>
@@ -53,7 +62,7 @@ export default function TableMenu({
             <div className="flex flex-col gap-2">
               <LogsMenu
                 gameId={gameId}
-                canUndoLastRound={true}
+                canUndoLastRound={canUndo}
                 onUndoSuccess={onRefetchNow}
               />
             </div>
@@ -69,8 +78,8 @@ export default function TableMenu({
         </Accordion>
 
         <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
-          <FinishMenu gameId={gameId} />
-          <AbortMenu gameId={gameId} />
+          <FinishMenu gameId={gameId} canFinish={canFinish} />
+          <AbortMenu gameId={gameId} canAbort={canAbort} />
         </div>
       </DrawerBody>
     </>

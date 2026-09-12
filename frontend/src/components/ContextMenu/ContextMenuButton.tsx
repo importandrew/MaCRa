@@ -4,8 +4,10 @@ import { BarsIcon } from '../Icons/BarsIcon';
 
 export default function ContextMenuButton({
   onPress,
+  className = 'absolute z-100',
 }: {
   onPress: () => void;
+  className?: string;
 }) {
   const handleOnPress = useCallback(() => {
     onPress();
@@ -18,7 +20,7 @@ export default function ContextMenuButton({
       size="lg"
       isIconOnly
       onPress={handleOnPress}
-      className="absolute z-100"
+      className={className}
     >
       <BarsIcon className="text-gray-400" />
     </Button>

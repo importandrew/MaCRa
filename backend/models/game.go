@@ -62,3 +62,50 @@ type PlayerHistory struct {
 	ID      int   `json:"id"`
 	GameIDs []int `json:"game_ids"`
 }
+
+type EventGame struct {
+	GameID  int `db:"id"`
+	EventID int `db:"event_id"`
+}
+
+// Game is a row from the games table.
+type Game struct {
+	ID         int        `db:"id" json:"id"`
+	Status     GameStatus `db:"status" json:"status"`
+	CreatedAt  time.Time  `db:"created_at" json:"created_at"`
+	FinishedAt *time.Time `db:"finished_at" json:"finished_at"`
+	EventID    int        `db:"event_id" json:"event_id"`
+}
+
+type MainGameInfo struct {
+	HasLast    bool `json:"has_last"`
+	HasCurrent bool `json:"has_current"`
+}
+
+// EventGames is the paginated response for event games listing.
+type EventGames struct {
+	Games   []EventGameItem `json:"games"`
+	HasMore bool            `json:"has_more"`
+}
+
+// EventGameItem is one game row in GET /api/event/:eventId/games.
+type EventGameItem struct {
+	ID      int                    `json:"id"`
+	Status  GameStatus             `json:"status"`
+	Round   *Round                 `json:"round"`
+	Players []EventGamePlayerScore `json:"players"`
+}
+
+// EventGamePlayerScore is a player preview on an event games list item.
+type EventGamePlayerScore struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Wind string `json:"wind,omitempty"`
+	GP   int    `json:"gp"`
+}
+
+// EventGameItemRow is a DB row used while building EventGameListItem.
+type EventGameItemRow struct {
+	ID     int        `db:"id"`
+	Status GameStatus `db:"status"`
+}
