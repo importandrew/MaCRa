@@ -37,12 +37,29 @@ func TestLogin(t *testing.T) {
 					models.Player{ID: 1, Name: "Alice"},
 					nil,
 				)
+				m.EXPECT().IsEmailVerified(mock.Anything, 1).Return(true, nil)
 			},
 			expectedErr: assert.NoError,
 			expectedPlayer: models.Player{
 				ID:   1,
 				Name: "Alice",
 			},
+		},
+		"email not verified": {
+			email:    "alice@example.com",
+			password: validPassword,
+			mockSetup: func(m *MockPlayerRepo, email, password string) {
+				m.EXPECT().GetPassByEmail(mock.Anything, email).Return(
+					string(validHash),
+					nil,
+				)
+				m.EXPECT().GetByEmail(mock.Anything, email).Return(
+					models.Player{ID: 1, Name: "Alice"},
+					nil,
+				)
+				m.EXPECT().IsEmailVerified(mock.Anything, 1).Return(false, nil)
+			},
+			expectedErr: assert.Error,
 		},
 		"wrong password": {
 			email:    "alice@example.com",
@@ -99,7 +116,7 @@ func TestLogin(t *testing.T) {
 			mockRepo := NewMockPlayerRepo(t)
 			testCase.mockSetup(mockRepo, testCase.email, testCase.password)
 
-			service := NewService(mockRepo)
+			service := NewService(mockRepo, nil)
 
 			ctx := context.Background()
 			player, err := service.Login(ctx, testCase.email, testCase.password)
@@ -109,6 +126,9 @@ func TestLogin(t *testing.T) {
 				// Verify that bad credentials error is returned for wrong password
 				if testCase.password == wrongPassword {
 					assert.Equal(t, models.ErrBadCredentials, err)
+				}
+				if name == "email not verified" {
+					assert.Equal(t, models.ErrEmailNotVerified, err)
 				}
 				return
 			}

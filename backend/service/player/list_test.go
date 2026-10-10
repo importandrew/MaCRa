@@ -108,7 +108,7 @@ func TestListByNameLimit(t *testing.T) {
 			mockRepo := NewMockPlayerRepo(t)
 			testCase.mockSetup(mockRepo, testCase.name, testCase.limit)
 
-			service := NewService(mockRepo)
+			service := NewService(mockRepo, nil)
 
 			ctx := context.Background()
 			players, err := service.ListByNameLimit(ctx, testCase.name, testCase.limit)

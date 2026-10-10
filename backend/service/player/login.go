@@ -22,6 +22,15 @@ func (s *Service) Login(ctx context.Context, email, password string) (models.Pla
 		return models.Player{}, err
 	}
 
+	verified, err := s.repo.IsEmailVerified(ctx, player.ID)
+	if err != nil {
+		return models.Player{}, err
+	}
+
+	if !verified {
+		return models.Player{}, models.ErrEmailNotVerified
+	}
+
 	return player, nil
 }
 

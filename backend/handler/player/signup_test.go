@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -16,6 +17,8 @@ import (
 
 func TestHandler_SignUp(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+
+	const origin = "https://macra.pro"
 
 	testData := map[string]struct {
 		requestBody  any
@@ -28,18 +31,36 @@ func TestHandler_SignUp(t *testing.T) {
 				Email:    "test@example.com",
 				Name:     "Test User",
 				Password: "password123",
+				Origin:   origin,
 			},
 			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().Add(
+				m.EXPECT().SignUp(
 					mock.Anything,
 					"test@example.com",
 					"Test User",
 					"password123",
-				).Return(models.Player{ID: 1, Name: "Test User"}, nil)
+					origin,
+				).Return(nil)
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
 				assert.Empty(t, w.Body.String())
+			},
+		},
+		"invalid origin": {
+			requestBody: SignupRequest{
+				Email:    "test@example.com",
+				Name:     "Test User",
+				Password: "password123",
+				Origin:   "https://evil.example",
+			},
+			mockSetup:    func(m *MockPlayerService) {},
+			expectedCode: http.StatusBadRequest,
+			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
+				var response map[string]string
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, models.ErrInvalidOrigin.Error(), response["error"])
 			},
 		},
 		"invalid json": {
@@ -69,14 +90,16 @@ func TestHandler_SignUp(t *testing.T) {
 				Email:    "test@example.com",
 				Name:     "Test User",
 				Password: "password123",
+				Origin:   origin,
 			},
 			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().Add(
+				m.EXPECT().SignUp(
 					mock.Anything,
 					"test@example.com",
 					"Test User",
 					"password123",
-				).Return(models.Player{}, errors.New("database error"))
+					origin,
+				).Return(errors.New("database error"))
 			},
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -92,14 +115,16 @@ func TestHandler_SignUp(t *testing.T) {
 				Email:    "existing@example.com",
 				Name:     "Existing User",
 				Password: "password123",
+				Origin:   origin,
 			},
 			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().Add(
+				m.EXPECT().SignUp(
 					mock.Anything,
 					"existing@example.com",
 					"Existing User",
 					"password123",
-				).Return(models.Player{}, models.ErrPlayerExists)
+					origin,
+				).Return(models.ErrPlayerExists)
 			},
 			expectedCode: http.StatusConflict,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -117,7 +142,7 @@ func TestHandler_SignUp(t *testing.T) {
 			mockPlayerService := NewMockPlayerService(t)
 			testCase.mockSetup(mockPlayerService)
 
-			handler := NewHandler(mockPlayerService, "", nil)
+			handler := NewHandler(mockPlayerService, config.Config{})
 
 			var bodyBytes []byte
 			var err error

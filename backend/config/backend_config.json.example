@@ -3,5 +3,6 @@
     "cookie_domain": "",
     "allow_origins": ["https://my.domain.dev"],
     "db_url": "postgresql://user:pass@host/db?sslmode=disable",
-    "jwt_key": "somekey"
+    "jwt_key": "somekey",
+    "mail_from": "noreply@macra.pro"
 }

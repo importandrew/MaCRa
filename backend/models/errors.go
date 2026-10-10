@@ -18,6 +18,10 @@ var (
 	ErrPlayerExists     = errors.New("player with this email already exists")
 	ErrEmptyName        = errors.New("name cannot be empty")
 	ErrLongName         = errors.New("name cannot exceed 50 characters")
+	ErrEmailNotVerified = errors.New("email not verified")
+	ErrInvalidOrigin    = errors.New("invalid origin")
+	ErrInvalidAuthToken = errors.New("invalid or expired token")
+	ErrMailFromEmpty    = errors.New("mail_from is empty")
 
 	ErrJWTKeyEmpty = errors.New("jwt key is empty")
 
@@ -60,6 +64,8 @@ var Errors = map[error]int{
 	ErrInvalidEventType:         http.StatusBadRequest,
 	ErrInvalidContentReach:      http.StatusBadRequest,
 	ErrInvalidGameStatus:        http.StatusBadRequest,
+	ErrInvalidOrigin:            http.StatusBadRequest,
+	ErrInvalidAuthToken:         http.StatusBadRequest,
 
 	// 404
 	ErrGameNotFound:   http.StatusNotFound,
@@ -72,6 +78,7 @@ var Errors = map[error]int{
 	ErrEventForbidden:        http.StatusForbidden,
 	ErrEventMembersForbidden: http.StatusForbidden,
 	ErrImmutableEvent:        http.StatusForbidden,
+	ErrEmailNotVerified:      http.StatusForbidden,
 
 	// 409
 	ErrPlayerExists:         http.StatusConflict,

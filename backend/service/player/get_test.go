@@ -57,7 +57,7 @@ func TestGet(t *testing.T) {
 			mockRepo := NewMockPlayerRepo(t)
 			testCase.mockSetup(mockRepo, testCase.playerID)
 
-			service := NewService(mockRepo)
+			service := NewService(mockRepo, nil)
 
 			ctx := context.Background()
 			player, err := service.Get(ctx, testCase.playerID)
