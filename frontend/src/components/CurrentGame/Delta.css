@@ -1,0 +1,726 @@
+.delta-modal {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      hsl(var(--heroui-primary-50) / 0.35),
+      transparent 40%
+    ),
+    hsl(var(--heroui-background));
+  color: hsl(var(--heroui-foreground));
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.delta-modal__header {
+  flex-shrink: 0;
+  padding: 18px 22px 10px;
+  border-bottom: 1px solid hsl(var(--heroui-divider));
+  background: hsl(var(--heroui-content1) / 0.96);
+  backdrop-filter: blur(12px);
+}
+
+.delta-modal__body {
+  min-height: 0;
+  padding: 14px 18px 18px;
+  overflow: hidden;
+}
+
+.delta-title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.delta-title > span:first-child {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.delta-title__player {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: hsl(var(--heroui-default-500));
+}
+
+.delta-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  font-size: 0.95rem;
+  color: hsl(var(--heroui-default-500));
+}
+
+.delta-layout {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr)
+    minmax(250px, 320px)
+    minmax(220px, 1fr);
+  grid-template-rows:
+    minmax(210px, 1fr)
+    auto
+    auto;
+  grid-template-areas:
+    ". top ."
+    "left selected right"
+    "legend legend legend";
+  align-items: center;
+  justify-items: center;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.delta-opponent,
+.delta-selected {
+  box-sizing: border-box;
+  min-width: 0;
+  border-radius: 20px;
+  background: hsl(var(--heroui-content1) / 0.98);
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 0.08),
+    0 3px 10px rgb(0 0 0 / 0.05);
+}
+
+.delta-opponent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 340px);
+  padding: 16px;
+  border: 1px solid hsl(var(--heroui-primary-200));
+}
+
+.delta-opponent--top {
+  grid-area: top;
+  align-self: end;
+}
+
+.delta-opponent--left {
+  grid-area: left;
+  justify-self: end;
+}
+
+.delta-opponent--right {
+  grid-area: right;
+  justify-self: start;
+}
+
+/* Заголовок карточки соперника */
+
+.delta-opponent__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding-bottom: 10px;
+  border-bottom: 1px solid hsl(var(--heroui-divider));
+  text-align: center;
+}
+
+.delta-opponent__name {
+  width: 100%;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--heroui-foreground));
+}
+
+.delta-opponent__score {
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  text-align: center;
+  color: hsl(var(--heroui-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.delta-opponent__score--negative {
+  color: hsl(var(--heroui-danger-600));
+}
+
+/* Синий блок: взять с игрока */
+
+.delta-direct {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.delta-direct__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: hsl(var(--heroui-primary-50));
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-align: center;
+  color: hsl(var(--heroui-primary-700));
+}
+
+.delta-direct__targets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+
+.delta-direct__target {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  min-width: 92px;
+  padding: 7px 10px;
+  border: 1px solid hsl(var(--heroui-primary-200));
+  border-radius: 11px;
+  background: hsl(var(--heroui-primary-50) / 0.72);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.delta-direct__value {
+  font-size: 1.03rem;
+  font-weight: 900;
+  line-height: 1;
+  color: hsl(var(--heroui-primary-700));
+}
+
+.delta-direct__destination {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: hsl(var(--heroui-default-600));
+}
+
+.delta-direct__empty {
+  padding: 3px 0;
+  font-size: 0.74rem;
+  text-align: center;
+  color: hsl(var(--heroui-default-500));
+}
+
+/* Красный блок: набросить игроку */
+
+.delta-discard {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 10px;
+  border-top: 1px solid hsl(var(--heroui-danger-200));
+}
+
+.delta-discard__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: hsl(var(--heroui-danger-50));
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-align: center;
+  color: hsl(var(--heroui-danger-700));
+}
+
+.delta-discard__targets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+
+.delta-discard__target {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  min-width: 112px;
+  padding: 7px 10px;
+  border: 1px solid hsl(var(--heroui-danger-200));
+  border-radius: 11px;
+  background: hsl(var(--heroui-danger-50) / 0.76);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.delta-discard__value {
+  font-size: 1.03rem;
+  font-weight: 900;
+  line-height: 1;
+  color: hsl(var(--heroui-danger-700));
+}
+
+.delta-discard__destination {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: hsl(var(--heroui-default-600));
+}
+
+.delta-discard__arrows {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: hsl(var(--heroui-danger-700));
+}
+
+.delta-discard__empty {
+  padding: 3px 0;
+  font-size: 0.74rem;
+  text-align: center;
+  color: hsl(var(--heroui-default-500));
+}
+
+/* Центральная карточка выбранного игрока */
+
+.delta-selected {
+  grid-area: selected;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  min-width: 250px;
+  max-width: 320px;
+  padding: 18px;
+  border: 2px solid hsl(var(--heroui-success-400));
+  background:
+    linear-gradient(
+      180deg,
+      hsl(var(--heroui-success-50) / 0.94),
+      hsl(var(--heroui-content1))
+    );
+}
+
+.delta-selected__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+}
+
+.delta-selected__icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: hsl(var(--heroui-success-100));
+  font-size: 1.3rem;
+}
+
+.delta-selected__identity {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.delta-selected__name {
+  width: 100%;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--heroui-foreground));
+}
+
+.delta-selected__score {
+  margin-top: 5px;
+  font-size: 1.55rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: hsl(var(--heroui-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.delta-selected__score--negative {
+  color: hsl(var(--heroui-danger-600));
+}
+
+.delta-selected__place {
+  margin-top: 5px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: hsl(var(--heroui-success-700));
+}
+
+/* Зелёный блок: селф */
+
+.delta-self {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-top: 12px;
+  border-top: 1px solid hsl(var(--heroui-success-200));
+}
+
+.delta-self__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: hsl(var(--heroui-success-100));
+  font-size: 0.82rem;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  color: hsl(var(--heroui-success-800));
+}
+
+.delta-self__targets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+
+.delta-self__target {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  min-width: 92px;
+  padding: 8px 10px;
+  border: 1px solid hsl(var(--heroui-success-300));
+  border-radius: 11px;
+  background: hsl(var(--heroui-success-50));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.delta-self__value {
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: 1;
+  color: hsl(var(--heroui-success-800));
+}
+
+.delta-self__destination {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: hsl(var(--heroui-success-700));
+}
+
+.delta-self__empty {
+  padding: 5px 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  color: hsl(var(--heroui-success-700));
+}
+
+/* Легенда */
+
+.delta-legend {
+  grid-area: legend;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  width: min(100%, 900px);
+  padding: 12px 16px;
+  border: 1px solid hsl(var(--heroui-divider));
+  border-radius: 14px;
+  background: hsl(var(--heroui-content1) / 0.88);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  color: hsl(var(--heroui-default-600));
+  backdrop-filter: blur(8px);
+}
+
+.delta-legend span {
+  white-space: nowrap;
+}
+
+/* Планшеты */
+
+@media (max-width: 980px) {
+  .delta-layout {
+    grid-template-columns:
+      minmax(180px, 1fr)
+      minmax(210px, 270px)
+      minmax(180px, 1fr);
+    gap: 14px;
+  }
+
+  .delta-opponent {
+    width: min(100%, 290px);
+    padding: 14px;
+  }
+
+  .delta-selected {
+    min-width: 210px;
+    max-width: 270px;
+    padding: 15px;
+  }
+
+  .delta-direct__target,
+  .delta-self__target {
+    min-width: 82px;
+    padding: 6px 8px;
+  }
+
+  .delta-discard__target {
+    min-width: 102px;
+    padding: 6px 8px;
+  }
+}
+
+/* Телефоны */
+
+@media (max-width: 640px) {
+  .delta-modal__header {
+    padding: 12px 15px 8px;
+  }
+
+  .delta-modal__body {
+    padding: 8px 8px 12px;
+    overflow-y: auto;
+  }
+
+  .delta-title > span:first-child {
+    font-size: 0.92rem;
+  }
+
+  .delta-title__player {
+    font-size: 0.74rem;
+  }
+
+  .delta-layout {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(126px, 152px)
+      minmax(0, 1fr);
+    grid-template-rows:
+      auto
+      auto
+      auto;
+    gap: 7px;
+    min-height: calc(100dvh - 94px);
+  }
+
+  .delta-opponent {
+    gap: 7px;
+    width: 100%;
+    padding: 9px 7px;
+    border-radius: 14px;
+  }
+
+  .delta-opponent__identity {
+    gap: 4px;
+    padding-bottom: 7px;
+  }
+
+  .delta-opponent__name {
+    font-size: 0.78rem;
+  }
+
+  .delta-opponent__score {
+    font-size: 1.15rem;
+  }
+
+  .delta-direct__title,
+  .delta-discard__title {
+    min-height: 22px;
+    padding: 3px 6px;
+    font-size: 0.66rem;
+  }
+
+  .delta-direct__targets,
+  .delta-discard__targets,
+  .delta-self__targets {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .delta-direct__target,
+  .delta-discard__target,
+  .delta-self__target {
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+    padding: 5px 6px;
+    border-radius: 8px;
+  }
+
+  .delta-direct__value,
+  .delta-discard__value,
+  .delta-self__value {
+    font-size: 0.86rem;
+  }
+
+  .delta-direct__destination,
+  .delta-discard__destination,
+  .delta-discard__arrows,
+  .delta-self__destination {
+    font-size: 0.66rem;
+  }
+
+  .delta-selected {
+    gap: 9px;
+    min-width: 126px;
+    max-width: 152px;
+    padding: 10px 7px;
+    border-radius: 15px;
+  }
+
+  .delta-selected__header {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .delta-selected__icon {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+
+  .delta-selected__identity {
+    width: 100%;
+    text-align: center;
+  }
+
+  .delta-selected__name {
+    font-size: 0.78rem;
+  }
+
+  .delta-selected__score {
+    font-size: 1.25rem;
+  }
+
+  .delta-selected__place {
+    margin-top: 3px;
+    font-size: 0.66rem;
+  }
+
+  .delta-self {
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  .delta-self__title {
+    min-height: 23px;
+    padding: 3px 6px;
+    font-size: 0.7rem;
+  }
+
+  .delta-legend {
+    gap: 4px 10px;
+    padding: 8px 10px;
+    border-radius: 11px;
+    font-size: 0.66rem;
+  }
+
+  .delta-legend span {
+    white-space: normal;
+  }
+}
+
+/* Очень узкие телефоны */
+
+@media (max-width: 420px) {
+  .delta-layout {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(108px, 126px)
+      minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .delta-opponent {
+    padding: 8px 5px;
+  }
+
+  .delta-opponent__name {
+    font-size: 0.7rem;
+  }
+
+  .delta-opponent__score {
+    font-size: 1rem;
+  }
+
+  .delta-selected {
+    min-width: 108px;
+    max-width: 126px;
+    padding: 9px 6px;
+  }
+
+  .delta-selected__name {
+    font-size: 0.7rem;
+  }
+
+  .delta-selected__score {
+    font-size: 1.08rem;
+  }
+
+  .delta-direct__title,
+  .delta-discard__title,
+  .delta-self__title {
+    font-size: 0.62rem;
+  }
+
+  .delta-direct__value,
+  .delta-discard__value,
+  .delta-self__value {
+    font-size: 0.8rem;
+  }
+
+  .delta-direct__destination,
+  .delta-discard__destination,
+  .delta-discard__arrows,
+  .delta-self__destination {
+    font-size: 0.61rem;
+  }
+}
+
+/* Небольшая анимация */
+
+@media (prefers-reduced-motion: no-preference) {
+  .delta-opponent,
+  .delta-selected {
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease,
+      border-color 140ms ease;
+  }
+
+  .delta-opponent:hover,
+  .delta-selected:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 15px 36px rgb(0 0 0 / 0.1),
+      0 4px 12px rgb(0 0 0 / 0.06);
+  }
+}
