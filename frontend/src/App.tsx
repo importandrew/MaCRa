@@ -16,6 +16,10 @@ import LiveGames from './components/Events/LiveGames';
 import GameResult from './components/GameResult/GameResult';
 import History from './components/History/History';
 import LoginPage from './components/Login/Login';
+import CheckEmailPage from './components/Login/CheckEmail';
+import ForgotPasswordPage from './components/Login/ForgotPassword';
+import ResetPasswordPage from './components/Login/ResetPassword';
+import VerifyEmailPage from './components/Login/VerifyEmail';
 import Landing from './components/Main/Landing';
 import ProfilePage from './components/Profile/Profile';
 import ViewGame from './components/ViewGame/ViewGame';
@@ -49,6 +53,10 @@ function App() {
               path="/signup"
               element={<Navigate to="/login?tab=signup" replace />}
             />
+            <Route path="/check-email" element={<CheckEmailPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             <Route element={<RequireAuth />}>
               <Route path="/profile" element={<ProfilePage />} />

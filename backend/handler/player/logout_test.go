@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -86,7 +87,7 @@ func TestHandler_Logout(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			mockPlayerService := NewMockPlayerService(t)
 
-			handler := NewHandler(mockPlayerService, testCase.domain, nil)
+			handler := NewHandler(mockPlayerService, config.Config{CookieDomain: testCase.domain})
 
 			req := httptest.NewRequest(http.MethodPost, "/auth/logout", nil)
 			req.Host = testCase.host

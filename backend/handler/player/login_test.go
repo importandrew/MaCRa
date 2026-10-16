@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -203,7 +204,7 @@ func TestHandler_Login(t *testing.T) {
 			mockPlayerService := NewMockPlayerService(t)
 			testCase.mockSetup(mockPlayerService)
 
-			handler := NewHandler(mockPlayerService, testCase.domain, testJWT)
+			handler := NewHandler(mockPlayerService, config.Config{CookieDomain: testCase.domain, JWTKey: string(testJWT)})
 
 			var bodyBytes []byte
 			var err error

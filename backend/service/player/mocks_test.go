@@ -6,6 +6,7 @@ package player
 
 import (
 	"context"
+	"time"
 
 	"github.com/importandrew/MaCRa/models"
 	mock "github.com/stretchr/testify/mock"
@@ -116,6 +117,81 @@ func (_c *MockPlayerRepo_Add_Call) RunAndReturn(run func(ctx context.Context, em
 	return _c
 }
 
+// CreateAuthToken provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) CreateAuthToken(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time) error {
+	ret := _mock.Called(ctx, userID, purpose, tokenHash, expiresAt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateAuthToken")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.AuthPurpose, string, time.Time) error); ok {
+		r0 = returnFunc(ctx, userID, purpose, tokenHash, expiresAt)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerRepo_CreateAuthToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateAuthToken'
+type MockPlayerRepo_CreateAuthToken_Call struct {
+	*mock.Call
+}
+
+// CreateAuthToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int
+//   - purpose models.AuthPurpose
+//   - tokenHash string
+//   - expiresAt time.Time
+func (_e *MockPlayerRepo_Expecter) CreateAuthToken(ctx interface{}, userID interface{}, purpose interface{}, tokenHash interface{}, expiresAt interface{}) *MockPlayerRepo_CreateAuthToken_Call {
+	return &MockPlayerRepo_CreateAuthToken_Call{Call: _e.mock.On("CreateAuthToken", ctx, userID, purpose, tokenHash, expiresAt)}
+}
+
+func (_c *MockPlayerRepo_CreateAuthToken_Call) Run(run func(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time)) *MockPlayerRepo_CreateAuthToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.AuthPurpose
+		if args[2] != nil {
+			arg2 = args[2].(models.AuthPurpose)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 time.Time
+		if args[4] != nil {
+			arg4 = args[4].(time.Time)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_CreateAuthToken_Call) Return(err error) *MockPlayerRepo_CreateAuthToken_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_CreateAuthToken_Call) RunAndReturn(run func(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time) error) *MockPlayerRepo_CreateAuthToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Get provides a mock function for the type MockPlayerRepo
 func (_mock *MockPlayerRepo) Get(ctx context.Context, id int) (models.Player, error) {
 	ret := _mock.Called(ctx, id)
@@ -178,6 +254,72 @@ func (_c *MockPlayerRepo_Get_Call) Return(player models.Player, err error) *Mock
 }
 
 func (_c *MockPlayerRepo_Get_Call) RunAndReturn(run func(ctx context.Context, id int) (models.Player, error)) *MockPlayerRepo_Get_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetAuthTokenByHash provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) GetAuthTokenByHash(ctx context.Context, tokenHash string) (models.AuthToken, error) {
+	ret := _mock.Called(ctx, tokenHash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAuthTokenByHash")
+	}
+
+	var r0 models.AuthToken
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (models.AuthToken, error)); ok {
+		return returnFunc(ctx, tokenHash)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) models.AuthToken); ok {
+		r0 = returnFunc(ctx, tokenHash)
+	} else {
+		r0 = ret.Get(0).(models.AuthToken)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, tokenHash)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPlayerRepo_GetAuthTokenByHash_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAuthTokenByHash'
+type MockPlayerRepo_GetAuthTokenByHash_Call struct {
+	*mock.Call
+}
+
+// GetAuthTokenByHash is a helper method to define mock.On call
+//   - ctx context.Context
+//   - tokenHash string
+func (_e *MockPlayerRepo_Expecter) GetAuthTokenByHash(ctx interface{}, tokenHash interface{}) *MockPlayerRepo_GetAuthTokenByHash_Call {
+	return &MockPlayerRepo_GetAuthTokenByHash_Call{Call: _e.mock.On("GetAuthTokenByHash", ctx, tokenHash)}
+}
+
+func (_c *MockPlayerRepo_GetAuthTokenByHash_Call) Run(run func(ctx context.Context, tokenHash string)) *MockPlayerRepo_GetAuthTokenByHash_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_GetAuthTokenByHash_Call) Return(authToken models.AuthToken, err error) *MockPlayerRepo_GetAuthTokenByHash_Call {
+	_c.Call.Return(authToken, err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_GetAuthTokenByHash_Call) RunAndReturn(run func(ctx context.Context, tokenHash string) (models.AuthToken, error)) *MockPlayerRepo_GetAuthTokenByHash_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -314,6 +456,135 @@ func (_c *MockPlayerRepo_GetPassByEmail_Call) RunAndReturn(run func(ctx context.
 	return _c
 }
 
+// InvalidateAuthTokens provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) InvalidateAuthTokens(ctx context.Context, userID int, purpose models.AuthPurpose) error {
+	ret := _mock.Called(ctx, userID, purpose)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InvalidateAuthTokens")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.AuthPurpose) error); ok {
+		r0 = returnFunc(ctx, userID, purpose)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerRepo_InvalidateAuthTokens_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InvalidateAuthTokens'
+type MockPlayerRepo_InvalidateAuthTokens_Call struct {
+	*mock.Call
+}
+
+// InvalidateAuthTokens is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int
+//   - purpose models.AuthPurpose
+func (_e *MockPlayerRepo_Expecter) InvalidateAuthTokens(ctx interface{}, userID interface{}, purpose interface{}) *MockPlayerRepo_InvalidateAuthTokens_Call {
+	return &MockPlayerRepo_InvalidateAuthTokens_Call{Call: _e.mock.On("InvalidateAuthTokens", ctx, userID, purpose)}
+}
+
+func (_c *MockPlayerRepo_InvalidateAuthTokens_Call) Run(run func(ctx context.Context, userID int, purpose models.AuthPurpose)) *MockPlayerRepo_InvalidateAuthTokens_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.AuthPurpose
+		if args[2] != nil {
+			arg2 = args[2].(models.AuthPurpose)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_InvalidateAuthTokens_Call) Return(err error) *MockPlayerRepo_InvalidateAuthTokens_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_InvalidateAuthTokens_Call) RunAndReturn(run func(ctx context.Context, userID int, purpose models.AuthPurpose) error) *MockPlayerRepo_InvalidateAuthTokens_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsEmailVerified provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) IsEmailVerified(ctx context.Context, userID int) (bool, error) {
+	ret := _mock.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsEmailVerified")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (bool, error)); ok {
+		return returnFunc(ctx, userID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) bool); ok {
+		r0 = returnFunc(ctx, userID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPlayerRepo_IsEmailVerified_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsEmailVerified'
+type MockPlayerRepo_IsEmailVerified_Call struct {
+	*mock.Call
+}
+
+// IsEmailVerified is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int
+func (_e *MockPlayerRepo_Expecter) IsEmailVerified(ctx interface{}, userID interface{}) *MockPlayerRepo_IsEmailVerified_Call {
+	return &MockPlayerRepo_IsEmailVerified_Call{Call: _e.mock.On("IsEmailVerified", ctx, userID)}
+}
+
+func (_c *MockPlayerRepo_IsEmailVerified_Call) Run(run func(ctx context.Context, userID int)) *MockPlayerRepo_IsEmailVerified_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_IsEmailVerified_Call) Return(b bool, err error) *MockPlayerRepo_IsEmailVerified_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_IsEmailVerified_Call) RunAndReturn(run func(ctx context.Context, userID int) (bool, error)) *MockPlayerRepo_IsEmailVerified_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListByNameLimit provides a mock function for the type MockPlayerRepo
 func (_mock *MockPlayerRepo) ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error) {
 	ret := _mock.Called(ctx, name, limit)
@@ -388,6 +659,120 @@ func (_c *MockPlayerRepo_ListByNameLimit_Call) RunAndReturn(run func(ctx context
 	return _c
 }
 
+// MarkAuthTokenUsed provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) MarkAuthTokenUsed(ctx context.Context, id int) error {
+	ret := _mock.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MarkAuthTokenUsed")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerRepo_MarkAuthTokenUsed_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MarkAuthTokenUsed'
+type MockPlayerRepo_MarkAuthTokenUsed_Call struct {
+	*mock.Call
+}
+
+// MarkAuthTokenUsed is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id int
+func (_e *MockPlayerRepo_Expecter) MarkAuthTokenUsed(ctx interface{}, id interface{}) *MockPlayerRepo_MarkAuthTokenUsed_Call {
+	return &MockPlayerRepo_MarkAuthTokenUsed_Call{Call: _e.mock.On("MarkAuthTokenUsed", ctx, id)}
+}
+
+func (_c *MockPlayerRepo_MarkAuthTokenUsed_Call) Run(run func(ctx context.Context, id int)) *MockPlayerRepo_MarkAuthTokenUsed_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_MarkAuthTokenUsed_Call) Return(err error) *MockPlayerRepo_MarkAuthTokenUsed_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_MarkAuthTokenUsed_Call) RunAndReturn(run func(ctx context.Context, id int) error) *MockPlayerRepo_MarkAuthTokenUsed_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SetEmailVerified provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) SetEmailVerified(ctx context.Context, userID int) error {
+	ret := _mock.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetEmailVerified")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerRepo_SetEmailVerified_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetEmailVerified'
+type MockPlayerRepo_SetEmailVerified_Call struct {
+	*mock.Call
+}
+
+// SetEmailVerified is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int
+func (_e *MockPlayerRepo_Expecter) SetEmailVerified(ctx interface{}, userID interface{}) *MockPlayerRepo_SetEmailVerified_Call {
+	return &MockPlayerRepo_SetEmailVerified_Call{Call: _e.mock.On("SetEmailVerified", ctx, userID)}
+}
+
+func (_c *MockPlayerRepo_SetEmailVerified_Call) Run(run func(ctx context.Context, userID int)) *MockPlayerRepo_SetEmailVerified_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_SetEmailVerified_Call) Return(err error) *MockPlayerRepo_SetEmailVerified_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_SetEmailVerified_Call) RunAndReturn(run func(ctx context.Context, userID int) error) *MockPlayerRepo_SetEmailVerified_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Update provides a mock function for the type MockPlayerRepo
 func (_mock *MockPlayerRepo) Update(ctx context.Context, id int, name string) error {
 	ret := _mock.Called(ctx, id, name)
@@ -447,6 +832,69 @@ func (_c *MockPlayerRepo_Update_Call) Return(err error) *MockPlayerRepo_Update_C
 }
 
 func (_c *MockPlayerRepo_Update_Call) RunAndReturn(run func(ctx context.Context, id int, name string) error) *MockPlayerRepo_Update_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdatePassword provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) UpdatePassword(ctx context.Context, userID int, hash string) error {
+	ret := _mock.Called(ctx, userID, hash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdatePassword")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, string) error); ok {
+		r0 = returnFunc(ctx, userID, hash)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerRepo_UpdatePassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdatePassword'
+type MockPlayerRepo_UpdatePassword_Call struct {
+	*mock.Call
+}
+
+// UpdatePassword is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int
+//   - hash string
+func (_e *MockPlayerRepo_Expecter) UpdatePassword(ctx interface{}, userID interface{}, hash interface{}) *MockPlayerRepo_UpdatePassword_Call {
+	return &MockPlayerRepo_UpdatePassword_Call{Call: _e.mock.On("UpdatePassword", ctx, userID, hash)}
+}
+
+func (_c *MockPlayerRepo_UpdatePassword_Call) Run(run func(ctx context.Context, userID int, hash string)) *MockPlayerRepo_UpdatePassword_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_UpdatePassword_Call) Return(err error) *MockPlayerRepo_UpdatePassword_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_UpdatePassword_Call) RunAndReturn(run func(ctx context.Context, userID int, hash string) error) *MockPlayerRepo_UpdatePassword_Call {
 	_c.Call.Return(run)
 	return _c
 }

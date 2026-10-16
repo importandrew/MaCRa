@@ -9,11 +9,10 @@ import {
   Tabs,
 } from '@heroui/react';
 import { Key, useCallback, useContext, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { UserData } from '../../models/UserData';
-import { globalFetch, PostRequest } from '../Request';
-import { showToast } from '../Toast';
+import { fetchWithStatus, globalFetch, PostRequest } from '../Request';
 import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
 
@@ -58,21 +57,22 @@ export default function LoginPage() {
   const handleLogin = useCallback(async () => {
     setIsLoading(true);
 
-    const loginRequest = PostRequest('/auth/login', {
-      email,
-      password,
-    });
+    const result = await fetchWithStatus<UserData>(
+      PostRequest('/auth/login', { email, password }),
+      { redirectOn401: false },
+    );
 
-    const data = await globalFetch<UserData>(loginRequest, {
-      redirectOn401: false,
-    });
+    if (result.status === 403) {
+      navigate('/check-email', { state: { email }, replace: true });
+      return;
+    }
 
-    if (!data) {
+    if (!result.data) {
       setIsLoading(false);
       return;
     }
 
-    signIn(data);
+    signIn(result.data);
     navigate(from, { replace: true });
     setIsLoading(false);
   }, [email, password, signIn, navigate, from]);
@@ -80,26 +80,22 @@ export default function LoginPage() {
   const handleSignup = useCallback(async () => {
     setIsLoading(true);
 
-    const signupRequest = PostRequest('/auth/signup', {
-      email,
-      password,
-      name,
-    });
-
-    const data = await globalFetch<object>(signupRequest);
+    const data = await globalFetch<object>(
+      PostRequest('/auth/signup', {
+        email,
+        password,
+        name,
+        origin: window.location.origin,
+      }),
+    );
 
     if (!data) {
       setIsLoading(false);
       return;
     }
 
-    showToast({
-      title: 'Registration successful! Now login, please',
-      color: 'success',
-    });
-    setTab('login');
-    setIsLoading(false);
-  }, [email, password, name, setTab]);
+    navigate('/check-email', { state: { email }, replace: true });
+  }, [email, password, name, navigate]);
 
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
@@ -121,7 +117,7 @@ export default function LoginPage() {
                     <Spacer />
                     <PasswordInput onChange={setPassword} />
                     <Spacer />
-                    <div className="flex justify-center mt-3">
+                    <div className="flex flex-col items-center gap-2 mt-3">
                       <Button
                         color="primary"
                         isDisabled={!email || !password}
@@ -130,6 +126,12 @@ export default function LoginPage() {
                       >
                         Sign In
                       </Button>
+                      <Link
+                        to="/forgot-password"
+                        className="text-sm text-primary underline"
+                      >
+                        Forgot password?
+                      </Link>
                     </div>
                   </div>
                 </Tab>

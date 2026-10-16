@@ -8,6 +8,7 @@ import (
 	ehndl "github.com/importandrew/MaCRa/handler/event"
 	phndl "github.com/importandrew/MaCRa/handler/player"
 	"github.com/importandrew/MaCRa/logger"
+	"github.com/importandrew/MaCRa/mailer"
 	"github.com/importandrew/MaCRa/repo/database"
 	erepo "github.com/importandrew/MaCRa/repo/event"
 	grepo "github.com/importandrew/MaCRa/repo/game"
@@ -53,12 +54,13 @@ func main() {
 
 	// service
 	gameService := gsvc.NewService(gameRepo, playerRepo)
-	playerService := psvc.NewService(playerRepo)
+	mail := mailer.New(cfg.MailFrom)
+	playerService := psvc.NewService(playerRepo, mail)
 	eventService := esvc.NewService(eventRepo, gameService, playerService)
 
 	// handler
 	eventHandler := ehndl.NewHandler(eventService, gameService)
-	playerHandler := phndl.NewHandler(playerService, cfg.CookieDomain, []byte(cfg.JWTKey))
+	playerHandler := phndl.NewHandler(playerService, cfg)
 	h := handler.New(eventHandler, playerHandler, []byte(cfg.JWTKey))
 
 	// server

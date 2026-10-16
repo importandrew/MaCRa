@@ -28,6 +28,10 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 		auth.POST("/signup", h.player.SignUp)
 		auth.POST("/login", h.player.Login)
 		auth.POST("/logout", h.player.Logout)
+		auth.POST("/verify-email", h.player.VerifyEmail)
+		auth.POST("/resend-verification", h.player.ResendVerification)
+		auth.POST("/forgot-password", h.player.ForgotPassword)
+		auth.POST("/reset-password", h.player.ResetPassword)
 	}
 
 	// main api

@@ -70,7 +70,7 @@ func TestAdd(t *testing.T) {
 			mockRepo := NewMockPlayerRepo(t)
 			testCase.mockSetup(mockRepo, testCase.email, testCase.name, "")
 
-			service := NewService(mockRepo)
+			service := NewService(mockRepo, nil)
 
 			ctx := context.Background()
 			player, err := service.Add(ctx, testCase.email, testCase.name, testCase.password)

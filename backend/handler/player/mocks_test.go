@@ -38,47 +38,37 @@ func (_m *MockPlayerService) EXPECT() *MockPlayerService_Expecter {
 	return &MockPlayerService_Expecter{mock: &_m.Mock}
 }
 
-// Add provides a mock function for the type MockPlayerService
-func (_mock *MockPlayerService) Add(ctx context.Context, email string, name string, password string) (models.Player, error) {
-	ret := _mock.Called(ctx, email, name, password)
+// ForgotPassword provides a mock function for the type MockPlayerService
+func (_mock *MockPlayerService) ForgotPassword(ctx context.Context, email string, origin string) error {
+	ret := _mock.Called(ctx, email, origin)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Add")
+		panic("no return value specified for ForgotPassword")
 	}
 
-	var r0 models.Player
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) (models.Player, error)); ok {
-		return returnFunc(ctx, email, name, password)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) models.Player); ok {
-		r0 = returnFunc(ctx, email, name, password)
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = returnFunc(ctx, email, origin)
 	} else {
-		r0 = ret.Get(0).(models.Player)
+		r0 = ret.Error(0)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = returnFunc(ctx, email, name, password)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
+	return r0
 }
 
-// MockPlayerService_Add_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Add'
-type MockPlayerService_Add_Call struct {
+// MockPlayerService_ForgotPassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ForgotPassword'
+type MockPlayerService_ForgotPassword_Call struct {
 	*mock.Call
 }
 
-// Add is a helper method to define mock.On call
+// ForgotPassword is a helper method to define mock.On call
 //   - ctx context.Context
 //   - email string
-//   - name string
-//   - password string
-func (_e *MockPlayerService_Expecter) Add(ctx interface{}, email interface{}, name interface{}, password interface{}) *MockPlayerService_Add_Call {
-	return &MockPlayerService_Add_Call{Call: _e.mock.On("Add", ctx, email, name, password)}
+//   - origin string
+func (_e *MockPlayerService_Expecter) ForgotPassword(ctx interface{}, email interface{}, origin interface{}) *MockPlayerService_ForgotPassword_Call {
+	return &MockPlayerService_ForgotPassword_Call{Call: _e.mock.On("ForgotPassword", ctx, email, origin)}
 }
 
-func (_c *MockPlayerService_Add_Call) Run(run func(ctx context.Context, email string, name string, password string)) *MockPlayerService_Add_Call {
+func (_c *MockPlayerService_ForgotPassword_Call) Run(run func(ctx context.Context, email string, origin string)) *MockPlayerService_ForgotPassword_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -92,26 +82,21 @@ func (_c *MockPlayerService_Add_Call) Run(run func(ctx context.Context, email st
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 string
-		if args[3] != nil {
-			arg3 = args[3].(string)
-		}
 		run(
 			arg0,
 			arg1,
 			arg2,
-			arg3,
 		)
 	})
 	return _c
 }
 
-func (_c *MockPlayerService_Add_Call) Return(player models.Player, err error) *MockPlayerService_Add_Call {
-	_c.Call.Return(player, err)
+func (_c *MockPlayerService_ForgotPassword_Call) Return(err error) *MockPlayerService_ForgotPassword_Call {
+	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *MockPlayerService_Add_Call) RunAndReturn(run func(ctx context.Context, email string, name string, password string) (models.Player, error)) *MockPlayerService_Add_Call {
+func (_c *MockPlayerService_ForgotPassword_Call) RunAndReturn(run func(ctx context.Context, email string, origin string) error) *MockPlayerService_ForgotPassword_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -328,6 +313,207 @@ func (_c *MockPlayerService_Login_Call) RunAndReturn(run func(ctx context.Contex
 	return _c
 }
 
+// ResendVerification provides a mock function for the type MockPlayerService
+func (_mock *MockPlayerService) ResendVerification(ctx context.Context, email string, origin string) error {
+	ret := _mock.Called(ctx, email, origin)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResendVerification")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = returnFunc(ctx, email, origin)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerService_ResendVerification_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResendVerification'
+type MockPlayerService_ResendVerification_Call struct {
+	*mock.Call
+}
+
+// ResendVerification is a helper method to define mock.On call
+//   - ctx context.Context
+//   - email string
+//   - origin string
+func (_e *MockPlayerService_Expecter) ResendVerification(ctx interface{}, email interface{}, origin interface{}) *MockPlayerService_ResendVerification_Call {
+	return &MockPlayerService_ResendVerification_Call{Call: _e.mock.On("ResendVerification", ctx, email, origin)}
+}
+
+func (_c *MockPlayerService_ResendVerification_Call) Run(run func(ctx context.Context, email string, origin string)) *MockPlayerService_ResendVerification_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerService_ResendVerification_Call) Return(err error) *MockPlayerService_ResendVerification_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerService_ResendVerification_Call) RunAndReturn(run func(ctx context.Context, email string, origin string) error) *MockPlayerService_ResendVerification_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ResetPassword provides a mock function for the type MockPlayerService
+func (_mock *MockPlayerService) ResetPassword(ctx context.Context, token string, password string) error {
+	ret := _mock.Called(ctx, token, password)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResetPassword")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = returnFunc(ctx, token, password)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerService_ResetPassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResetPassword'
+type MockPlayerService_ResetPassword_Call struct {
+	*mock.Call
+}
+
+// ResetPassword is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+//   - password string
+func (_e *MockPlayerService_Expecter) ResetPassword(ctx interface{}, token interface{}, password interface{}) *MockPlayerService_ResetPassword_Call {
+	return &MockPlayerService_ResetPassword_Call{Call: _e.mock.On("ResetPassword", ctx, token, password)}
+}
+
+func (_c *MockPlayerService_ResetPassword_Call) Run(run func(ctx context.Context, token string, password string)) *MockPlayerService_ResetPassword_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerService_ResetPassword_Call) Return(err error) *MockPlayerService_ResetPassword_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerService_ResetPassword_Call) RunAndReturn(run func(ctx context.Context, token string, password string) error) *MockPlayerService_ResetPassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SignUp provides a mock function for the type MockPlayerService
+func (_mock *MockPlayerService) SignUp(ctx context.Context, email string, name string, password string, origin string) error {
+	ret := _mock.Called(ctx, email, name, password, origin)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SignUp")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string, string) error); ok {
+		r0 = returnFunc(ctx, email, name, password, origin)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerService_SignUp_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SignUp'
+type MockPlayerService_SignUp_Call struct {
+	*mock.Call
+}
+
+// SignUp is a helper method to define mock.On call
+//   - ctx context.Context
+//   - email string
+//   - name string
+//   - password string
+//   - origin string
+func (_e *MockPlayerService_Expecter) SignUp(ctx interface{}, email interface{}, name interface{}, password interface{}, origin interface{}) *MockPlayerService_SignUp_Call {
+	return &MockPlayerService_SignUp_Call{Call: _e.mock.On("SignUp", ctx, email, name, password, origin)}
+}
+
+func (_c *MockPlayerService_SignUp_Call) Run(run func(ctx context.Context, email string, name string, password string, origin string)) *MockPlayerService_SignUp_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerService_SignUp_Call) Return(err error) *MockPlayerService_SignUp_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerService_SignUp_Call) RunAndReturn(run func(ctx context.Context, email string, name string, password string, origin string) error) *MockPlayerService_SignUp_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Update provides a mock function for the type MockPlayerService
 func (_mock *MockPlayerService) Update(ctx context.Context, id int, name string) error {
 	ret := _mock.Called(ctx, id, name)
@@ -387,6 +573,63 @@ func (_c *MockPlayerService_Update_Call) Return(err error) *MockPlayerService_Up
 }
 
 func (_c *MockPlayerService_Update_Call) RunAndReturn(run func(ctx context.Context, id int, name string) error) *MockPlayerService_Update_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// VerifyEmail provides a mock function for the type MockPlayerService
+func (_mock *MockPlayerService) VerifyEmail(ctx context.Context, token string) error {
+	ret := _mock.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VerifyEmail")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = returnFunc(ctx, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerService_VerifyEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'VerifyEmail'
+type MockPlayerService_VerifyEmail_Call struct {
+	*mock.Call
+}
+
+// VerifyEmail is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+func (_e *MockPlayerService_Expecter) VerifyEmail(ctx interface{}, token interface{}) *MockPlayerService_VerifyEmail_Call {
+	return &MockPlayerService_VerifyEmail_Call{Call: _e.mock.On("VerifyEmail", ctx, token)}
+}
+
+func (_c *MockPlayerService_VerifyEmail_Call) Run(run func(ctx context.Context, token string)) *MockPlayerService_VerifyEmail_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerService_VerifyEmail_Call) Return(err error) *MockPlayerService_VerifyEmail_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerService_VerifyEmail_Call) RunAndReturn(run func(ctx context.Context, token string) error) *MockPlayerService_VerifyEmail_Call {
 	_c.Call.Return(run)
 	return _c
 }

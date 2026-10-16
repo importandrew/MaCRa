@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -150,7 +151,7 @@ func TestHandler_List(t *testing.T) {
 			mockPlayerService := NewMockPlayerService(t)
 			testCase.mockSetup(mockPlayerService)
 
-			handler := NewHandler(mockPlayerService, "", nil)
+			handler := NewHandler(mockPlayerService, config.Config{})
 
 			req := httptest.NewRequest(http.MethodGet, "/api/player/list", nil)
 			q := req.URL.Query()

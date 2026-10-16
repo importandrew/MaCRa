@@ -16,6 +16,7 @@ type Config struct {
 	AllowOrigins []string `json:"allow_origins"` // List of origins allowed to API.
 	DBLog        bool     `json:"db_log"`        // Whether to log DB actions for debugging.
 	JWTKey       string   `json:"jwt_key"`       // Key to generate/parse JWT tokens.
+	MailFrom     string   `json:"mail_from"`     // Envelope and From address for outbound auth mail (must match Postfix/DKIM).
 }
 
 func Read(path string) (Config, error) {
@@ -36,6 +37,10 @@ func Read(path string) (Config, error) {
 func (c Config) Validate() error {
 	if c.JWTKey == "" {
 		return models.ErrJWTKeyEmpty
+	}
+
+	if c.MailFrom == "" {
+		return models.ErrMailFromEmpty
 	}
 
 	return nil
