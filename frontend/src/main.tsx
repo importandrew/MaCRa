@@ -9,10 +9,9 @@ import { EventProvider } from './providers/event/EventContext.tsx';
 
 if (process.env.NODE_ENV === 'development') {
   // DEBUG mode in Console
-} else {
+} else if (import.meta.env.VITE_HAWK_TOKEN) {
   new HawkCatcher({
-    token:
-      'REDACTED_HAWK_TOKEN',
+    token: import.meta.env.VITE_HAWK_TOKEN,
     consoleTracking: true,
     context: {},
     beforeSend: (event) => {
