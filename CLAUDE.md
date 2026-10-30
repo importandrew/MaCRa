@@ -14,6 +14,7 @@ MaCRa (Mahjong Competitive Rules assistant) tracks MCR mahjong games: live score
 - Ask the owner before changing DB migrations (`backend/repo/database/migrations/`), CI (`.github/`), or dependencies (`go.mod`/`go.sum`, `package.json`/`package-lock.json`).
 - Commit messages follow Conventional Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`, … (as in the existing history).
 - Write everything that lands in the repository or on GitHub in English: code, comments, commit messages, branch names, issues, PR titles and descriptions. This applies even when the conversation is in another language.
+- When the code you work with does the same thing in different ways (e.g. two query or error-handling styles), or uses a pattern, coupling or package worth improving, mention it in a line or two at the end of your reply. Don't fix it without being asked; keep the task's diff focused. In new code, follow the prevailing pattern and say which one you followed.
 
 `.claude/settings.json` enforces some of these rules:
 - **Permission rules** deny force pushes, `gh pr merge` and reading `.env*`, and ask before `git push` and `gh pr create`.
