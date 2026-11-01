@@ -6,19 +6,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestEnterRound(t *testing.T) {
 	testData := map[string]struct {
-		playerID  int
-		outcome   models.Outcome
-		value     int
-		winnerID  int
-		loserID   int
-		mockSetup func(*MockGameRepo, *MockPlayerRepo, int)
+		playerID    int
+		outcome     models.Outcome
+		value       int
+		winnerID    int
+		loserID     int
+		mockSetup   func(*MockGameRepo, *MockPlayerRepo, int)
 		expectedErr assert.ErrorAssertionFunc
 		checkNow    func(*testing.T, models.GameNow)
 	}{

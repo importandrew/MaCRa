@@ -6,9 +6,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/models"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestHandler_Logout(t *testing.T) {
@@ -58,7 +59,7 @@ func TestHandler_Logout(t *testing.T) {
 				assert.Equal(t, "token", auth.Name)
 				assert.Empty(t, auth.Value)
 				assert.Equal(t, -1, auth.MaxAge)
-				assert.Equal(t, "", auth.Domain)
+				assert.Empty(t, auth.Domain)
 				assert.False(t, auth.Secure)
 				assert.True(t, auth.HttpOnly)
 				assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)

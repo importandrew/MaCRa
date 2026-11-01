@@ -7,7 +7,7 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) HasCapability(ctx context.Context, eventID, callerID, gameID int, cap models.Capability) error {
+func (s *Service) HasCapability(ctx context.Context, eventID, callerID, gameID int, capability models.Capability) error {
 	event, err := s.repo.Get(ctx, eventID)
 	if err != nil {
 		return err
@@ -18,7 +18,7 @@ func (s *Service) HasCapability(ctx context.Context, eventID, callerID, gameID i
 		return err
 	}
 
-	if !authCtx.hasCapability(cap) {
+	if !authCtx.hasCapability(capability) {
 		return fmt.Errorf("user %d: %w", callerID, models.ErrEventForbidden)
 	}
 
@@ -49,9 +49,9 @@ func (s *Service) MyCapabilities(ctx context.Context, eventID, callerID, gameID 
 	}
 
 	caps := make([]models.Capability, 0, len(allCaps))
-	for _, cap := range allCaps {
-		if authCtx.hasCapability(cap) {
-			caps = append(caps, cap)
+	for _, capability := range allCaps {
+		if authCtx.hasCapability(capability) {
+			caps = append(caps, capability)
 		}
 	}
 

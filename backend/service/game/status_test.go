@@ -5,9 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestStatus(t *testing.T) {

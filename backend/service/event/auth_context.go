@@ -63,12 +63,12 @@ func (authCtx EventAuthContext) canAccessEvent() bool {
 	return authCtx.isParticipating()
 }
 
-func (authCtx EventAuthContext) hasCapability(cap models.Capability) bool {
+func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool {
 	if !authCtx.canAccessEvent() {
 		return false
 	}
 
-	switch cap {
+	switch capability {
 	case models.CapManageEvent, models.CapManageMembers:
 		return authCtx.IsOwner
 	case models.CapCreateGame:

@@ -3,8 +3,9 @@ package event
 import (
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func testEvent(typ models.EventType) models.Event {

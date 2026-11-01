@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
-	"github.com/importandrew/MaCRa/repo/database"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/importandrew/MaCRa/models"
+	"github.com/importandrew/MaCRa/repo/database"
 )
 
 func TestNewGame(t *testing.T) {

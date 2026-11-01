@@ -3,8 +3,9 @@ package player
 import (
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestNormalizeOrigin(t *testing.T) {

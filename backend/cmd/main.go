@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/spf13/pflag"
+
 	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/handler"
 	ehndl "github.com/importandrew/MaCRa/handler/event"
@@ -17,7 +19,6 @@ import (
 	esvc "github.com/importandrew/MaCRa/service/event"
 	gsvc "github.com/importandrew/MaCRa/service/game"
 	psvc "github.com/importandrew/MaCRa/service/player"
-	"github.com/spf13/pflag"
 )
 
 const (

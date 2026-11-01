@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/importandrew/MaCRa/handler/httperr"
 	"github.com/importandrew/MaCRa/handler/token"
 )

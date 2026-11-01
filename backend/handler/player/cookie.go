@@ -6,17 +6,18 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
 	authmw "github.com/importandrew/MaCRa/handler/middleware"
 	"github.com/importandrew/MaCRa/models"
 )
 
-// cookieAttrs derives Set-Cookie Domain / Secure from config and the request.
+// cookieAttrs returns the Set-Cookie Domain and Secure flag, derived from config and the request.
 // Secure follows the actual connection (TLS or X-Forwarded-Proto), not a hardcoded true.
 // Empty config → host-only cookie (not shared with sibling subdomains).
 // If configured domain host does not match the request host, Domain is left empty (host-only)
 // so LAN misconfigs like cookie_domain=localhost against mj.home still work.
-func cookieAttrs(configured, requestHost, forwardedProto string, tls bool) (domain string, secure bool) {
-	secure = tls || strings.EqualFold(forwardedProto, "https")
+func cookieAttrs(configured, requestHost, forwardedProto string, tls bool) (string, bool) {
+	secure := tls || strings.EqualFold(forwardedProto, "https")
 	if strings.HasPrefix(strings.ToLower(configured), "http://") {
 		secure = false
 	} else if strings.HasPrefix(strings.ToLower(configured), "https://") {

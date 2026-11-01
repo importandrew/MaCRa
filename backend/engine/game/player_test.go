@@ -3,8 +3,9 @@ package game
 import (
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestGame_Players(t *testing.T) {

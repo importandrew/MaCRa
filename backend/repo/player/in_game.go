@@ -3,8 +3,9 @@ package player
 import (
 	"context"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) IsInLiveGame(ctx context.Context, id int) (bool, error) {

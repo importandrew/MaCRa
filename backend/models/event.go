@@ -28,20 +28,21 @@ const (
 )
 
 type Event struct {
-	ID          int             `db:"id" json:"id"`
-	Type        EventType       `db:"type" json:"type"`
-	Name        string          `db:"name" json:"name"`
-	Description string          `db:"description" json:"description,omitempty"`
-	OwnerUserID int             `db:"owner_user_id" json:"owner_user_id"`
+	ID           int             `db:"id" json:"id"`
+	Type         EventType       `db:"type" json:"type"`
+	Name         string          `db:"name" json:"name"`
+	Description  string          `db:"description" json:"description,omitempty"`
+	OwnerUserID  int             `db:"owner_user_id" json:"owner_user_id"`
 	Visibility   EventVisibility `db:"visibility" json:"visibility"`
 	RatingsReach ContentReach    `db:"ratings_reach" json:"ratings_reach"`
 	GamesReach   ContentReach    `db:"games_reach" json:"games_reach"`
-	CreatedAt   time.Time       `db:"created_at" json:"created_at"`
-	FinishedAt  *time.Time      `db:"finished_at" json:"finished_at"`
+	CreatedAt    time.Time       `db:"created_at" json:"created_at"`
+	FinishedAt   *time.Time      `db:"finished_at" json:"finished_at"`
 }
 
 type EventListItem struct {
 	Event
+
 	IsParticipating bool        `json:"is_participating"`
 	IsOwner         bool        `json:"is_owner"`
 	Roles           []EventRole `json:"roles"`
@@ -54,10 +55,10 @@ type EventMe struct {
 }
 
 type EventCreateParams struct {
-	OwnerID     int
-	Type        EventType
-	Name        string
-	Description string
+	OwnerID      int
+	Type         EventType
+	Name         string
+	Description  string
 	Visibility   EventVisibility
 	RatingsReach *ContentReach
 	GamesReach   *ContentReach

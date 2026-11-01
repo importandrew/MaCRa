@@ -9,11 +9,12 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/importandrew/MaCRa/handler/reqctx"
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/importandrew/MaCRa/handler/reqctx"
+	"github.com/importandrew/MaCRa/models"
 )
 
 func newListGamesContext(userID, eventID int, query string) (*gin.Context, *httptest.ResponseRecorder) {

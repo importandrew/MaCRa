@@ -9,10 +9,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/importandrew/MaCRa/handler/reqctx"
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/handler/reqctx"
+	"github.com/importandrew/MaCRa/models"
 )
 
 func newNowTestContext(userID, eventID int) (*gin.Context, *httptest.ResponseRecorder) {

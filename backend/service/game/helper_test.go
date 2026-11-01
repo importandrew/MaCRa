@@ -3,8 +3,9 @@ package game
 import (
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 const testEventID = 1

@@ -20,12 +20,12 @@ func (s *Service) SignUp(ctx context.Context, email, name, password, origin stri
 func (s *Service) ResendVerification(ctx context.Context, email, origin string) error {
 	player, err := s.repo.GetByEmail(ctx, email)
 	if err != nil {
-		return nil
+		return nil //nolint:nilerr // don't reveal whether the email is registered
 	}
 
 	verified, err := s.repo.IsEmailVerified(ctx, player.ID)
 	if err != nil || verified {
-		return nil
+		return nil //nolint:nilerr // don't reveal the account state
 	}
 
 	s.sendVerification(ctx, player.ID, email, origin)
@@ -52,7 +52,7 @@ func (s *Service) VerifyEmail(ctx context.Context, rawToken string) error {
 func (s *Service) ForgotPassword(ctx context.Context, email, origin string) error {
 	player, err := s.repo.GetByEmail(ctx, email)
 	if err != nil {
-		return nil
+		return nil //nolint:nilerr // don't reveal whether the email is registered
 	}
 
 	s.sendPasswordReset(ctx, player.ID, email, origin)
