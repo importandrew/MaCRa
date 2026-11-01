@@ -11,7 +11,7 @@ const (
 	ZeroUserID = 0 // unauthorized user, value must be less than ID of any valid user
 )
 
-// use only inside API scope (where UserIDKey value is assigned), fallback to ZeroUserID
+// use only inside API scope (where UserIDKey value is assigned), fallback to ZeroUserID.
 func GetUserID(c *gin.Context) int {
 	value, ok := c.Get(UserIDKey)
 	if !ok {

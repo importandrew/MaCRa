@@ -59,7 +59,7 @@ func TestHandler_Logout(t *testing.T) {
 				assert.Equal(t, "token", auth.Name)
 				assert.Empty(t, auth.Value)
 				assert.Equal(t, -1, auth.MaxAge)
-				assert.Equal(t, "", auth.Domain)
+				assert.Empty(t, auth.Domain)
 				assert.False(t, auth.Secure)
 				assert.True(t, auth.HttpOnly)
 				assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)

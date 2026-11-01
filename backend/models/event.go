@@ -42,6 +42,7 @@ type Event struct {
 
 type EventListItem struct {
 	Event
+
 	IsParticipating bool        `json:"is_participating"`
 	IsOwner         bool        `json:"is_owner"`
 	Roles           []EventRole `json:"roles"`

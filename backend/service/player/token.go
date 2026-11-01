@@ -11,8 +11,11 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
+// authTokenBytes is the amount of random data in an auth token (256 bits).
+const authTokenBytes = 32
+
 func generateAuthToken() string {
-	buf := make([]byte, 32)
+	buf := make([]byte, authTokenBytes)
 	_, _ = rand.Read(buf)
 	return base64.RawURLEncoding.EncodeToString(buf)
 }

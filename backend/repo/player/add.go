@@ -29,11 +29,11 @@ func (r *Repo) Add(ctx context.Context, email, name, hash string) (int, error) {
 
 	playerID, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
 	if err != nil {
-		if repo.IsTargetErr(23505, err) {
+		if repo.IsTargetErr(repo.SQLStateUniqueViolation, err) {
 			return 0, models.ErrPlayerExists
 		}
 
-		if repo.IsTargetErr(22001, err) {
+		if repo.IsTargetErr(repo.SQLStateStringTooLong, err) {
 			return 0, models.ErrLongName
 		}
 

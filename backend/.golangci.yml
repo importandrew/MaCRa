@@ -492,4 +492,5 @@ linters:
           - goconst
           - gosec
           - noctx
+          - unparam
           - wrapcheck

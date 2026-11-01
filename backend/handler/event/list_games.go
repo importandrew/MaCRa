@@ -21,12 +21,12 @@ func (h Handler) ListGames(c *gin.Context) {
 		return
 	}
 
-	cap := models.CapWatchResults
+	capability := models.CapWatchResults
 	if status == models.GameLive {
-		cap = models.CapWatchLive
+		capability = models.CapWatchLive
 	}
 
-	if err := h.event.HasCapability(c.Request.Context(), eventID, userID, 0, cap); err != nil {
+	if err := h.event.HasCapability(c.Request.Context(), eventID, userID, 0, capability); err != nil {
 		httperr.Error(c, err)
 		return
 	}

@@ -7,7 +7,7 @@ const (
 	CapManageMembers Capability = "manage_members"
 	CapCreateGame    Capability = "create_game"
 	// CapPlayGame      Capability = "play_game"
-	// CapEnterRound   Capability = "enter_round"
+	// CapEnterRound   Capability = "enter_round".
 	CapAbortGame    Capability = "abort_game"
 	CapFinishGame   Capability = "finish_game"
 	CapUndoRound    Capability = "undo_round"
