@@ -129,8 +129,8 @@ export default function EventLayout() {
       >
         <div className="relative flex flex-col w-full max-w-full min-h-full min-w-0 overflow-x-hidden">
           <ContextMenuButton
-            onPress={() => setIsDrawerOpen(true)}
-            className="fixed bottom-4 right-4 z-100"
+            onPress={() => setIsDrawerOpen((isOpen) => !isOpen)}
+            className="fixed bottom-4 right-4"
           />
           <SideMenu isOpen={isDrawerOpen} onOpenChange={closeDrawer}>
             <DrawerHeader className="flex flex-col gap-1">

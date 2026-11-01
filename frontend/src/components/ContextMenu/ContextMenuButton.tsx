@@ -2,9 +2,11 @@ import { Button } from '@heroui/react';
 import { useCallback } from 'react';
 import { BarsIcon } from '../Icons/BarsIcon';
 
+// ContextMenuButton is layered above SideMenu (z-40) and below modals and
+// dropdowns (z-50). className sets only its position.
 export default function ContextMenuButton({
   onPress,
-  className = 'absolute z-100',
+  className = 'absolute',
 }: {
   onPress: () => void;
   className?: string;
@@ -20,7 +22,7 @@ export default function ContextMenuButton({
       size="lg"
       isIconOnly
       onPress={handleOnPress}
-      className={className}
+      className={`z-45 ${className}`}
     >
       <BarsIcon className="text-gray-400" />
     </Button>
