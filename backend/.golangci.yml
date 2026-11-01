@@ -337,6 +337,12 @@ linters:
         # https://github.com/godoc-lint/godoc-lint?tab=readme-ov-file#no-unused-link
         - no-unused-link
 
+    godot:
+      # Skip commented-out declarations like `// CapPlayGame Capability = "play_game"`:
+      # they are code, not sentences, so they need no period.
+      exclude:
+        - '^\s*[A-Za-z_]\w*\s+[A-Za-z_][\w.]*\s*=\s*\S'
+
     govet:
       # Enable all analyzers.
       # Default: false
