@@ -6,9 +6,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/models"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestHandler_Logout(t *testing.T) {

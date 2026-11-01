@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 // Finalize stores players' scores and sets game status to finished.

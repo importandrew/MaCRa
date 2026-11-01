@@ -5,8 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) DeleteLastRound(ctx context.Context, gameID int) error {

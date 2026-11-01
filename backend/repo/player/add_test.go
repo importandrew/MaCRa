@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/importandrew/MaCRa/repo/database"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/importandrew/MaCRa/repo/database"
 )
 
 func TestAdd(t *testing.T) {

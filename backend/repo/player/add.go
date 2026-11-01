@@ -3,9 +3,10 @@ package player
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/importandrew/MaCRa/models"
 	"github.com/importandrew/MaCRa/repo"
-	"github.com/jackc/pgx/v5"
 )
 
 func (r *Repo) Add(ctx context.Context, email, name, hash string) (int, error) {

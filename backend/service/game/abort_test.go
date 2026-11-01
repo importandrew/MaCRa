@@ -5,15 +5,16 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestAbort(t *testing.T) {
 	testData := map[string]struct {
-		gameID    int
-		mockSetup func(*MockGameRepo, int)
+		gameID      int
+		mockSetup   func(*MockGameRepo, int)
 		expectedErr assert.ErrorAssertionFunc
 	}{
 		"ok": {

@@ -6,10 +6,11 @@ import (
 	"os"
 	"testing"
 
-	logger "github.com/importandrew/MaCRa/logger"
 	pgxlogrus "github.com/jackc/pgx-logrus"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/tracelog"
+
+	logger "github.com/importandrew/MaCRa/logger"
 )
 
 const defaultDBURLEnv = "PSQL_MACRA"

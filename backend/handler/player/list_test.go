@@ -8,10 +8,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/importandrew/MaCRa/config"
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/config"
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestHandler_List(t *testing.T) {

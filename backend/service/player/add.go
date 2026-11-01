@@ -3,8 +3,9 @@ package player
 import (
 	"context"
 
-	"github.com/importandrew/MaCRa/models"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (s *Service) Add(ctx context.Context, email, name, password string) (models.Player, error) {

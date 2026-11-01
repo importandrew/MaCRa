@@ -3,8 +3,9 @@ package event
 import (
 	"context"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) AddMemberRoles(ctx context.Context, eventID, userID int, roles []models.EventRole) error {

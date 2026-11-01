@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) Get(ctx context.Context, id int) (models.Player, error) {

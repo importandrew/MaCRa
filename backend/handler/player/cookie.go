@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
 	authmw "github.com/importandrew/MaCRa/handler/middleware"
 	"github.com/importandrew/MaCRa/models"
 )

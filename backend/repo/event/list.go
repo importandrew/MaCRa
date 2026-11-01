@@ -3,8 +3,9 @@ package event
 import (
 	"context"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) List(ctx context.Context) ([]models.Event, error) {
