@@ -1,0 +1,69 @@
+name: Backend Checks
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    name: Run golangci-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.15.0
+          working-directory: backend
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: macra
+          POSTGRES_PASSWORD: macra
+          POSTGRES_DB: macra_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U macra -d macra_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Throwaway database of the CI service container; repo tests wipe it.
+      PSQL_MACRA_TEST: postgres://macra:macra@localhost:5432/macra_test?sslmode=disable
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      # -p 1: repo test packages share one database and migrate it up and
+      # down around every test, so running them in parallel deadlocks.
+      - name: Run tests
+        working-directory: backend
+        run: go test -count=1 -p 1 ./...
