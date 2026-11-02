@@ -20,7 +20,11 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     getStoredEventId()
   );
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // Starts as true when the effect below will load the stored event, so the
+  // first render doesn't show the "no event" state for a moment.
+  const [isLoading, setIsLoading] = useState(
+    () => isAuthenticated && getStoredEventId() != null
+  );
 
   const clearEvent = useCallback(() => {
     clearStoredEventId();
