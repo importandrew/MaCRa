@@ -43,13 +43,7 @@ const ROLE_META: Record<
   },
 };
 
-function MetaItem({
-  icon,
-  label,
-}: {
-  icon: ReactNode;
-  label: string;
-}) {
+function MetaItem({ icon, label }: { icon: ReactNode; label: string }) {
   return (
     <span
       className="inline-flex shrink-0"
@@ -91,10 +85,7 @@ function EventCardMeta({ event }: { event: Event }) {
         label={event.type === 'tournament' ? 'Tournament' : 'Regular'}
       />
       {event.is_owner && (
-        <MetaItem
-          icon={<CrownIcon className={iconClass} />}
-          label="Owner"
-        />
+        <MetaItem icon={<CrownIcon className={iconClass} />} label="Owner" />
       )}
       {orderedRoles.map((role) => {
         const meta = ROLE_META[role];
@@ -136,8 +127,8 @@ export default function EventsList() {
       <div className="relative flex flex-col w-full max-w-full px-3 py-6 gap-4 min-w-0 overflow-x-hidden items-stretch">
         <div className="flex flex-col w-full max-w-[600px] mx-auto gap-4 min-w-0">
           <ContextMenuButton
-            onPress={() => setIsDrawerOpen(true)}
-            className="fixed bottom-4 right-4 z-100"
+            onPress={() => setIsDrawerOpen((isOpen) => !isOpen)}
+            className="fixed bottom-4 right-4"
           />
 
           <SideMenu isOpen={isDrawerOpen} onOpenChange={closeDrawer}>
@@ -184,9 +175,7 @@ export default function EventsList() {
                     <CardBody className="pt-0">
                       <p
                         className={`text-sm truncate ${
-                          isFinished
-                            ? 'text-default-400'
-                            : 'text-default-600'
+                          isFinished ? 'text-default-400' : 'text-default-600'
                         }`}
                       >
                         {event.description}
