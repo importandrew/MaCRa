@@ -3,10 +3,5 @@ export interface MainButtonProps {
   link?: string;
   onPress?: () => void;
   color?:
-    | 'primary'
-    | 'default'
-    | 'secondary'
-    | 'success'
-    | 'warning'
-    | 'danger';
+    'primary' | 'default' | 'secondary' | 'success' | 'warning' | 'danger';
 }

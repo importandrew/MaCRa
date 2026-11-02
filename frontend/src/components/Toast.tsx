@@ -1,12 +1,7 @@
 import { addToast } from '@heroui/react';
 
 type ToastColor =
-  | 'default'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning'
-  | 'danger';
+  'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
 
 interface ShowToastParams {
   title: string;

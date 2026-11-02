@@ -8,12 +8,7 @@ import {
 } from '@heroui/react';
 
 type ButtonColor =
-  | 'default'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning'
-  | 'danger';
+  'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
 
 export interface ConfirmProps {
   isOpen: boolean;
