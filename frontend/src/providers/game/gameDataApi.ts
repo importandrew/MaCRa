@@ -52,6 +52,7 @@ export const useFetchPlayerGamesHistory = (playerId: number) => {
     }
 
     startLoading();
+    setIsError(false);
 
     const request = GetRequest(
       eventPath(eventId, `/player/${playerId}/game-history`)
@@ -145,6 +146,7 @@ export const useFetchGameData = () => {
     }
 
     startLoading();
+    setIsError(false);
 
     const gameDataRequest = GetRequest(eventPath(eventId, '/now'));
     const data = await authFetch<GameData>(gameDataRequest);
