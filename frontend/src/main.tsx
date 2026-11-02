@@ -7,7 +7,7 @@ import './index.css';
 import { AuthProvider } from './providers/auth/AuthContext.tsx';
 import { EventProvider } from './providers/event/EventContext.tsx';
 
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   // DEBUG mode in Console
 } else if (import.meta.env.VITE_HAWK_TOKEN) {
   new HawkCatcher({

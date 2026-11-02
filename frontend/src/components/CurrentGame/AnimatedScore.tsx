@@ -18,7 +18,7 @@ export default function AnimatedScore({
 
   const [displayScore, setDisplayScore] = useState(currentScore);
   const [animationClass, setAnimationClass] = useState('');
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const animationDuration = 2000; // 2 seconds
