@@ -62,6 +62,8 @@ jobs:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
 
+      # -p 1: repo test packages share one database and migrate it up and
+      # down around every test, so running them in parallel deadlocks.
       - name: Run tests
         working-directory: backend
-        run: go test -count=1 ./...
+        run: go test -count=1 -p 1 ./...

@@ -250,7 +250,7 @@ linters:
       # Default: [ switch ]
       check:
         - switch
-        - map
+        - mapliteral
 
       default-signifies-exhaustive: true
 
@@ -348,7 +348,7 @@ linters:
         - fieldalignment # too strict
         - shadow
       # Settings per analyzer.
-      settings:
+      # settings:
         # shadow:
         #   # Whether to be strict about shadowing; can be noisy.
         #   # Default: false
