@@ -1,5 +1,4 @@
 import { Button } from '@heroui/react';
-import { LinkButton } from '../LinkButton';
 import { useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
@@ -94,9 +93,6 @@ export default function GameResult() {
                 Play Again
               </Button>
             )}
-            <LinkButton to="/" variant="secondary" fullWidth>
-              Home
-            </LinkButton>
           </div>
           {isLogsVisible && (
             <LogsMenu
