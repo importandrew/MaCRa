@@ -12,7 +12,6 @@ import { WIND_LABELS, WIND_SYMBOLS } from '../../utils/constants';
 import { shuffleArray } from '../../utils/shuffleArray';
 import { authFetch, PostRequest, eventPath } from '../Request';
 import PlayerSelector from './PlayerSelector';
-import { buttonTint } from '../buttonTint';
 
 export default function Draft() {
   const navigate = useNavigate();
@@ -156,17 +155,11 @@ export default function Draft() {
                 <Button variant="tertiary" type="button" onPress={onClear}>
                   Clear
                 </Button>
-                <Button
-                  variant="secondary"
-                  className={buttonTint('secondary')}
-                  type="button"
-                  onPress={onShuffle}
-                >
+                <Button variant="secondary" type="button" onPress={onShuffle}>
                   Shuffle
                 </Button>
                 <Button
-                  variant="secondary"
-                  className={buttonTint('accent')}
+                  variant="primary"
                   type="submit"
                   isDisabled={
                     players.length !== 4 || selectedKeys.some((key) => !key)

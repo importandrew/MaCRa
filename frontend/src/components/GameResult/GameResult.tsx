@@ -10,7 +10,6 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import LogsMenu from '../CurrentGame/Menu/LogsMenu';
 import GameLogs from './GameLogs';
 import GameResultTable from './GameResultTable';
-import { buttonTint } from '../buttonTint';
 
 export default function GameResult() {
   const navigate = useNavigate();
@@ -80,8 +79,7 @@ export default function GameResult() {
             <Button
               type="button"
               onPress={showLogs}
-              variant="secondary"
-              className={buttonTint('secondary')}
+              variant="tertiary"
               fullWidth
             >
               {isLogsVisible ? 'Hide logs' : 'Show logs'}
@@ -90,19 +88,13 @@ export default function GameResult() {
               <Button
                 type="button"
                 onPress={playAgain}
-                variant="secondary"
-                className={buttonTint('success')}
+                variant="primary"
                 fullWidth
               >
                 Play Again
               </Button>
             )}
-            <LinkButton
-              to="/"
-              variant="secondary"
-              className={buttonTint('accent')}
-              fullWidth
-            >
+            <LinkButton to="/" variant="secondary" fullWidth>
               Home
             </LinkButton>
           </div>

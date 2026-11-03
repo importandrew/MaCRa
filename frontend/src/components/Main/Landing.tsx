@@ -114,10 +114,14 @@ export default function Landing() {
               <MainButton text="New game" link="/new" />
             )}
             {data?.has_last && (
-              <MainButton text="Last game" tint="secondary" link="/last" />
+              <MainButton text="Last game" variant="secondary" link="/last" />
             )}
             {data?.has_last && (
-              <MainButton text="Played games" tint="default" link="/history" />
+              <MainButton
+                text="Played games"
+                variant="tertiary"
+                link="/history"
+              />
             )}
           </>
         )}

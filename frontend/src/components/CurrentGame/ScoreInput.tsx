@@ -23,7 +23,6 @@ import {
 import { OUTCOME_LABELS } from '../../utils/constants';
 import { authFetch, PostRequest, eventPath } from '../Request';
 import { getStoredEventId } from '../../providers/event/eventConstants';
-import { buttonTint } from '../buttonTint';
 
 // PlayerSelect is a compact player dropdown. The round form sits in the
 // middle cell of the table, which is too narrow for one button per player.
@@ -154,7 +153,7 @@ export default function ScroreInput({
       <Button
         size="lg"
         variant="secondary"
-        className={`p-4 h-16 text-5xl ${buttonTint('accent')}`}
+        className="p-4 h-16 text-5xl"
         type="button"
         onPress={() => toggleForm()}
       >
@@ -238,8 +237,7 @@ export default function ScroreInput({
           <div className="flex justify-center">
             <Button
               type="submit"
-              variant="secondary"
-              className={buttonTint('accent')}
+              variant="primary"
               isDisabled={!isComplete}
               isPending={isLoading}
             >
