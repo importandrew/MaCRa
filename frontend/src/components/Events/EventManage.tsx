@@ -360,11 +360,13 @@ export default function EventManage() {
                 ) : !members?.length ? (
                   <p className="text-sm text-muted">No members yet</p>
                 ) : (
-                  // One grid for all rows (rows use subgrid), so the roles and the
-                  // action column line up like the table columns did in v2.
+                  // One grid for all rows (rows use subgrid), like the v2 table:
+                  // name + roles in the first column, the action in the second,
+                  // so the action column lines up and names use all the room
+                  // their roles leave.
                   <ul
                     aria-label="Event members"
-                    className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3"
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3"
                   >
                     {members.map((member) => {
                       const isOwner = member.user_id === event.owner_user_id;
@@ -372,29 +374,30 @@ export default function EventManage() {
                       return (
                         <li
                           key={member.user_id}
-                          className="col-span-3 grid grid-cols-subgrid items-center px-2 py-2 border-b border-separator text-foreground last:border-b-0"
+                          className="col-span-2 grid grid-cols-subgrid items-center px-2 py-2 border-b border-separator text-foreground last:border-b-0"
                         >
-                          <span className="min-w-0 truncate">
-                            {member.name}
-                          </span>
-                          {/* A fixed slot per role, so each role stays in its own column. */}
-                          <div className="flex items-center gap-2 text-muted">
-                            {ALL_ROLES.map((role) => {
-                              const meta = ROLE_META[role];
-                              return member.roles.includes(role) ? (
-                                <span
-                                  key={role}
-                                  className="inline-flex w-6 shrink-0"
-                                  title={meta.label}
-                                  aria-label={meta.label}
-                                  role="img"
-                                >
-                                  {meta.icon({ className: 'w-6 h-6' })}
-                                </span>
-                              ) : (
-                                <span key={role} className="w-6 shrink-0" />
-                              );
-                            })}
+                          <div className="flex min-w-0 items-center justify-between gap-2">
+                            <span className="min-w-0 truncate">
+                              {member.name}
+                            </span>
+                            <div className="flex shrink-0 items-center gap-2 text-muted">
+                              {ALL_ROLES.filter((role) =>
+                                member.roles.includes(role)
+                              ).map((role) => {
+                                const meta = ROLE_META[role];
+                                return (
+                                  <span
+                                    key={role}
+                                    className="inline-flex shrink-0"
+                                    title={meta.label}
+                                    aria-label={meta.label}
+                                    role="img"
+                                  >
+                                    {meta.icon({ className: 'w-6 h-6' })}
+                                  </span>
+                                );
+                              })}
+                            </div>
                           </div>
                           <div className="flex justify-center whitespace-nowrap">
                             {isOwner ? (
