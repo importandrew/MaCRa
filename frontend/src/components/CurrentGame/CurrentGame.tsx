@@ -59,6 +59,9 @@ export default function CurrentGame() {
       closeContextMenuOpen();
       refetch();
     }
+    // Run only when finedPlayerId or data change. With isContextMenuOpen in the
+    // deps, opening the ≡ menu (finedPlayerId === null) would close it at once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finedPlayerId, data]);
 
   // Update currentScores when roundData changes, and save previous scores

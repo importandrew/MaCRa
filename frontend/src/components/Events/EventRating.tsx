@@ -69,15 +69,14 @@ export default function EventRating() {
     ratingsForbidden ||
     (!layoutLoading && !!event && !canViewRatings);
 
-  const ratings = data?.ratings ?? [];
-
   const sortedRatings = useMemo(() => {
+    const ratings = data?.ratings ?? [];
     const column = (sortDescriptor.column as RatingColumn) || 'rank';
     const direction = sortDescriptor.direction === 'descending' ? -1 : 1;
     return [...ratings].sort(
       (a, b) => compareRatings(a, b, column) * direction
     );
-  }, [ratings, sortDescriptor]);
+  }, [data, sortDescriptor]);
 
   return (
     <LoadingTemplate

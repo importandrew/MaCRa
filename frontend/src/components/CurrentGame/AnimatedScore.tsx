@@ -92,6 +92,9 @@ export default function AnimatedScore({
     return () => {
       cleanup();
     };
+    // Animate only when currentScore changes; previousScore is read as the
+    // starting value, and a change to it alone must not restart the animation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentScore]);
 
   return (

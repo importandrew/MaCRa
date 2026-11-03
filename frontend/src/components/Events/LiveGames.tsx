@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useFetchEventGames } from '../../providers/event/eventApi';
 import { useEventLayout } from '../../providers/event/eventLayoutContext';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
-import { EventGamesList, useEventGamesNavigate } from './EventGamesList';
+import { useEventGamesNavigate } from '../../providers/event/useEventGamesNavigate';
+import { EventGamesList } from './EventGamesList';
 
 export default function LiveGames() {
   const navigate = useNavigate();
