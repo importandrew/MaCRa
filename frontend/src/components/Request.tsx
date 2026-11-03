@@ -57,11 +57,12 @@ async function fetchWithStatus<T>(
     const data = JSON.parse((await response.text()) || '{}');
     return { data, status: response.status };
   } catch (error) {
-    isToastEnabled &&
+    if (isToastEnabled) {
       showToast({
         title: `Error: ${error}`,
         color: 'danger',
       });
+    }
     return { data: null, status: 0 };
   }
 }
@@ -95,11 +96,12 @@ async function globalBatchFetch<T>(
     );
     return data;
   } catch (error) {
-    isToastEnabled &&
+    if (isToastEnabled) {
       showToast({
         title: `Error: ${error}`,
         color: 'danger',
       });
+    }
     return null;
   }
 }
