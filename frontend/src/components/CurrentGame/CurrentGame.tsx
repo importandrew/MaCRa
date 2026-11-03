@@ -12,6 +12,37 @@ import TableMenu from './Menu/TableMenu';
 import './CurrentGame.css';
 import ScroreInput from './ScoreInput';
 
+function DeltaArrowsIcon() {
+  return (
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M7 20V7M3.5 10.5 7 6l3.5 4.5" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M17 4v13m-3.5-3.5L17 18l3.5-4.5" stroke="#dc2626" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+type DeltaButtonProps = {
+  playerId: number;
+  playerName: string;
+  onOpen: (id: number) => void;
+};
+
+function DeltaButton({ playerId, playerName, onOpen }: DeltaButtonProps) {
+  return (
+    <Button
+      isIconOnly
+      size="sm"
+      radius="full"
+      variant="light"
+      aria-label={`Show position thresholds for ${playerName}`}
+      onPress={() => onOpen(playerId)}
+      className="min-w-7 w-7 h-7"
+    >
+      <DeltaArrowsIcon />
+    </Button>
+  );
+}
+
 export default function CurrentGame() {
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
@@ -64,7 +95,6 @@ export default function CurrentGame() {
   };
   const closeDelta = () => {
     setIsDeltaOpen(false);
-    setDeltaPlayerId(null);
   };
 
   return (
@@ -88,10 +118,7 @@ export default function CurrentGame() {
                     <AnimatedScore previousScores={previousScores} currentScores={currentScores}
                       playerId={roundData.opp.id} />
                   </span>
-                  <Button isIconOnly size="sm" radius="full" variant="light"
-                    aria-label={`Показать дельты игрока ${roundData.opp.name}`}
-                    onPress={() => openDelta(roundData.opp.id)}
-                    className="min-w-7 w-7 h-7 text-base text-default-500">Δ×</Button>
+                  <DeltaButton playerId={roundData.opp.id} playerName={roundData.opp.name} onOpen={openDelta} />
                 </div>
               </div>
             </div>
@@ -111,10 +138,7 @@ export default function CurrentGame() {
                     <AnimatedScore previousScores={previousScores} currentScores={currentScores}
                       playerId={roundData.left.id} />
                   </span>
-                  <Button isIconOnly size="sm" radius="full" variant="light"
-                    aria-label={`Показать дельты игрока ${roundData.left.name}`}
-                    onPress={() => openDelta(roundData.left.id)}
-                    className="min-w-7 w-7 h-7 text-base text-default-500">Δ×</Button>
+                  <DeltaButton playerId={roundData.left.id} playerName={roundData.left.name} onOpen={openDelta} />
                 </div>
               </div>
             </div>
@@ -135,10 +159,7 @@ export default function CurrentGame() {
                     <AnimatedScore previousScores={previousScores} currentScores={currentScores}
                       playerId={roundData.right.id} />
                   </span>
-                  <Button isIconOnly size="sm" radius="full" variant="light"
-                    aria-label={`Показать дельты игрока ${roundData.right.name}`}
-                    onPress={() => openDelta(roundData.right.id)}
-                    className="min-w-7 w-7 h-7 text-base text-default-500">Δ×</Button>
+                  <DeltaButton playerId={roundData.right.id} playerName={roundData.right.name} onOpen={openDelta} />
                 </div>
               </div>
             </div>
@@ -163,10 +184,7 @@ export default function CurrentGame() {
                     <AnimatedScore previousScores={previousScores} currentScores={currentScores}
                       playerId={roundData.me.id} />
                   </span>
-                  <Button isIconOnly size="sm" radius="full" variant="light"
-                    aria-label={`Показать дельты игрока ${roundData.me.name}`}
-                    onPress={() => openDelta(roundData.me.id)}
-                    className="min-w-7 w-7 h-7 text-base text-default-500">Δ×</Button>
+                  <DeltaButton playerId={roundData.me.id} playerName={roundData.me.name} onOpen={openDelta} />
                 </div>
               </div>
             </div>
