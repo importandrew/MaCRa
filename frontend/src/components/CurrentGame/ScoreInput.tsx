@@ -1,4 +1,15 @@
-import { Button, Form, Input, Select, SelectItem } from '@heroui/react';
+import {
+  Button,
+  FieldError,
+  Form,
+  Label,
+  Input,
+  Spinner,
+  ToggleButton,
+  TextField,
+  ToggleButtonGroup,
+  type Key,
+} from '@heroui/react';
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -78,139 +89,147 @@ export default function ScroreInput({
     setIsLoading(false);
   };
 
+  const isWinOutcome = outcome === Outcome.Self || outcome === Outcome.Deal;
+  const isHandTooLow = score > 0 && score < 8;
+  const isComplete =
+    outcome === Outcome.Draw ||
+    (outcome === Outcome.Self && winner !== '' && score >= 8) ||
+    (outcome === Outcome.Deal && winner !== '' && loser !== '' && score >= 8);
+
+  // firstKey returns the selected key of a single-selection group, or ''.
+  const firstKey = (keys: Set<Key>) => String([...keys][0] ?? '');
+
   return (
     <div className="relative z-10 py-3 justify-self-center self-center items-center w-full text-5xl">
       <Button
         size="lg"
-        variant="flat"
-        color="primary"
+        variant="secondary"
         className="p-4 h-16 text-5xl"
         type="button"
         onPress={() => toggleForm()}
       >
         {kanji}
       </Button>
+      {/* Toggle button groups instead of selects: one tap per choice and no
+          popover on phones. */}
       <Form
         validationBehavior="native"
         onSubmit={onSubmit}
-        className={'mt-3 ' + (isHidden ? 'hidden' : '')}
+        className={'mt-3 text-base ' + (isHidden ? 'hidden' : '')}
       >
-        <div className="flex flex-col gap-3 w-full">
-          <div className="block">
-            <Select
-              label="Outcome"
-              className="w-full md:w-[300px] inline-flex"
+        <div className="flex flex-col gap-4 w-full md:w-[300px] mx-auto px-3 md:px-0 text-start">
+          <div className="flex flex-col gap-1">
+            <Label id="outcome-label">Outcome</Label>
+            <ToggleButtonGroup
+              aria-labelledby="outcome-label"
+              selectionMode="single"
+              disallowEmptySelection
+              fullWidth
               selectedKeys={outcome ? [outcome] : []}
-              onChange={(event) => {
+              onSelectionChange={(keys) => {
                 resetRoundResults();
-                setOutcome(event.target.value as Outcome);
-              }}
-              validate={(value) => {
-                return !value?.length ? 'Outcome is required' : null;
+                setOutcome(firstKey(keys) as Outcome);
               }}
             >
-              {Object.values(Outcome)
-                .map((key, index) => (
-                  <SelectItem key={key}>{OUTCOME_LABELS[index]}</SelectItem>
-                ))
-                .splice(0, 3)}
-            </Select>
+              {[Outcome.Draw, Outcome.Self, Outcome.Deal].map((key, index) => (
+                <ToggleButton key={key} id={key}>
+                  {index > 0 && <ToggleButtonGroup.Separator />}
+                  {OUTCOME_LABELS[index]}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
           </div>
-          <>
-            {outcome == Outcome.Self || outcome == Outcome.Deal ? (
-              <div>
-                <Select
-                  label="Player won"
-                  className="w-full md:w-[300px] inline-flex"
-                  selectedKeys={[winner]}
-                  onChange={(event) => setWinner(event.target.value)}
-                  validate={(value) => {
-                    return !value?.length ? 'Winner is required' : null;
-                  }}
-                >
-                  {players.map((player) => {
-                    if (player.id.toString() === loser) {
-                      return null;
-                    }
 
-                    return (
-                      <SelectItem key={String(player.id)}>
-                        {player.name}
-                      </SelectItem>
-                    );
-                  })}
-                </Select>
-              </div>
-            ) : null}
-          </>
+          {isWinOutcome && (
+            <div className="flex flex-col gap-1">
+              <Label id="winner-label">Player won</Label>
+              <ToggleButtonGroup
+                aria-labelledby="winner-label"
+                selectionMode="single"
+                disallowEmptySelection
+                isDetached
+                className="grid grid-cols-2 gap-2"
+                selectedKeys={winner ? [winner] : []}
+                onSelectionChange={(keys) => setWinner(firstKey(keys))}
+              >
+                {players.map((player) => (
+                  <ToggleButton
+                    key={player.id}
+                    id={String(player.id)}
+                    isDisabled={String(player.id) === loser}
+                    className="min-w-0"
+                  >
+                    <span className="truncate">{player.name}</span>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </div>
+          )}
 
-          <>
-            {outcome === Outcome.Deal ? (
-              <div>
-                <Select
-                  label="Player dealt"
-                  className="w-full md:w-[300px] inline-flex"
-                  selectedKeys={[loser]}
-                  onChange={(event) => setLoser(event.target.value)}
-                  validate={(value) => {
-                    return !value?.length ? 'Loser is required' : null;
-                  }}
-                >
-                  {players.map((player) => {
-                    if (player.id.toString() === winner) {
-                      return null;
-                    }
+          {outcome === Outcome.Deal && (
+            <div className="flex flex-col gap-1">
+              <Label id="loser-label">Player dealt</Label>
+              <ToggleButtonGroup
+                aria-labelledby="loser-label"
+                selectionMode="single"
+                disallowEmptySelection
+                isDetached
+                className="grid grid-cols-2 gap-2"
+                selectedKeys={loser ? [loser] : []}
+                onSelectionChange={(keys) => setLoser(firstKey(keys))}
+              >
+                {players.map((player) => (
+                  <ToggleButton
+                    key={player.id}
+                    id={String(player.id)}
+                    isDisabled={String(player.id) === winner}
+                    className="min-w-0"
+                  >
+                    <span className="truncate">{player.name}</span>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </div>
+          )}
 
-                    return (
-                      <SelectItem key={player.id}>{player.name}</SelectItem>
-                    );
-                  })}
-                </Select>
-              </div>
-            ) : null}
-          </>
+          {isWinOutcome && (
+            // A text field with a numeric keyboard, not NumberField:
+            // NumberField commits its value only on blur, so OK would still
+            // be disabled when the user taps it right after typing.
+            <TextField
+              fullWidth
+              value={score === 0 ? '' : score.toString()}
+              isInvalid={error !== ''}
+              onChange={(text) => {
+                const digits = text.replace(/\D/g, '');
+                setScore(digits ? Number(digits) : 0);
+                setError('');
+              }}
+              onBlur={() => {
+                setError(
+                  isHandTooLow ? 'Hand score should be 8 or higher' : ''
+                );
+              }}
+            >
+              <Label>Hand value</Label>
+              <Input inputMode="numeric" pattern="\d*" autoComplete="off" />
+              <FieldError>{error}</FieldError>
+            </TextField>
+          )}
 
-          <>
-            {outcome == Outcome.Self || outcome == Outcome.Deal ? (
-              <div>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  isClearable={true}
-                  isInvalid={error !== ''}
-                  onClear={() => {
-                    setScore(0);
-                    setError('');
-                  }}
-                  onBlur={() => {
-                    if (score < 8 && score > 0) {
-                      setError('Hand score should be 8 or higher');
-                    } else {
-                      setError('');
-                    }
-                  }}
-                  errorMessage={error}
-                  pattern="\d*"
-                  autoComplete="off"
-                  label="Hand value"
-                  className="w-full md:w-[300px] inline-flex"
-                  onChange={(event) => {
-                    setScore(+event.target.value);
-                  }}
-                  value={score === 0 ? '' : score.toString()}
-                />
-              </div>
-            ) : null}
-          </>
           <div className="flex justify-center">
             <Button
               type="submit"
-              variant="flat"
-              color="primary"
-              isDisabled={!outcome || (outcome !== Outcome.Draw && score === 0)}
-              isLoading={isLoading}
+              variant="primary"
+              isDisabled={!isComplete}
+              isPending={isLoading}
             >
-              OK
+              {({ isPending }) => (
+                <>
+                  {isPending && <Spinner color="current" size="sm" />}
+                  OK
+                </>
+              )}
             </Button>
           </div>
         </div>

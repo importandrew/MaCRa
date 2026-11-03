@@ -1,4 +1,5 @@
-import { Avatar, Button } from '@heroui/react';
+import { Button } from '@heroui/react';
+import UserAvatar from '../UserAvatar';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
@@ -99,14 +100,7 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {top.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={top.name}
-                  />{' '}
-                  {top.name}
+                  {top.wind} <UserAvatar name={top.name} /> {top.name}
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -121,14 +115,7 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {left.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={left.name}
-                  />{' '}
-                  {left.name}
+                  {left.wind} <UserAvatar name={left.name} /> {left.name}
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -146,9 +133,9 @@ export default function Live() {
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    variant="flat"
-                    color="default"
+                    variant="tertiary"
                     type="button"
+                    aria-label="Rotate clockwise"
                     onPress={rotateClockwise}
                     className="text-xl"
                   >
@@ -156,9 +143,9 @@ export default function Live() {
                   </Button>
                   <Button
                     size="sm"
-                    variant="flat"
-                    color="default"
+                    variant="tertiary"
                     type="button"
+                    aria-label="Rotate counterclockwise"
                     onPress={rotateCounterClockwise}
                     className="text-xl"
                   >
@@ -171,14 +158,7 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {right.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={right.name}
-                  />{' '}
-                  {right.name}
+                  {right.wind} <UserAvatar name={right.name} /> {right.name}
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -191,12 +171,12 @@ export default function Live() {
             </div>
             <div>
               <Button
-                variant="light"
-                radius="full"
+                variant="ghost"
                 size="lg"
                 isIconOnly
+                aria-label="Refresh"
                 onPress={refetch}
-                className="absolute z-1 left-0 bottom-0"
+                className="absolute z-1 left-0 bottom-0 rounded-full"
               >
                 <RefreshIcon className="text-gray-400" />
               </Button>
@@ -204,14 +184,7 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {bot.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={bot.name}
-                  />{' '}
-                  {bot.name}
+                  {bot.wind} <UserAvatar name={bot.name} /> {bot.name}
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -225,7 +198,7 @@ export default function Live() {
             <div className="flex justify-end items-end">
               <ContextMenu
                 isOpen={isContextMenuOpen}
-                setIsOpen={setIsContextMenuOpen}
+                onOpen={() => setIsContextMenuOpen(true)}
                 onClose={closeContextMenuOpen}
               >
                 <LiveMenu

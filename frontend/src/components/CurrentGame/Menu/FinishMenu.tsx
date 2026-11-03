@@ -1,4 +1,4 @@
-import { Button, useDisclosure } from '@heroui/react';
+import { Button, useOverlayState } from '@heroui/react';
 import { PostRequest, authFetch, eventGamePath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { useState } from 'react';
@@ -16,7 +16,7 @@ export default function FinishMenu({
 }) {
   const navigate = useNavigate();
   const [isFinishing, setIsFinishing] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
   const handleFinish = async () => {
     if (!gameId) return;
@@ -38,7 +38,7 @@ export default function FinishMenu({
     setIsFinishing(false);
     showToast({
       title: 'Game finished',
-      color: 'warning',
+      variant: 'warning',
     });
 
     navigate('/last');
@@ -51,13 +51,12 @@ export default function FinishMenu({
   return (
     <>
       <Button
-        color="primary"
-        variant="solid"
+        variant="primary"
         onPress={onOpen}
         isDisabled={!gameId || isFinishing}
         className="w-1/2"
-        startContent={<WarningIcon className="text-white" />}
       >
+        <WarningIcon className="text-white" />
         {isFinishing ? 'Finishing...' : 'Finish Game'}
       </Button>
       <Confirm
@@ -71,7 +70,7 @@ export default function FinishMenu({
         cancelText="Cancel"
         confirmText="Finish Game"
         prompt="Are you sure you want to finish this game? Game will be counted. This action will finalize the result."
-        confirmButtonColor="primary"
+        confirmVariant="primary"
       />
     </>
   );

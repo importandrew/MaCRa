@@ -1,5 +1,16 @@
 @import 'tailwindcss';
-@config "../tailwind.config.js";
+@import '@heroui/styles';
+
+/* Dark mode only via a `dark` class, as in v2 (darkMode: 'class'). The app
+   never sets that class, so it stays light. Without this, Tailwind 4 and
+   @heroui/styles fall back to the system color scheme for dark: utilities. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* The v3 background token is light gray (v2's was white). Paint the whole page
+   with it, not only <main>, so narrow pages don't show white strips. */
+body {
+  @apply bg-background text-foreground;
+}
 
 html,
 body,

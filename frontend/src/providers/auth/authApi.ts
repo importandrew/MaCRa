@@ -12,7 +12,7 @@ export async function fetchLogoutApi(): Promise<boolean> {
   } catch (error) {
     showToast({
       title: `Network error during logout: ${error}`,
-      color: 'danger',
+      variant: 'danger',
     });
     return false;
   }

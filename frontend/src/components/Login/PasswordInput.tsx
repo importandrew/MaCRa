@@ -1,36 +1,47 @@
-import { Input } from '@heroui/react';
-import { useCallback, useState } from 'react';
+import {
+  Button,
+  FieldError,
+  InputGroup,
+  Label,
+  TextField,
+} from '@heroui/react';
+import { useState } from 'react';
 import { InputArgs } from '../../models/Input';
 import { EyeClosedIcon } from './EyeClosed';
 import { EyeIcon } from './EyeOpen';
 
 export default function PasswordInput({ onChange }: InputArgs) {
   const [isVisible, setIsVisible] = useState(false);
-  const toggleVisibility = useCallback(() => setIsVisible((prev) => !prev), []);
 
   return (
-    <Input
-      label="Password"
-      variant="bordered"
-      placeholder=" "
-      validate={(value: string) => {
-        return !value.length ? 'Password is required' : null;
-      }}
-      endContent={
-        <button
-          className="focus:outline-none"
-          type="button"
-          onClick={toggleVisibility}
-        >
-          {isVisible ? (
-            <EyeClosedIcon className="text-2xl text-default-400 pointer-events-none" />
-          ) : (
-            <EyeIcon className="text-2xl text-default-400 pointer-events-none" />
-          )}
-        </button>
+    <TextField
+      name="password"
+      autoComplete="current-password"
+      validate={(value: string) =>
+        !value.length ? 'Password is required' : null
       }
-      type={isVisible ? 'text' : 'password'}
-      onChange={(event) => onChange(event.target.value)}
-    />
+      onChange={onChange}
+    >
+      <Label>Password</Label>
+      <InputGroup>
+        <InputGroup.Input type={isVisible ? 'text' : 'password'} />
+        <InputGroup.Suffix className="pe-0">
+          <Button
+            isIconOnly
+            size="sm"
+            variant="ghost"
+            aria-label={isVisible ? 'Hide password' : 'Show password'}
+            onPress={() => setIsVisible((prev) => !prev)}
+          >
+            {isVisible ? (
+              <EyeClosedIcon className="text-xl text-muted" />
+            ) : (
+              <EyeIcon className="text-xl text-muted" />
+            )}
+          </Button>
+        </InputGroup.Suffix>
+      </InputGroup>
+      <FieldError />
+    </TextField>
   );
 }

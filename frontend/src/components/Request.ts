@@ -35,7 +35,7 @@ async function fetchWithStatus<T>(
       showToast({
         title: 'Unauthorized request!',
         description: 'Redirecting to login...',
-        color: 'danger',
+        variant: 'danger',
       });
       setTimeout(() => (window.location.href = '/login'), 3000);
       return { data: null, status: response.status };
@@ -48,7 +48,7 @@ async function fetchWithStatus<T>(
       if (isToastEnabled && response.status !== 403) {
         showToast({
           title: `Error: ${data.error}`,
-          color: 'danger',
+          variant: 'danger',
         });
       }
       return { data: null, status: response.status };
@@ -60,7 +60,7 @@ async function fetchWithStatus<T>(
     if (isToastEnabled) {
       showToast({
         title: `Error: ${error}`,
-        color: 'danger',
+        variant: 'danger',
       });
     }
     return { data: null, status: 0 };
@@ -99,7 +99,7 @@ async function globalBatchFetch<T>(
     if (isToastEnabled) {
       showToast({
         title: `Error: ${error}`,
-        color: 'danger',
+        variant: 'danger',
       });
     }
     return null;

@@ -1,13 +1,8 @@
-import {
-  Dropdown,
-  DropdownTrigger,
-  Avatar,
-  DropdownMenu,
-  DropdownItem,
-} from '@heroui/react';
+import { Dropdown, Label } from '@heroui/react';
 import { PlayerOrder } from '../../../models/GameData';
 import { WarningIcon } from '../../Icons/WarningIcon';
 import { UserIcon } from '../../Icons/UserIcon';
+import UserAvatar from '../../UserAvatar';
 
 export default function PlayerMenu({
   player,
@@ -16,43 +11,31 @@ export default function PlayerMenu({
   player: PlayerOrder | undefined;
   setFinedPlayerId: (id: number) => void;
 }) {
-  const assignPenalty = (_event: unknown, id: number) => {
-    setFinedPlayerId(id);
-  };
-
   return (
     <Dropdown>
-      <DropdownTrigger>
-        <Avatar
-          as="button"
-          className="transition-transform"
-          style={{ cursor: 'pointer' }}
-          color="default"
-          size="md"
-          name={player?.name || ''}
-        />
-      </DropdownTrigger>
+      <Dropdown.Trigger
+        className="rounded-full"
+        aria-label={`${player?.name ?? 'Player'} menu`}
+      >
+        <UserAvatar name={player?.name || ''} />
+      </Dropdown.Trigger>
       {player && (
-        <DropdownMenu
-          disabledKeys={['profile']}
-          aria-label="Player menu"
-          variant="flat"
-        >
-          <DropdownItem
-            key="penalty"
-            color="warning"
-            onPress={(event) => assignPenalty(event, player.id)}
-            startContent={<WarningIcon className="text-warning" />}
-          >
-            Penalty
-          </DropdownItem>
-          <DropdownItem
-            key="profile"
-            startContent={<UserIcon className="text-primary" />}
-          >
-            Profile
-          </DropdownItem>
-        </DropdownMenu>
+        <Dropdown.Popover>
+          <Dropdown.Menu aria-label="Player menu" disabledKeys={['profile']}>
+            <Dropdown.Item
+              id="penalty"
+              textValue="Penalty"
+              onAction={() => setFinedPlayerId(player.id)}
+            >
+              <WarningIcon className="text-warning" />
+              <Label>Penalty</Label>
+            </Dropdown.Item>
+            <Dropdown.Item id="profile" textValue="Profile">
+              <UserIcon className="text-accent" />
+              <Label>Profile</Label>
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
       )}
     </Dropdown>
   );

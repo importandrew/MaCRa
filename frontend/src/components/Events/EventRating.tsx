@@ -1,12 +1,4 @@
-import {
-  SortDescriptor,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from '@heroui/react';
+import { SortDescriptor, Table } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventRatingEntry } from '../../models/EventRating';
@@ -95,42 +87,94 @@ export default function EventRating() {
             Rating — {event.name}
           </h1>
 
-          <Table
-            isStriped
-            removeWrapper
-            className="z-0"
-            aria-label="Event rating"
-            sortDescriptor={sortDescriptor}
-            onSortChange={setSortDescriptor}
-          >
-            <TableHeader>
-              <TableColumn key="rank" allowsSorting align="center" width="10%">
-                #
-              </TableColumn>
-              <TableColumn key="name" allowsSorting align="center">
-                Player
-              </TableColumn>
-              <TableColumn key="games" allowsSorting align="center" width="15%">
-                Games
-              </TableColumn>
-              <TableColumn key="tp" allowsSorting align="center" width="15%">
-                TP
-              </TableColumn>
-              <TableColumn key="gp" allowsSorting align="center" width="15%">
-                GP
-              </TableColumn>
-            </TableHeader>
-            <TableBody emptyContent="No games played yet" items={sortedRatings}>
-              {(item: EventRatingEntry) => (
-                <TableRow key={item.player_id}>
-                  <TableCell>{item.rank}</TableCell>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.games}</TableCell>
-                  <TableCell>{item.tp}</TableCell>
-                  <TableCell>{item.gp}</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+          <Table className="z-0">
+            <Table.ScrollContainer>
+              <Table.Content
+                aria-label="Event rating"
+                sortDescriptor={sortDescriptor}
+                onSortChange={setSortDescriptor}
+              >
+                <Table.Header>
+                  <Table.Column
+                    id="rank"
+                    allowsSorting
+                    className="text-center w-[10%]"
+                  >
+                    {({ sortDirection }) => (
+                      <Table.SortableColumnHeader sortDirection={sortDirection}>
+                        #
+                      </Table.SortableColumnHeader>
+                    )}
+                  </Table.Column>
+                  <Table.Column
+                    id="name"
+                    allowsSorting
+                    isRowHeader
+                    className="text-center "
+                  >
+                    {({ sortDirection }) => (
+                      <Table.SortableColumnHeader sortDirection={sortDirection}>
+                        Player
+                      </Table.SortableColumnHeader>
+                    )}
+                  </Table.Column>
+                  <Table.Column
+                    id="games"
+                    allowsSorting
+                    className="text-center w-[15%]"
+                  >
+                    {({ sortDirection }) => (
+                      <Table.SortableColumnHeader sortDirection={sortDirection}>
+                        Games
+                      </Table.SortableColumnHeader>
+                    )}
+                  </Table.Column>
+                  <Table.Column
+                    id="tp"
+                    allowsSorting
+                    className="text-center w-[15%]"
+                  >
+                    {({ sortDirection }) => (
+                      <Table.SortableColumnHeader sortDirection={sortDirection}>
+                        TP
+                      </Table.SortableColumnHeader>
+                    )}
+                  </Table.Column>
+                  <Table.Column
+                    id="gp"
+                    allowsSorting
+                    className="text-center w-[15%]"
+                  >
+                    {({ sortDirection }) => (
+                      <Table.SortableColumnHeader sortDirection={sortDirection}>
+                        GP
+                      </Table.SortableColumnHeader>
+                    )}
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body
+                  items={sortedRatings}
+                  renderEmptyState={() => (
+                    <p className="py-6 text-center text-muted">
+                      No games played yet
+                    </p>
+                  )}
+                >
+                  {(item: EventRatingEntry) => (
+                    <Table.Row
+                      id={item.player_id}
+                      className="text-center even:bg-default/50"
+                    >
+                      <Table.Cell>{item.rank}</Table.Cell>
+                      <Table.Cell>{item.name}</Table.Cell>
+                      <Table.Cell>{item.games}</Table.Cell>
+                      <Table.Cell>{item.tp}</Table.Cell>
+                      <Table.Cell>{item.gp}</Table.Cell>
+                    </Table.Row>
+                  )}
+                </Table.Body>
+              </Table.Content>
+            </Table.ScrollContainer>
           </Table>
         </div>
       )}

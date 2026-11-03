@@ -1,22 +1,15 @@
-import { addToast } from '@heroui/react';
+import { toast } from '@heroui/react';
 
-type ToastColor =
-  'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+type ToastVariant = 'default' | 'accent' | 'success' | 'warning' | 'danger';
 
 interface ShowToastParams {
   title: string;
   description?: string;
-  color?: ToastColor;
+  variant?: ToastVariant;
 }
 
-export function showToast({ title, description, color }: ShowToastParams) {
-  addToast({
-    title,
-    description,
-    color,
-    classNames: {
-      title: 'whitespace-normal break-words',
-      description: 'whitespace-normal break-words',
-    },
-  });
+const TOAST_TIMEOUT_MS = 3000;
+
+export function showToast({ title, description, variant }: ShowToastParams) {
+  toast(title, { description, variant, timeout: TOAST_TIMEOUT_MS });
 }

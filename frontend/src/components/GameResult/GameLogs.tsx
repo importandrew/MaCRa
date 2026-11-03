@@ -1,14 +1,4 @@
-import {
-  Button,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  Tooltip,
-} from '@heroui/react';
+import { Button, Popover, Table } from '@heroui/react';
 import { useCallback } from 'react';
 import { Outcome } from '../../models/GameData';
 import {
@@ -20,6 +10,7 @@ import { useFetchGameLogsData } from '../../providers/game/gameDataApi';
 import GameChart from './GameChart';
 import { MinusIcon } from '../Icons/MinusIcon';
 import { WarningIcon } from '../Icons/WarningIcon';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function GameLogs({
   isChartVisible = false,
@@ -205,7 +196,7 @@ export default function GameLogs({
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-full my-auto justify-center items-center">
-        <Spinner label="Loading..." size="lg" />
+        <LoadingSpinner label="Loading..." />
       </div>
     );
   }
@@ -239,124 +230,154 @@ export default function GameLogs({
         <div
           className={
             'overflow-hidden flex flex-col justify-center mb-3 w-full ' +
-            '[&_table]:w-full [&_table]:table-fixed [&_:is(th,td)]:box-border ' +
+            '[&_table]:w-full [&_table]:table-fixed [&_:is(th,td)]:box-border [&_:is(th,td)]:px-1 ' +
             '[&_:is(th,td):first-child]:w-10 [&_:is(th,td):first-child]:min-w-10 ' +
             '[&_:is(th,td):last-child]:w-10 [&_:is(th,td):last-child]:min-w-10 ' +
             '[&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:w-[calc((100%-5rem)/4)] [&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:min-w-0'
           }
         >
-          <Table
-            defaultSelectedKeys={['finalScores']}
-            isStriped
-            removeWrapper
-            aria-label="Game logs"
-            color="default"
-            selectionMode="single"
-            className="w-full self-center z-10"
-          >
-            <TableHeader>
-              {[
-                <TableColumn className="min-w-0" align="end" key="round">
-                  #
-                </TableColumn>,
-                ...preparedData.players.map((player) => (
-                  <TableColumn
-                    className="min-w-0 overflow-hidden"
-                    align="end"
-                    key={player.id}
+          <Table className="w-full self-center z-10">
+            <Table.ScrollContainer>
+              <Table.Content aria-label="Game logs">
+                <Table.Header>
+                  <Table.Column
+                    id="round"
+                    isRowHeader
+                    className="min-w-0 text-end"
                   >
-                    <Tooltip content={player.id}>
-                      <div className="overflow-hidden text-ellipsis">
+                    #
+                  </Table.Column>
+                  {preparedData.players.map((player) => (
+                    <Table.Column
+                      key={player.id}
+                      id={String(player.id)}
+                      className="min-w-0 overflow-hidden text-end"
+                    >
+                      <div
+                        className="overflow-hidden text-ellipsis"
+                        title={`ID ${player.id}`}
+                      >
                         {player.name}
                       </div>
-                    </Tooltip>
-                  </TableColumn>
-                )),
-                <TableColumn className="min-w-0" align="end" key="result">
-                  <Tooltip content={getLegend()}>Δ</Tooltip>
-                </TableColumn>,
-              ]}
-            </TableHeader>
-            <TableBody>
-              {[
-                ...preparedData.rounds.map((item) => (
-                  <TableRow key={getRowKey(item)}>
-                    <TableCell>{item.round}</TableCell>
-                    <TableCell>
-                      <div className="text-base">
-                        {getSignedScore(item.initial_scores[0])}
-                      </div>
-                      <div
-                        className={
-                          'text-xs ' + getColoredScore(item.score_changes?.[0])
-                        }
+                    </Table.Column>
+                  ))}
+                  <Table.Column id="result" className="min-w-0 text-end">
+                    {/* A popover, not a tooltip: it opens on tap on phones. */}
+                    <Popover>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        isIconOnly
+                        aria-label="Legend"
                       >
-                        {getSignedScore(item.score_changes?.[0])}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-base">
-                        {getSignedScore(item.initial_scores[1])}
-                      </div>
-                      <div
-                        className={
-                          'text-xs ' + getColoredScore(item.score_changes?.[1])
-                        }
+                        Δ
+                      </Button>
+                      <Popover.Content className="max-w-64">
+                        <Popover.Dialog>{getLegend()}</Popover.Dialog>
+                      </Popover.Content>
+                    </Popover>
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body>
+                  {[
+                    ...preparedData.rounds.map((item) => (
+                      <Table.Row
+                        key={getRowKey(item)}
+                        id={getRowKey(item)}
+                        className="even:bg-default/50"
                       >
-                        {getSignedScore(item.score_changes?.[1])}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-base">
-                        {getSignedScore(item.initial_scores[2])}
-                      </div>
-                      <div
-                        className={
-                          'text-xs ' + getColoredScore(item.score_changes?.[2])
-                        }
-                      >
-                        {getSignedScore(item.score_changes?.[2])}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-base">
-                        {getSignedScore(item.initial_scores[3])}
-                      </div>
-                      <div
-                        className={
-                          'text-xs ' + getColoredScore(item.score_changes?.[3])
-                        }
-                      >
-                        {getSignedScore(item.score_changes?.[3])}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-base">{getResultScore(item)}</div>
-                    </TableCell>
-                  </TableRow>
-                )),
-                ...(finalScores?.length === 4
-                  ? [
-                      <TableRow key={'finalScores'}>
-                        <TableCell className="text-base font-bold">Σ</TableCell>
-                        <TableCell className="text-base font-bold">
-                          {finalScores[0]}
-                        </TableCell>
-                        <TableCell className="text-base font-bold">
-                          {finalScores[1]}
-                        </TableCell>
-                        <TableCell className="text-base font-bold">
-                          {finalScores[2]}
-                        </TableCell>
-                        <TableCell className="text-base font-bold">
-                          {finalScores[3]}
-                        </TableCell>
-                        <TableCell> </TableCell>
-                      </TableRow>,
-                    ]
-                  : []),
-              ]}
-            </TableBody>
+                        <Table.Cell className="text-end">
+                          {item.round}
+                        </Table.Cell>
+                        <Table.Cell className="text-end">
+                          <div className="text-base">
+                            {getSignedScore(item.initial_scores[0])}
+                          </div>
+                          <div
+                            className={
+                              'text-xs ' +
+                              getColoredScore(item.score_changes?.[0])
+                            }
+                          >
+                            {getSignedScore(item.score_changes?.[0])}
+                          </div>
+                        </Table.Cell>
+                        <Table.Cell className="text-end">
+                          <div className="text-base">
+                            {getSignedScore(item.initial_scores[1])}
+                          </div>
+                          <div
+                            className={
+                              'text-xs ' +
+                              getColoredScore(item.score_changes?.[1])
+                            }
+                          >
+                            {getSignedScore(item.score_changes?.[1])}
+                          </div>
+                        </Table.Cell>
+                        <Table.Cell className="text-end">
+                          <div className="text-base">
+                            {getSignedScore(item.initial_scores[2])}
+                          </div>
+                          <div
+                            className={
+                              'text-xs ' +
+                              getColoredScore(item.score_changes?.[2])
+                            }
+                          >
+                            {getSignedScore(item.score_changes?.[2])}
+                          </div>
+                        </Table.Cell>
+                        <Table.Cell className="text-end">
+                          <div className="text-base">
+                            {getSignedScore(item.initial_scores[3])}
+                          </div>
+                          <div
+                            className={
+                              'text-xs ' +
+                              getColoredScore(item.score_changes?.[3])
+                            }
+                          >
+                            {getSignedScore(item.score_changes?.[3])}
+                          </div>
+                        </Table.Cell>
+                        <Table.Cell className="text-end">
+                          <div className="text-base">
+                            {getResultScore(item)}
+                          </div>
+                        </Table.Cell>
+                      </Table.Row>
+                    )),
+                    ...(finalScores?.length === 4
+                      ? [
+                          <Table.Row
+                            key="finalScores"
+                            id="finalScores"
+                            className="bg-accent-soft"
+                          >
+                            <Table.Cell className="text-end text-base font-bold">
+                              Σ
+                            </Table.Cell>
+                            <Table.Cell className="text-end text-base font-bold">
+                              {finalScores[0]}
+                            </Table.Cell>
+                            <Table.Cell className="text-end text-base font-bold">
+                              {finalScores[1]}
+                            </Table.Cell>
+                            <Table.Cell className="text-end text-base font-bold">
+                              {finalScores[2]}
+                            </Table.Cell>
+                            <Table.Cell className="text-end text-base font-bold">
+                              {finalScores[3]}
+                            </Table.Cell>
+                            <Table.Cell> </Table.Cell>
+                          </Table.Row>,
+                        ]
+                      : []),
+                  ]}
+                </Table.Body>
+              </Table.Content>
+            </Table.ScrollContainer>
           </Table>
         </div>
       ) : null}

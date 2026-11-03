@@ -1,4 +1,4 @@
-import { Button } from '@heroui/react';
+import { Button, Spinner } from '@heroui/react';
 import { useState } from 'react';
 import GameLogs from '../../GameResult/GameLogs';
 import Confirm from '../../Confirm';
@@ -27,7 +27,7 @@ export default function LogsMenu({
     const ok = await undoLastRound(gameId, eventId);
     setUndoLoading(false);
     if (ok) {
-      showToast({ title: 'Last round undone', color: 'warning' });
+      showToast({ title: 'Last round undone', variant: 'warning' });
       onUndoSuccess?.();
     }
   };
@@ -44,15 +44,22 @@ export default function LogsMenu({
         <>
           <Button
             className="w-1/2 self-center"
-            color="default"
-            variant="flat"
+            variant="tertiary"
             size="sm"
-            startContent={<UndoIcon />}
             onPress={() => setConfirmOpen(true)}
-            isLoading={undoLoading}
+            isPending={undoLoading}
             isDisabled={gameId == null}
           >
-            Undo last round
+            {({ isPending }) => (
+              <>
+                {isPending ? (
+                  <Spinner color="current" size="sm" />
+                ) : (
+                  <UndoIcon />
+                )}
+                Undo last round
+              </>
+            )}
           </Button>
           <Confirm
             isOpen={confirmOpen}
@@ -62,7 +69,7 @@ export default function LogsMenu({
             headerText="Undo last round"
             cancelText="Cancel"
             confirmText="Undo"
-            confirmButtonColor="danger"
+            confirmVariant="danger"
           />
         </>
       )}

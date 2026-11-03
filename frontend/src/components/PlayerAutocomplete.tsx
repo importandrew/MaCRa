@@ -1,9 +1,15 @@
-import { Key } from 'react';
-import { Autocomplete, AutocompleteItem } from '@heroui/react';
+import {
+  CloseButton,
+  ComboBox,
+  Input,
+  Label,
+  ListBox,
+  type Key,
+} from '@heroui/react';
 import { Player } from '../models/Player';
 
 function PlayerId({ id }: { id: number }) {
-  return <span className="text-xs">[{id}]</span>;
+  return <span className="text-xs text-muted">[{id}]</span>;
 }
 
 export type PlayerAutocompleteProps = {
@@ -14,6 +20,8 @@ export type PlayerAutocompleteProps = {
   disabledKeys?: string[];
 };
 
+// PlayerAutocomplete picks a player by typing part of the name: tap the field
+// and type, as with HeroUI v2 Autocomplete.
 export default function PlayerAutocomplete({
   label,
   items,
@@ -22,32 +30,43 @@ export default function PlayerAutocomplete({
   disabledKeys = [],
 }: PlayerAutocompleteProps) {
   const handleSelectionChange = (key: Key | null) => {
-    if (key == null) {
-      onSelectionChange(null);
-      return;
-    }
-    onSelectionChange(Number(key));
+    onSelectionChange(key == null ? null : Number(key));
   };
 
   return (
-    <Autocomplete
-      label={label}
-      itemHeight={50}
+    <ComboBox
       selectedKey={selectedKey}
-      isClearable={true}
       disabledKeys={disabledKeys}
       className="w-full md:w-[300px]"
       onSelectionChange={handleSelectionChange}
     >
-      {items.map((player) => (
-        <AutocompleteItem
-          key={String(player.id)}
-          textValue={player.name}
-          endContent={<PlayerId id={player.id} />}
-        >
-          {player.name}
-        </AutocompleteItem>
-      ))}
-    </Autocomplete>
+      <Label>{label}</Label>
+      <ComboBox.InputGroup>
+        <Input />
+        {selectedKey != null && (
+          <CloseButton
+            aria-label={`Clear ${label}`}
+            onPress={() => handleSelectionChange(null)}
+          />
+        )}
+        <ComboBox.Trigger />
+      </ComboBox.InputGroup>
+      <ComboBox.Popover>
+        <ListBox>
+          {items.map((player) => (
+            <ListBox.Item
+              key={player.id}
+              id={String(player.id)}
+              textValue={player.name}
+            >
+              <span className="flex w-full items-center justify-between gap-2">
+                {player.name}
+                <PlayerId id={player.id} />
+              </span>
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </ComboBox.Popover>
+    </ComboBox>
   );
 }

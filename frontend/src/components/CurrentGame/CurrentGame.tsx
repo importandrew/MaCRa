@@ -173,12 +173,12 @@ export default function CurrentGame() {
             </div>
             <div>
               <Button
-                variant="light"
-                radius="full"
+                variant="ghost"
                 size="lg"
                 isIconOnly
+                aria-label="Refresh"
                 onPress={refetch}
-                className="absolute z-1 left-0 bottom-0"
+                className="absolute z-1 left-0 bottom-0 rounded-full"
               >
                 <RefreshIcon className="text-gray-400" />
               </Button>
@@ -209,7 +209,7 @@ export default function CurrentGame() {
             <div className="flex justify-end items-end">
               <ContextMenu
                 isOpen={isContextMenuOpen}
-                setIsOpen={setIsContextMenuOpen}
+                onOpen={() => setIsContextMenuOpen(true)}
                 onClose={closeContextMenuOpen}
               >
                 <TableMenu

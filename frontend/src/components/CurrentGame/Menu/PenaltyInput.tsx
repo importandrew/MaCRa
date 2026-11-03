@@ -1,10 +1,13 @@
 import {
   Button,
-  Checkbox,
   Form,
+  Label,
   Input,
-  Radio,
-  RadioGroup,
+  Switch,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  type Key,
 } from '@heroui/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { showToast } from '../../Toast';
@@ -56,7 +59,7 @@ export default function PenaltyInput({
 
     showToast({
       title: 'Penalty successfully added',
-      color: 'warning',
+      variant: 'warning',
     });
     resetPenaltyResults();
   };
@@ -72,6 +75,9 @@ export default function PenaltyInput({
     }
   }, [distributed]);
 
+  // firstKey returns the selected key of a single-selection group, or ''.
+  const firstKey = (keys: Set<Key>) => String([...keys][0] ?? '');
+
   return (
     <Form
       validationBehavior="native"
@@ -79,100 +85,83 @@ export default function PenaltyInput({
       className="mb-3 items-center"
     >
       <div className="flex flex-col gap-4 w-full sm:w-[300px]">
-        <div>
-          <RadioGroup
-            label="Select player to fine:"
-            value={loser?.toString()}
-            onValueChange={(value: string) => setLoser(Number(value))}
-            color="warning"
+        <div className="flex flex-col gap-1">
+          <Label id="fined-player-label">Select player to fine</Label>
+          <ToggleButtonGroup
+            aria-labelledby="fined-player-label"
+            selectionMode="single"
+            disallowEmptySelection
+            isDetached
+            className="grid grid-cols-2 gap-2"
+            selectedKeys={loser ? [String(loser)] : []}
+            onSelectionChange={(keys) => setLoser(Number(firstKey(keys)))}
           >
-            {players &&
-              players.map((player) => (
-                <Radio
-                  key={player.id}
-                  value={player.id.toString()}
-                  description={`[${player.id}]`}
-                >
-                  {player.name}
-                </Radio>
-              ))}
-          </RadioGroup>
+            {(players ?? []).map((player) => (
+              <ToggleButton
+                key={player.id}
+                id={String(player.id)}
+                className="min-w-0"
+              >
+                <span className="truncate">{player.name}</span>
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
         </div>
 
-        <div>
-          <div className="text-3x1 text-gray-500 mb-2">Is false mahjong?</div>
-          <Checkbox
-            radius="full"
-            color="warning"
-            isSelected={distributed}
-            onValueChange={handleIsDistributed}
-          >
-            Yes
-          </Checkbox>
-        </div>
+        <Switch isSelected={distributed} onChange={handleIsDistributed}>
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            False mahjong
+          </Switch.Content>
+        </Switch>
 
-        <div>
-          <div className="text-3x1 text-gray-500 mb-2">Force next round?</div>
-          <Checkbox
-            radius="full"
-            color="warning"
-            isSelected={forceNextRound}
-            onValueChange={setForceNextRound}
-          >
-            Yes
-          </Checkbox>
-        </div>
+        <Switch isSelected={forceNextRound} onChange={setForceNextRound}>
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            Force next round
+          </Switch.Content>
+        </Switch>
 
-        <div className={distributed ? '' : 'hidden'}>
-          <RadioGroup
-            label="Fine value:"
-            value={value.toString()}
-            onValueChange={(value) => setValue(Number(value))}
-            validate={(value: string | null) => {
-              if (!distributed) return null;
-
-              return Number(value) === 30 || Number(value) === 60
-                ? null
-                : 'Fine value is required';
+        {distributed ? (
+          <div className="flex flex-col gap-1">
+            <Label id="fine-value-label">Fine value</Label>
+            <ToggleButtonGroup
+              aria-labelledby="fine-value-label"
+              selectionMode="single"
+              disallowEmptySelection
+              fullWidth
+              selectedKeys={value ? [String(value)] : []}
+              onSelectionChange={(keys) => setValue(Number(firstKey(keys)))}
+            >
+              <ToggleButton id="30">30</ToggleButton>
+              <ToggleButton id="60">
+                <ToggleButtonGroup.Separator />
+                60
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </div>
+        ) : (
+          // A text field with a numeric keyboard: NumberField commits its
+          // value only on blur, which would keep Submit disabled on the tap.
+          <TextField
+            fullWidth
+            value={value === 0 ? '' : value.toString()}
+            onChange={(text) => {
+              const digits = text.replace(/\D/g, '');
+              setValue(digits ? Number(digits) : 0);
             }}
-            color="warning"
-            orientation="horizontal"
           >
-            <Radio className="mr-3" value="30">
-              30
-            </Radio>
-            <Radio className="mr-3" value="60">
-              60
-            </Radio>
-          </RadioGroup>
-        </div>
+            <Label>Fine value</Label>
+            <Input inputMode="numeric" pattern="\d*" autoComplete="off" />
+          </TextField>
+        )}
 
-        <div className={'sm:max-w-[300px] ' + (distributed ? 'hidden' : '')}>
-          <Input
-            type="number"
-            isClearable={true}
-            value={value.toString()}
-            min="0"
-            pattern="\d*"
-            label="Fine value"
-            className="w-full inline-flex"
-            onChange={(event) => {
-              setValue(+event.target.value);
-            }}
-            validate={(value) => {
-              if (!distributed) return null;
-
-              return Number(value) === 0 ? 'Fine value is required' : null;
-            }}
-          />
-        </div>
         <div className="flex justify-center sm:max-w-[300px]">
-          <Button
-            type="submit"
-            variant="flat"
-            color="warning"
-            isDisabled={!loser || !value}
-          >
+          <Button type="submit" variant="primary" isDisabled={!loser || !value}>
             Submit
           </Button>
         </div>

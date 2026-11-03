@@ -1,12 +1,11 @@
 import {
   Button,
   Card,
-  CardBody,
+  FieldError,
   Input,
-  Spacer,
-  Spinner,
-  Tab,
+  Label,
   Tabs,
+  TextField,
 } from '@heroui/react';
 import { Key, useCallback, useContext, useState } from 'react';
 import {
@@ -20,6 +19,7 @@ import { UserData } from '../../models/UserData';
 import { fetchWithStatus, globalFetch, PostRequest } from '../Request';
 import EmailInput from './EmailInput';
 import PasswordInput from './PasswordInput';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 type AuthTab = 'login' | 'signup';
 
@@ -105,50 +105,51 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       {isLoading ? (
-        <Spinner label="Loading..." size="lg" />
+        <LoadingSpinner label="Loading..." />
       ) : (
         <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
-          <Card fullWidth className="mx-5">
-            <CardBody>
-              <Tabs
-                aria-label="Authentication"
-                fullWidth
-                selectedKey={tab}
-                onSelectionChange={handleTabChange}
-              >
-                <Tab key="login" title="Login">
-                  <div className="pt-2">
+          <Card className="w-full mx-5">
+            <Card.Content>
+              <Tabs selectedKey={tab} onSelectionChange={handleTabChange}>
+                <Tabs.ListContainer>
+                  <Tabs.List aria-label="Authentication" className="w-full">
+                    <Tabs.Tab id="login" className="flex-1">
+                      Login
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                    <Tabs.Tab id="signup" className="flex-1">
+                      Sign Up
+                      <Tabs.Indicator />
+                    </Tabs.Tab>
+                  </Tabs.List>
+                </Tabs.ListContainer>
+                <Tabs.Panel id="login">
+                  <div className="flex flex-col gap-3 pt-2 text-start">
                     <EmailInput onChange={setEmail} />
-                    <Spacer />
                     <PasswordInput onChange={setPassword} />
-                    <Spacer />
                     <div className="flex flex-col items-center gap-2 mt-3">
                       <Button
-                        color="primary"
+                        variant="primary"
                         isDisabled={!email || !password}
-                        variant="solid"
                         onPress={handleLogin}
                       >
                         Sign In
                       </Button>
                       <Link
                         to="/forgot-password"
-                        className="text-sm text-primary underline"
+                        className="text-sm text-accent underline"
                       >
                         Forgot password?
                       </Link>
                     </div>
                   </div>
-                </Tab>
-                <Tab key="signup" title="Sign Up">
-                  <div className="pt-2">
+                </Tabs.Panel>
+                <Tabs.Panel id="signup">
+                  <div className="flex flex-col gap-3 pt-2 text-start">
                     <EmailInput onChange={setEmail} />
-                    <Spacer />
-                    <Input
-                      type="text"
-                      label="Name"
-                      placeholder="John Mah"
-                      variant="bordered"
+                    <TextField
+                      name="name"
+                      autoComplete="name"
                       validate={(value: string) => {
                         if (!value.length) {
                           return 'Name is required';
@@ -158,16 +159,17 @@ export default function LoginPage() {
                         }
                         return null;
                       }}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                    <Spacer />
+                      onChange={setName}
+                    >
+                      <Label>Name</Label>
+                      <Input placeholder="John Mah" />
+                      <FieldError />
+                    </TextField>
                     <PasswordInput onChange={setPassword} />
-                    <Spacer />
                     <div className="flex justify-center">
                       <Button
-                        color="primary"
+                        variant="primary"
                         isDisabled={!email || !password || !name}
-                        variant="solid"
                         className="mt-3"
                         onPress={handleSignup}
                       >
@@ -175,9 +177,9 @@ export default function LoginPage() {
                       </Button>
                     </div>
                   </div>
-                </Tab>
+                </Tabs.Panel>
               </Tabs>
-            </CardBody>
+            </Card.Content>
           </Card>
         </div>
       )}

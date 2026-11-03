@@ -186,7 +186,7 @@ export async function updateEvent(
       .catch(() => ({ error: 'Unknown error' }));
     showToast({
       title: `Error: ${data.error}`,
-      color: 'danger',
+      variant: 'danger',
     });
     return false;
   }

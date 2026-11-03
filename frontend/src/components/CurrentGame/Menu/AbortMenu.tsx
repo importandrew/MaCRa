@@ -1,4 +1,4 @@
-import { Button, useDisclosure } from '@heroui/react';
+import { Button, useOverlayState } from '@heroui/react';
 import { DeleteRequest, authFetch, eventGamePath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { useState } from 'react';
@@ -16,7 +16,7 @@ export default function AbortMenu({
 }) {
   const navigate = useNavigate();
   const [isAborting, setIsAborting] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
   if (!canAbort) {
     return null;
@@ -45,7 +45,7 @@ export default function AbortMenu({
     setIsAborting(false);
     showToast({
       title: 'Game aborted',
-      color: 'warning',
+      variant: 'warning',
     });
 
     navigate('/');
@@ -54,13 +54,12 @@ export default function AbortMenu({
   return (
     <>
       <Button
-        color="danger"
-        variant="solid"
+        variant="danger"
         onPress={onOpen}
         isDisabled={!gameId || isAborting}
         className="w-1/2"
-        startContent={<WarningIcon className="text-white" />}
       >
+        <WarningIcon className="text-white" />
         {isAborting ? 'Aborting...' : 'Abort Game'}
       </Button>
       <Confirm
@@ -74,7 +73,7 @@ export default function AbortMenu({
         cancelText="Cancel"
         confirmText="Abort Game"
         prompt="Are you sure you want to abort this game? Game will NOT be counted. This action cannot be undone."
-        confirmButtonColor="danger"
+        confirmVariant="danger"
       />
     </>
   );

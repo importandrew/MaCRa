@@ -1,8 +1,8 @@
-import { Spinner } from '@heroui/react';
 import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useEvent } from '../../providers/event/eventConstants';
 import { showToast } from '../Toast';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function RequireEvent() {
   const { selectedEventId, isLoading } = useEvent();
@@ -11,7 +11,7 @@ export default function RequireEvent() {
     if (!isLoading && !selectedEventId) {
       showToast({
         title: 'Select an event first',
-        color: 'warning',
+        variant: 'warning',
       });
     }
   }, [isLoading, selectedEventId]);
@@ -29,7 +29,7 @@ export default function RequireEvent() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-screen my-auto justify-center items-center">
-        <Spinner label="Loading event..." size="lg" />
+        <LoadingSpinner label="Loading event..." />
       </div>
     );
   }

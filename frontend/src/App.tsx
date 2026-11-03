@@ -1,5 +1,11 @@
-import { HeroUIProvider, ToastProvider } from '@heroui/react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { RouterProvider, Toast } from '@heroui/react';
+import {
+  Navigate,
+  Route,
+  Routes,
+  useHref,
+  useNavigate,
+} from 'react-router-dom';
 import './App.css';
 import RequireAuth from './components/Auth/RequireAuth';
 import RequireEvent from './components/Auth/RequireEvent';
@@ -32,16 +38,12 @@ function App() {
   const navigate = useNavigate();
 
   return (
-    <HeroUIProvider navigate={navigate}>
-      <ToastProvider
-        placement="bottom-left"
-        toastProps={{
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-        }}
-        regionProps={{
-          className: 'z-200',
-        }}
+    // RouterProvider lets HeroUI links and menu items with href navigate
+    // through react-router instead of reloading the page.
+    <RouterProvider navigate={navigate} useHref={useHref}>
+      <Toast.Provider
+        placement="bottom start"
+        width="min(460px, calc(100vw - 2rem))"
       />
       <NavigateSetter />
       <Routes>
@@ -90,7 +92,7 @@ function App() {
           </Route>
         </Route>
       </Routes>
-    </HeroUIProvider>
+    </RouterProvider>
   );
 }
 

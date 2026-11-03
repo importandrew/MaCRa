@@ -1,12 +1,11 @@
 import {
   Button,
   Card,
-  CardBody,
-  CardHeader,
-  Divider,
   Input,
-  Spacer,
+  Label,
+  Separator,
   Spinner,
+  TextField,
 } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +16,7 @@ import {
 } from '../../providers/auth/authApi';
 import { UserData } from '../../models/UserData';
 import { showToast } from '../Toast';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -57,7 +57,7 @@ export default function ProfilePage() {
       showToast({
         title: 'Error',
         description: 'Name cannot be empty',
-        color: 'danger',
+        variant: 'danger',
       });
       return;
     }
@@ -76,7 +76,7 @@ export default function ProfilePage() {
 
     showToast({
       title: 'Profile updated successfully',
-      color: 'success',
+      variant: 'success',
     });
 
     setIsSaving(false);
@@ -85,7 +85,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-screen md:w-[600px] my-auto justify-center items-center">
-        <Spinner label="Loading..." size="lg" />
+        <LoadingSpinner label="Loading..." />
       </div>
     );
   }
@@ -93,48 +93,43 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
-        <Card fullWidth className="mx-5">
-          <CardHeader className="flex justify-center bg-blue-400 text-gray-100">
-            Profile
-          </CardHeader>
-          <Divider />
-          <CardBody>
-            <Input
-              label="User ID"
-              value={userData?.id.toString() || ''}
+        <Card className="w-full mx-5">
+          <Card.Header className="items-center rounded-xl bg-blue-400 py-2 text-gray-100">
+            <Card.Title>Profile</Card.Title>
+          </Card.Header>
+          <Separator />
+          <Card.Content className="gap-4 text-start">
+            <TextField
               isDisabled
-              variant="bordered"
               fullWidth
-            />
-            <Spacer y={4} />
-            <Input
-              label="Name"
-              value={name}
-              onValueChange={setName}
-              variant="bordered"
-              fullWidth
-              placeholder="Enter your name"
-            />
-            <Spacer y={4} />
+              value={userData?.id.toString() || ''}
+            >
+              <Label>User ID</Label>
+              <Input />
+            </TextField>
+            <TextField fullWidth value={name} onChange={setName}>
+              <Label>Name</Label>
+              <Input placeholder="Enter your name" />
+            </TextField>
             <div className="flex justify-center mt-3 gap-3">
-              <Button
-                color="default"
-                variant="light"
-                onPress={() => navigate('/')}
-              >
+              <Button variant="ghost" onPress={() => navigate('/')}>
                 Cancel
               </Button>
               <Button
-                color="primary"
-                variant="solid"
+                variant="primary"
                 onPress={handleSave}
-                isLoading={isSaving}
+                isPending={isSaving}
                 isDisabled={!name.trim() || name.trim() === userData?.name}
               >
-                Save
+                {({ isPending }) => (
+                  <>
+                    {isPending && <Spinner color="current" size="sm" />}
+                    Save
+                  </>
+                )}
               </Button>
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
     </div>
