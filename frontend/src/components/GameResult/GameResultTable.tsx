@@ -1,13 +1,16 @@
 import { Table } from '@heroui/react';
 import { GameResult } from '../../models/GameResult';
+import { UserData } from '../../models/UserData';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import { getDateTimeFormatted } from '../../utils/date-tools';
 
 // Table component for rendering game results
 export default function GameResultTable({ data }: { data: GameResult }) {
-  const currentPlayer = JSON.parse(
-    localStorage.getItem(AUTH_USER_DATA) || '{}'
-  ).name;
+  const currentPlayerId = (
+    JSON.parse(
+      localStorage.getItem(AUTH_USER_DATA) || '{}'
+    ) as Partial<UserData>
+  ).id;
 
   return (
     <div className="flex flex-col gap-1">
@@ -28,10 +31,12 @@ export default function GameResultTable({ data }: { data: GameResult }) {
             <Table.Body items={data.player_results}>
               {(item) => (
                 <Table.Row
-                  id={item.name}
+                  // By id, not name: players can share a name, and React Aria
+                  // throws on duplicate keys in a collection.
+                  id={item.id}
                   // Highlight the signed-in player's row.
                   className={
-                    item.name === currentPlayer
+                    item.id === currentPlayerId
                       ? 'bg-accent-soft font-medium'
                       : undefined
                   }
