@@ -222,7 +222,7 @@ export default function EventManage() {
         isLoading={false}
         isError={false}
         isForbidden
-        onRefresh={() => { }}
+        onRefresh={() => {}}
         onGoHome={() => navigate(`/event/${eventId}`)}
       >
         {null}
@@ -255,217 +255,206 @@ export default function EventManage() {
         </Tabs>
       )}
 
-      {activeTab === 'overview' &&
-        canManageEvent && (
-          <>
-            <Card>
-              <CardBody className="gap-2">
-                <p className="text-default-500">General</p>
-                <Form
-                  id="edit-event-form"
-                  onSubmit={handleSave}
-                >
-                  <Input
-                    label="Name"
-                    value={editName}
-                    onValueChange={setEditName}
-                    isRequired
-                    variant="bordered"
-                  />
-                  <Textarea
-                    label="Description"
-                    value={editDescription}
-                    onValueChange={setEditDescription}
-                    variant="bordered"
-                  />
-                  <div className="w-full flex flex-col gap-2">
-                    <p className="text-default-500">Visibility</p>
-                    <VisibilityTabs
-                      label="General"
-                      ariaLabel="Event visibility"
-                      options={VISIBILITY_OPTIONS}
-                      selectedKey={editVisibility}
-                      onSelectionChange={(value) => {
-                        setEditVisibility(value);
-                        applyVisibilityPreset(value);
-                      }}
-                    />
-                    <div className="flex flex-col gap-5">
-                      <VisibilityTabs
-                        label="Ratings"
-                        ariaLabel="Ratings visibility"
-                        options={CONTENT_REACH_OPTIONS}
-                        selectedKey={editRatingsReach}
-                        onSelectionChange={setEditRatingsReach}
-                        isOptionDisabled={isReachOptionDisabled}
-                      />
-                      <VisibilityTabs
-                        label="Live games & results"
-                        ariaLabel="Live games and results visibility"
-                        options={CONTENT_REACH_OPTIONS}
-                        selectedKey={editGamesReach}
-                        onSelectionChange={setEditGamesReach}
-                        isOptionDisabled={isReachOptionDisabled}
-                      />
-                    </div>
-                  </div>
-                </Form>
-              </CardBody>
-            </Card>
-            <Button
-              type="submit"
-              form="edit-event-form"
-              color="primary"
-              isLoading={isSaving}
-              isDisabled={!editName.trim()}
-              className="w-3/4 self-center"
-            >
-              Save changes
-            </Button>
-          </>
-        )}
-
-      {activeTab === 'members' &&
-        canManageMembers && (
-          <Accordion
-            selectionMode="multiple"
-          // defaultExpandedKeys={['members', 'add']}
-          >
-            <AccordionItem
-              key="add"
-              aria-label="Add members"
-              title="Add members"
-            >
-              <p className="text-sm text-default-500 mb-3">
-                All 4 players need the player role to start a game.
-              </p>
-              <Form onSubmit={handleAddMember} className="gap-4">
-                <PlayerAutocomplete
-                  label="User"
-                  items={players}
-                  selectedKey={selectedUserId || null}
-                  onSelectionChange={(id) =>
-                    setSelectedUserId(id != null ? String(id) : '')
-                  }
+      {activeTab === 'overview' && canManageEvent && (
+        <>
+          <Card>
+            <CardBody className="gap-2">
+              <p className="text-default-500">General</p>
+              <Form id="edit-event-form" onSubmit={handleSave}>
+                <Input
+                  label="Name"
+                  value={editName}
+                  onValueChange={setEditName}
+                  isRequired
+                  variant="bordered"
                 />
-                <CheckboxGroup
-                  label="Roles"
-                  value={selectedRoles}
-                  onValueChange={(v) => setSelectedRoles(v as EventRole[])}
-                >
-                  {ALL_ROLES.map((role) => {
-                    const meta = ROLE_META[role];
+                <Textarea
+                  label="Description"
+                  value={editDescription}
+                  onValueChange={setEditDescription}
+                  variant="bordered"
+                />
+                <div className="w-full flex flex-col gap-2">
+                  <p className="text-default-500">Visibility</p>
+                  <VisibilityTabs
+                    label="General"
+                    ariaLabel="Event visibility"
+                    options={VISIBILITY_OPTIONS}
+                    selectedKey={editVisibility}
+                    onSelectionChange={(value) => {
+                      setEditVisibility(value);
+                      applyVisibilityPreset(value);
+                    }}
+                  />
+                  <div className="flex flex-col gap-5">
+                    <VisibilityTabs
+                      label="Ratings"
+                      ariaLabel="Ratings visibility"
+                      options={CONTENT_REACH_OPTIONS}
+                      selectedKey={editRatingsReach}
+                      onSelectionChange={setEditRatingsReach}
+                      isOptionDisabled={isReachOptionDisabled}
+                    />
+                    <VisibilityTabs
+                      label="Live games & results"
+                      ariaLabel="Live games and results visibility"
+                      options={CONTENT_REACH_OPTIONS}
+                      selectedKey={editGamesReach}
+                      onSelectionChange={setEditGamesReach}
+                      isOptionDisabled={isReachOptionDisabled}
+                    />
+                  </div>
+                </div>
+              </Form>
+            </CardBody>
+          </Card>
+          <Button
+            type="submit"
+            form="edit-event-form"
+            color="primary"
+            isLoading={isSaving}
+            isDisabled={!editName.trim()}
+            className="w-3/4 self-center"
+          >
+            Save changes
+          </Button>
+        </>
+      )}
+
+      {activeTab === 'members' && canManageMembers && (
+        <Accordion
+          selectionMode="multiple"
+          // defaultExpandedKeys={['members', 'add']}
+        >
+          <AccordionItem key="add" aria-label="Add members" title="Add members">
+            <p className="text-sm text-default-500 mb-3">
+              All 4 players need the player role to start a game.
+            </p>
+            <Form onSubmit={handleAddMember} className="gap-4">
+              <PlayerAutocomplete
+                label="User"
+                items={players}
+                selectedKey={selectedUserId || null}
+                onSelectionChange={(id) =>
+                  setSelectedUserId(id != null ? String(id) : '')
+                }
+              />
+              <CheckboxGroup
+                label="Roles"
+                value={selectedRoles}
+                onValueChange={(v) => setSelectedRoles(v as EventRole[])}
+              >
+                {ALL_ROLES.map((role) => {
+                  const meta = ROLE_META[role];
+                  return (
+                    <Checkbox
+                      key={role}
+                      value={role}
+                      classNames={{ label: 'flex items-center' }}
+                    >
+                      <span className="flex items-center gap-2 leading-none">
+                        {meta.icon({ className: 'w-6 h-6 shrink-0' })}
+                        {meta.label}
+                      </span>
+                    </Checkbox>
+                  );
+                })}
+              </CheckboxGroup>
+              <Button
+                type="submit"
+                color="primary"
+                isLoading={isAddingMember}
+                isDisabled={!selectedUserId || !selectedRoles.length}
+                className="w-3/4 self-center"
+              >
+                Add member
+              </Button>
+            </Form>
+          </AccordionItem>
+
+          <AccordionItem
+            key="members"
+            aria-label="Members"
+            title={`Members [${members?.length}]`}
+          >
+            {membersLoading ? (
+              <Spinner size="sm" />
+            ) : !members?.length ? (
+              <p className="text-sm text-default-500">No members yet</p>
+            ) : (
+              <Table
+                hideHeader
+                isStriped
+                removeWrapper
+                className="z-0"
+                aria-label="Event members"
+              >
+                <TableHeader>
+                  <TableColumn>Member</TableColumn>
+                  <TableColumn width={1}>Actions</TableColumn>
+                </TableHeader>
+                <TableBody emptyContent={'No members yet'}>
+                  {members.map((member) => {
+                    const orderedRoles = ALL_ROLES.filter((role) =>
+                      member.roles.includes(role)
+                    );
+                    const isOwner = member.user_id === event.owner_user_id;
+
                     return (
-                      <Checkbox
-                        key={role}
-                        value={role}
-                        classNames={{ label: 'flex items-center' }}
-                      >
-                        <span className="flex items-center gap-2 leading-none">
-                          {meta.icon({ className: 'w-6 h-6 shrink-0' })}
-                          {meta.label}
-                        </span>
-                      </Checkbox>
+                      <TableRow key={member.user_id}>
+                        <TableCell>
+                          <div className="flex justify-between items-center gap-2 min-w-0">
+                            <span className="min-w-0 truncate">
+                              {member.name}
+                            </span>
+                            <div className="flex items-center gap-2 shrink-0 text-default-500">
+                              {orderedRoles.map((role) => {
+                                const meta = ROLE_META[role];
+                                return (
+                                  <span
+                                    key={role}
+                                    className="inline-flex shrink-0"
+                                    title={meta.label}
+                                    aria-label={meta.label}
+                                    role="img"
+                                  >
+                                    {meta.icon({ className: 'w-6 h-6' })}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="w-0 whitespace-nowrap">
+                          {isOwner ? (
+                            <span
+                              className="flex justify-center text-default-500"
+                              title="Owner"
+                              aria-label="Owner"
+                              role="img"
+                            >
+                              <CrownIcon className="w-6 h-6" />
+                            </span>
+                          ) : (
+                            <Button
+                              size="sm"
+                              color="danger"
+                              variant="flat"
+                              onPress={() => handleRemoveMember(member.user_id)}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </CheckboxGroup>
-                <Button
-                  type="submit"
-                  color="primary"
-                  isLoading={isAddingMember}
-                  isDisabled={!selectedUserId || !selectedRoles.length}
-                  className="w-3/4 self-center"
-                >
-                  Add member
-                </Button>
-              </Form>
-            </AccordionItem>
-
-            <AccordionItem
-              key="members"
-              aria-label="Members"
-              title={`Members [${members?.length}]`}
-            >
-              {membersLoading ? (
-                <Spinner size="sm" />
-              ) : !members?.length ? (
-                <p className="text-sm text-default-500">No members yet</p>
-              ) : (
-                <Table
-                  hideHeader
-                  isStriped
-                  removeWrapper
-                  className="z-0"
-                  aria-label="Event members"
-                >
-                  <TableHeader>
-                    <TableColumn>Member</TableColumn>
-                    <TableColumn width={1}>Actions</TableColumn>
-                  </TableHeader>
-                  <TableBody emptyContent={"No members yet"}>
-                    {members.map((member) => {
-                      const orderedRoles = ALL_ROLES.filter((role) =>
-                        member.roles.includes(role)
-                      );
-                      const isOwner = member.user_id === event.owner_user_id;
-
-                      return (
-                        <TableRow key={member.user_id}>
-                          <TableCell>
-                            <div className="flex justify-between items-center gap-2 min-w-0">
-                              <span className="min-w-0 truncate">
-                                {member.name}
-                              </span>
-                              <div className="flex items-center gap-2 shrink-0 text-default-500">
-                                {orderedRoles.map((role) => {
-                                  const meta = ROLE_META[role];
-                                  return (
-                                    <span
-                                      key={role}
-                                      className="inline-flex shrink-0"
-                                      title={meta.label}
-                                      aria-label={meta.label}
-                                      role="img"
-                                    >
-                                      {meta.icon({ className: 'w-6 h-6' })}
-                                    </span>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="w-0 whitespace-nowrap">
-                            {isOwner ? (
-                              <span
-                                className="flex justify-center text-default-500"
-                                title="Owner"
-                                aria-label="Owner"
-                                role="img"
-                              >
-                                <CrownIcon className="w-6 h-6" />
-                              </span>
-                            ) : (
-                              <Button
-                                size="sm"
-                                color="danger"
-                                variant="flat"
-                                onPress={() =>
-                                  handleRemoveMember(member.user_id)
-                                }
-                              >
-                                Remove
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </AccordionItem>
-          </Accordion>
-        )}
+                </TableBody>
+              </Table>
+            )}
+          </AccordionItem>
+        </Accordion>
+      )}
     </div>
   );
 }

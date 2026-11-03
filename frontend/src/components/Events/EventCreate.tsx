@@ -23,9 +23,13 @@ const VISIBILITY_OPTIONS: { value: EventVisibility; label: string }[] = [
   { value: 'public', label: 'Public' },
 ];
 
-const TYPE_OPTIONS: { value: 'regular' | 'tournament'; label: string, isDisabled: boolean }[] = [
-  { value: 'regular', label: 'Regular',  isDisabled: false},
-  { value: 'tournament', label: 'Tournament', isDisabled: true},
+const TYPE_OPTIONS: {
+  value: 'regular' | 'tournament';
+  label: string;
+  isDisabled: boolean;
+}[] = [
+  { value: 'regular', label: 'Regular', isDisabled: false },
+  { value: 'tournament', label: 'Tournament', isDisabled: true },
 ];
 
 type VisibilityTabsProps<T extends string> = {
@@ -143,7 +147,11 @@ export default function EventCreate() {
                 }
               >
                 {TYPE_OPTIONS.map((opt) => (
-                  <Tab key={opt.value} title={opt.label} isDisabled={opt.isDisabled} />
+                  <Tab
+                    key={opt.value}
+                    title={opt.label}
+                    isDisabled={opt.isDisabled}
+                  />
                 ))}
               </Tabs>
               <p className="text-default-500">Visibility</p>

@@ -233,7 +233,6 @@ export default function Live() {
                   eventId={eventId}
                   onUndoSuccess={refetch}
                 />
-             
               </ContextMenu>
             </div>
           </div>

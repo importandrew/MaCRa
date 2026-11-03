@@ -15,8 +15,11 @@ const iconClass = 'w-6 h-6 text-default-500';
 
 export default function Landing() {
   const { isAuthenticated } = useContext(AuthContext);
-  const { selectedEvent, selectedEventId, isLoading: eventLoading } =
-    useEvent();
+  const {
+    selectedEvent,
+    selectedEventId,
+    isLoading: eventLoading,
+  } = useEvent();
   const { data, isLoading } = useFetchPlayerStatus();
   const { hasCapability, isLoading: capsLoading } =
     useEventCapabilities(selectedEventId);
@@ -89,9 +92,7 @@ export default function Landing() {
       </div>
 
       <div className="flex flex-col-reverse w-screen px-6 mb-6 gap-3">
-        {!isAuthenticated && (
-          <MainButton text="Login to play" link="/login" />
-        )}
+        {!isAuthenticated && <MainButton text="Login to play" link="/login" />}
 
         {isAuthenticated && !selectedEventId && !eventLoading && (
           <MainButton text="Select event to play" onPress={onOpen} />
@@ -117,11 +118,7 @@ export default function Landing() {
               <MainButton text="Last game" color="secondary" link="/last" />
             )}
             {data?.has_last && (
-              <MainButton
-                text="Played games"
-                color="default"
-                link="/history"
-              />
+              <MainButton text="Played games" color="default" link="/history" />
             )}
           </>
         )}

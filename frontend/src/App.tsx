@@ -69,10 +69,7 @@ function App() {
               </Route>
             </Route>
 
-            <Route
-              path="/event/:eventId/game/:gameId"
-              element={<ViewGame />}
-            />
+            <Route path="/event/:eventId/game/:gameId" element={<ViewGame />} />
           </Route>
 
           <Route element={<EventPagesLayout />}>

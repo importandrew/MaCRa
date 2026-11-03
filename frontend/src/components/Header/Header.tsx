@@ -18,7 +18,10 @@ export default function Header() {
   return (
     // Brand defaults to flex-grow/basis-0; override so logo keeps intrinsic size.
     // Start + end contents both grow and share the remaining width.
-    <Navbar maxWidth="full" classNames={{ wrapper: 'min-w-0 gap-2 px-4 sm:gap-4 sm:px-6' }}>
+    <Navbar
+      maxWidth="full"
+      classNames={{ wrapper: 'min-w-0 gap-2 px-4 sm:gap-4 sm:px-6' }}
+    >
       <NavbarBrand className="grow-0 basis-auto shrink-0 max-w-fit">
         <Link color="foreground" href="/" className="flex items-center gap-2">
           <Image
