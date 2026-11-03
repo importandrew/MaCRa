@@ -15,6 +15,7 @@ import { PlayerOrder } from '../../../models/GameData';
 import { authFetch, PostRequest, eventPath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { GameResult } from '../../../models/GameResult';
+import PlayerPicker from '../../PlayerPicker';
 
 export default function PenaltyInput({
   players = [],
@@ -85,28 +86,12 @@ export default function PenaltyInput({
       className="mb-3 items-center"
     >
       <div className="flex flex-col gap-4 w-full sm:w-[300px]">
-        <div className="flex flex-col gap-1">
-          <Label id="fined-player-label">Select player to fine</Label>
-          <ToggleButtonGroup
-            aria-labelledby="fined-player-label"
-            selectionMode="single"
-            disallowEmptySelection
-            isDetached
-            className="grid grid-cols-2 gap-2"
-            selectedKeys={loser ? [String(loser)] : []}
-            onSelectionChange={(keys) => setLoser(Number(firstKey(keys)))}
-          >
-            {(players ?? []).map((player) => (
-              <ToggleButton
-                key={player.id}
-                id={String(player.id)}
-                className="min-w-0"
-              >
-                <span className="truncate">{player.name}</span>
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-        </div>
+        <PlayerPicker
+          label="Select player to fine"
+          players={players ?? []}
+          selectedId={loser ? String(loser) : ''}
+          onChange={(id) => setLoser(Number(id))}
+        />
 
         <Switch isSelected={distributed} onChange={handleIsDistributed}>
           <Switch.Content>

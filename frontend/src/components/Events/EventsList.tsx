@@ -127,7 +127,7 @@ export default function EventsList() {
               <Drawer.Heading>Events</Drawer.Heading>
             </Drawer.Header>
             <Drawer.Body className="flex flex-col gap-3">
-              <Button variant="primary" onPress={handleCreate}>
+              <Button variant="primary" fullWidth onPress={handleCreate}>
                 New event
               </Button>
             </Drawer.Body>

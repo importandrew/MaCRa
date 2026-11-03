@@ -39,6 +39,7 @@ export default function SegmentedPicker<T extends string>({
         selectionMode="single"
         disallowEmptySelection
         fullWidth
+        className="items-stretch"
         selectedKeys={[selectedKey]}
         onSelectionChange={(keys) => {
           const [key] = keys;

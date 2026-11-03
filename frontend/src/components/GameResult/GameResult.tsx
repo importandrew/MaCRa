@@ -67,19 +67,34 @@ export default function GameResult() {
       {data ? (
         <div className="flex flex-col grow justify-center w-screen sm:max-w-[600px] h-full px-3 gap-3">
           <GameResultTable data={data} />
-          <div className="grid grid-cols-2 sm:flex sm:flex-row justify-center gap-3">
-            <Button type="button" onPress={showChart} variant="tertiary">
+          <div className="flex flex-wrap gap-3 [&>*]:flex-1 [&>*]:basis-[calc(50%-0.375rem)] sm:[&>*]:basis-0">
+            <Button
+              type="button"
+              onPress={showChart}
+              variant="tertiary"
+              fullWidth
+            >
               {isChartVisible ? 'Hide chart' : 'Show chart'}
             </Button>
-            <Button type="button" onPress={showLogs} variant="tertiary">
+            <Button
+              type="button"
+              onPress={showLogs}
+              variant="tertiary"
+              fullWidth
+            >
               {isLogsVisible ? 'Hide logs' : 'Show logs'}
             </Button>
             {!isEventGameRoute && isAuthenticated && canCreateGame && (
-              <Button type="button" onPress={playAgain} variant="primary">
+              <Button
+                type="button"
+                onPress={playAgain}
+                variant="primary"
+                fullWidth
+              >
                 Play Again
               </Button>
             )}
-            <LinkButton to="/" variant="secondary">
+            <LinkButton to="/" variant="secondary" fullWidth>
               Home
             </LinkButton>
           </div>

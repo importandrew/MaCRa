@@ -142,6 +142,9 @@ export default function EventLayout() {
               {canManage && (
                 <Button
                   variant="tertiary"
+                  fullWidth
+                  // Tertiary text is muted inside overlays; keep it readable.
+                  className="text-foreground"
                   onPress={() => goTo(`/event/${eventId}/manage`)}
                 >
                   Manage
@@ -150,6 +153,9 @@ export default function EventLayout() {
               {canRating && (
                 <Button
                   variant="tertiary"
+                  fullWidth
+                  // Tertiary text is muted inside overlays; keep it readable.
+                  className="text-foreground"
                   onPress={() => goTo(`/event/${eventId}/rating`)}
                 >
                   Rating
@@ -158,6 +164,9 @@ export default function EventLayout() {
               {canLiveGames && (
                 <Button
                   variant="tertiary"
+                  fullWidth
+                  // Tertiary text is muted inside overlays; keep it readable.
+                  className="text-foreground"
                   onPress={() => goTo(`/event/${eventId}/games/live`)}
                 >
                   Live games
@@ -166,6 +175,9 @@ export default function EventLayout() {
               {canFinishedGames && (
                 <Button
                   variant="tertiary"
+                  fullWidth
+                  // Tertiary text is muted inside overlays; keep it readable.
+                  className="text-foreground"
                   onPress={() => goTo(`/event/${eventId}/games/finished`)}
                 >
                   Finished games

@@ -3,6 +3,8 @@ import {
   FieldError,
   Form,
   Label,
+  ListBox,
+  Select,
   Input,
   Spinner,
   ToggleButton,
@@ -21,6 +23,53 @@ import {
 import { OUTCOME_LABELS } from '../../utils/constants';
 import { authFetch, PostRequest, eventPath } from '../Request';
 import { getStoredEventId } from '../../providers/event/eventConstants';
+
+// PlayerSelect is a compact player dropdown. The round form sits in the
+// middle cell of the table, which is too narrow for one button per player.
+// TODO.local.md item 10 replaces this form with seat-based input.
+function PlayerSelect({
+  label,
+  players,
+  selectedId,
+  onChange,
+  disabledId,
+}: {
+  label: string;
+  players: PlayerOrder[];
+  selectedId: string;
+  onChange: (id: string) => void;
+  disabledId: string;
+}) {
+  return (
+    <Select
+      fullWidth
+      placeholder="Select player"
+      value={selectedId || null}
+      disabledKeys={disabledId ? [disabledId] : []}
+      onChange={(key) => onChange(key == null ? '' : String(key))}
+    >
+      <Label>{label}</Label>
+      <Select.Trigger>
+        <Select.Value />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {players.map((player) => (
+            <ListBox.Item
+              key={player.id}
+              id={String(player.id)}
+              textValue={player.name}
+            >
+              {player.name}
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </Select.Popover>
+    </Select>
+  );
+}
 
 export default function ScroreInput({
   kanji,
@@ -117,7 +166,7 @@ export default function ScroreInput({
         onSubmit={onSubmit}
         className={'mt-3 text-base ' + (isHidden ? 'hidden' : '')}
       >
-        <div className="flex flex-col gap-4 w-full md:w-[300px] mx-auto px-3 md:px-0 text-start">
+        <div className="flex flex-col gap-3 w-full md:w-[300px] mx-auto text-start">
           <div className="flex flex-col gap-1">
             <Label id="outcome-label">Outcome</Label>
             <ToggleButtonGroup
@@ -141,55 +190,23 @@ export default function ScroreInput({
           </div>
 
           {isWinOutcome && (
-            <div className="flex flex-col gap-1">
-              <Label id="winner-label">Player won</Label>
-              <ToggleButtonGroup
-                aria-labelledby="winner-label"
-                selectionMode="single"
-                disallowEmptySelection
-                isDetached
-                className="grid grid-cols-2 gap-2"
-                selectedKeys={winner ? [winner] : []}
-                onSelectionChange={(keys) => setWinner(firstKey(keys))}
-              >
-                {players.map((player) => (
-                  <ToggleButton
-                    key={player.id}
-                    id={String(player.id)}
-                    isDisabled={String(player.id) === loser}
-                    className="min-w-0"
-                  >
-                    <span className="truncate">{player.name}</span>
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-            </div>
+            <PlayerSelect
+              label="Player won"
+              players={players}
+              selectedId={winner}
+              onChange={setWinner}
+              disabledId={loser}
+            />
           )}
 
           {outcome === Outcome.Deal && (
-            <div className="flex flex-col gap-1">
-              <Label id="loser-label">Player dealt</Label>
-              <ToggleButtonGroup
-                aria-labelledby="loser-label"
-                selectionMode="single"
-                disallowEmptySelection
-                isDetached
-                className="grid grid-cols-2 gap-2"
-                selectedKeys={loser ? [loser] : []}
-                onSelectionChange={(keys) => setLoser(firstKey(keys))}
-              >
-                {players.map((player) => (
-                  <ToggleButton
-                    key={player.id}
-                    id={String(player.id)}
-                    isDisabled={String(player.id) === winner}
-                    className="min-w-0"
-                  >
-                    <span className="truncate">{player.name}</span>
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-            </div>
+            <PlayerSelect
+              label="Player dealt"
+              players={players}
+              selectedId={loser}
+              onChange={setLoser}
+              disabledId={winner}
+            />
           )}
 
           {isWinOutcome && (
