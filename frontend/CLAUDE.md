@@ -6,6 +6,7 @@
 - UI is HeroUI v3 (React Aria Components, compound components like `Card.Content`, styles from `@heroui/styles`; no provider, no Tailwind plugin, no framer-motion). Shared building blocks in `src/components/`:
   - `ContextMenu/ContextMenu` — the ≡ button plus its side menu; use it for every ≡ menu. An open v3 Drawer makes everything outside it inert, so `SideMenu` draws its own ≡ close button at the same screen spot.
   - `LinkButton` — a react-router link styled as a button (v3 Button has no `as`). HeroUI `href` props navigate through react-router via `RouterProvider` in `App.tsx`.
+  - `buttonTint()` — soft colored fill for a button (`variant="secondary"` + `className={buttonTint('accent')}`), like v2's `variant="flat"` with a color; v3 has no such variants.
   - `Confirm` (AlertDialog), `SegmentedPicker` (ToggleButtonGroup for one-of-few choices), `LazyAccordion` (v3 Accordion keeps every panel mounted; this one renders a panel only while open), `NavList` (list of links), `UserAvatar`, `LoadingTemplate/LoadingSpinner`.
 - Colors use v3 tokens (`text-muted`, `bg-default`, `bg-accent-soft`, `border-border`, …); v2 numbered scales like `text-default-500` no longer exist. Dark mode is class-only (`index.css`), and the app never sets it.
 - Number inputs that gate a submit button use a `TextField` with `inputMode="numeric"`, not `NumberField`: NumberField commits its value only on blur.
