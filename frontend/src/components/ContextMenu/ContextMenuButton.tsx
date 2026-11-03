@@ -21,7 +21,7 @@ export default function ContextMenuButton({
       onPress={onPress}
       className={`rounded-full ${className}`}
     >
-      <BarsIcon className="text-gray-400" />
+      <BarsIcon className="text-muted" />
     </Button>
   );
 }

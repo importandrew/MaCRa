@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   Label,
-  Spinner,
   TextArea,
   TextField,
 } from '@heroui/react';
@@ -18,6 +17,7 @@ import {
 import { createEvent } from '../../providers/event/eventApi';
 import { showToast } from '../Toast';
 import SegmentedPicker from '../SegmentedPicker';
+import PendingButton from '../PendingButton';
 
 const VISIBILITY_OPTIONS: { value: EventVisibility; label: string }[] = [
   { value: 'private', label: 'Private' },
@@ -146,7 +146,7 @@ export default function EventCreate() {
         >
           Cancel
         </Button>
-        <Button
+        <PendingButton
           type="submit"
           form="create-event-form"
           variant="primary"
@@ -154,13 +154,8 @@ export default function EventCreate() {
           isDisabled={!name.trim()}
           className="flex-1"
         >
-          {({ isPending }) => (
-            <>
-              {isPending && <Spinner color="current" size="sm" />}
-              Create
-            </>
-          )}
-        </Button>
+          Create
+        </PendingButton>
       </div>
     </div>
   );

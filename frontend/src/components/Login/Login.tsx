@@ -126,7 +126,10 @@ export default function LoginPage() {
                 <Tabs.Panel id="login">
                   <div className="flex flex-col gap-3 pt-2 text-start">
                     <EmailInput onChange={setEmail} />
-                    <PasswordInput onChange={setPassword} />
+                    <PasswordInput
+                      onChange={setPassword}
+                      autoComplete="current-password"
+                    />
                     <div className="flex flex-col items-center gap-2 mt-3">
                       <Button
                         variant="primary"
@@ -165,7 +168,10 @@ export default function LoginPage() {
                       <Input placeholder="John Mah" />
                       <FieldError />
                     </TextField>
-                    <PasswordInput onChange={setPassword} />
+                    <PasswordInput
+                      onChange={setPassword}
+                      autoComplete="new-password"
+                    />
                     <div className="flex justify-center">
                       <Button
                         variant="primary"

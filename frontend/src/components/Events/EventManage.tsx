@@ -36,6 +36,7 @@ import { GetRequest, authFetch } from '../Request';
 import { showToast } from '../Toast';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import PlayerAutocomplete from '../PlayerAutocomplete';
+import PendingButton from '../PendingButton';
 
 const ALL_ROLES: EventRole[] = ['player', 'referee', 'observer'];
 
@@ -269,7 +270,7 @@ export default function EventManage() {
               </Form>
             </Card.Content>
           </Card>
-          <Button
+          <PendingButton
             type="submit"
             form="edit-event-form"
             variant="primary"
@@ -277,13 +278,8 @@ export default function EventManage() {
             isDisabled={!editName.trim()}
             className="w-3/4 self-center"
           >
-            {({ isPending }) => (
-              <>
-                {isPending && <Spinner color="current" size="sm" />}
-                Save changes
-              </>
-            )}
-          </Button>
+            Save changes
+          </PendingButton>
         </>
       )}
 
@@ -333,20 +329,15 @@ export default function EventManage() {
                         );
                       })}
                     </CheckboxGroup>
-                    <Button
+                    <PendingButton
                       type="submit"
                       variant="primary"
                       isPending={isAddingMember}
                       isDisabled={!selectedUserId || !selectedRoles.length}
                       className="w-3/4 self-center"
                     >
-                      {({ isPending }) => (
-                        <>
-                          {isPending && <Spinner color="current" size="sm" />}
-                          Add member
-                        </>
-                      )}
-                    </Button>
+                      Add member
+                    </PendingButton>
                   </Form>
                 </>
               ),

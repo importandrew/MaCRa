@@ -104,11 +104,11 @@ export default function GameLogs({
 
   const getColoredScore = (value: number | undefined) => {
     if (value === undefined) {
-      return 'text-gray-400';
+      return 'text-muted';
     }
 
     if (value === 0) {
-      return 'text-gray-400';
+      return 'text-muted';
     }
 
     if (value < 0) {

@@ -40,7 +40,7 @@ export default function PlayerPicker({
             key={player.id}
             id={String(player.id)}
             isDisabled={String(player.id) === disabledId}
-            className="h-auto min-h-11 w-full min-w-0 rounded-xl px-2 py-1.5"
+            className="h-auto min-h-11 w-full min-w-0 rounded-xl px-2 py-1.5 not-data-selected:text-foreground"
           >
             <span className="line-clamp-2 whitespace-normal break-words text-center leading-tight">
               {player.name}

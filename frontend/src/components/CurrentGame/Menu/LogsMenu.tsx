@@ -1,10 +1,10 @@
-import { Button, Spinner } from '@heroui/react';
 import { useState } from 'react';
 import GameLogs from '../../GameResult/GameLogs';
 import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
 import { UndoIcon } from '../../Icons/UndoIcon';
 import { undoLastRound } from '../../../providers/game/gameDataApi';
+import PendingButton from '../../PendingButton';
 
 export default function LogsMenu({
   gameId,
@@ -42,25 +42,18 @@ export default function LogsMenu({
       ></GameLogs>
       {canUndoLastRound && (
         <>
-          <Button
+          <PendingButton
             className="w-1/2 self-center"
             variant="tertiary"
             size="sm"
             onPress={() => setConfirmOpen(true)}
             isPending={undoLoading}
             isDisabled={gameId == null}
+
+            icon={<UndoIcon />}
           >
-            {({ isPending }) => (
-              <>
-                {isPending ? (
-                  <Spinner color="current" size="sm" />
-                ) : (
-                  <UndoIcon />
-                )}
-                Undo last round
-              </>
-            )}
-          </Button>
+            Undo last round
+          </PendingButton>
           <Confirm
             isOpen={confirmOpen}
             onClose={() => setConfirmOpen(false)}

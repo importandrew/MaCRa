@@ -1,9 +1,10 @@
-import { Button, ProgressCircle, Spinner } from '@heroui/react';
+import { ProgressCircle } from '@heroui/react';
 import {
   EventGameListItem,
   EventGameListPlayer,
 } from '../../models/EventGames';
 import NavList from '../NavList';
+import PendingButton from '../PendingButton';
 
 type EventGamesListProps = {
   games: EventGameListItem[];
@@ -120,19 +121,14 @@ export function EventGamesList({
         }))}
       />
       {hasMore && (
-        <Button
+        <PendingButton
           variant="secondary"
           isPending={isLoadingMore}
           onPress={onLoadMore}
           className="self-center"
         >
-          {({ isPending }) => (
-            <>
-              {isPending && <Spinner color="current" size="sm" />}
-              Load more
-            </>
-          )}
-        </Button>
+          Load more
+        </PendingButton>
       )}
     </div>
   );

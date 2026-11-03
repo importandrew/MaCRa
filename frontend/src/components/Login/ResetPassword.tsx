@@ -59,7 +59,10 @@ export default function ResetPasswordPage() {
                 </>
               ) : (
                 <>
-                  <PasswordInput onChange={setPassword} />
+                  <PasswordInput
+                    onChange={setPassword}
+                    autoComplete="new-password"
+                  />
                   <div className="flex justify-center gap-3">
                     <Button
                       variant="primary"

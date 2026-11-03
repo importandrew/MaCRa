@@ -178,7 +178,7 @@ export default function Live() {
                 onPress={refetch}
                 className="absolute z-1 left-0 bottom-0 rounded-full"
               >
-                <RefreshIcon className="text-gray-400" />
+                <RefreshIcon className="text-muted" />
               </Button>
             </div>
             <div className="relative self-center h-full w-full">

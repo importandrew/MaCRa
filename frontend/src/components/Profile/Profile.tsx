@@ -4,7 +4,6 @@ import {
   Input,
   Label,
   Separator,
-  Spinner,
   TextField,
 } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -17,6 +16,7 @@ import {
 import { UserData } from '../../models/UserData';
 import { showToast } from '../Toast';
 import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
+import PendingButton from '../PendingButton';
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -94,7 +94,7 @@ export default function ProfilePage() {
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
         <Card className="w-full mx-5">
-          <Card.Header className="items-center rounded-xl bg-blue-400 py-2 text-gray-100">
+          <Card.Header className="items-center rounded-xl bg-accent py-2 text-accent-foreground">
             <Card.Title>Profile</Card.Title>
           </Card.Header>
           <Separator />
@@ -115,19 +115,14 @@ export default function ProfilePage() {
               <Button variant="ghost" onPress={() => navigate('/')}>
                 Cancel
               </Button>
-              <Button
+              <PendingButton
                 variant="primary"
                 onPress={handleSave}
                 isPending={isSaving}
                 isDisabled={!name.trim() || name.trim() === userData?.name}
               >
-                {({ isPending }) => (
-                  <>
-                    {isPending && <Spinner color="current" size="sm" />}
-                    Save
-                  </>
-                )}
-              </Button>
+                Save
+              </PendingButton>
             </div>
           </Card.Content>
         </Card>

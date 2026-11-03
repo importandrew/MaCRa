@@ -12,6 +12,15 @@ body {
   @apply bg-background text-foreground;
 }
 
+/* Long unbroken text (URLs, ids in error toasts) wraps inside the toast
+   instead of overflowing it on phones. */
+@layer components {
+  .toast__title,
+  .toast__description {
+    @apply whitespace-normal wrap-anywhere;
+  }
+}
+
 html,
 body,
 #root {

@@ -6,11 +6,7 @@ import {
   ListBox,
   Select,
   Input,
-  Spinner,
-  ToggleButton,
   TextField,
-  ToggleButtonGroup,
-  type Key,
 } from '@heroui/react';
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -23,10 +19,11 @@ import {
 import { OUTCOME_LABELS } from '../../utils/constants';
 import { authFetch, PostRequest, eventPath } from '../Request';
 import { getStoredEventId } from '../../providers/event/eventConstants';
+import PendingButton from '../PendingButton';
+import SegmentedPicker from '../SegmentedPicker';
 
 // PlayerSelect is a compact player dropdown. The round form sits in the
 // middle cell of the table, which is too narrow for one button per player.
-// TODO.local.md item 10 replaces this form with seat-based input.
 function PlayerSelect({
   label,
   players,
@@ -145,9 +142,6 @@ export default function ScroreInput({
     (outcome === Outcome.Self && winner !== '' && score >= 8) ||
     (outcome === Outcome.Deal && winner !== '' && loser !== '' && score >= 8);
 
-  // firstKey returns the selected key of a single-selection group, or ''.
-  const firstKey = (keys: Set<Key>) => String([...keys][0] ?? '');
-
   return (
     <div className="relative z-10 py-3 justify-self-center self-center items-center w-full text-5xl">
       <Button
@@ -167,27 +161,21 @@ export default function ScroreInput({
         className={'mt-3 text-base ' + (isHidden ? 'hidden' : '')}
       >
         <div className="flex flex-col gap-3 w-full md:w-[300px] mx-auto text-start">
-          <div className="flex flex-col gap-1">
-            <Label id="outcome-label">Outcome</Label>
-            <ToggleButtonGroup
-              aria-labelledby="outcome-label"
-              selectionMode="single"
-              disallowEmptySelection
-              fullWidth
-              selectedKeys={outcome ? [outcome] : []}
-              onSelectionChange={(keys) => {
-                resetRoundResults();
-                setOutcome(firstKey(keys) as Outcome);
-              }}
-            >
-              {[Outcome.Draw, Outcome.Self, Outcome.Deal].map((key, index) => (
-                <ToggleButton key={key} id={key}>
-                  {index > 0 && <ToggleButtonGroup.Separator />}
-                  {OUTCOME_LABELS[index]}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </div>
+          <SegmentedPicker
+            label="Outcome"
+            options={[Outcome.Draw, Outcome.Self, Outcome.Deal].map(
+              (value, index) => ({
+                value,
+                // Non-breaking hyphen: "Deal-in" must not wrap in the narrow form.
+                label: OUTCOME_LABELS[index].replace('-', '\u2011'),
+              })
+            )}
+            selectedKey={outcome ? (outcome as Outcome) : null}
+            onSelectionChange={(value) => {
+              resetRoundResults();
+              setOutcome(value);
+            }}
+          />
 
           {isWinOutcome && (
             <PlayerSelect
@@ -235,19 +223,14 @@ export default function ScroreInput({
           )}
 
           <div className="flex justify-center">
-            <Button
+            <PendingButton
               type="submit"
               variant="primary"
               isDisabled={!isComplete}
               isPending={isLoading}
             >
-              {({ isPending }) => (
-                <>
-                  {isPending && <Spinner color="current" size="sm" />}
-                  OK
-                </>
-              )}
-            </Button>
+              OK
+            </PendingButton>
           </div>
         </div>
       </Form>

@@ -20,7 +20,8 @@ export default function SegmentedPicker<T extends string>({
   label?: string;
   ariaLabel?: string;
   options: SegmentedPickerOption<T>[];
-  selectedKey: T;
+  // selectedKey is null until the user picks an option.
+  selectedKey: T | null;
   onSelectionChange: (key: T) => void;
   isOptionDisabled?: (value: T) => boolean;
 }) {
@@ -40,7 +41,7 @@ export default function SegmentedPicker<T extends string>({
         disallowEmptySelection
         fullWidth
         className="items-stretch"
-        selectedKeys={[selectedKey]}
+        selectedKeys={selectedKey ? [selectedKey] : []}
         onSelectionChange={(keys) => {
           const [key] = keys;
           if (key != null) onSelectionChange(String(key) as T);
@@ -51,7 +52,7 @@ export default function SegmentedPicker<T extends string>({
             key={opt.value}
             id={opt.value}
             isDisabled={opt.isDisabled || isOptionDisabled?.(opt.value)}
-            className="min-w-0 h-auto min-h-9 py-1.5"
+            className="min-w-0 h-auto min-h-9 py-1.5 not-data-selected:text-foreground"
           >
             {index > 0 && <ToggleButtonGroup.Separator />}
             <span className="whitespace-normal text-center leading-tight">

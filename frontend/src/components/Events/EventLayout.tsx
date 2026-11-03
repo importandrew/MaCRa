@@ -1,4 +1,4 @@
-import { Button, Drawer, Spinner, useOverlayState } from '@heroui/react';
+import { Button, Drawer, useOverlayState } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { hasCapability as checkCapability } from '../../providers/event/useEventCapabilities';
@@ -15,6 +15,7 @@ import Confirm from '../Confirm';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import { showToast } from '../Toast';
+import PendingButton from '../PendingButton';
 
 export default function EventLayout() {
   const { eventId: eventIdParam } = useParams();
@@ -91,6 +92,17 @@ export default function EventLayout() {
 
   const closeDrawer = () => setIsDrawerOpen(false);
 
+  const menuItems = [
+    { label: 'Manage', path: '/manage', isAllowed: canManage },
+    { label: 'Rating', path: '/rating', isAllowed: canRating },
+    { label: 'Live games', path: '/games/live', isAllowed: canLiveGames },
+    {
+      label: 'Finished games',
+      path: '/games/finished',
+      isAllowed: canFinishedGames,
+    },
+  ];
+
   const goTo = (path: string) => {
     closeDrawer();
     navigate(path);
@@ -139,65 +151,30 @@ export default function EventLayout() {
               </Drawer.Heading>
             </Drawer.Header>
             <Drawer.Body className="flex flex-col gap-2 flex-1">
-              {canManage && (
-                <Button
-                  variant="tertiary"
-                  fullWidth
-                  // Tertiary text is muted inside overlays; keep it readable.
-                  className="text-foreground"
-                  onPress={() => goTo(`/event/${eventId}/manage`)}
-                >
-                  Manage
-                </Button>
-              )}
-              {canRating && (
-                <Button
-                  variant="tertiary"
-                  fullWidth
-                  // Tertiary text is muted inside overlays; keep it readable.
-                  className="text-foreground"
-                  onPress={() => goTo(`/event/${eventId}/rating`)}
-                >
-                  Rating
-                </Button>
-              )}
-              {canLiveGames && (
-                <Button
-                  variant="tertiary"
-                  fullWidth
-                  // Tertiary text is muted inside overlays; keep it readable.
-                  className="text-foreground"
-                  onPress={() => goTo(`/event/${eventId}/games/live`)}
-                >
-                  Live games
-                </Button>
-              )}
-              {canFinishedGames && (
-                <Button
-                  variant="tertiary"
-                  fullWidth
-                  // Tertiary text is muted inside overlays; keep it readable.
-                  className="text-foreground"
-                  onPress={() => goTo(`/event/${eventId}/games/finished`)}
-                >
-                  Finished games
-                </Button>
-              )}
+              {menuItems
+                .filter((item) => item.isAllowed)
+                .map((item) => (
+                  <Button
+                    key={item.path}
+                    variant="tertiary"
+                    fullWidth
+                    // Tertiary text is muted inside overlays; keep it readable.
+                    className="text-foreground"
+                    onPress={() => goTo(`/event/${eventId}${item.path}`)}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
 
               {canFinishEvent && (
-                <Button
+                <PendingButton
                   variant="danger"
                   className="mt-auto w-1/2 self-center"
                   isPending={isFinishing}
                   onPress={onFinishConfirmOpen}
                 >
-                  {({ isPending }) => (
-                    <>
-                      {isPending && <Spinner color="current" size="sm" />}
-                      Finish event
-                    </>
-                  )}
-                </Button>
+                  Finish event
+                </PendingButton>
               )}
             </Drawer.Body>
           </ContextMenu>

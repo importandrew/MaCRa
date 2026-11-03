@@ -10,13 +10,18 @@ import { InputArgs } from '../../models/Input';
 import { EyeClosedIcon } from './EyeClosed';
 import { EyeIcon } from './EyeOpen';
 
-export default function PasswordInput({ onChange }: InputArgs) {
+// autoComplete is 'current-password' to sign in and 'new-password' where the
+// user sets a password (sign up, reset), so password managers suggest one.
+export default function PasswordInput({
+  onChange,
+  autoComplete,
+}: InputArgs & { autoComplete: 'current-password' | 'new-password' }) {
   const [isVisible, setIsVisible] = useState(false);
 
   return (
     <TextField
       name="password"
-      autoComplete="current-password"
+      autoComplete={autoComplete}
       validate={(value: string) =>
         !value.length ? 'Password is required' : null
       }

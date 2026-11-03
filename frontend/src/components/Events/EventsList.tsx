@@ -58,7 +58,11 @@ function EventCardMeta({ event }: { event: Event }) {
   const iconClass = 'w-6 h-6';
 
   return (
-    <div className={`flex items-center gap-2 shrink-0 ${'text-muted'}`}>
+    <div
+      className={`flex items-center gap-2 shrink-0 ${
+        isFinished ? 'text-muted/60' : 'text-muted'
+      }`}
+    >
       {isFinished && (
         <MetaItem
           icon={<CheckInCircleIcon className={iconClass} />}

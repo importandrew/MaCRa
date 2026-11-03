@@ -1,14 +1,4 @@
-import {
-  Button,
-  Form,
-  Label,
-  Input,
-  Switch,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  type Key,
-} from '@heroui/react';
+import { Button, Form, Label, Input, Switch, TextField } from '@heroui/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { showToast } from '../../Toast';
 import { PlayerOrder } from '../../../models/GameData';
@@ -16,6 +6,7 @@ import { authFetch, PostRequest, eventPath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { GameResult } from '../../../models/GameResult';
 import PlayerPicker from '../../PlayerPicker';
+import SegmentedPicker from '../../SegmentedPicker';
 
 export default function PenaltyInput({
   players = [],
@@ -76,9 +67,6 @@ export default function PenaltyInput({
     }
   }, [distributed]);
 
-  // firstKey returns the selected key of a single-selection group, or ''.
-  const firstKey = (keys: Set<Key>) => String([...keys][0] ?? '');
-
   return (
     <Form
       validationBehavior="native"
@@ -112,23 +100,15 @@ export default function PenaltyInput({
         </Switch>
 
         {distributed ? (
-          <div className="flex flex-col gap-1">
-            <Label id="fine-value-label">Fine value</Label>
-            <ToggleButtonGroup
-              aria-labelledby="fine-value-label"
-              selectionMode="single"
-              disallowEmptySelection
-              fullWidth
-              selectedKeys={value ? [String(value)] : []}
-              onSelectionChange={(keys) => setValue(Number(firstKey(keys)))}
-            >
-              <ToggleButton id="30">30</ToggleButton>
-              <ToggleButton id="60">
-                <ToggleButtonGroup.Separator />
-                60
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </div>
+          <SegmentedPicker
+            label="Fine value"
+            options={[
+              { value: '30', label: '30' },
+              { value: '60', label: '60' },
+            ]}
+            selectedKey={value === 30 || value === 60 ? String(value) : null}
+            onSelectionChange={(next) => setValue(Number(next))}
+          />
         ) : (
           // A text field with a numeric keyboard: NumberField commits its
           // value only on blur, which would keep Submit disabled on the tap.
