@@ -1,5 +1,11 @@
-import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
+import { Button, Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
+import { useMemo } from 'react';
 import './Delta.css';
+
+function ordinal(value: number): string {
+  if (value % 100 >= 11 && value % 100 <= 13) return 'th';
+  return ['th', 'st', 'nd', 'rd'][value % 10] ?? 'th';
+}
 
 type TablePosition = 'top' | 'right' | 'bottom' | 'left';
 
@@ -18,44 +24,93 @@ type DeltaProps = {
 };
 
 type PlaceTarget = { place: number; handValue: number };
-type LossTarget = { placesLost: number; finalPlace: number; handValue: number };
+type LossTarget = {
+  placesLost: number;
+  finalPlace: number;
+  tiedThrough: number;
+  handValue: number;
+};
 type OpponentArea = 'top' | 'left' | 'right';
 
 const MIN_HAND = 8;
 
-function sortPlayers(players: DeltaPlayer[]): DeltaPlayer[] {
-  // Keep the input order as the tie-breaker until the project defines
-  // a dedicated rule for players with equal scores.
-  return [...players].sort((a, b) => b.score - a.score);
+type HandMode = 'self' | 'direct' | 'deal-in';
+type Scenario = {
+  mode: HandMode;
+  selectedPlayerId: number;
+  opponentId?: number;
+};
+type LinearScore = { id: number; base: number; slope: number };
+type Rank = { first: number; last: number };
+
+function rankOf(scores: LinearScore[], selectedId: number, handValue: number): Rank {
+  const own = scores.find((p) => p.id === selectedId);
+  if (!own) return { first: 0, last: 0 };
+  const value = own.base + own.slope * handValue;
+  let above = 0;
+  let equal = 0;
+  for (const player of scores) {
+    const otherValue = player.base + player.slope * handValue;
+    if (otherValue > value) above++;
+    if (otherValue === value) equal++;
+  }
+  return { first: above + 1, last: above + equal };
 }
 
-function validHand(required: number): number {
-  return Math.max(MIN_HAND, required);
+// MCR: self-draw = +3(H+8) / -(H+8);
+// discard win = +(H+24) / -(H+8) from discarder / -8 from others.
+function buildScenario(players: DeltaPlayer[], scenario: Scenario): LinearScore[] {
+  const { mode, selectedPlayerId, opponentId } = scenario;
+  return players.map((player) => {
+    let base = player.score;
+    let slope = 0;
+    if (mode === 'self') {
+      if (player.id === selectedPlayerId) {
+        base += 24;
+        slope = 3;
+      } else {
+        base -= 8;
+        slope = -1;
+      }
+    } else {
+      const winnerId = mode === 'direct' ? selectedPlayerId : opponentId;
+      const discarderId = mode === 'direct' ? opponentId : selectedPlayerId;
+      if (player.id === winnerId) {
+        base += 24;
+        slope = 1;
+      } else if (player.id === discarderId) {
+        base -= 8;
+        slope = -1;
+      } else {
+        base -= 8;
+      }
+    }
+    return { id: player.id, base, slope };
+  });
 }
 
-function getRequiredSelfHandAgainstPlayer(selectedScore: number, targetScore: number): number {
-  return validHand(Math.ceil((targetScore - selectedScore + 1) / 4 - 8));
+// Rankings can only change where two linear score functions cross.
+// Evaluate those boundaries instead of scanning every possible hand value.
+function candidateHands(scores: LinearScore[]): number[] {
+  const values = new Set<number>([MIN_HAND]);
+  for (let i = 0; i < scores.length; i++) {
+    for (let j = i + 1; j < scores.length; j++) {
+      const a = scores[i];
+      const b = scores[j];
+      if (a.slope === b.slope) continue;
+      const crossing = (b.base - a.base) / (a.slope - b.slope);
+      if (crossing < MIN_HAND - 1) continue;
+      const floor = Math.floor(crossing);
+      for (const hand of [floor, floor + 1, floor + 2]) {
+        if (hand >= MIN_HAND && Number.isSafeInteger(hand)) values.add(hand);
+      }
+    }
+  }
+  return [...values].sort((a, b) => a - b);
 }
 
-function getRequiredDirectHandAgainstPlayer(
-  selectedScore: number,
-  targetScore: number,
-  isDiscarder: boolean
-): number {
-  const difference = targetScore - selectedScore + 1;
-  return validHand(
-    isDiscarder ? Math.ceil((difference - 32) / 2) : Math.ceil(difference - 32)
-  );
-}
-
-function getPlayersToOvertake(
-  sortedPlayers: DeltaPlayer[],
-  selectedPlayerId: number,
-  targetPlace: number
-): DeltaPlayer[] | null {
-  const selectedIndex = sortedPlayers.findIndex((p) => p.id === selectedPlayerId);
-  if (selectedIndex < 0 || targetPlace < 1 || targetPlace > selectedIndex) return null;
-  return sortedPlayers.slice(targetPlace - 1, selectedIndex);
+function currentRank(players: DeltaPlayer[], selectedPlayerId: number): Rank {
+  return rankOf(players.map((p) => ({ id: p.id, base: p.score, slope: 0 })), selectedPlayerId, 0);
 }
 
 function getGainTargets(
@@ -64,30 +119,27 @@ function getGainTargets(
   mode: 'self' | 'direct',
   discarderId?: number
 ): PlaceTarget[] {
-  const sorted = sortPlayers(players);
-  const selectedIndex = sorted.findIndex((p) => p.id === selectedPlayerId);
-  if (selectedIndex <= 0) return [];
-  const selected = sorted[selectedIndex];
-  const targets: PlaceTarget[] = [];
-
-  for (let place = selectedIndex; place >= 1; place--) {
-    const toOvertake = getPlayersToOvertake(sorted, selectedPlayerId, place);
-    if (!toOvertake) continue;
-    const handValue = Math.max(
-      MIN_HAND,
-      ...toOvertake.map((p) =>
-        mode === 'self'
-          ? getRequiredSelfHandAgainstPlayer(selected.score, p.score)
-          : getRequiredDirectHandAgainstPlayer(
-              selected.score,
-              p.score,
-              p.id === discarderId
-            )
-      )
-    );
-    targets.push({ place, handValue });
+  const initial = currentRank(players, selectedPlayerId);
+  if (initial.first === 0 || (initial.first === 1 && initial.last === 1)) return [];
+  const scores = buildScenario(players, {
+    mode,
+    selectedPlayerId,
+    opponentId: discarderId,
+  });
+  const bestByPlace = new Map<number, number>();
+  for (const handValue of candidateHands(scores)) {
+    const rank = rankOf(scores, selectedPlayerId, handValue);
+    // Only sole places: never display a tie as a promotion.
+    if (rank.first !== rank.last || rank.first >= initial.last) continue;
+    if (!bestByPlace.has(rank.first)) bestByPlace.set(rank.first, handValue);
   }
-  return targets;
+  // The same minimum hand may skip multiple places. Keep the highest.
+  const bestAtHand = new Map<number, number>();
+  for (const [place, handValue] of bestByPlace) {
+    bestAtHand.set(handValue, Math.min(place, bestAtHand.get(handValue) ?? 5));
+  }
+  return [...bestAtHand].map(([handValue, place]) => ({ place, handValue }))
+    .sort((a, b) => a.handValue - b.handValue);
 }
 
 function getDiscardTargets(
@@ -95,29 +147,28 @@ function getDiscardTargets(
   selectedPlayerId: number,
   winnerId: number
 ): LossTarget[] {
-  const sorted = sortPlayers(players);
-  const selectedIndex = sorted.findIndex((p) => p.id === selectedPlayerId);
-  if (selectedIndex < 0 || selectedIndex === sorted.length - 1) return [];
-
-  const selected = sorted[selectedIndex];
-  const currentPlace = selectedIndex + 1;
-  const thresholds = sorted.slice(selectedIndex + 1).map((target) => {
-    const difference = selected.score - target.score + 1;
-    const required = target.id === winnerId
-      ? Math.ceil((difference - 32) / 2)
-      : Math.ceil(difference);
-    return validHand(required);
+  const initial = currentRank(players, selectedPlayerId);
+  if (initial.first === 0 || initial.last === players.length) return [];
+  const scores = buildScenario(players, {
+    mode: 'deal-in',
+    selectedPlayerId,
+    opponentId: winnerId,
   });
-
-  const uniqueValues = [...new Set(thresholds)].sort((a, b) => a - b);
-  return uniqueValues.map((handValue) => {
-    const placesLost = thresholds.filter((threshold) => threshold <= handValue).length;
-    return {
-      placesLost,
-      finalPlace: currentPlace + placesLost,
+  const targets: LossTarget[] = [];
+  let worstRankSum = initial.first + initial.last;
+  for (const handValue of candidateHands(scores)) {
+    const rank = rankOf(scores, selectedPlayerId, handValue);
+    const rankSum = rank.first + rank.last;
+    if (rankSum <= worstRankSum) continue;
+    worstRankSum = rankSum;
+    targets.push({
+      placesLost: Math.max(1, rank.last - initial.first),
+      finalPlace: rank.first,
+      tiedThrough: rank.last,
       handValue,
-    };
-  });
+    });
+  }
+  return targets;
 }
 
 function getRelativePositions(players: DeltaPlayer[], selectedPlayerId: number) {
@@ -147,14 +198,14 @@ type TargetListProps = {
 
 function TargetList({ targets, emptyText, className }: TargetListProps) {
   if (targets.length === 0) {
-    return <div className={`${className}__empty`}>{emptyText}</div>;
+    return <div className={`${className}__empty text-center text-sm text-default-500`}>{emptyText}</div>;
   }
   return (
     <div className={`${className}__targets`}>
       {targets.map(({ place, handValue }) => (
-        <div key={place} className={`${className}__target`}>
-          <span className={`${className}__value`}>{handValue}</span>
-          <span className={`${className}__destination`}>→ {place}-е</span>
+        <div key={place} className={`${className}__target rounded-medium bg-default-100 px-2 py-1.5 text-sm`}>
+          <span className={`${className}__value font-semibold tabular-nums`}>{handValue}</span>
+          <span className={`${className}__destination text-xs text-default-500`}>→ {place}{ordinal(place)}</span>
         </div>
       ))}
     </div>
@@ -163,31 +214,28 @@ function TargetList({ targets, emptyText, className }: TargetListProps) {
 
 type OpponentCardProps = {
   player: DeltaPlayer;
-  selectedPlayer: DeltaPlayer;
-  players: DeltaPlayer[];
+  directTargets: PlaceTarget[];
+  discardTargets: LossTarget[];
   area: OpponentArea;
 };
 
-function OpponentCard({ player, selectedPlayer, players, area }: OpponentCardProps) {
-  const directTargets = getGainTargets(players, selectedPlayer.id, 'direct', player.id);
-  const discardTargets = getDiscardTargets(players, selectedPlayer.id, player.id);
-
+function OpponentCard({ player, directTargets, discardTargets, area }: OpponentCardProps) {
   return (
-    <section className={`delta-opponent delta-opponent--${area}`}>
-      <div className="delta-opponent__identity">
-        <div className="delta-opponent__name" title={player.name}>{player.name}</div>
+    <section className={`delta-opponent delta-opponent--${area} rounded-large border border-divider bg-content1 p-4 shadow-small`}>
+      <div className="delta-opponent__identity border-b border-divider pb-3 text-center">
+        <div className="delta-opponent__name font-semibold text-foreground" title={player.name}>{player.name}</div>
         <div className={[
-          'delta-opponent__score',
-          player.score < 0 ? 'delta-opponent__score--negative' : '',
+          'delta-opponent__score font-semibold text-foreground tabular-nums',
+          player.score < 0 ? 'text-danger' : '',
         ].filter(Boolean).join(' ')}>
-          {player.score.toLocaleString('ru-RU')}
+          {player.score.toLocaleString('en-US')}
         </div>
       </div>
 
       {directTargets.length > 0 && (
         <div className="delta-direct">
-          <div className="delta-direct__title" title={`Прямой выигрыш с ${player.name}`}>
-            🎯 Взять с этого игрока
+          <div className="delta-direct__title rounded-medium bg-primary-100 px-2 py-1 text-center text-xs font-semibold text-primary" title={`Win on a discard from ${player.name}`}>
+            Win from this player
           </div>
           <TargetList targets={directTargets} emptyText="" className="delta-direct" />
         </div>
@@ -195,15 +243,15 @@ function OpponentCard({ player, selectedPlayer, players, area }: OpponentCardPro
 
       {discardTargets.length > 0 && (
         <div className="delta-discard">
-          <div className="delta-discard__title" title={`Набросить игроку ${player.name}`}>
-            💥 Набросить этому игроку
+          <div className="delta-discard__title rounded-medium bg-danger-100 px-2 py-1 text-center text-xs font-semibold text-danger" title={`Discard into a win by ${player.name}`}>
+            Deal into this player
           </div>
           <div className="delta-discard__targets">
-            {discardTargets.map(({ finalPlace, handValue, placesLost }) => (
-              <div key={finalPlace} className="delta-discard__target">
-                <span className="delta-discard__value">{handValue}</span>
-                <span className="delta-discard__destination">→ {finalPlace}-е</span>
-                <span className="delta-discard__arrows" aria-label={`Потеряно мест: ${placesLost}`}>
+            {discardTargets.map(({ finalPlace, tiedThrough, handValue, placesLost }) => (
+              <div key={`${finalPlace}-${tiedThrough}-${handValue}`} className="delta-discard__target rounded-medium bg-default-100 px-2 py-1.5 text-sm">
+                <span className="delta-discard__value font-semibold tabular-nums">{handValue}</span>
+                <span className="delta-discard__destination text-xs text-default-500">→ {finalPlace}{ordinal(finalPlace)}{tiedThrough > finalPlace ? `–${tiedThrough}${ordinal(tiedThrough)} (tie)` : ''} </span>
+                <span className="delta-discard__arrows text-xs text-danger" aria-label={`${placesLost} places lost`}>
                   {'↓'.repeat(placesLost)}
                 </span>
               </div>
@@ -216,14 +264,49 @@ function OpponentCard({ player, selectedPlayer, players, area }: OpponentCardPro
 }
 
 export default function Delta({ isOpen, onClose, selectedPlayerId, players }: DeltaProps) {
-  const sorted = sortPlayers(players);
-  const selectedIndex = sorted.findIndex((p) => p.id === selectedPlayerId);
-  const { selectedPlayer, topPlayer, leftPlayer, rightPlayer } = selectedPlayerId === null
-    ? { selectedPlayer: null, topPlayer: null, leftPlayer: null, rightPlayer: null }
-    : getRelativePositions(players, selectedPlayerId);
-  const selfTargets = selectedPlayer
-    ? getGainTargets(players, selectedPlayer.id, 'self')
-    : [];
+  // CurrentGame passes a newly created array on each render.
+  const playersKey = JSON.stringify(players.map((p) =>
+    [p.id, p.name, p.score, p.position]
+  ));
+
+  const calculations = useMemo(() => {
+    const empty = {
+      rank: { first: 0, last: 0 },
+      selectedPlayer: null as DeltaPlayer | null,
+      topPlayer: null as DeltaPlayer | null,
+      leftPlayer: null as DeltaPlayer | null,
+      rightPlayer: null as DeltaPlayer | null,
+      selfTargets: [] as PlaceTarget[],
+      opponentTargets: {} as Record<number, {
+        direct: PlaceTarget[];
+        discard: LossTarget[];
+      }>,
+    };
+    if (!isOpen || selectedPlayerId === null) return empty;
+    const positions = getRelativePositions(players, selectedPlayerId);
+    if (!positions.selectedPlayer) return empty;
+    const opponentTargets: typeof empty.opponentTargets = {};
+    for (const opponent of players) {
+      if (opponent.id === selectedPlayerId) continue;
+      opponentTargets[opponent.id] = {
+        direct: getGainTargets(players, selectedPlayerId, 'direct', opponent.id),
+        discard: getDiscardTargets(players, selectedPlayerId, opponent.id),
+      };
+    }
+    return {
+      ...positions,
+      rank: currentRank(players, selectedPlayerId),
+      selfTargets: getGainTargets(players, selectedPlayerId, 'self'),
+      opponentTargets,
+    };
+  // The primitive key includes every player field used by these calculations.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, selectedPlayerId, playersKey]);
+
+  const {
+    rank, selectedPlayer, topPlayer, leftPlayer, rightPlayer,
+    selfTargets, opponentTargets,
+  } = calculations;
 
   return (
     <Modal
@@ -233,75 +316,90 @@ export default function Delta({ isOpen, onClose, selectedPlayerId, players }: De
       placement="center"
       scrollBehavior="inside"
       classNames={{
-        base: 'delta-modal',
-        header: 'delta-modal__header',
+        base: 'delta-modal bg-background text-foreground rounded-none',
+        header: 'delta-modal__header border-b border-divider',
         body: 'delta-modal__body',
+        closeButton: 'hidden',
       }}
     >
       <ModalContent>
         {() => (
           <>
-            <ModalHeader>
-              <div className="delta-title">
-                <span>Дельты по местам</span>
+            <ModalHeader className="relative pr-14">
+              <div className="flex flex-col gap-1">
+                <span>Position thresholds</span>
                 {selectedPlayer && (
-                  <span className="delta-title__player">
-                    {selectedPlayer.name} · {selectedIndex + 1}-е место
+                  <span className="text-sm font-normal text-default-500">
+                    {selectedPlayer.name} · {rank.first}{ordinal(rank.first)}{rank.last > rank.first ? `–${rank.last}${ordinal(rank.last)} (tie)` : ''} place
                   </span>
                 )}
               </div>
+              <Button
+                isIconOnly
+                variant="light"
+                radius="full"
+                size="sm"
+                aria-label="Close position thresholds"
+                onPress={onClose}
+                className="absolute right-3 top-1/2 z-20 -translate-y-1/2 text-default-600"
+              >
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </Button>
             </ModalHeader>
-            <ModalBody onClick={(event) => {
-              const target = event.target as HTMLElement;
-              if (!target.closest('.delta-opponent, .delta-selected, .delta-legend')) {
-                onClose();
-              }
-            }}>
+            <ModalBody>
               {!selectedPlayer ? (
-                <div className="delta-empty">Игрок не найден</div>
+                <div className="flex min-h-48 items-center justify-center text-default-500">Player not found</div>
               ) : (
                 <div className="delta-layout">
                   {topPlayer && (
-                    <OpponentCard player={topPlayer} selectedPlayer={selectedPlayer}
-                      players={players} area="top" />
+                    <OpponentCard player={topPlayer}
+                      directTargets={opponentTargets[topPlayer.id].direct}
+                      discardTargets={opponentTargets[topPlayer.id].discard}
+                      area="top" />
                   )}
                   {leftPlayer && (
-                    <OpponentCard player={leftPlayer} selectedPlayer={selectedPlayer}
-                      players={players} area="left" />
+                    <OpponentCard player={leftPlayer}
+                      directTargets={opponentTargets[leftPlayer.id].direct}
+                      discardTargets={opponentTargets[leftPlayer.id].discard}
+                      area="left" />
                   )}
-                  <section className="delta-selected">
-                    <div className="delta-selected__header">
-                      <span className="delta-selected__icon">👤</span>
+                  <section className="delta-selected rounded-large border-2 border-primary bg-content1 p-4 shadow-small">
+                    <div className="flex flex-col items-center gap-2">
+                      
                       <div className="delta-selected__identity">
-                        <div className="delta-selected__name" title={selectedPlayer.name}>
+                        <div className="delta-selected__name font-semibold text-foreground" title={selectedPlayer.name}>
                           {selectedPlayer.name}
                         </div>
                         <div className={[
-                          'delta-selected__score',
-                          selectedPlayer.score < 0 ? 'delta-selected__score--negative' : '',
+                          'delta-selected__score font-semibold text-foreground tabular-nums',
+                          selectedPlayer.score < 0 ? 'text-danger' : '',
                         ].filter(Boolean).join(' ')}>
-                          {selectedPlayer.score.toLocaleString('ru-RU')}
+                          {selectedPlayer.score.toLocaleString('en-US')}
                         </div>
-                        <div className="delta-selected__place">
-                          Сейчас {selectedIndex + 1}-е место
+                        <div className="delta-selected__place text-xs text-default-500">
+                          Currently {rank.first}{ordinal(rank.first)}{rank.last > rank.first ? `–${rank.last}${ordinal(rank.last)} (tie)` : ''} place
                         </div>
                       </div>
                     </div>
                     {selfTargets.length > 0 && (
                       <div className="delta-self">
-                        <div className="delta-self__title">🀄 Селф (со стены)</div>
+                        <div className="delta-self__title rounded-medium bg-success-100 px-2 py-1 text-center text-xs font-semibold text-success">Self-draw</div>
                         <TargetList targets={selfTargets} emptyText="" className="delta-self" />
                       </div>
                     )}
                   </section>
                   {rightPlayer && (
-                    <OpponentCard player={rightPlayer} selectedPlayer={selectedPlayer}
-                      players={players} area="right" />
+                    <OpponentCard player={rightPlayer}
+                      directTargets={opponentTargets[rightPlayer.id].direct}
+                      discardTargets={opponentTargets[rightPlayer.id].discard}
+                      area="right" />
                   )}
-                  <div className="delta-legend">
-                    <span>🀄 минимальная рука при селфе</span>
-                    <span>🎯 минимальная рука с указанного игрока</span>
-                    <span>→ итоговое место</span>
+                  <div className="delta-legend text-xs text-default-500">
+                    <span>Self-draw: minimum hand value</span>
+                    <span>Discard win: minimum hand value</span>
+                    <span>→ resulting place</span>
                   </div>
                 </div>
               )}
