@@ -4,6 +4,7 @@ import {
   EventGameListPlayer,
 } from '../../models/EventGames';
 import NavList from '../NavList';
+import { buttonTint } from '../buttonTint';
 
 type EventGamesListProps = {
   games: EventGameListItem[];
@@ -124,7 +125,7 @@ export function EventGamesList({
           variant="secondary"
           isPending={isLoadingMore}
           onPress={onLoadMore}
-          className="self-center"
+          className={`self-center ${buttonTint('accent')}`}
         >
           {({ isPending }) => (
             <>

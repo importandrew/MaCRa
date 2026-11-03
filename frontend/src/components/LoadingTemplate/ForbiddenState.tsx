@@ -1,4 +1,5 @@
 import { Button } from '@heroui/react';
+import { buttonTint } from '../buttonTint';
 
 type ForbiddenStateProps = {
   onGoHome?: () => void;
@@ -12,7 +13,12 @@ export default function ForbiddenState({ onGoHome }: ForbiddenStateProps) {
         You do not have access to this event.
       </p>
       {onGoHome && (
-        <Button type="button" variant="secondary" onPress={onGoHome}>
+        <Button
+          type="button"
+          variant="secondary"
+          className={buttonTint('accent')}
+          onPress={onGoHome}
+        >
           Go home
         </Button>
       )}

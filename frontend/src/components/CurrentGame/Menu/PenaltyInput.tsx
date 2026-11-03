@@ -16,6 +16,7 @@ import { authFetch, PostRequest, eventPath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { GameResult } from '../../../models/GameResult';
 import PlayerPicker from '../../PlayerPicker';
+import { buttonTint } from '../../buttonTint';
 
 export default function PenaltyInput({
   players = [],
@@ -146,7 +147,12 @@ export default function PenaltyInput({
         )}
 
         <div className="flex justify-center sm:max-w-[300px]">
-          <Button type="submit" variant="primary" isDisabled={!loser || !value}>
+          <Button
+            type="submit"
+            variant="secondary"
+            className={buttonTint('warning')}
+            isDisabled={!loser || !value}
+          >
             Submit
           </Button>
         </div>

@@ -42,11 +42,15 @@ export default function PlayerAutocomplete({
     >
       <Label>{label}</Label>
       <ComboBox.InputGroup>
-        <Input />
+        {/* The trigger arrow is absolutely positioned at the end of the field,
+            so the clear button sits just before it and the input reserves
+            room for both. */}
+        <Input className={selectedKey != null ? 'pe-14' : undefined} />
         {selectedKey != null && (
           <CloseButton
             aria-label={`Clear ${label}`}
             onPress={() => handleSelectionChange(null)}
+            className="absolute end-7 top-1/2 z-10 -translate-y-1/2"
           />
         )}
         <ComboBox.Trigger />
