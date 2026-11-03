@@ -9,7 +9,12 @@ import {
   Tabs,
 } from '@heroui/react';
 import { Key, useCallback, useContext, useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { UserData } from '../../models/UserData';
 import { fetchWithStatus, globalFetch, PostRequest } from '../Request';
@@ -44,14 +49,14 @@ export default function LoginPage() {
         setSearchParams({}, { replace: true });
       }
     },
-    [setSearchParams],
+    [setSearchParams]
   );
 
   const handleTabChange = useCallback(
     (key: Key) => {
       setTab(key === 'signup' ? 'signup' : 'login');
     },
-    [setTab],
+    [setTab]
   );
 
   const handleLogin = useCallback(async () => {
@@ -59,7 +64,7 @@ export default function LoginPage() {
 
     const result = await fetchWithStatus<UserData>(
       PostRequest('/auth/login', { email, password }),
-      { redirectOn401: false },
+      { redirectOn401: false }
     );
 
     if (result.status === 403) {
@@ -86,7 +91,7 @@ export default function LoginPage() {
         password,
         name,
         origin: window.location.origin,
-      }),
+      })
     );
 
     if (!data) {

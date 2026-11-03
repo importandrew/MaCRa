@@ -60,18 +60,12 @@ export default function EventOverview() {
     return owner?.name ?? null;
   }, [event, members]);
 
-  const referees = useMemo(
-    () => namesWithRole(members, 'referee'),
-    [members]
-  );
+  const referees = useMemo(() => namesWithRole(members, 'referee'), [members]);
   const observers = useMemo(
     () => namesWithRole(members, 'observer'),
     [members]
   );
-  const players = useMemo(
-    () => namesWithRole(members, 'player'),
-    [members]
-  );
+  const players = useMemo(() => namesWithRole(members, 'player'), [members]);
 
   if (!event) return null;
 
@@ -130,17 +124,11 @@ export default function EventOverview() {
           label="Players"
         >
           {players.length}
-        </DetailRow>  
-        <DetailRow
-          icon={<ScalesIcon className={iconClass} />}
-          label="Referees"
-        >
+        </DetailRow>
+        <DetailRow icon={<ScalesIcon className={iconClass} />} label="Referees">
           {referees.length > 0 ? referees.join(', ') : '—'}
         </DetailRow>
-        <DetailRow
-          icon={<EyeIcon className={iconClass} />}
-          label="Observers"
-        >
+        <DetailRow icon={<EyeIcon className={iconClass} />} label="Observers">
           {observers.length > 0 ? observers.join(', ') : '—'}
         </DetailRow>
         <DetailRow

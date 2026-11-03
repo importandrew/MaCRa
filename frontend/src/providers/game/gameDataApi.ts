@@ -179,6 +179,9 @@ export const useFetchGameData = () => {
 
   useEffect(() => {
     fetchGameData();
+    // Fetch once on mount. fetchGameData isn't memoized and reads playersList,
+    // so listing it would refetch after every load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { data, playersList, isLoading, isError, refetch: fetchGameData };

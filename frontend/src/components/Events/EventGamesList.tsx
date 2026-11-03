@@ -1,5 +1,4 @@
 import { Button, CircularProgress, Listbox, ListboxItem } from '@heroui/react';
-import { useNavigate } from 'react-router-dom';
 import {
   EventGameListItem,
   EventGameListPlayer,
@@ -152,11 +151,4 @@ export function EventGamesList({
       )}
     </div>
   );
-}
-
-export function useEventGamesNavigate(eventId: number) {
-  const navigate = useNavigate();
-  return (gameId: number) => {
-    navigate(`/event/${eventId}/game/${gameId}`);
-  };
 }

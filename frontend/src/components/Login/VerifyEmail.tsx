@@ -35,7 +35,9 @@ export default function VerifyEmailPage() {
       <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
         <Card fullWidth className="mx-5">
           <CardBody className="gap-3 py-8">
-            {status === 'loading' && <Spinner label="Verifying email..." size="lg" />}
+            {status === 'loading' && (
+              <Spinner label="Verifying email..." size="lg" />
+            )}
             {status === 'ok' && (
               <>
                 <p>Email verified. You can sign in now.</p>
@@ -49,7 +51,12 @@ export default function VerifyEmailPage() {
               <>
                 <p>This verification link is invalid or expired.</p>
                 <Spacer />
-                <Button as={Link} to="/login" color="primary" variant="bordered">
+                <Button
+                  as={Link}
+                  to="/login"
+                  color="primary"
+                  variant="bordered"
+                >
                   Back to login
                 </Button>
               </>

@@ -27,7 +27,7 @@ export default function CheckEmailPage() {
         email,
         origin: window.location.origin,
       }),
-      { redirectOn401: false },
+      { redirectOn401: false }
     );
     setIsLoading(false);
 
@@ -55,7 +55,8 @@ export default function CheckEmailPage() {
                 {email ? (
                   <>
                     {' '}
-                    to <span className="font-medium text-foreground">{email}</span>
+                    to{' '}
+                    <span className="font-medium text-foreground">{email}</span>
                   </>
                 ) : null}
                 . Open it to activate your account before signing in.
