@@ -146,24 +146,6 @@ export default function GameLogs({
     }
   };
 
-  const getRowKey = (item: PreparedRoundLog) => {
-    let key = item.round.toString();
-
-    if (item.outcome) {
-      key += item.outcome;
-    }
-
-    if (item.result) {
-      key += item.result;
-    }
-
-    if (item.score_changes) {
-      key += item.initial_scores.join('');
-    }
-
-    return key;
-  };
-
   const getLegend = () => {
     return (
       <legend>
@@ -280,10 +262,13 @@ export default function GameLogs({
                 </Table.Header>
                 <Table.Body>
                   {[
-                    ...preparedData.rounds.map((item) => (
+                    // Keyed by position: round, outcome and scores can repeat
+                    // (two equal penalties in one round), and React Aria
+                    // throws on duplicate keys in a collection.
+                    ...preparedData.rounds.map((item, index) => (
                       <Table.Row
-                        key={getRowKey(item)}
-                        id={getRowKey(item)}
+                        key={`log-${index}`}
+                        id={`log-${index}`}
                         className="even:bg-default/50"
                       >
                         <Table.Cell className="text-end">
