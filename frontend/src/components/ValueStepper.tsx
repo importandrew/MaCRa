@@ -109,7 +109,7 @@ export default function ValueStepper({
             key={step}
             size="sm"
             variant="tertiary"
-            className="min-w-10 px-1.5"
+            className="min-w-10 px-1.5 md:h-10 md:min-w-12 md:text-base"
             aria-label={`${label} ${step > 0 ? '+' : ''}${step}`}
             isDisabled={step < 0 && value <= min}
             onPress={() => onChange(Math.max(min, value + step))}

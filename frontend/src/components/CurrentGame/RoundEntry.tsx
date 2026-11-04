@@ -1,6 +1,8 @@
 import { Switch, ToggleButton, ToggleButtonGroup } from '@heroui/react';
 import { Outcome, PlayerScore } from '../../models/GameData';
 import { OUTCOME_LABELS } from '../../utils/constants';
+import { MinusIcon } from '../Icons/MinusIcon';
+import { PlusIcon } from '../Icons/PlusIcon';
 import PendingButton from '../PendingButton';
 import SegmentedPicker from '../SegmentedPicker';
 import ValueStepper from '../ValueStepper';
@@ -16,9 +18,17 @@ const OUTCOME_OPTIONS = [
 ] as { value: EntryOutcome; label: string }[];
 
 // ToggleButton has no bordered variant, so ghost plus a border: an outline
-// that fills (and turns the border accent) when picked.
+// that fills (and turns the border accent) when picked. Larger from md up,
+// for the mouse; HeroUI's own sizes shrink there instead.
 const MARK_CLASS =
-  'size-10 rounded-lg border-2 border-border text-2xl data-[selected=true]:border-accent';
+  'size-10 md:size-12 rounded-lg border-2 border-border data-[selected=true]:border-accent';
+
+// The glyphs are SVG, not the + and − characters: the font draws those
+// above the middle of the line, so they sat high in the square.
+const MARK_ICON_CLASS = 'm-0 size-6 md:size-7 [&_path]:stroke-2';
+
+// Outcome buttons, step buttons and OK grow from md up too.
+const DESKTOP_BUTTON_CLASS = 'md:h-10 md:text-base';
 
 // SeatMarks are the + (won) and − (dealt in / fined) toggles at a player's
 // seat while a round is entered. They sit between the name and the center
@@ -39,7 +49,7 @@ export function SeatMarks({
 }) {
   return (
     // Fixed height: the line keeps its size whatever the outcome shows.
-    <span className="mb-2 flex h-10 items-center justify-center gap-2">
+    <span className="mb-2 flex h-10 md:h-12 items-center justify-center gap-2">
       {entry.isWin && (
         <ToggleButton
           isIconOnly
@@ -50,7 +60,7 @@ export function SeatMarks({
           onChange={() => entry.pickWinner(player.id)}
           className={MARK_CLASS}
         >
-          +
+          <PlusIcon className={MARK_ICON_CLASS} />
         </ToggleButton>
       )}
       {entry.showLose && (
@@ -63,9 +73,9 @@ export function SeatMarks({
           onChange={() => entry.pickLoser(player.id)}
           className={MARK_CLASS}
         >
-          <span className={isSideSeat ? 'rotate-90' : undefined}>
-            {'\u2212'}
-          </span>
+          <MinusIcon
+            className={`${MARK_ICON_CLASS} ${isSideSeat ? 'rotate-90' : ''}`}
+          />
         </ToggleButton>
       )}
     </span>
@@ -98,7 +108,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
             key={opt.value}
             id={opt.value}
             size="sm"
-            className="w-full min-w-0 not-data-selected:text-foreground"
+            className={`w-full min-w-0 not-data-selected:text-foreground ${DESKTOP_BUTTON_CLASS}`}
           >
             {opt.label}
           </ToggleButton>
@@ -171,6 +181,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
         <PendingButton
           size="sm"
           variant="primary"
+          className={`md:px-6 ${DESKTOP_BUTTON_CLASS}`}
           isDisabled={!entry.isComplete}
           isPending={entry.isPending}
           onPress={entry.submit}
