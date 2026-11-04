@@ -1,12 +1,11 @@
 import { Switch, ToggleButton, ToggleButtonGroup } from '@heroui/react';
 import { Outcome, PlayerScore } from '../../models/GameData';
 import { OUTCOME_LABELS } from '../../utils/constants';
-import { MinusIcon } from '../Icons/MinusIcon';
-import { PlusIcon } from '../Icons/PlusIcon';
+import { SignIcon } from '../Icons/SignIcon';
 import PendingButton from '../PendingButton';
 import SegmentedPicker from '../SegmentedPicker';
 import ValueStepper from '../ValueStepper';
-import { EntryOutcome, MIN_HAND, RoundEntry } from './useRoundEntry';
+import { EntryOutcome, MIN_FINE, MIN_HAND, RoundEntry } from './useRoundEntry';
 
 const OUTCOME_OPTIONS = [
   ...[Outcome.Draw, Outcome.Self, Outcome.Deal].map((value, index) => ({
@@ -23,8 +22,6 @@ const OUTCOME_OPTIONS = [
 const MARK_CLASS =
   'size-10 md:size-12 rounded-lg border-2 border-border data-[selected=true]:border-accent';
 
-// The glyphs are SVG, not the + and − characters: the font draws those
-// above the middle of the line, so they sat high in the square.
 const MARK_ICON_CLASS = 'm-0 size-6 md:size-7 [&_path]:stroke-2';
 
 // Outcome buttons, step buttons and OK grow from md up too.
@@ -51,34 +48,52 @@ export function SeatMarks({
     // Fixed height: the line keeps its size whatever the outcome shows.
     <span className="mb-2 flex h-10 md:h-12 items-center justify-center gap-2">
       {entry.isWin && (
-        <ToggleButton
-          isIconOnly
-          size="sm"
-          variant="ghost"
-          aria-label={`${player.name} won`}
+        <SeatMark
+          sign="plus"
+          label={`${player.name} won`}
           isSelected={entry.winner === player.id}
           onChange={() => entry.pickWinner(player.id)}
-          className={MARK_CLASS}
-        >
-          <PlusIcon className={MARK_ICON_CLASS} />
-        </ToggleButton>
+        />
       )}
       {entry.showLose && (
-        <ToggleButton
-          isIconOnly
-          size="sm"
-          variant="ghost"
-          aria-label={`${player.name} ${entry.isPenalty ? 'fined' : 'dealt in'}`}
+        <SeatMark
+          sign="minus"
+          label={`${player.name} ${entry.isPenalty ? 'fined' : 'dealt in'}`}
           isSelected={entry.loser === player.id}
           onChange={() => entry.pickLoser(player.id)}
-          className={MARK_CLASS}
-        >
-          <MinusIcon
-            className={`${MARK_ICON_CLASS} ${isSideSeat ? 'rotate-90' : ''}`}
-          />
-        </ToggleButton>
+          iconClassName={isSideSeat ? 'rotate-90' : undefined}
+        />
       )}
     </span>
+  );
+}
+
+// SeatMark is one + or − toggle of SeatMarks.
+function SeatMark({
+  sign,
+  label,
+  isSelected,
+  onChange,
+  iconClassName = '',
+}: {
+  sign: 'plus' | 'minus';
+  label: string;
+  isSelected: boolean;
+  onChange: () => void;
+  iconClassName?: string;
+}) {
+  return (
+    <ToggleButton
+      isIconOnly
+      size="sm"
+      variant="ghost"
+      aria-label={label}
+      isSelected={isSelected}
+      onChange={onChange}
+      className={MARK_CLASS}
+    >
+      <SignIcon sign={sign} className={`${MARK_ICON_CLASS} ${iconClassName}`} />
+    </ToggleButton>
   );
 }
 
@@ -140,7 +155,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
         <ValueStepper
           label="Fine"
           value={entry.fine}
-          min={1}
+          min={MIN_FINE}
           onChange={entry.setFine}
         />
       )}

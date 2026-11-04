@@ -7,6 +7,7 @@ import { showToast } from '../Toast';
 
 export const MIN_HAND = 8;
 const START_FINE = 10;
+export const MIN_FINE = 1;
 
 export type EntryOutcome =
   Outcome.Draw | Outcome.Self | Outcome.Deal | Outcome.Penalty;
@@ -37,12 +38,24 @@ export function useRoundEntry(onSubmitted: (data: GameData) => void) {
   // the chosen outcome uses.
   const isComplete =
     outcome === Outcome.Draw ||
-    (outcome === Outcome.Self && winner !== null) ||
+    (outcome === Outcome.Self && winner !== null && hand >= MIN_HAND) ||
     (outcome === Outcome.Deal &&
       winner !== null &&
       loser !== null &&
-      winner !== loser) ||
-    (isPenalty && loser !== null && (!isFalseMahjong || !!falseMahjongFine));
+      winner !== loser &&
+      hand >= MIN_HAND) ||
+    (isPenalty &&
+      loser !== null &&
+      (isFalseMahjong ? !!falseMahjongFine : fine >= MIN_FINE));
+
+  // A Self winner and a Penalty loser can be the same player; Deal-in can't
+  // have both on one player, so switching to it drops the − mark.
+  const changeOutcome = (next: EntryOutcome) => {
+    setOutcome(next);
+    if (next === Outcome.Deal && winner !== null && winner === loser) {
+      setLoser(null);
+    }
+  };
 
   const pickWinner = (id: number) => {
     setWinner(winner === id ? null : id);
@@ -105,7 +118,7 @@ export function useRoundEntry(onSubmitted: (data: GameData) => void) {
 
   return {
     outcome,
-    setOutcome,
+    setOutcome: changeOutcome,
     winner,
     loser,
     hand,
