@@ -18,7 +18,8 @@ const OUTCOME_OPTIONS = [
 // SeatMarks are the + (won) and − (dealt in / fined) toggles at a player's
 // seat while a round is entered. They sit between the name and the center
 // of the table; the score line is hidden meanwhile, so the center keeps its
-// room. + and − read the
+// room. Rounded squares, not circles, so they don't look like the round
+// avatars next to them; mb-2 keeps them off the name line. + and − read the
 // same when the seat is rotated, unlike 👍/👎.
 export function SeatMarks({
   entry,
@@ -33,7 +34,7 @@ export function SeatMarks({
 }) {
   return (
     // Fixed height: the line keeps its size whatever the outcome shows.
-    <span className="flex h-10 items-center justify-center gap-2">
+    <span className="mb-2 flex h-10 items-center justify-center gap-2">
       {entry.isWin && (
         <ToggleButton
           isIconOnly
@@ -41,7 +42,7 @@ export function SeatMarks({
           aria-label={`${player.name} won`}
           isSelected={entry.winner === player.id}
           onChange={() => entry.pickWinner(player.id)}
-          className="size-10 text-2xl"
+          className="size-10 rounded-lg text-2xl"
         >
           +
         </ToggleButton>
@@ -53,7 +54,7 @@ export function SeatMarks({
           aria-label={`${player.name} ${entry.isPenalty ? 'fined' : 'dealt in'}`}
           isSelected={entry.loser === player.id}
           onChange={() => entry.pickLoser(player.id)}
-          className="size-10 text-2xl"
+          className="size-10 rounded-lg text-2xl"
         >
           <span className={isSideSeat ? 'rotate-90' : undefined}>
             {'\u2212'}
