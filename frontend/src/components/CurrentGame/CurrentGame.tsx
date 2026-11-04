@@ -96,16 +96,16 @@ export default function CurrentGame() {
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.opp.wind}{' '}
+                  <span className="shrink-0">{roundData.opp.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.opp.name
+                        (player) => player.id === roundData.opp.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.opp.name}
+                  }
+                  <span className="min-w-0 truncate">{roundData.opp.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -120,16 +120,18 @@ export default function CurrentGame() {
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.left.wind}{' '}
+                  <span className="shrink-0">{roundData.left.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.left.name
+                        (player) => player.id === roundData.left.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.left.name}
+                  }
+                  <span className="min-w-0 truncate">
+                    {roundData.left.name}
+                  </span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -150,16 +152,18 @@ export default function CurrentGame() {
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.right.wind}{' '}
+                  <span className="shrink-0">{roundData.right.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.right.name
+                        (player) => player.id === roundData.right.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.right.name}
+                  }
+                  <span className="min-w-0 truncate">
+                    {roundData.right.name}
+                  </span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -179,16 +183,16 @@ export default function CurrentGame() {
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.me.wind}{' '}
+                  <span className="shrink-0">{roundData.me.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.me.name
+                        (player) => player.id === roundData.me.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.me.name}
+                  }
+                  <span className="min-w-0 truncate">{roundData.me.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore

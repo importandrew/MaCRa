@@ -14,7 +14,7 @@ export default function PlayerMenu({
   return (
     <Dropdown>
       <Dropdown.Trigger
-        className="rounded-full"
+        className="shrink-0 rounded-full"
         aria-label={`${player?.name ?? 'Player'} menu`}
       >
         <UserAvatar name={player?.name || ''} />

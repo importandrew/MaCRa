@@ -100,7 +100,9 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {top.wind} <UserAvatar name={top.name} /> {top.name}
+                  <span className="shrink-0">{top.wind}</span>
+                  <UserAvatar name={top.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{top.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -115,7 +117,9 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {left.wind} <UserAvatar name={left.name} /> {left.name}
+                  <span className="shrink-0">{left.wind}</span>
+                  <UserAvatar name={left.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{left.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -158,7 +162,9 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {right.wind} <UserAvatar name={right.name} /> {right.name}
+                  <span className="shrink-0">{right.wind}</span>
+                  <UserAvatar name={right.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{right.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -178,7 +184,9 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {bot.wind} <UserAvatar name={bot.name} /> {bot.name}
+                  <span className="shrink-0">{bot.wind}</span>
+                  <UserAvatar name={bot.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{bot.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
