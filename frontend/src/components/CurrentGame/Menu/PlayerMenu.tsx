@@ -1,15 +1,12 @@
 import { Dropdown, Label } from '@heroui/react';
 import { PlayerOrder } from '../../../models/GameData';
-import { WarningIcon } from '../../Icons/WarningIcon';
 import { UserIcon } from '../../Icons/UserIcon';
 import UserAvatar from '../../UserAvatar';
 
 export default function PlayerMenu({
   player,
-  setFinedPlayerId,
 }: {
   player: PlayerOrder | undefined;
-  setFinedPlayerId: (id: number) => void;
 }) {
   return (
     <Dropdown>
@@ -22,14 +19,6 @@ export default function PlayerMenu({
       {player && (
         <Dropdown.Popover>
           <Dropdown.Menu aria-label="Player menu" disabledKeys={['profile']}>
-            <Dropdown.Item
-              id="penalty"
-              textValue="Penalty"
-              onAction={() => setFinedPlayerId(player.id)}
-            >
-              <WarningIcon className="text-warning" />
-              <Label>Penalty</Label>
-            </Dropdown.Item>
             <Dropdown.Item id="profile" textValue="Profile">
               <UserIcon className="text-accent" />
               <Label>Profile</Label>

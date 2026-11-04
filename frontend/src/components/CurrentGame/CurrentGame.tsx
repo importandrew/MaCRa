@@ -1,3 +1,4 @@
+import { Button } from '@heroui/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameData } from '../../models/GameData';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
@@ -7,14 +8,17 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from './AnimatedScore';
 import PlayerMenu from './Menu/PlayerMenu';
 import TableMenu from './Menu/TableMenu';
+import RoundCard from './RoundCard';
 import './CurrentGame.css';
-import ScroreInput from './ScoreInput';
 
 export default function CurrentGame() {
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
-  const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [isRoundCardOpen, setIsRoundCardOpen] = useState(false);
+  // roundCardKey remounts the round card, which clears its choices: after
+  // a submit and on refresh (including undo), as agreed with the owner.
+  const [roundCardKey, setRoundCardKey] = useState(0);
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}
   );
@@ -32,36 +36,22 @@ export default function CurrentGame() {
     }
   );
 
-  const openContextMenuOpen = () => {
-    setIsContextMenuOpen(true);
-  };
-
-  const closeContextMenuOpen = () => {
-    setIsContextMenuOpen(false);
-    setFinedPlayerId(null);
-  };
-
   const onRefresh = useCallback(() => {
-    refetch();
+    setRoundCardKey((key) => key + 1);
+    return refetch();
   }, [refetch]);
+
+  const onRoundSubmitted = (next: GameData) => {
+    setRoundData(next);
+    setIsRoundCardOpen(false);
+    setRoundCardKey((key) => key + 1);
+  };
 
   useEffect(() => {
     if (data) {
       setRoundData(data);
     }
-
-    if (finedPlayerId !== null) {
-      openContextMenuOpen();
-    }
-
-    if (finedPlayerId === null && isContextMenuOpen) {
-      closeContextMenuOpen();
-      refetch();
-    }
-    // Run only when finedPlayerId or data change. With isContextMenuOpen in the
-    // deps, opening the ≡ menu (finedPlayerId === null) would close it at once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finedPlayerId, data]);
+  }, [data]);
 
   // Update currentScores when roundData changes, and save previous scores
   useEffect(() => {
@@ -102,7 +92,6 @@ export default function CurrentGame() {
                       player={playersList.find(
                         (player) => player.id === roundData.opp.id
                       )}
-                      setFinedPlayerId={setFinedPlayerId}
                     />
                   }
                   <span className="min-w-0 truncate">{roundData.opp.name}</span>
@@ -126,7 +115,6 @@ export default function CurrentGame() {
                       player={playersList.find(
                         (player) => player.id === roundData.left.id
                       )}
-                      setFinedPlayerId={setFinedPlayerId}
                     />
                   }
                   <span className="min-w-0 truncate">
@@ -143,11 +131,24 @@ export default function CurrentGame() {
               </div>
             </div>
 
-            <ScroreInput
-              kanji={roundData.round.kanji}
-              playersList={playersList}
-              setRoundData={setRoundData}
-            />
+            <div className="relative z-10 py-3 justify-self-center self-center">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="p-4 h-16 text-5xl"
+                aria-label={`Enter result of round ${roundData.round.kanji}`}
+                onPress={() => setIsRoundCardOpen(true)}
+              >
+                {roundData.round.kanji}
+              </Button>
+              <RoundCard
+                key={roundCardKey}
+                game={roundData}
+                isOpen={isRoundCardOpen}
+                onClose={() => setIsRoundCardOpen(false)}
+                onSubmitted={onRoundSubmitted}
+              />
+            </div>
 
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
@@ -158,7 +159,6 @@ export default function CurrentGame() {
                       player={playersList.find(
                         (player) => player.id === roundData.right.id
                       )}
-                      setFinedPlayerId={setFinedPlayerId}
                     />
                   }
                   <span className="min-w-0 truncate">
@@ -176,7 +176,7 @@ export default function CurrentGame() {
             </div>
             <div>
               <RefreshButton
-                onRefresh={refetch}
+                onRefresh={onRefresh}
                 className="absolute z-1 left-0 bottom-0"
               />
             </div>
@@ -189,7 +189,6 @@ export default function CurrentGame() {
                       player={playersList.find(
                         (player) => player.id === roundData.me.id
                       )}
-                      setFinedPlayerId={setFinedPlayerId}
                     />
                   }
                   <span className="min-w-0 truncate">{roundData.me.name}</span>
@@ -207,15 +206,9 @@ export default function CurrentGame() {
               <ContextMenu
                 isOpen={isContextMenuOpen}
                 onOpen={() => setIsContextMenuOpen(true)}
-                onClose={closeContextMenuOpen}
+                onClose={() => setIsContextMenuOpen(false)}
               >
-                <TableMenu
-                  players={playersList}
-                  finedPlayerId={finedPlayerId}
-                  gameId={roundData.id}
-                  setFinedPlayerId={setFinedPlayerId}
-                  onRefetchNow={refetch}
-                />
+                <TableMenu gameId={roundData.id} onRefetchNow={onRefresh} />
               </ContextMenu>
             </div>
           </div>
