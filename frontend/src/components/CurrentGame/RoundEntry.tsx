@@ -15,6 +15,11 @@ const OUTCOME_OPTIONS = [
   { value: Outcome.Penalty, label: 'Penalty' },
 ] as { value: EntryOutcome; label: string }[];
 
+// ToggleButton has no bordered variant, so ghost plus a border: an outline
+// that fills (and turns the border accent) when picked.
+const MARK_CLASS =
+  'size-10 rounded-lg border-2 border-border text-2xl data-[selected=true]:border-accent';
+
 // SeatMarks are the + (won) and − (dealt in / fined) toggles at a player's
 // seat while a round is entered. They sit between the name and the center
 // of the table; the score line is hidden meanwhile, so the center keeps its
@@ -39,10 +44,11 @@ export function SeatMarks({
         <ToggleButton
           isIconOnly
           size="sm"
+          variant="ghost"
           aria-label={`${player.name} won`}
           isSelected={entry.winner === player.id}
           onChange={() => entry.pickWinner(player.id)}
-          className="size-10 rounded-lg text-2xl"
+          className={MARK_CLASS}
         >
           +
         </ToggleButton>
@@ -51,10 +57,11 @@ export function SeatMarks({
         <ToggleButton
           isIconOnly
           size="sm"
+          variant="ghost"
           aria-label={`${player.name} ${entry.isPenalty ? 'fined' : 'dealt in'}`}
           isSelected={entry.loser === player.id}
           onChange={() => entry.pickLoser(player.id)}
-          className="size-10 rounded-lg text-2xl"
+          className={MARK_CLASS}
         >
           <span className={isSideSeat ? 'rotate-90' : undefined}>
             {'\u2212'}

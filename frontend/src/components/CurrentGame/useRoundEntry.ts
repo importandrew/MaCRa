@@ -13,7 +13,7 @@ export type EntryOutcome =
 export type PenaltyType = Outcome.Penalty | Outcome.FalseMahjong;
 
 // useRoundEntry holds the round entry on the game screen: the outcome and
-// values in the center of the table, and the 👍/👎 marks next to each seat.
+// values in the center of the table, and the +/− marks next to each seat.
 export function useRoundEntry(onSubmitted: (data: GameData) => void) {
   const navigate = useNavigate();
 

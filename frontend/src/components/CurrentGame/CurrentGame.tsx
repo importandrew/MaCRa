@@ -6,7 +6,7 @@ import ContextMenu from '../ContextMenu/ContextMenu';
 import RefreshButton from '../RefreshButton';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from './AnimatedScore';
-import PlayerMenu from './Menu/PlayerMenu';
+import UserAvatar from '../UserAvatar';
 import TableMenu from './Menu/TableMenu';
 import { RoundEntryPanel, SeatMarks } from './RoundEntry';
 import { useRoundEntry } from './useRoundEntry';
@@ -91,13 +91,7 @@ export default function CurrentGame() {
                 )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.opp.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.opp.id
-                      )}
-                    />
-                  }
+                  <UserAvatar name={roundData.opp.name} className="shrink-0" />
                   <span className="min-w-0 truncate">{roundData.opp.name}</span>
                 </span>
                 <span
@@ -120,13 +114,7 @@ export default function CurrentGame() {
                 )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.left.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.left.id
-                      )}
-                    />
-                  }
+                  <UserAvatar name={roundData.left.name} className="shrink-0" />
                   <span className="min-w-0 truncate">
                     {roundData.left.name}
                   </span>
@@ -173,13 +161,10 @@ export default function CurrentGame() {
                 )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.right.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.right.id
-                      )}
-                    />
-                  }
+                  <UserAvatar
+                    name={roundData.right.name}
+                    className="shrink-0"
+                  />
                   <span className="min-w-0 truncate">
                     {roundData.right.name}
                   </span>
@@ -209,13 +194,7 @@ export default function CurrentGame() {
                 )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.me.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.me.id
-                      )}
-                    />
-                  }
+                  <UserAvatar name={roundData.me.name} className="shrink-0" />
                   <span className="min-w-0 truncate">{roundData.me.name}</span>
                 </span>
                 <span
