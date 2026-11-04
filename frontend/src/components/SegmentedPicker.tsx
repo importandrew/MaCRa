@@ -16,6 +16,7 @@ export default function SegmentedPicker<T extends string>({
   selectedKey,
   onSelectionChange,
   isOptionDisabled,
+  optionClassName = '',
 }: {
   label?: string;
   ariaLabel?: string;
@@ -24,6 +25,8 @@ export default function SegmentedPicker<T extends string>({
   selectedKey: T | null;
   onSelectionChange: (key: T) => void;
   isOptionDisabled?: (value: T) => boolean;
+  // optionClassName is added to each option, e.g. a smaller text size.
+  optionClassName?: string;
 }) {
   const labelId = useId();
 
@@ -52,7 +55,7 @@ export default function SegmentedPicker<T extends string>({
             key={opt.value}
             id={opt.value}
             isDisabled={opt.isDisabled || isOptionDisabled?.(opt.value)}
-            className="min-w-0 h-auto min-h-9 py-1.5 not-data-selected:text-foreground"
+            className={`min-w-0 h-auto min-h-9 py-1.5 not-data-selected:text-foreground ${optionClassName}`}
           >
             {index > 0 && <ToggleButtonGroup.Separator />}
             <span className="whitespace-normal text-center leading-tight">

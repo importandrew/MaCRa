@@ -142,6 +142,10 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
       {entry.isPenalty && (
         <SegmentedPicker
           ariaLabel="Penalty type"
+          // "False mahjong" must fit the center of a 320px phone: smaller
+          // text, less padding, and options sized by their text (flex-auto)
+          // rather than equal halves. Desktop keeps the usual size.
+          optionClassName="flex-auto px-2 text-xs md:px-4 md:text-sm"
           options={[
             { value: Outcome.Penalty, label: 'Penalty' },
             // Non-breaking space: on two lines it makes the Penalty
