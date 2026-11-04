@@ -16,7 +16,14 @@ import PlayerSelector from './PlayerSelector';
 export default function Draft() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [players, setPlayers] = useState<(number | undefined)[]>([]);
+  // One slot per seat from the start: Shuffle only moves slots that exist,
+  // so with [] and one pick it had nothing to swap with.
+  const [players, setPlayers] = useState<(number | undefined)[]>([
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  ]);
   const eventId = getStoredEventId();
   const { data: members, isLoading: membersLoading } =
     useFetchEventMembers(eventId);

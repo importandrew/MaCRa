@@ -6,6 +6,7 @@ import {
   ListBox,
   type Key,
 } from '@heroui/react';
+import { useRef } from 'react';
 import { Player } from '../models/Player';
 
 function PlayerId({ id }: { id: number }) {
@@ -29,8 +30,14 @@ export default function PlayerAutocomplete({
   onSelectionChange,
   disabledKeys = [],
 }: PlayerAutocompleteProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleSelectionChange = (key: Key | null) => {
     onSelectionChange(key == null ? null : Number(key));
+    // React Aria keeps focus in the input after a pick (it returns focus there
+    // when the list closes), which leaves the phone keyboard open. Drop the
+    // focus on the next frame, after the list has closed.
+    if (key != null) requestAnimationFrame(() => inputRef.current?.blur());
   };
 
   return (
@@ -45,7 +52,10 @@ export default function PlayerAutocomplete({
         {/* The trigger arrow is absolutely positioned at the end of the field,
             so the clear button sits just before it and the input reserves
             room for both. */}
-        <Input className={selectedKey != null ? 'pe-14' : undefined} />
+        <Input
+          ref={inputRef}
+          className={selectedKey != null ? 'pe-14' : undefined}
+        />
         {selectedKey != null && (
           <CloseButton
             aria-label={`Clear ${label}`}
