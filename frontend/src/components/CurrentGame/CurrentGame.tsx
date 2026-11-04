@@ -11,7 +11,6 @@ import './CurrentGame.css';
 import ScroreInput from './ScoreInput';
 
 export default function CurrentGame() {
-  const [scoreFormKey, setScoreFormKey] = useState(0);
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
@@ -143,9 +142,6 @@ export default function CurrentGame() {
             </div>
 
             <ScroreInput
-              // A new key resets the form (collapsed, empty), e.g. after a
-              // penalty from the side menu changed the game.
-              key={scoreFormKey}
               kanji={roundData.round.kanji}
               playersList={playersList}
               setRoundData={setRoundData}
@@ -215,7 +211,6 @@ export default function CurrentGame() {
                   gameId={roundData.id}
                   setFinedPlayerId={setFinedPlayerId}
                   onRefetchNow={refetch}
-                  onPenaltyAdded={() => setScoreFormKey((key) => key + 1)}
                 />
               </ContextMenu>
             </div>

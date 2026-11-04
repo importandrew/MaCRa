@@ -12,12 +12,10 @@ export default function PenaltyInput({
   players = [],
   finedPlayerId = null,
   setFinedPlayerId,
-  onPenaltyAdded,
 }: {
   players: PlayerOrder[] | null;
   finedPlayerId: number | null;
   setFinedPlayerId: (value: number | null) => void;
-  onPenaltyAdded?: () => void;
 }) {
   const [loser, setLoser] = useState<number | null>(finedPlayerId);
   const [distributed, setDistibuted] = useState(false);
@@ -56,7 +54,6 @@ export default function PenaltyInput({
       variant: 'warning',
     });
     resetPenaltyResults();
-    onPenaltyAdded?.();
   };
 
   const handleIsDistributed = (value: boolean) => {
