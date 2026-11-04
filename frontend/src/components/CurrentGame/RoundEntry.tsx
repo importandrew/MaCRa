@@ -1,4 +1,4 @@
-import { Button, Switch, ToggleButton, ToggleButtonGroup } from '@heroui/react';
+import { Switch, ToggleButton, ToggleButtonGroup } from '@heroui/react';
 import { Outcome, PlayerScore } from '../../models/GameData';
 import { OUTCOME_LABELS } from '../../utils/constants';
 import PendingButton from '../PendingButton';
@@ -15,19 +15,25 @@ const OUTCOME_OPTIONS = [
   { value: Outcome.Penalty, label: 'Penalty' },
 ] as { value: EntryOutcome; label: string }[];
 
-// SeatMarks are the 👍 (won) and 👎 (dealt in / fined) toggles next to a
-// player's name on the table, shown only while the outcome needs them.
+// SeatMarks are the + (won) and − (dealt in / fined) toggles at a player's
+// seat while a round is entered. They sit between the name and the center
+// of the table; the score line is hidden meanwhile, so the center keeps its
+// room. + and − read the
+// same when the seat is rotated, unlike 👍/👎.
 export function SeatMarks({
   entry,
   player,
+  isSideSeat = false,
 }: {
   entry: RoundEntry;
   player: PlayerScore;
+  // isSideSeat turns the − back on the left and right seats: rotated 90°
+  // with the seat it would look like a vertical bar ("I").
+  isSideSeat?: boolean;
 }) {
-  if (!entry.isWin && !entry.showLose) return null;
-
   return (
-    <span className="flex shrink-0 gap-1.5">
+    // Fixed height: the line keeps its size whatever the outcome shows.
+    <span className="flex h-10 items-center justify-center gap-2">
       {entry.isWin && (
         <ToggleButton
           isIconOnly
@@ -35,9 +41,9 @@ export function SeatMarks({
           aria-label={`${player.name} won`}
           isSelected={entry.winner === player.id}
           onChange={() => entry.pickWinner(player.id)}
-          className="size-10 text-lg"
+          className="size-10 text-2xl"
         >
-          👍
+          +
         </ToggleButton>
       )}
       {entry.showLose && (
@@ -47,9 +53,11 @@ export function SeatMarks({
           aria-label={`${player.name} ${entry.isPenalty ? 'fined' : 'dealt in'}`}
           isSelected={entry.loser === player.id}
           onChange={() => entry.pickLoser(player.id)}
-          className="size-10 text-lg"
+          className="size-10 text-2xl"
         >
-          👎
+          <span className={isSideSeat ? 'rotate-90' : undefined}>
+            {'\u2212'}
+          </span>
         </ToggleButton>
       )}
     </span>
@@ -57,15 +65,10 @@ export function SeatMarks({
 }
 
 // RoundEntryPanel is the center of the table while a round is entered:
-// outcome, hand value or fine, and OK/Cancel. Players are marked on their
-// seats (SeatMarks), so no names are picked from a list.
-export function RoundEntryPanel({
-  entry,
-  onCancel,
-}: {
-  entry: RoundEntry;
-  onCancel: () => void;
-}) {
+// outcome, hand value or fine, and OK. Players are marked on their seats
+// (SeatMarks), so no names are picked from a list. The round kanji above it
+// closes it, so there's no Cancel.
+export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
   return (
     <div className="flex w-full flex-col items-stretch gap-2 text-base">
       {/* 2×2 instead of one row: four options don't fit the center of a
@@ -156,10 +159,7 @@ export function RoundEntryPanel({
         </Switch>
       )}
 
-      <div className="flex justify-center gap-2">
-        <Button size="sm" variant="secondary" onPress={onCancel}>
-          Cancel
-        </Button>
+      <div className="flex justify-center">
         <PendingButton
           size="sm"
           variant="primary"

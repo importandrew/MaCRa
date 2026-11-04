@@ -39,7 +39,8 @@ export default function CurrentGame() {
   );
 
   // The round entry clears after a submit (in useRoundEntry) and on refresh,
-  // including undo, as agreed with the owner. Cancel keeps the choices.
+  // including undo, as agreed with the owner. Closing it with the kanji keeps
+  // the choices.
   const onRefresh = () => {
     entry.reset();
     setIsEntryOpen(false);
@@ -84,6 +85,10 @@ export default function CurrentGame() {
             <div></div>
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks entry={entry} player={roundData.opp} />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.opp.wind}</span>
                   {
@@ -94,9 +99,10 @@ export default function CurrentGame() {
                     />
                   }
                   <span className="min-w-0 truncate">{roundData.opp.name}</span>
-                  <SeatMarks entry={entry} player={roundData.opp} />
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
@@ -108,6 +114,10 @@ export default function CurrentGame() {
             <div></div>
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks entry={entry} player={roundData.left} isSideSeat />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.left.wind}</span>
                   {
@@ -120,9 +130,10 @@ export default function CurrentGame() {
                   <span className="min-w-0 truncate">
                     {roundData.left.name}
                   </span>
-                  <SeatMarks entry={entry} player={roundData.left} />
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
@@ -147,16 +158,19 @@ export default function CurrentGame() {
               >
                 {roundData.round.kanji}
               </Button>
-              {isEntryOpen && (
-                <RoundEntryPanel
-                  entry={entry}
-                  onCancel={() => setIsEntryOpen(false)}
-                />
-              )}
+              {isEntryOpen && <RoundEntryPanel entry={entry} />}
             </div>
 
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks
+                    entry={entry}
+                    player={roundData.right}
+                    isSideSeat
+                  />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.right.wind}</span>
                   {
@@ -169,9 +183,10 @@ export default function CurrentGame() {
                   <span className="min-w-0 truncate">
                     {roundData.right.name}
                   </span>
-                  <SeatMarks entry={entry} player={roundData.right} />
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
@@ -188,6 +203,10 @@ export default function CurrentGame() {
             </div>
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks entry={entry} player={roundData.me} />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.me.wind}</span>
                   {
@@ -198,9 +217,10 @@ export default function CurrentGame() {
                     />
                   }
                   <span className="min-w-0 truncate">{roundData.me.name}</span>
-                  <SeatMarks entry={entry} player={roundData.me} />
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
