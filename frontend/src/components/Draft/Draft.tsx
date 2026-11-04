@@ -143,9 +143,11 @@ export default function Draft() {
           <Form
             validationBehavior="native"
             onSubmit={onSubmit}
-            className="items-center"
+            // v3 Form is a plain <form>, not a flex column as in v2, so
+            // items-center needs flex to center the selectors.
+            className="flex flex-col items-center"
           >
-            <div className="flex flex-col gap-3 p-3">
+            <div className="flex w-full flex-col gap-3 p-3 md:w-auto">
               {WIND_LABELS.map((wind: string, index: number) => (
                 <PlayerSelector
                   key={wind}
