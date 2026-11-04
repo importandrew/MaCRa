@@ -1,9 +1,8 @@
-import { Button } from '@heroui/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameData } from '../../models/GameData';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
-import { RefreshIcon } from '../Icons/RefreshIcon';
+import RefreshButton from '../RefreshButton';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from './AnimatedScore';
 import PlayerMenu from './Menu/PlayerMenu';
@@ -97,16 +96,16 @@ export default function CurrentGame() {
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.opp.wind}{' '}
+                  <span className="shrink-0">{roundData.opp.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.opp.name
+                        (player) => player.id === roundData.opp.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.opp.name}
+                  }
+                  <span className="min-w-0 truncate">{roundData.opp.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -121,16 +120,18 @@ export default function CurrentGame() {
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.left.wind}{' '}
+                  <span className="shrink-0">{roundData.left.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.left.name
+                        (player) => player.id === roundData.left.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.left.name}
+                  }
+                  <span className="min-w-0 truncate">
+                    {roundData.left.name}
+                  </span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -151,16 +152,18 @@ export default function CurrentGame() {
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.right.wind}{' '}
+                  <span className="shrink-0">{roundData.right.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.right.name
+                        (player) => player.id === roundData.right.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.right.name}
+                  }
+                  <span className="min-w-0 truncate">
+                    {roundData.right.name}
+                  </span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -172,30 +175,24 @@ export default function CurrentGame() {
               </div>
             </div>
             <div>
-              <Button
-                variant="light"
-                radius="full"
-                size="lg"
-                isIconOnly
-                onPress={refetch}
+              <RefreshButton
+                onRefresh={refetch}
                 className="absolute z-1 left-0 bottom-0"
-              >
-                <RefreshIcon className="text-gray-400" />
-              </Button>
+              />
             </div>
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {roundData.me.wind}{' '}
+                  <span className="shrink-0">{roundData.me.wind}</span>
                   {
                     <PlayerMenu
                       player={playersList.find(
-                        (player) => player.name === roundData.me.name
+                        (player) => player.id === roundData.me.id
                       )}
                       setFinedPlayerId={setFinedPlayerId}
                     />
-                  }{' '}
-                  {roundData.me.name}
+                  }
+                  <span className="min-w-0 truncate">{roundData.me.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -209,7 +206,7 @@ export default function CurrentGame() {
             <div className="flex justify-end items-end">
               <ContextMenu
                 isOpen={isContextMenuOpen}
-                setIsOpen={setIsContextMenuOpen}
+                onOpen={() => setIsContextMenuOpen(true)}
                 onClose={closeContextMenuOpen}
               >
                 <TableMenu

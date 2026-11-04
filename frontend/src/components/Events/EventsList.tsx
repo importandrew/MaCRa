@@ -1,19 +1,12 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  DrawerBody,
-  DrawerHeader,
-} from '@heroui/react';
+import { Button, Drawer } from '@heroui/react';
+import { cardVariants } from '@heroui/styles';
 import { type ReactNode, useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Event } from '../../models/Event';
 import type { EventRole } from '../../models/EventRole';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { useFetchVisibleEvents } from '../../providers/event/eventApi';
-import ContextMenuButton from '../ContextMenu/ContextMenuButton';
-import SideMenu from '../ContextMenu/SideMenu';
+import ContextMenu from '../ContextMenu/ContextMenu';
 import { CrownIcon } from '../Icons/CrownIcon';
 import { EyeIcon } from '../Icons/EyeIcon';
 import { CheckInCircleIcon } from '../Icons/CheckInCircleIcon';
@@ -22,6 +15,8 @@ import { ScalesIcon } from '../Icons/ScalesIcon';
 import { TrophyIcon } from '../Icons/TrophyIcon';
 import { UsersIcon } from '../Icons/UsersIcon';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
+
+const cardStyles = cardVariants();
 
 const ROLE_ORDER: EventRole[] = ['player', 'referee', 'observer'];
 
@@ -65,7 +60,7 @@ function EventCardMeta({ event }: { event: Event }) {
   return (
     <div
       className={`flex items-center gap-2 shrink-0 ${
-        isFinished ? 'text-default-400' : 'text-default-500'
+        isFinished ? 'text-muted/60' : 'text-muted'
       }`}
     >
       {isFinished && (
@@ -126,63 +121,66 @@ export default function EventsList() {
     >
       <div className="relative flex flex-col w-full max-w-full px-3 py-6 gap-4 min-w-0 overflow-x-hidden items-stretch">
         <div className="flex flex-col w-full max-w-[600px] mx-auto gap-4 min-w-0">
-          <ContextMenuButton
-            onPress={() => setIsDrawerOpen((isOpen) => !isOpen)}
-            className="fixed bottom-4 right-4"
-          />
-
-          <SideMenu isOpen={isDrawerOpen} onOpenChange={closeDrawer}>
-            <DrawerHeader>Events</DrawerHeader>
-            <DrawerBody className="flex flex-col gap-3">
-              <Button color="primary" onPress={handleCreate}>
+          <ContextMenu
+            isOpen={isDrawerOpen}
+            onOpen={() => setIsDrawerOpen(true)}
+            onClose={closeDrawer}
+            buttonClassName="fixed bottom-4 right-4 z-10"
+          >
+            <Drawer.Header>
+              <Drawer.Heading>Events</Drawer.Heading>
+            </Drawer.Header>
+            <Drawer.Body className="flex flex-col gap-3">
+              <Button variant="primary" fullWidth onPress={handleCreate}>
                 New event
               </Button>
-            </DrawerBody>
-          </SideMenu>
+            </Drawer.Body>
+          </ContextMenu>
 
           <h1 className="text-2xl font-semibold">Events</h1>
 
           {!data?.length ? (
-            <p className="text-center text-default-500 text-xl py-8">
+            <p className="text-center text-muted text-xl py-8">
               No events available.
             </p>
           ) : (
             data.map((event) => {
               const isFinished = Boolean(event.finished_at);
               return (
-                <Card
+                // A real link: long-press and "open in new tab" work on phones.
+                <Link
                   key={event.id}
-                  isPressable
-                  onPress={() => navigate(`/event/${event.id}`)}
-                  className={
-                    isFinished
-                      ? 'opacity-60 bg-default-100/60 border border-default-200 shadow-none'
-                      : undefined
-                  }
+                  to={`/event/${event.id}`}
+                  className={cardStyles.base({
+                    className: isFinished
+                      ? 'opacity-60 bg-default/60 border border-border shadow-none'
+                      : undefined,
+                  })}
                 >
-                  <CardHeader className="flex justify-between items-center gap-2 min-w-0">
+                  <div
+                    className={cardStyles.header({
+                      className:
+                        'flex-row justify-between items-center gap-2 min-w-0',
+                    })}
+                  >
                     <span
                       className={`font-medium min-w-0 truncate text-lg ${
-                        isFinished ? 'text-default-400' : ''
+                        isFinished ? 'text-muted' : ''
                       }`}
                       title={event.name}
                     >
                       {event.name}
                     </span>
                     <EventCardMeta event={event} />
-                  </CardHeader>
+                  </div>
                   {event.description && (
-                    <CardBody className="pt-0">
-                      <p
-                        className={`text-sm truncate ${
-                          isFinished ? 'text-default-400' : 'text-default-600'
-                        }`}
-                      >
+                    <div className={cardStyles.content()}>
+                      <p className="text-sm truncate text-muted">
                         {event.description}
                       </p>
-                    </CardBody>
+                    </div>
                   )}
-                </Card>
+                </Link>
               );
             })
           )}

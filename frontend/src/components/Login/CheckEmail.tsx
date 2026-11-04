@@ -1,9 +1,11 @@
-import { Button, Card, CardBody, Spacer, Spinner } from '@heroui/react';
+import { Button, Card } from '@heroui/react';
+import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { globalFetch, PostRequest } from '../Request';
 import { showToast } from '../Toast';
 import EmailInput from './EmailInput';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 type CheckEmailState = {
   email?: string;
@@ -37,20 +39,20 @@ export default function CheckEmailPage() {
 
     showToast({
       title: 'Verification email sent if the account is unverified',
-      color: 'success',
+      variant: 'success',
     });
   }, [email]);
 
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       {isLoading ? (
-        <Spinner label="Loading..." size="lg" />
+        <LoadingSpinner label="Loading..." />
       ) : (
         <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
-          <Card fullWidth className="mx-5">
-            <CardBody className="gap-3 py-6">
+          <Card className="w-full mx-5">
+            <Card.Content className="gap-3 py-6">
               <h1 className="text-xl font-semibold">Check your email</h1>
-              <p className="text-base text-default-600">
+              <p className="text-base text-muted">
                 We sent a verification link
                 {email ? (
                   <>
@@ -64,22 +66,21 @@ export default function CheckEmailPage() {
               {!stateEmail && (
                 <>
                   <EmailInput onChange={setEmail} />
-                  <Spacer />
                 </>
               )}
               <div className="flex justify-center gap-3">
                 <Button
-                  color="primary"
+                  variant="primary"
                   isDisabled={!email}
                   onPress={handleResend}
                 >
                   Resend verification email
                 </Button>
-                <Button as={Link} to="/login" variant="bordered">
+                <LinkButton variant="outline" to="/login">
                   Back to login
-                </Button>
+                </LinkButton>
               </div>
-            </CardBody>
+            </Card.Content>
           </Card>
         </div>
       )}

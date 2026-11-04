@@ -1,9 +1,10 @@
-import { Button, Card, CardBody, Spacer, Spinner } from '@heroui/react';
+import { Button, Card } from '@heroui/react';
+import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { globalFetch, PostRequest } from '../Request';
 import { showToast } from '../Toast';
 import EmailInput from './EmailInput';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -29,47 +30,46 @@ export default function ForgotPasswordPage() {
     setSent(true);
     showToast({
       title: 'If that email exists, a reset link was sent',
-      color: 'success',
+      variant: 'success',
     });
   }, [email]);
 
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       {isLoading ? (
-        <Spinner label="Loading..." size="lg" />
+        <LoadingSpinner label="Loading..." />
       ) : (
         <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
-          <Card fullWidth className="mx-5">
-            <CardBody className="gap-3 py-6">
+          <Card className="w-full mx-5">
+            <Card.Content className="gap-3 py-6">
               <h1 className="text-xl font-semibold">Forgot password</h1>
               {sent ? (
                 <>
-                  <p className="text-base text-default-600">
+                  <p className="text-base text-muted">
                     Check your email for a reset link.
                   </p>
-                  <Button as={Link} to="/login" color="primary">
+                  <LinkButton variant="primary" to="/login">
                     Back to login
-                  </Button>
+                  </LinkButton>
                 </>
               ) : (
                 <>
                   <EmailInput onChange={setEmail} />
-                  <Spacer />
                   <div className="flex justify-center gap-3">
                     <Button
-                      color="primary"
+                      variant="primary"
                       isDisabled={!email}
                       onPress={handleSubmit}
                     >
                       Send reset link
                     </Button>
-                    <Button as={Link} to="/login" variant="bordered">
+                    <LinkButton variant="outline" to="/login">
                       Cancel
-                    </Button>
+                    </LinkButton>
                   </div>
                 </>
               )}
-            </CardBody>
+            </Card.Content>
           </Card>
         </div>
       )}

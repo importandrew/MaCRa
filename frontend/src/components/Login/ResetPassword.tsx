@@ -1,9 +1,11 @@
-import { Button, Card, CardBody, Spacer, Spinner } from '@heroui/react';
+import { Button, Card } from '@heroui/react';
+import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { globalFetch, PostRequest } from '../Request';
 import { showToast } from '../Toast';
 import PasswordInput from './PasswordInput';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -15,7 +17,7 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = useCallback(async () => {
     if (!token) {
-      showToast({ title: 'Missing reset token', color: 'danger' });
+      showToast({ title: 'Missing reset token', variant: 'danger' });
       return;
     }
 
@@ -32,7 +34,7 @@ export default function ResetPasswordPage() {
 
     showToast({
       title: 'Password updated. Please sign in.',
-      color: 'success',
+      variant: 'success',
     });
     navigate('/login', { replace: true });
   }, [token, password, navigate]);
@@ -40,40 +42,42 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       {isLoading ? (
-        <Spinner label="Loading..." size="lg" />
+        <LoadingSpinner label="Loading..." />
       ) : (
         <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
-          <Card fullWidth className="mx-5">
-            <CardBody className="gap-3 py-6">
+          <Card className="w-full mx-5">
+            <Card.Content className="gap-3 py-6">
               <h1 className="text-xl font-semibold">Reset password</h1>
               {!token ? (
                 <>
-                  <p className="text-base text-default-600">
+                  <p className="text-base text-muted">
                     This reset link is missing a token.
                   </p>
-                  <Button as={Link} to="/forgot-password" color="primary">
+                  <LinkButton variant="primary" to="/forgot-password">
                     Request a new link
-                  </Button>
+                  </LinkButton>
                 </>
               ) : (
                 <>
-                  <PasswordInput onChange={setPassword} />
-                  <Spacer />
+                  <PasswordInput
+                    onChange={setPassword}
+                    autoComplete="new-password"
+                  />
                   <div className="flex justify-center gap-3">
                     <Button
-                      color="primary"
+                      variant="primary"
                       isDisabled={!password}
                       onPress={handleSubmit}
                     >
                       Update password
                     </Button>
-                    <Button as={Link} to="/login" variant="bordered">
+                    <LinkButton variant="outline" to="/login">
                       Cancel
-                    </Button>
+                    </LinkButton>
                   </div>
                 </>
               )}
-            </CardBody>
+            </Card.Content>
           </Card>
         </div>
       )}

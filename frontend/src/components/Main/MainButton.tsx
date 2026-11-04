@@ -1,22 +1,24 @@
-import { Link } from 'react-router-dom';
-import { MainButtonProps } from '../../models/Button';
 import { Button } from '@heroui/react';
+import { MainButtonProps } from '../../models/Button';
+import { LinkButton } from '../LinkButton';
 
 function MainButton({
   text,
   link = '/',
   onPress,
-  color = 'primary',
+  variant = 'primary',
 }: MainButtonProps) {
+  if (onPress) {
+    return (
+      <Button variant={variant} size="lg" fullWidth onPress={onPress}>
+        {text}
+      </Button>
+    );
+  }
   return (
-    <Button
-      {...(onPress ? { onPress } : { as: Link, to: link })}
-      color={color}
-      variant="flat"
-      size="lg"
-    >
+    <LinkButton to={link} variant={variant} size="lg" fullWidth>
       {text}
-    </Button>
+    </LinkButton>
   );
 }
 

@@ -40,7 +40,7 @@ export default function ViewGame() {
     >
       <div className="flex flex-col h-full w-auto my-auto justify-center items-center gap-3 px-3">
         <p className="text-center text-3xl">Game not available</p>
-        <p className="text-center text-default-500">
+        <p className="text-center text-muted">
           This game is not live or finished.
         </p>
       </div>

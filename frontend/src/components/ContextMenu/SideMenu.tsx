@@ -1,27 +1,35 @@
-import { Drawer, DrawerContent } from '@heroui/react';
+import { Drawer } from '@heroui/react';
 import { ReactNode } from 'react';
 
-// SideMenu sits below the default overlay layer (z-50) so modals and dropdowns
-// opened from it still cover it, while ContextMenuButton (z-45) stays on top of
-// it and can close it. On phones the menu takes the full screen width, so the
-// button is the easiest way to close it.
+// SideMenu is the drawer behind the ≡ button. On phones it takes the full
+// screen width (the logs and fans tables need the room), so there's no
+// backdrop to tap: it closes with the ✕ button or by swiping its header to
+// the right (built into the v3 Drawer). Escape closes it on desktop.
 export default function SideMenu({
   isOpen,
+  onClose,
   children,
-  onOpenChange,
 }: {
   isOpen: boolean;
+  onClose: () => void;
   children: ReactNode;
-  onOpenChange: () => void;
 }) {
   return (
-    <Drawer
-      size="3xl"
+    <Drawer.Backdrop
       isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      classNames={{ wrapper: 'z-40', backdrop: 'z-40' }}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <DrawerContent>{children}</DrawerContent>
-    </Drawer>
+      <Drawer.Content placement="right">
+        <Drawer.Dialog
+          aria-label="Menu"
+          className="w-full max-w-full sm:w-full sm:max-w-3xl"
+        >
+          <Drawer.CloseTrigger aria-label="Close menu" />
+          {children}
+        </Drawer.Dialog>
+      </Drawer.Content>
+    </Drawer.Backdrop>
   );
 }

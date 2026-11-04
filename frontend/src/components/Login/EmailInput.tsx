@@ -1,17 +1,18 @@
-import { Input } from '@heroui/react';
+import { FieldError, Input, Label, TextField } from '@heroui/react';
 import { InputArgs } from '../../models/Input';
 
 export default function EmailInput({ onChange }: InputArgs) {
   return (
-    <Input
+    <TextField
       type="email"
-      label="Email"
-      variant="bordered"
-      placeholder=" "
-      validate={(value: string) => {
-        return !value.length ? 'Email is required' : null;
-      }}
-      onChange={(event) => onChange(event.target.value)}
-    />
+      name="email"
+      autoComplete="email"
+      validate={(value: string) => (!value.length ? 'Email is required' : null)}
+      onChange={onChange}
+    >
+      <Label>Email</Label>
+      <Input />
+      <FieldError />
+    </TextField>
   );
 }

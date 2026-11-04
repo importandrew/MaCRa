@@ -16,7 +16,14 @@ import PlayerSelector from './PlayerSelector';
 export default function Draft() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [players, setPlayers] = useState<(number | undefined)[]>([]);
+  // One slot per seat from the start: Shuffle only moves slots that exist,
+  // so with [] and one pick it had nothing to swap with.
+  const [players, setPlayers] = useState<(number | undefined)[]>([
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  ]);
   const eventId = getStoredEventId();
   const { data: members, isLoading: membersLoading } =
     useFetchEventMembers(eventId);
@@ -49,7 +56,7 @@ export default function Draft() {
     if (capsForbidden || !canCreateGame) {
       showToast({
         title: 'You cannot start a game in this event',
-        color: 'warning',
+        variant: 'warning',
       });
       navigate('/');
     }
@@ -100,7 +107,7 @@ export default function Draft() {
     if (!players.includes(currentPlayerId)) {
       showToast({
         title: 'You should also pick youself to start the game',
-        color: 'warning',
+        variant: 'warning',
       });
       return;
     }
@@ -110,7 +117,7 @@ export default function Draft() {
       showToast({
         title: 'No event selected',
         description: 'Please select an event first',
-        color: 'warning',
+        variant: 'warning',
       });
       return;
     }
@@ -140,45 +147,27 @@ export default function Draft() {
           >
             <div className="flex flex-col gap-3 p-3">
               {WIND_LABELS.map((wind: string, index: number) => (
-                <div
+                <PlayerSelector
                   key={wind}
-                  className="relative flex justify-center items-center"
-                >
-                  <span className="absolute left-[-24px] text-base pr-3">
-                    {WIND_SYMBOLS[index]}
-                  </span>
-                  <PlayerSelector
-                    wind={wind}
-                    index={index}
-                    players={players}
-                    suggestions={suggestions}
-                    selectedKeys={selectedKeys}
-                    handleSuggestionsChange={handleSuggestionsChange}
-                  />
-                </div>
+                  wind={`${WIND_SYMBOLS[index]} ${wind}`}
+                  index={index}
+                  players={players}
+                  suggestions={suggestions}
+                  selectedKeys={selectedKeys}
+                  handleSuggestionsChange={handleSuggestionsChange}
+                />
               ))}
 
               <div className="flex justify-center gap-3">
-                <Button
-                  variant="flat"
-                  type="button"
-                  color="default"
-                  onPress={onClear}
-                >
+                <Button variant="tertiary" type="button" onPress={onClear}>
                   Clear
                 </Button>
-                <Button
-                  variant="flat"
-                  type="button"
-                  color="secondary"
-                  onPress={onShuffle}
-                >
+                <Button variant="secondary" type="button" onPress={onShuffle}>
                   Shuffle
                 </Button>
                 <Button
-                  variant="flat"
+                  variant="primary"
                   type="submit"
-                  color="primary"
                   isDisabled={
                     players.length !== 4 || selectedKeys.some((key) => !key)
                   }

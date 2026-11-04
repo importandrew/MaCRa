@@ -1,17 +1,12 @@
-import {
-  Button,
-  Checkbox,
-  Form,
-  Input,
-  Radio,
-  RadioGroup,
-} from '@heroui/react';
+import { Button, Form, Label, Input, Switch, TextField } from '@heroui/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { showToast } from '../../Toast';
 import { PlayerOrder } from '../../../models/GameData';
 import { authFetch, PostRequest, eventPath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { GameResult } from '../../../models/GameResult';
+import PlayerPicker from '../../PlayerPicker';
+import SegmentedPicker from '../../SegmentedPicker';
 
 export default function PenaltyInput({
   players = [],
@@ -56,7 +51,7 @@ export default function PenaltyInput({
 
     showToast({
       title: 'Penalty successfully added',
-      color: 'warning',
+      variant: 'warning',
     });
     resetPenaltyResults();
   };
@@ -79,100 +74,59 @@ export default function PenaltyInput({
       className="mb-3 items-center"
     >
       <div className="flex flex-col gap-4 w-full sm:w-[300px]">
-        <div>
-          <RadioGroup
-            label="Select player to fine:"
-            value={loser?.toString()}
-            onValueChange={(value: string) => setLoser(Number(value))}
-            color="warning"
-          >
-            {players &&
-              players.map((player) => (
-                <Radio
-                  key={player.id}
-                  value={player.id.toString()}
-                  description={`[${player.id}]`}
-                >
-                  {player.name}
-                </Radio>
-              ))}
-          </RadioGroup>
-        </div>
+        <PlayerPicker
+          label="Select player to fine"
+          players={players ?? []}
+          selectedId={loser ? String(loser) : ''}
+          onChange={(id) => setLoser(Number(id))}
+        />
 
-        <div>
-          <div className="text-3x1 text-gray-500 mb-2">Is false mahjong?</div>
-          <Checkbox
-            radius="full"
-            color="warning"
-            isSelected={distributed}
-            onValueChange={handleIsDistributed}
-          >
-            Yes
-          </Checkbox>
-        </div>
+        <Switch isSelected={distributed} onChange={handleIsDistributed}>
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            False mahjong
+          </Switch.Content>
+        </Switch>
 
-        <div>
-          <div className="text-3x1 text-gray-500 mb-2">Force next round?</div>
-          <Checkbox
-            radius="full"
-            color="warning"
-            isSelected={forceNextRound}
-            onValueChange={setForceNextRound}
-          >
-            Yes
-          </Checkbox>
-        </div>
+        <Switch isSelected={forceNextRound} onChange={setForceNextRound}>
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            Force next round
+          </Switch.Content>
+        </Switch>
 
-        <div className={distributed ? '' : 'hidden'}>
-          <RadioGroup
-            label="Fine value:"
-            value={value.toString()}
-            onValueChange={(value) => setValue(Number(value))}
-            validate={(value: string | null) => {
-              if (!distributed) return null;
-
-              return Number(value) === 30 || Number(value) === 60
-                ? null
-                : 'Fine value is required';
-            }}
-            color="warning"
-            orientation="horizontal"
-          >
-            <Radio className="mr-3" value="30">
-              30
-            </Radio>
-            <Radio className="mr-3" value="60">
-              60
-            </Radio>
-          </RadioGroup>
-        </div>
-
-        <div className={'sm:max-w-[300px] ' + (distributed ? 'hidden' : '')}>
-          <Input
-            type="number"
-            isClearable={true}
-            value={value.toString()}
-            min="0"
-            pattern="\d*"
+        {distributed ? (
+          <SegmentedPicker
             label="Fine value"
-            className="w-full inline-flex"
-            onChange={(event) => {
-              setValue(+event.target.value);
-            }}
-            validate={(value) => {
-              if (!distributed) return null;
-
-              return Number(value) === 0 ? 'Fine value is required' : null;
-            }}
+            options={[
+              { value: '30', label: '30' },
+              { value: '60', label: '60' },
+            ]}
+            selectedKey={value === 30 || value === 60 ? String(value) : null}
+            onSelectionChange={(next) => setValue(Number(next))}
           />
-        </div>
-        <div className="flex justify-center sm:max-w-[300px]">
-          <Button
-            type="submit"
-            variant="flat"
-            color="warning"
-            isDisabled={!loser || !value}
+        ) : (
+          // A text field with a numeric keyboard: NumberField commits its
+          // value only on blur, which would keep Submit disabled on the tap.
+          <TextField
+            fullWidth
+            value={value === 0 ? '' : value.toString()}
+            onChange={(text) => {
+              const digits = text.replace(/\D/g, '');
+              setValue(digits ? Number(digits) : 0);
+            }}
           >
+            <Label>Fine value</Label>
+            <Input inputMode="numeric" pattern="\d*" autoComplete="off" />
+          </TextField>
+        )}
+
+        <div className="flex justify-center sm:max-w-[300px]">
+          <Button type="submit" variant="primary" isDisabled={!loser || !value}>
             Submit
           </Button>
         </div>

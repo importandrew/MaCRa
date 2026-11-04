@@ -1,10 +1,10 @@
-import { Button } from '@heroui/react';
 import { useState } from 'react';
 import GameLogs from '../../GameResult/GameLogs';
 import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
 import { UndoIcon } from '../../Icons/UndoIcon';
 import { undoLastRound } from '../../../providers/game/gameDataApi';
+import PendingButton from '../../PendingButton';
 
 export default function LogsMenu({
   gameId,
@@ -27,7 +27,7 @@ export default function LogsMenu({
     const ok = await undoLastRound(gameId, eventId);
     setUndoLoading(false);
     if (ok) {
-      showToast({ title: 'Last round undone', color: 'warning' });
+      showToast({ title: 'Last round undone', variant: 'warning' });
       onUndoSuccess?.();
     }
   };
@@ -42,18 +42,18 @@ export default function LogsMenu({
       ></GameLogs>
       {canUndoLastRound && (
         <>
-          <Button
+          <PendingButton
             className="w-1/2 self-center"
-            color="default"
-            variant="flat"
+            variant="tertiary"
             size="sm"
-            startContent={<UndoIcon />}
             onPress={() => setConfirmOpen(true)}
-            isLoading={undoLoading}
+            isPending={undoLoading}
             isDisabled={gameId == null}
+
+            icon={<UndoIcon />}
           >
             Undo last round
-          </Button>
+          </PendingButton>
           <Confirm
             isOpen={confirmOpen}
             onClose={() => setConfirmOpen(false)}
@@ -62,7 +62,7 @@ export default function LogsMenu({
             headerText="Undo last round"
             cancelText="Cancel"
             confirmText="Undo"
-            confirmButtonColor="danger"
+            confirmVariant="danger"
           />
         </>
       )}

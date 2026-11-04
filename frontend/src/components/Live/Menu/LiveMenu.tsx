@@ -1,9 +1,5 @@
-import {
-  Accordion,
-  AccordionItem,
-  DrawerBody,
-  DrawerHeader,
-} from '@heroui/react';
+import { Drawer } from '@heroui/react';
+import LazyAccordion from '../../LazyAccordion';
 import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
@@ -28,37 +24,39 @@ export default function LiveMenu({
 
   return (
     <>
-      <DrawerHeader className="flex flex-col gap-3">Table menu</DrawerHeader>
-      <DrawerBody className="flex flex-col">
-        <Accordion>
-          <AccordionItem
-            startContent={<ListIcon />}
-            key="logs"
-            aria-label="Logs"
-            title="Logs"
-          >
-            <LogsMenu
-              gameId={gameId}
-              eventId={eventId}
-              canUndoLastRound={canUndoLastRound}
-              onUndoSuccess={onUndoSuccess}
-            />
-          </AccordionItem>
-          <AccordionItem
-            startContent={<BookIcon />}
-            key="fans"
-            aria-label="Fans"
-            title="Fans"
-          >
-            <FansMenu />
-          </AccordionItem>
-        </Accordion>
+      <Drawer.Header>
+        <Drawer.Heading>Table menu</Drawer.Heading>
+      </Drawer.Header>
+      <Drawer.Body className="flex flex-col">
+        <LazyAccordion
+          sections={[
+            {
+              id: 'logs',
+              title: 'Logs',
+              icon: <ListIcon />,
+              content: () => (
+                <LogsMenu
+                  gameId={gameId}
+                  eventId={eventId}
+                  canUndoLastRound={canUndoLastRound}
+                  onUndoSuccess={onUndoSuccess}
+                />
+              ),
+            },
+            {
+              id: 'fans',
+              title: 'Fans',
+              icon: <BookIcon />,
+              content: () => <FansMenu />,
+            },
+          ]}
+        />
 
         <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
           <FinishMenu gameId={gameId} canFinish={canFinish} />
           <AbortMenu gameId={gameId} canAbort={canAbort} />
         </div>
-      </DrawerBody>
+      </Drawer.Body>
     </>
   );
 }

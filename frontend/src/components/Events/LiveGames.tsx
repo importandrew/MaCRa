@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useFetchEventGames } from '../../providers/event/eventApi';
 import { useEventLayout } from '../../providers/event/eventLayoutContext';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
-import { useEventGamesNavigate } from '../../providers/event/useEventGamesNavigate';
 import { EventGamesList } from './EventGamesList';
 
 export default function LiveGames() {
@@ -20,7 +19,6 @@ export default function LiveGames() {
     refetch,
     loadMore,
   } = useFetchEventGames(canView ? eventId : null, canView ? 'live' : null);
-  const onSelect = useEventGamesNavigate(eventId);
 
   const onRefresh = useCallback(() => {
     refetch();
@@ -48,7 +46,7 @@ export default function LiveGames() {
           emptyContent="No live games"
           ariaLabel="Live event games"
           mode="live"
-          onSelect={onSelect}
+          gameHref={(gameId) => `/event/${eventId}/game/${gameId}`}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           onLoadMore={loadMore}
