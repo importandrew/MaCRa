@@ -43,8 +43,9 @@ export default function ValueStepper({
   // The error waits for blur, so typing 16 doesn't flash it at "1".
   const isTooLow = value < min;
 
-  // The number sits above the buttons, not between them: the stepper must
-  // fit the center of the table on a 360px phone.
+  // The number sits above the buttons, not between them, and has no visible
+  // caption (the field's aria-label names it): the stepper must fit the
+  // center of the table on a 360px phone.
   return (
     <div className="flex flex-col items-center gap-1">
       <TextField
@@ -56,13 +57,12 @@ export default function ValueStepper({
         onBlur={() => setIsFocused(false)}
         isInvalid={isTooLow && !isFocused}
       >
-        <span className="text-xs text-muted">{label}</span>
         <Input
           inputMode="numeric"
           pattern="\d*"
           autoComplete="off"
           onFocus={(e) => e.currentTarget.select()}
-          className="h-11 w-24 text-center text-3xl font-semibold tabular-nums"
+          className="h-9 w-24 text-center text-2xl font-semibold tabular-nums"
         />
         <FieldError className="text-center">
           {`${label} should be ${min} or higher`}

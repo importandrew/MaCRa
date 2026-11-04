@@ -1,4 +1,9 @@
-import { Switch, ToggleButton, ToggleButtonGroup } from '@heroui/react';
+import {
+  Separator,
+  Switch,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@heroui/react';
 import { Outcome, PlayerScore } from '../../models/GameData';
 import { OUTCOME_LABELS } from '../../utils/constants';
 import { SignIcon } from '../Icons/SignIcon';
@@ -130,12 +135,18 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
         ))}
       </ToggleButtonGroup>
 
+      {/* Sets the outcome apart from what it asks for next, so Penalty /
+          False mahjong doesn't read as more outcome buttons. */}
+      <Separator />
+
       {entry.isPenalty && (
         <SegmentedPicker
           ariaLabel="Penalty type"
           options={[
             { value: Outcome.Penalty, label: 'Penalty' },
-            { value: Outcome.FalseMahjong, label: 'False mahjong' },
+            // Non-breaking space: on two lines it makes the Penalty
+            // form too tall for the center of a phone.
+            { value: Outcome.FalseMahjong, label: 'False\u00a0mahjong' },
           ]}
           selectedKey={entry.penaltyType}
           onSelectionChange={entry.setPenaltyType}
