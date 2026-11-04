@@ -109,11 +109,14 @@ export default function ScroreInput({
       return;
     }
 
+    // Winner, loser and hand value are kept when the outcome changes, so
+    // send only the ones that apply to the chosen outcome.
+    const isWin = outcome === Outcome.Self || outcome === Outcome.Deal;
     const roundResult = PostRequest(eventPath(eventId, '/round'), {
       outcome,
-      won: Number(winner) || null,
-      dealt: Number(loser) || null,
-      score,
+      won: isWin ? Number(winner) || null : null,
+      dealt: outcome === Outcome.Deal ? Number(loser) || null : null,
+      score: isWin ? score : 0,
     });
     const data = await authFetch<GameData>(roundResult, {
       isToastEnabled: true,
@@ -172,8 +175,10 @@ export default function ScroreInput({
             )}
             selectedKey={outcome ? (outcome as Outcome) : null}
             onSelectionChange={(value) => {
-              resetRoundResults();
+              // Keep the picked players and hand value: switching Self ⇄
+              // Deal-in shouldn't make the user pick the winner again.
               setOutcome(value);
+              setError('');
             }}
           />
 
@@ -182,8 +187,12 @@ export default function ScroreInput({
               label="Player won"
               players={players}
               selectedId={winner}
-              onChange={setWinner}
-              disabledId={loser}
+              onChange={(id) => {
+                setWinner(id);
+                // One player can't both win and deal in.
+                if (id === loser) setLoser('');
+              }}
+              disabledId={outcome === Outcome.Deal ? loser : ''}
             />
           )}
 

@@ -18,12 +18,14 @@ export default function TableMenu({
   gameId = null,
   setFinedPlayerId,
   onRefetchNow,
+  onPenaltyAdded,
 }: {
   players: PlayerOrder[] | null;
   finedPlayerId: number | null;
   gameId: number | null;
   setFinedPlayerId: (value: number | null) => void;
   onRefetchNow?: () => void;
+  onPenaltyAdded?: () => void;
 }) {
   const { selectedEventId } = useEvent();
   const { data: eventMe } = useFetchEventMe(selectedEventId);
@@ -49,6 +51,7 @@ export default function TableMenu({
                   players={players}
                   finedPlayerId={finedPlayerId}
                   setFinedPlayerId={setFinedPlayerId}
+                  onPenaltyAdded={onPenaltyAdded}
                 />
               ),
             },

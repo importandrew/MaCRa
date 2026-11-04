@@ -1,9 +1,8 @@
-import { Button } from '@heroui/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameData } from '../../models/GameData';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
-import { RefreshIcon } from '../Icons/RefreshIcon';
+import RefreshButton from '../RefreshButton';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from './AnimatedScore';
 import PlayerMenu from './Menu/PlayerMenu';
@@ -12,6 +11,7 @@ import './CurrentGame.css';
 import ScroreInput from './ScoreInput';
 
 export default function CurrentGame() {
+  const [scoreFormKey, setScoreFormKey] = useState(0);
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
@@ -143,6 +143,9 @@ export default function CurrentGame() {
             </div>
 
             <ScroreInput
+              // A new key resets the form (collapsed, empty), e.g. after a
+              // penalty from the side menu changed the game.
+              key={scoreFormKey}
               kanji={roundData.round.kanji}
               playersList={playersList}
               setRoundData={setRoundData}
@@ -172,16 +175,10 @@ export default function CurrentGame() {
               </div>
             </div>
             <div>
-              <Button
-                variant="ghost"
-                size="lg"
-                isIconOnly
-                aria-label="Refresh"
-                onPress={refetch}
-                className="absolute z-1 left-0 bottom-0 rounded-full"
-              >
-                <RefreshIcon className="text-muted" />
-              </Button>
+              <RefreshButton
+                onRefresh={refetch}
+                className="absolute z-1 left-0 bottom-0"
+              />
             </div>
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
@@ -218,6 +215,7 @@ export default function CurrentGame() {
                   gameId={roundData.id}
                   setFinedPlayerId={setFinedPlayerId}
                   onRefetchNow={refetch}
+                  onPenaltyAdded={() => setScoreFormKey((key) => key + 1)}
                 />
               </ContextMenu>
             </div>

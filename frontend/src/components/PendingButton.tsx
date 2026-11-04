@@ -2,7 +2,7 @@ import { Button, Spinner, type ButtonProps } from '@heroui/react';
 import { ReactNode } from 'react';
 
 export type PendingButtonProps = Omit<ButtonProps, 'children'> & {
-  children: ReactNode;
+  children?: ReactNode;
   // icon shows before the label while the button isn't pending.
   icon?: ReactNode;
 };

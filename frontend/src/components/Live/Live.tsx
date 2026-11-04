@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
-import { RefreshIcon } from '../Icons/RefreshIcon';
+import RefreshButton from '../RefreshButton';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from '../CurrentGame/AnimatedScore';
 import '../CurrentGame/CurrentGame.css';
@@ -170,16 +170,10 @@ export default function Live() {
               </div>
             </div>
             <div>
-              <Button
-                variant="ghost"
-                size="lg"
-                isIconOnly
-                aria-label="Refresh"
-                onPress={refetch}
-                className="absolute z-1 left-0 bottom-0 rounded-full"
-              >
-                <RefreshIcon className="text-muted" />
-              </Button>
+              <RefreshButton
+                onRefresh={refetch}
+                className="absolute z-1 left-0 bottom-0"
+              />
             </div>
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
