@@ -54,77 +54,67 @@ export default function ValueStepper({
     setIsEditing(false);
   };
 
+  // The number sits above the buttons, not between them: the stepper must
+  // fit the center of the table on a 360px phone.
   return (
     <div className="flex flex-col items-center gap-1">
-      <p className="text-sm text-muted">{label}</p>
-      <div className="flex items-center justify-center gap-1.5">
-        {STEPS.slice(0, 2).map((step) => (
+      <span className="text-xs text-muted">{label}</span>
+      {isEditing ? (
+        <TextField
+          aria-label={label}
+          className="w-24"
+          value={draft}
+          onChange={(text) => setDraft(text.replace(/\D/g, ''))}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commit();
+          }}
+        >
+          <Input
+            ref={inputRef}
+            inputMode="numeric"
+            pattern="\d*"
+            autoComplete="off"
+            className="h-10 text-center text-2xl font-semibold"
+          />
+        </TextField>
+      ) : (
+        // A plain button, not HeroUI's: React Aria's press handling has no
+        // long press, and its pointer capture would swallow the timer.
+        <button
+          type="button"
+          aria-label={`${label} ${value}. Long press to type a value`}
+          className="h-10 w-24 select-none touch-manipulation text-center text-foreground text-4xl leading-none font-semibold tabular-nums [-webkit-touch-callout:none]"
+          onPointerDown={() => {
+            cancelLongPress();
+            timer.current = window.setTimeout(startEditing, LONG_PRESS_MS);
+          }}
+          onPointerUp={cancelLongPress}
+          onPointerLeave={cancelLongPress}
+          onPointerCancel={cancelLongPress}
+          onContextMenu={(e) => e.preventDefault()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              startEditing();
+            }
+          }}
+        >
+          {value}
+        </button>
+      )}
+      <div className="flex items-center justify-center gap-1">
+        {STEPS.map((step) => (
           <Button
             key={step}
+            size="sm"
             variant="tertiary"
-            className="min-w-11 px-2"
-            aria-label={`${label} ${step}`}
-            isDisabled={value <= min}
+            className="min-w-10 px-1.5"
+            aria-label={`${label} ${step > 0 ? '+' : ''}${step}`}
+            isDisabled={step < 0 && value <= min}
             onPress={() => onChange(Math.max(min, value + step))}
           >
-            {`−${-step}`}
-          </Button>
-        ))}
-
-        {isEditing ? (
-          <TextField
-            aria-label={label}
-            className="w-20"
-            value={draft}
-            onChange={(text) => setDraft(text.replace(/\D/g, ''))}
-            onBlur={commit}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') commit();
-            }}
-          >
-            <Input
-              ref={inputRef}
-              inputMode="numeric"
-              pattern="\d*"
-              autoComplete="off"
-              className="text-center text-3xl font-semibold"
-            />
-          </TextField>
-        ) : (
-          // A plain button, not HeroUI's: React Aria's press handling has no
-          // long press, and its pointer capture would swallow the timer.
-          <button
-            type="button"
-            aria-label={`${label} ${value}. Long press to type a value`}
-            className="w-20 select-none touch-manipulation text-center text-foreground text-4xl font-semibold tabular-nums [-webkit-touch-callout:none]"
-            onPointerDown={() => {
-              cancelLongPress();
-              timer.current = window.setTimeout(startEditing, LONG_PRESS_MS);
-            }}
-            onPointerUp={cancelLongPress}
-            onPointerLeave={cancelLongPress}
-            onPointerCancel={cancelLongPress}
-            onContextMenu={(e) => e.preventDefault()}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                startEditing();
-              }
-            }}
-          >
-            {value}
-          </button>
-        )}
-
-        {STEPS.slice(2).map((step) => (
-          <Button
-            key={step}
-            variant="tertiary"
-            className="min-w-11 px-2"
-            aria-label={`${label} +${step}`}
-            onPress={() => onChange(value + step)}
-          >
-            {`+${step}`}
+            {step > 0 ? `+${step}` : `\u2212${-step}`}
           </Button>
         ))}
       </div>
