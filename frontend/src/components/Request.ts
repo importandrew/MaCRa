@@ -12,6 +12,23 @@ type FetchOptions = {
   redirectOn401?: boolean;
 };
 
+// Several requests can fail with 401 at once; log out and redirect only once.
+let isSessionExpiredHandled = false;
+
+async function handleSessionExpired() {
+  if (isSessionExpiredHandled) return;
+  isSessionExpiredHandled = true;
+
+  await fetchLogoutApi();
+  localStorage.removeItem(AUTH_USER_DATA);
+  showToast({
+    title: 'Session expired',
+    description: 'Redirecting to login...',
+    variant: 'danger',
+  });
+  setTimeout(() => (window.location.href = '/login'), 3000);
+}
+
 async function globalFetch<T>(
   request: Request,
   params?: FetchOptions
@@ -27,18 +44,20 @@ async function fetchWithStatus<T>(
   const { isToastEnabled = true, redirectOn401 = true } = params || {};
 
   try {
-    const response = await fetch(request);
+    // A 401 from a public endpoint means the backend cleared a stale auth
+    // cookie; an anonymous visitor then just repeats the request without it.
+    const retryRequest = request.clone();
+    let response = await fetch(request);
 
-    if (response.status === 401 && redirectOn401) {
-      await fetchLogoutApi();
-      localStorage.removeItem(AUTH_USER_DATA);
-      showToast({
-        title: 'Unauthorized request!',
-        description: 'Redirecting to login...',
-        variant: 'danger',
-      });
-      setTimeout(() => (window.location.href = '/login'), 3000);
-      return { data: null, status: response.status };
+    if (response.status === 401) {
+      const isSignedIn = AUTH_USER_DATA in localStorage;
+
+      if (redirectOn401 || isSignedIn || isSessionExpiredHandled) {
+        await handleSessionExpired();
+        return { data: null, status: response.status };
+      }
+
+      response = await fetch(retryRequest);
     }
 
     if (!response.ok) {
