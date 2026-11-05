@@ -36,130 +36,36 @@ func (s GameScore) Final() string {
 	return output.String()
 }
 
-//nolint:funlen
+// CalculateTP sets each player's tournament points from their place by game points.
+// Players with equal game points share the average TP of the places they occupy.
 func (s GameScore) CalculateTP() {
-	type score struct {
-		id int
-		ps PlayerScore
-	}
+	placeTP := [...]float32{firstPlaceTP, secondPlaceTP, thirdPlaceTP, fourthPlaceTP}
 
-	scores := make([]score, 0, len(s))
-	for id, ps := range s {
-		scores = append(scores, score{id: id, ps: ps})
+	ids := make([]int, 0, len(s))
+	for id := range s {
+		ids = append(ids, id)
 	}
-
-	sort.Slice(scores, func(i, j int) bool {
-		return scores[i].ps.GP < scores[j].ps.GP
+	sort.Slice(ids, func(i, j int) bool {
+		return s[ids[i]].GP > s[ids[j]].GP
 	})
 
-	// Extract values once
-	// gpN/idN - N means players place
-	gp4, gp3, gp2, gp1 := scores[0].ps.GP, scores[1].ps.GP, scores[2].ps.GP, scores[3].ps.GP
-	id4, id3, id2, id1 := scores[0].id, scores[1].id, scores[2].id, scores[3].id
-
-	switch {
-	// 4 < 3 < 2 < 1
-	case gp4 < gp3 && gp3 < gp2 && gp2 < gp1:
-		entry4 := s[id4]
-		entry4.TP = fourthPlaceTP
-		s[id4] = entry4
-		entry3 := s[id3]
-		entry3.TP = thirdPlaceTP
-		s[id3] = entry3
-		entry2 := s[id2]
-		entry2.TP = secondPlaceTP
-		s[id2] = entry2
-		entry1 := s[id1]
-		entry1.TP = firstPlaceTP
-		s[id1] = entry1
-
-	// 4 = 3 < 2 < 1
-	case gp4 == gp3 && gp3 < gp2 && gp2 < gp1:
-		tp43 := (fourthPlaceTP + thirdPlaceTP) / 2
-		entry4 := s[id4]
-		entry4.TP = tp43
-		s[id4] = entry4
-		entry3 := s[id3]
-		entry3.TP = tp43
-		s[id3] = entry3
-		entry2 := s[id2]
-		entry2.TP = secondPlaceTP
-		s[id2] = entry2
-		entry1 := s[id1]
-		entry1.TP = firstPlaceTP
-		s[id1] = entry1
-
-	// 4 < 3 = 2 < 1
-	case gp4 < gp3 && gp3 == gp2 && gp2 < gp1:
-		tp32 := (thirdPlaceTP + secondPlaceTP) / 2
-		entry4 := s[id4]
-		entry4.TP = fourthPlaceTP
-		s[id4] = entry4
-		entry3 := s[id3]
-		entry3.TP = tp32
-		s[id3] = entry3
-		entry2 := s[id2]
-		entry2.TP = tp32
-		s[id2] = entry2
-		entry1 := s[id1]
-		entry1.TP = firstPlaceTP
-		s[id1] = entry1
-
-	// 4 < 3 < 2 = 1
-	case gp4 < gp3 && gp3 < gp2 && gp2 == gp1:
-		tp21 := (secondPlaceTP + firstPlaceTP) / 2
-		entry4 := s[id4]
-		entry4.TP = fourthPlaceTP
-		s[id4] = entry4
-		entry3 := s[id3]
-		entry3.TP = thirdPlaceTP
-		s[id3] = entry3
-		entry2 := s[id2]
-		entry2.TP = tp21
-		s[id2] = entry2
-		entry1 := s[id1]
-		entry1.TP = tp21
-		s[id1] = entry1
-
-	// 4 = 3 = 2 < 1
-	case gp4 == gp3 && gp3 == gp2 && gp2 < gp1:
-		tp432 := (fourthPlaceTP + thirdPlaceTP + secondPlaceTP) / 3
-		entry4 := s[id4]
-		entry4.TP = tp432
-		s[id4] = entry4
-		entry3 := s[id3]
-		entry3.TP = tp432
-		s[id3] = entry3
-		entry2 := s[id2]
-		entry2.TP = tp432
-		s[id2] = entry2
-		entry1 := s[id1]
-		entry1.TP = firstPlaceTP
-		s[id1] = entry1
-
-	// 4 < 3 = 2 = 1
-	case gp4 < gp3 && gp3 == gp2 && gp2 == gp1:
-		tp321 := (thirdPlaceTP + secondPlaceTP + firstPlaceTP) / 3
-		entry4 := s[id4]
-		entry4.TP = fourthPlaceTP
-		s[id4] = entry4
-		entry3 := s[id3]
-		entry3.TP = tp321
-		s[id3] = entry3
-		entry2 := s[id2]
-		entry2.TP = tp321
-		s[id2] = entry2
-		entry1 := s[id1]
-		entry1.TP = tp321
-		s[id1] = entry1
-
-	// 4 = 3 = 2 = 1
-	case gp4 == gp3 && gp3 == gp2 && gp2 == gp1:
-		tp4321 := (fourthPlaceTP + thirdPlaceTP + secondPlaceTP + firstPlaceTP) / 4
-		for id := range s {
-			entry := s[id]
-			entry.TP = tp4321
-			s[id] = entry
+	for start := 0; start < len(ids); {
+		end := start + 1
+		for end < len(ids) && s[ids[end]].GP == s[ids[start]].GP {
+			end++
 		}
+
+		var sum float32
+		for place := start; place < end && place < len(placeTP); place++ {
+			sum += placeTP[place]
+		}
+		tp := sum / float32(end-start)
+
+		for _, id := range ids[start:end] {
+			ps := s[id]
+			ps.TP = tp
+			s[id] = ps
+		}
+		start = end
 	}
 }
