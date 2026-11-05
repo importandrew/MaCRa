@@ -28,16 +28,27 @@ function resetSessionExpired() {
   isSessionExpiredHandled = false;
 }
 
-function handleSessionExpired() {
+// handleSessionExpired signs out and sends the user to /login. wasSignedIn
+// picks the toast: an expired session, or a visitor who never signed in and
+// hit an endpoint that needs an account.
+function handleSessionExpired(wasSignedIn: boolean) {
   if (isSessionExpiredHandled) return;
   isSessionExpiredHandled = true;
 
   localStorage.removeItem(AUTH_USER_DATA);
-  showToast({
-    title: 'Session expired',
-    description: 'Please log in again.',
-    variant: 'danger',
-  });
+  showToast(
+    wasSignedIn
+      ? {
+          title: 'Session expired',
+          description: 'Please log in again.',
+          variant: 'danger',
+        }
+      : {
+          title: 'Login required',
+          description: 'Please log in to continue.',
+          variant: 'warning',
+        }
+  );
 
   if (sessionExpiredHandler) {
     sessionExpiredHandler();
@@ -73,7 +84,7 @@ async function fetchWithStatus<T>(
       const isSignedIn = AUTH_USER_DATA in localStorage;
 
       if (redirectOn401 || isSignedIn || isSessionExpiredHandled) {
-        handleSessionExpired();
+        handleSessionExpired(isSignedIn);
         return { data: null, status: response.status };
       }
 
