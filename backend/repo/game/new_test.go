@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -87,4 +88,83 @@ func TestNewGame(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewGameAlreadyInGame(t *testing.T) {
+	db, err := database.NewTestDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	db.Test(t, "player already in live game", func(t *testing.T) {
+		repo := NewRepo(db)
+		ctx := context.Background()
+		conn, err := db.Acquire(ctx)
+		require.NoError(t, err)
+		defer conn.Release()
+
+		for id := 1; id <= 7; id++ {
+			createTestUser(t, conn, id)
+		}
+		createTestEvent(t, conn)
+
+		_, err = repo.NewGame(ctx, [4]int{1, 2, 3, 4}, testEventID)
+		require.NoError(t, err)
+
+		_, err = repo.NewGame(ctx, [4]int{5, 6, 7, 4}, testEventID)
+		assert.ErrorIs(t, err, models.ErrValidatePlayers)
+	})
+
+	db.Test(t, "concurrent creations", func(t *testing.T) {
+		repo := NewRepo(db)
+		ctx := context.Background()
+		conn, err := db.Acquire(ctx)
+		require.NoError(t, err)
+		defer conn.Release()
+
+		for id := 1; id <= 7; id++ {
+			createTestUser(t, conn, id)
+		}
+		createTestEvent(t, conn)
+
+		// The same table twice (a double tap) plus a table sharing player 4,
+		// seated in a different order to exercise lock ordering.
+		seatings := [][4]int{
+			{1, 2, 3, 4}, {1, 2, 3, 4}, {1, 2, 3, 4},
+			{4, 7, 6, 5}, {5, 6, 7, 4},
+		}
+
+		const rounds = 20
+		for range rounds {
+			_, err := conn.Exec(ctx, `DELETE FROM games`)
+			require.NoError(t, err)
+
+			errs := make(chan error, len(seatings))
+			var wg sync.WaitGroup
+			for _, seating := range seatings {
+				wg.Go(func() {
+					_, err := repo.NewGame(ctx, seating, testEventID)
+					errs <- err
+				})
+			}
+			wg.Wait()
+			close(errs)
+
+			created := 0
+			for err := range errs {
+				if err == nil {
+					created++
+					continue
+				}
+				require.ErrorIs(t, err, models.ErrValidatePlayers)
+			}
+			require.Equal(t, 1, created, "exactly one game must be created")
+
+			var live int
+			err = conn.QueryRow(ctx, `SELECT count(*) FROM games WHERE status = $1`, models.GameLive).Scan(&live)
+			require.NoError(t, err)
+			require.Equal(t, 1, live)
+		}
+	})
 }
