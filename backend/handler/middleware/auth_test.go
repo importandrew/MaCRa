@@ -14,6 +14,7 @@ import (
 	"github.com/importandrew/MaCRa/handler/authcookie"
 	"github.com/importandrew/MaCRa/handler/reqctx"
 	"github.com/importandrew/MaCRa/handler/token"
+	"github.com/importandrew/MaCRa/models"
 )
 
 var testKey = []byte("test-key")
@@ -124,6 +125,8 @@ func TestAuth_SetUserID(t *testing.T) {
 				assert.Equal(t, tc.wantUserID, gotUserID)
 			} else {
 				assert.Equal(t, -1, gotUserID, "handler must not run")
+				assert.JSONEq(t, `{"error":"`+models.ErrSessionExpired.Error()+`"}`, w.Body.String(),
+					"the body must not expose token parser details")
 			}
 			tc.checkCookie(t, authCookies(w))
 		})
