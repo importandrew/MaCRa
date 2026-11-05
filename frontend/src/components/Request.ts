@@ -100,29 +100,32 @@ async function publicFetch<T>(
   return fetchWithStatus<T>(request, { ...params, redirectOn401: false });
 }
 
+// globalBatchFetch runs the requests in parallel like publicFetch, so a 401
+// gets the same session-expired handling. A failed request yields null in its
+// slot; a network failure fails the whole batch with a single toast.
 async function globalBatchFetch<T>(
   requests: Request[],
-  params?: FetchOptions
-): Promise<T[] | null> {
+  params?: Omit<FetchOptions, 'redirectOn401'>
+): Promise<(T | null)[] | null> {
   const { isToastEnabled = true } = params || {};
-  try {
-    const responses = await Promise.all(
-      requests.map((request) => fetch(request))
-    );
 
-    const data = await Promise.all(
-      responses.map((response) => response.json())
-    );
-    return data;
-  } catch (error) {
+  const results = await Promise.all(
+    requests.map((request) =>
+      fetchWithStatus<T>(request, {
+        isToastEnabled: false,
+        redirectOn401: false,
+      })
+    )
+  );
+
+  if (results.some((result) => result.status === 0)) {
     if (isToastEnabled) {
-      showToast({
-        title: `Error: ${error}`,
-        variant: 'danger',
-      });
+      showToast({ title: 'Error: network request failed', variant: 'danger' });
     }
     return null;
   }
+
+  return results.map((result) => result.data);
 }
 
 function PostRequest(url: string, body: unknown = {}): Request {

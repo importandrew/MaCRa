@@ -109,7 +109,11 @@ export const useFetchBatchGameResults = (
     }
 
     const data: Record<number, GameResult> = results.reduce(
-      (acc: Record<number, GameResult>, result: GameResult, index: number) => {
+      (
+        acc: Record<number, GameResult>,
+        result: GameResult | null,
+        index: number
+      ) => {
         const id = gameIds[index];
         if (result) {
           acc[id] = result;
