@@ -11,6 +11,7 @@ var (
 	ErrGameNotLive              = errors.New("game is not live")
 	ErrGameNotEnded             = errors.New("game is not ended")
 	ErrValidateEnterRoundResult = errors.New("round result validate")
+	ErrValidatePenalty          = errors.New("penalty validate")
 
 	ErrPlayerNotFound   = errors.New("player not found")
 	ErrBadCredentials   = errors.New("email or password is incorrect")
@@ -54,6 +55,7 @@ var Errors = map[error]int{
 	ErrBadCredentials:           http.StatusBadRequest,
 	ErrUserNotInPlayers:         http.StatusBadRequest,
 	ErrValidateEnterRoundResult: http.StatusBadRequest,
+	ErrValidatePenalty:          http.StatusBadRequest,
 	ErrValidatePlayers:          http.StatusBadRequest,
 	ErrNoRounds:                 http.StatusBadRequest,
 	ErrTooLate:                  http.StatusBadRequest,

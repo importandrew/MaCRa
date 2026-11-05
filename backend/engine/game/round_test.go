@@ -290,3 +290,28 @@ func TestGame_EnterRoundResult(t *testing.T) {
 		})
 	}
 }
+
+func TestGame_EnterRoundResult_InvalidPlayers(t *testing.T) {
+	testData := map[string]struct {
+		outcome models.Outcome
+		loser   int
+		winner  int
+	}{
+		"self with an unseated winner":    {outcome: models.Self, winner: 99},
+		"deal with an unseated winner":    {outcome: models.Deal, loser: 2, winner: 99},
+		"deal with an unseated loser":     {outcome: models.Deal, loser: 99, winner: 1},
+		"deal with winner equal to loser": {outcome: models.Deal, loser: 1, winner: 1},
+	}
+
+	for name, testCase := range testData {
+		t.Run(name, func(t *testing.T) {
+			g := NewGame(Config{ID: 100, Players: [4]int{1, 2, 3, 4}})
+
+			err := g.EnterRoundResult(testCase.outcome, 8, testCase.loser, testCase.winner)
+
+			assert.ErrorIs(t, err, models.ErrValidateEnterRoundResult)
+			assert.Equal(t, NewScore([4]int{1, 2, 3, 4}), g.Score())
+			assert.Equal(t, 1, g.Round())
+		})
+	}
+}

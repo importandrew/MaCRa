@@ -45,12 +45,12 @@ func (g *Game) EnterRoundResult(outcome models.Outcome, hand, loser, winner int)
 		}
 		g.draw()
 	case models.Self:
-		if err := validateSelf(hand, loser, winner); err != nil {
+		if err := g.validateSelf(hand, loser, winner); err != nil {
 			return fmt.Errorf("%w: self: %w", models.ErrValidateEnterRoundResult, err)
 		}
 		g.self(hand, winner)
 	case models.Deal:
-		if err := validateDeal(hand, loser, winner); err != nil {
+		if err := g.validateDeal(hand, loser, winner); err != nil {
 			return fmt.Errorf("%w: deal: %w", models.ErrValidateEnterRoundResult, err)
 		}
 		g.deal(hand, loser, winner)
@@ -86,13 +86,17 @@ func (g *Game) draw() {
 	logger.WithField("result", "draw").Info(g.score.String())
 }
 
-func validateSelf(hand, loser, winner int) error {
+func (g *Game) validateSelf(hand, loser, winner int) error {
 	if hand < 8 {
 		return errors.New("hand score should be 8 or higher")
 	}
 
 	if winner == 0 {
 		return errors.New("winner is required")
+	}
+
+	if !g.isSeated(winner) {
+		return fmt.Errorf("winner %d is not in the game", winner)
 	}
 
 	if loser != 0 {
@@ -118,7 +122,7 @@ func (g *Game) self(hand, winner int) {
 		Info(g.score.String())
 }
 
-func validateDeal(hand, loser, winner int) error {
+func (g *Game) validateDeal(hand, loser, winner int) error {
 	if hand < 8 {
 		return errors.New("hand score should be 8 or higher")
 	}
@@ -129,6 +133,18 @@ func validateDeal(hand, loser, winner int) error {
 
 	if loser == 0 {
 		return errors.New("loser is required")
+	}
+
+	if !g.isSeated(winner) {
+		return fmt.Errorf("winner %d is not in the game", winner)
+	}
+
+	if !g.isSeated(loser) {
+		return fmt.Errorf("loser %d is not in the game", loser)
+	}
+
+	if winner == loser {
+		return errors.New("winner and loser should be different players")
 	}
 
 	return nil
