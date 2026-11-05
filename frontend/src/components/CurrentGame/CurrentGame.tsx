@@ -1,20 +1,26 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Button } from '@heroui/react';
+import { useEffect, useRef, useState } from 'react';
 import { GameData } from '../../models/GameData';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import RefreshButton from '../RefreshButton';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from './AnimatedScore';
-import PlayerMenu from './Menu/PlayerMenu';
+import UserAvatar from '../UserAvatar';
 import TableMenu from './Menu/TableMenu';
+import { RoundEntryPanel, SeatMarks } from './RoundEntry';
+import { useRoundEntry } from './useRoundEntry';
 import './CurrentGame.css';
-import ScroreInput from './ScoreInput';
 
 export default function CurrentGame() {
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
-  const [finedPlayerId, setFinedPlayerId] = useState<number | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [isEntryOpen, setIsEntryOpen] = useState(false);
+  const entry = useRoundEntry((next) => {
+    setRoundData(next);
+    setIsEntryOpen(false);
+  });
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}
   );
@@ -32,36 +38,20 @@ export default function CurrentGame() {
     }
   );
 
-  const openContextMenuOpen = () => {
-    setIsContextMenuOpen(true);
+  // The round entry clears after a submit (in useRoundEntry) and on refresh,
+  // including undo, as agreed with the owner. Closing it with the kanji keeps
+  // the choices.
+  const onRefresh = () => {
+    entry.reset();
+    setIsEntryOpen(false);
+    return refetch();
   };
-
-  const closeContextMenuOpen = () => {
-    setIsContextMenuOpen(false);
-    setFinedPlayerId(null);
-  };
-
-  const onRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
 
   useEffect(() => {
     if (data) {
       setRoundData(data);
     }
-
-    if (finedPlayerId !== null) {
-      openContextMenuOpen();
-    }
-
-    if (finedPlayerId === null && isContextMenuOpen) {
-      closeContextMenuOpen();
-      refetch();
-    }
-    // Run only when finedPlayerId or data change. With isContextMenuOpen in the
-    // deps, opening the ≡ menu (finedPlayerId === null) would close it at once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finedPlayerId, data]);
+  }, [data]);
 
   // Update currentScores when roundData changes, and save previous scores
   useEffect(() => {
@@ -90,24 +80,23 @@ export default function CurrentGame() {
       onRefresh={onRefresh}
     >
       {roundData ? (
-        <div className="flex justify-center h-full w-screen text-lg">
+        <div className="flex justify-center h-full w-screen">
           <div className="grid w-screen grid-cols-[25%_50%_25%] grid-rows-[20%_60%_20%] text-center">
             <div></div>
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks entry={entry} player={roundData.opp} />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.opp.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.opp.id
-                      )}
-                      setFinedPlayerId={setFinedPlayerId}
-                    />
-                  }
+                  <UserAvatar name={roundData.opp.name} className="shrink-0" />
                   <span className="min-w-0 truncate">{roundData.opp.name}</span>
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
@@ -119,21 +108,20 @@ export default function CurrentGame() {
             <div></div>
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks entry={entry} player={roundData.left} isSideSeat />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.left.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.left.id
-                      )}
-                      setFinedPlayerId={setFinedPlayerId}
-                    />
-                  }
+                  <UserAvatar name={roundData.left.name} className="shrink-0" />
                   <span className="min-w-0 truncate">
                     {roundData.left.name}
                   </span>
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
@@ -143,29 +131,47 @@ export default function CurrentGame() {
               </div>
             </div>
 
-            <ScroreInput
-              kanji={roundData.round.kanji}
-              playersList={playersList}
-              setRoundData={setRoundData}
-            />
+            {/* The center of the table: the round kanji, and the round entry
+                under it while it's open. It must fit without scrolling. */}
+            <div className="relative z-10 flex h-full min-h-0 w-full flex-col items-center justify-center gap-2 px-1">
+              <Button
+                size="lg"
+                variant="secondary"
+                className={
+                  isEntryOpen ? 'h-11 px-3 text-3xl' : 'p-4 h-16 text-5xl'
+                }
+                aria-label={`Enter result of round ${roundData.round.kanji}`}
+                aria-expanded={isEntryOpen}
+                onPress={() => setIsEntryOpen(!isEntryOpen)}
+              >
+                {roundData.round.kanji}
+              </Button>
+              {isEntryOpen && <RoundEntryPanel entry={entry} />}
+            </div>
 
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks
+                    entry={entry}
+                    player={roundData.right}
+                    isSideSeat
+                  />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.right.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.right.id
-                      )}
-                      setFinedPlayerId={setFinedPlayerId}
-                    />
-                  }
+                  <UserAvatar
+                    name={roundData.right.name}
+                    className="shrink-0"
+                  />
                   <span className="min-w-0 truncate">
                     {roundData.right.name}
                   </span>
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
@@ -176,25 +182,24 @@ export default function CurrentGame() {
             </div>
             <div>
               <RefreshButton
-                onRefresh={refetch}
+                onRefresh={onRefresh}
                 className="absolute z-1 left-0 bottom-0"
               />
             </div>
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
+                {/* Toward the center, so the name stays at the screen edge. */}
+                {isEntryOpen && (
+                  <SeatMarks entry={entry} player={roundData.me} />
+                )}
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
                   <span className="shrink-0">{roundData.me.wind}</span>
-                  {
-                    <PlayerMenu
-                      player={playersList.find(
-                        (player) => player.id === roundData.me.id
-                      )}
-                      setFinedPlayerId={setFinedPlayerId}
-                    />
-                  }
+                  <UserAvatar name={roundData.me.name} className="shrink-0" />
                   <span className="min-w-0 truncate">{roundData.me.name}</span>
                 </span>
-                <span className="text-ellipsis overflow-hidden">
+                <span
+                  className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
+                >
                   <AnimatedScore
                     previousScores={previousScores}
                     currentScores={currentScores}
@@ -207,15 +212,9 @@ export default function CurrentGame() {
               <ContextMenu
                 isOpen={isContextMenuOpen}
                 onOpen={() => setIsContextMenuOpen(true)}
-                onClose={closeContextMenuOpen}
+                onClose={() => setIsContextMenuOpen(false)}
               >
-                <TableMenu
-                  players={playersList}
-                  finedPlayerId={finedPlayerId}
-                  gameId={roundData.id}
-                  setFinedPlayerId={setFinedPlayerId}
-                  onRefetchNow={refetch}
-                />
+                <TableMenu gameId={roundData.id} onRefetchNow={onRefresh} />
               </ContextMenu>
             </div>
           </div>

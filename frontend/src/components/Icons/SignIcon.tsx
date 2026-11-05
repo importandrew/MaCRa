@@ -1,12 +1,20 @@
 import { SVGProps } from 'react';
 import { JSX } from 'react/jsx-runtime';
 
-export const MinusIcon = (
-  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
-) => {
+const PATHS = {
+  plus: 'M12 5v14M5 12h14',
+  minus: 'M5 12h14',
+};
+
+// SignIcon draws a + or − centered in its box, unlike the text glyphs,
+// which the font sets above the middle of the line.
+export const SignIcon = ({
+  sign,
+  ...props
+}: { sign: keyof typeof PATHS } & JSX.IntrinsicAttributes &
+  SVGProps<SVGSVGElement>) => {
   return (
     <svg
-      className="w-6 h-6 text-gray-800 dark:text-white"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -20,7 +28,7 @@ export const MinusIcon = (
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="1.5"
-        d="M5 12h14"
+        d={PATHS[sign]}
       />
     </svg>
   );

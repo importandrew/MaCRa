@@ -8,7 +8,7 @@ import {
 } from '../../models/GameResult';
 import { useFetchGameLogsData } from '../../providers/game/gameDataApi';
 import GameChart from './GameChart';
-import { MinusIcon } from '../Icons/MinusIcon';
+import { SignIcon } from '../Icons/SignIcon';
 import { WarningIcon } from '../Icons/WarningIcon';
 import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
@@ -138,7 +138,7 @@ export default function GameLogs({
     }
 
     if (item.outcome === Outcome.Draw) {
-      return <MinusIcon className="justify-self-end" />;
+      return <SignIcon sign="minus" className="justify-self-end" />;
     }
 
     if ([Outcome.Penalty, Outcome.FalseMahjong].includes(item.outcome)) {
@@ -157,7 +157,7 @@ export default function GameLogs({
         </div>
         <div>
           <span>
-            <MinusIcon className="inline" />: {Outcome.Draw}
+            <SignIcon sign="minus" className="inline" />: {Outcome.Draw}
           </span>
         </div>
         <div>

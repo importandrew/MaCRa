@@ -1,28 +1,21 @@
 import { Drawer } from '@heroui/react';
-import { PlayerOrder } from '../../../models/GameData';
 import { useFetchEventMe } from '../../../providers/event/eventApi';
 import { useEvent } from '../../../providers/event/eventConstants';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
-import { WarningIcon } from '../../Icons/WarningIcon';
-import PenaltyInput from './PenaltyInput';
 import LogsMenu from './LogsMenu';
 import AbortMenu from './AbortMenu';
 import FinishMenu from './FinishMenu';
 import { FansMenu } from './FansMenu';
 import LazyAccordion from '../../LazyAccordion';
 
+// TableMenu is the ≡ menu of the game screen. Penalties are entered in the
+// round card (tap the round kanji), not here.
 export default function TableMenu({
-  players = [],
-  finedPlayerId = null,
   gameId = null,
-  setFinedPlayerId,
   onRefetchNow,
 }: {
-  players: PlayerOrder[] | null;
-  finedPlayerId: number | null;
   gameId: number | null;
-  setFinedPlayerId: (value: number | null) => void;
   onRefetchNow?: () => void;
 }) {
   const { selectedEventId } = useEvent();
@@ -38,20 +31,7 @@ export default function TableMenu({
       </Drawer.Header>
       <Drawer.Body className="flex flex-col">
         <LazyAccordion
-          defaultExpandedKeys={finedPlayerId ? ['penalty'] : []}
           sections={[
-            {
-              id: 'penalty',
-              title: 'Penalty',
-              icon: <WarningIcon className="text-warning" />,
-              content: () => (
-                <PenaltyInput
-                  players={players}
-                  finedPlayerId={finedPlayerId}
-                  setFinedPlayerId={setFinedPlayerId}
-                />
-              ),
-            },
             {
               id: 'logs',
               title: 'Logs',
