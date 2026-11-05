@@ -2,15 +2,15 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
   authFetch,
   GetRequest,
-  resetSessionExpired,
   setSessionExpiredHandler,
 } from '../../components/Request';
+import { NavigateFunction } from 'react-router-dom';
 import { UserData } from '../../models/UserData';
 import { fetchLogoutApi } from './authApi';
 import { AUTH_USER_DATA, AuthContext } from './authConstants';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const navigateRef = useRef<((path: string) => void) | null>(null);
+  const navigateRef = useRef<NavigateFunction | null>(null);
 
   const isAuthenticatedFromStore = AUTH_USER_DATA in localStorage;
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -23,7 +23,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSessionExpiredHandler(() => {
       setIsAuthenticated(false);
       if (navigateRef.current) {
-        navigateRef.current('/login');
+        // Login returns to `from` after a sign-in, as with RequireAuth.
+        const { pathname, search } = window.location;
+        navigateRef.current('/login', {
+          state:
+            pathname === '/login' ? undefined : { from: { pathname, search } },
+        });
       } else {
         window.location.href = '/login';
       }
@@ -42,7 +47,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = useCallback((data: UserData) => {
     localStorage.setItem(AUTH_USER_DATA, JSON.stringify(data));
-    resetSessionExpired();
     setIsAuthenticated(true);
   }, []);
 

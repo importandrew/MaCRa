@@ -12,9 +12,10 @@ type FetchOptions = {
   redirectOn401?: boolean;
 };
 
-// Several requests can fail with 401 at once; log out and redirect only once.
-// The flag stays set until the next sign-in (resetSessionExpired).
-let isSessionExpiredHandled = false;
+// sessionGeneration grows each time an expired session is handled. A 401 to
+// a request sent before that belongs to the session that is already gone and
+// is ignored, so parallel 401s are handled once and later ones again.
+let sessionGeneration = 0;
 let sessionExpiredHandler: (() => void) | null = null;
 
 // setSessionExpiredHandler lets the auth provider switch to the signed-out
@@ -23,17 +24,11 @@ function setSessionExpiredHandler(handler: (() => void) | null) {
   sessionExpiredHandler = handler;
 }
 
-// resetSessionExpired re-arms the session-expired handling after a sign-in.
-function resetSessionExpired() {
-  isSessionExpiredHandled = false;
-}
-
 // handleSessionExpired signs out and sends the user to /login. wasSignedIn
 // picks the toast: an expired session, or a visitor who never signed in and
 // hit an endpoint that needs an account.
 function handleSessionExpired(wasSignedIn: boolean) {
-  if (isSessionExpiredHandled) return;
-  isSessionExpiredHandled = true;
+  sessionGeneration++;
 
   localStorage.removeItem(AUTH_USER_DATA);
   showToast(
@@ -80,12 +75,17 @@ async function fetchWithStatus<T>(
     // A Request body can be read only once, so keep a copy for that retry;
     // other requests are never repeated and need no copy.
     const retryRequest = redirectOn401 ? null : request.clone();
+    const generation = sessionGeneration;
     let response = await fetch(request);
 
     if (response.status === 401) {
+      if (generation !== sessionGeneration) {
+        return { data: null, status: response.status };
+      }
+
       const isSignedIn = AUTH_USER_DATA in localStorage;
 
-      if (!retryRequest || isSignedIn || isSessionExpiredHandled) {
+      if (!retryRequest || isSignedIn) {
         handleSessionExpired(isSignedIn);
         return { data: null, status: response.status };
       }
@@ -219,7 +219,6 @@ export {
   fetchWithStatus,
   globalBatchFetch,
   setSessionExpiredHandler,
-  resetSessionExpired,
   GetRequest,
   PostRequest,
   PutRequest,
