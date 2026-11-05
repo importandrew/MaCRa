@@ -5,17 +5,20 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/importandrew/MaCRa/handler/token"
 	"github.com/importandrew/MaCRa/models"
 )
 
 const (
 	// Name is the auth cookie name.
 	Name = "token"
-	// MaxAge is the auth cookie lifetime in seconds: 400 days, the longest Max-Age browsers accept.
-	MaxAge = 400 * 24 * 60 * 60
+	// MaxAge is the auth cookie lifetime in seconds. It is derived from token.Lifetime, so the
+	// cookie and the token it carries always expire together.
+	MaxAge = int(token.Lifetime / time.Second)
 )
 
 // cookieAttrs returns the Set-Cookie Domain and Secure flag, derived from config and the request.

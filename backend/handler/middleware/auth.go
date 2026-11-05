@@ -42,6 +42,9 @@ func (a Auth) SetUserID(c *gin.Context) {
 
 		userID = identity.UserID
 
+		// Parallel requests carrying the same old token each reissue it; the browser keeps the
+		// last cookie. That happens once a day per user and costs a few HMAC signatures, so it
+		// is accepted rather than coordinated.
 		if identity.NeedsRefresh {
 			a.refresh(c, userID)
 		}

@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	// Lifetime matches the auth cookie's MaxAge (400 days, the browser maximum), so a token
-	// never expires while the cookie that carries it is still sent.
+	// Lifetime is 400 days, the longest cookie Max-Age browsers accept. The auth cookie's MaxAge
+	// is derived from it, so a token never expires while the cookie that carries it is still sent.
 	Lifetime = 400 * 24 * time.Hour
 	// RefreshAfter is how old a token gets before a request reissues it. Each visit then pushes
 	// the expiry forward, so active users never have to log in again.
@@ -19,7 +19,6 @@ const (
 var (
 	ErrWrongClaims        = errors.New("token claims are of wrong type")
 	ErrWrongSigningMethod = errors.New("invalid signing method")
-	ErrNoExpiration       = errors.New("token has no expiration")
 )
 
 type UserClaims struct {
@@ -55,7 +54,7 @@ func IdentifyUser(token string, jwtKey []byte) (Identity, error) {
 		}
 
 		return jwtKey, nil
-	})
+	}, jwt.WithExpirationRequired()) // a token without exp would otherwise never expire
 
 	if err != nil {
 		return Identity{}, err
@@ -64,10 +63,6 @@ func IdentifyUser(token string, jwtKey []byte) (Identity, error) {
 	claims, ok := t.Claims.(*UserClaims)
 	if !ok {
 		return Identity{}, ErrWrongClaims
-	}
-
-	if claims.ExpiresAt == nil {
-		return Identity{}, ErrNoExpiration
 	}
 
 	remaining := time.Until(claims.ExpiresAt.Time)
