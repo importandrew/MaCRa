@@ -19,3 +19,9 @@ func (g *Game) Right(id int) int {
 func (g *Game) Left(id int) int {
 	return g.currentSeating[(g.currentSeating.Wind(id)+3)%4]
 }
+
+// isSeated reports whether id is one of the game's four players.
+func (g *Game) isSeated(id int) bool {
+	_, ok := g.score[id]
+	return ok
+}

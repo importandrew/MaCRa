@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestGame_Penalty(t *testing.T) {
@@ -187,6 +189,37 @@ func TestGame_FalseMahjong(t *testing.T) {
 			if testCase.check != nil {
 				testCase.check(t, g)
 			}
+		})
+	}
+}
+
+func TestGame_PenaltyValidation(t *testing.T) {
+	testData := map[string]struct {
+		falseMahjong bool
+		loser        int
+		value        int
+	}{
+		"penalty for an unseated player":       {loser: 99, value: 10},
+		"zero penalty":                         {loser: 1, value: 0},
+		"negative penalty":                     {loser: 1, value: -50},
+		"false mahjong for an unseated player": {falseMahjong: true, loser: 99, value: 30},
+		"false mahjong with a wrong value":     {falseMahjong: true, loser: 1, value: 40},
+	}
+
+	for name, testCase := range testData {
+		t.Run(name, func(t *testing.T) {
+			g := NewGame(Config{ID: 100, Players: [4]int{1, 2, 3, 4}})
+
+			var err error
+			if testCase.falseMahjong {
+				err = g.FalseMahjong(testCase.loser, testCase.value, true)
+			} else {
+				err = g.Penalty(testCase.loser, testCase.value, true)
+			}
+
+			assert.ErrorIs(t, err, models.ErrValidatePenalty)
+			assert.Equal(t, NewScore([4]int{1, 2, 3, 4}), g.Score())
+			assert.Equal(t, 1, g.Round())
 		})
 	}
 }
