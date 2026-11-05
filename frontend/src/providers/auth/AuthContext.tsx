@@ -1,5 +1,10 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { authFetch, GetRequest } from '../../components/Request';
+import {
+  authFetch,
+  GetRequest,
+  resetSessionExpired,
+  setSessionExpiredHandler,
+} from '../../components/Request';
 import { UserData } from '../../models/UserData';
 import { fetchLogoutApi } from './authApi';
 import { AUTH_USER_DATA, AuthContext } from './authConstants';
@@ -12,6 +17,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticatedFromStore
   );
 
+  // A 401 found by any request signs out at once: the UI switches to the
+  // signed-out state and goes to /login while the toast is still shown.
+  useEffect(() => {
+    setSessionExpiredHandler(() => {
+      setIsAuthenticated(false);
+      if (navigateRef.current) {
+        navigateRef.current('/login');
+      } else {
+        window.location.href = '/login';
+      }
+    });
+    return () => setSessionExpiredHandler(null);
+  }, []);
+
   // The stored user data outlives the auth cookie (the browser drops it after
   // its Max-Age), so check the session once on start: a 401 logs out.
   useEffect(() => {
@@ -23,6 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = useCallback((data: UserData) => {
     localStorage.setItem(AUTH_USER_DATA, JSON.stringify(data));
+    resetSessionExpired();
     setIsAuthenticated(true);
   }, []);
 

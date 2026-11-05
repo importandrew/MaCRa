@@ -13,20 +13,40 @@ type FetchOptions = {
 };
 
 // Several requests can fail with 401 at once; log out and redirect only once.
+// The flag stays set until the next sign-in (resetSessionExpired).
 let isSessionExpiredHandled = false;
+let sessionExpiredHandler: (() => void) | null = null;
 
-async function handleSessionExpired() {
+// setSessionExpiredHandler lets the auth provider switch to the signed-out
+// state and navigate to /login without a page reload, so the toast stays.
+function setSessionExpiredHandler(handler: (() => void) | null) {
+  sessionExpiredHandler = handler;
+}
+
+// resetSessionExpired re-arms the session-expired handling after a sign-in.
+function resetSessionExpired() {
+  isSessionExpiredHandled = false;
+}
+
+function handleSessionExpired() {
   if (isSessionExpiredHandled) return;
   isSessionExpiredHandled = true;
 
-  await fetchLogoutApi();
   localStorage.removeItem(AUTH_USER_DATA);
   showToast({
     title: 'Session expired',
-    description: 'Redirecting to login...',
+    description: 'Please log in again.',
     variant: 'danger',
   });
-  setTimeout(() => (window.location.href = '/login'), 3000);
+
+  if (sessionExpiredHandler) {
+    sessionExpiredHandler();
+  } else {
+    window.location.href = '/login';
+  }
+
+  // The UI doesn't wait for this; it only makes sure the cookie is gone.
+  void fetchLogoutApi();
 }
 
 async function globalFetch<T>(
@@ -53,7 +73,7 @@ async function fetchWithStatus<T>(
       const isSignedIn = AUTH_USER_DATA in localStorage;
 
       if (redirectOn401 || isSignedIn || isSessionExpiredHandled) {
-        await handleSessionExpired();
+        handleSessionExpired();
         return { data: null, status: response.status };
       }
 
@@ -185,6 +205,8 @@ export {
   publicFetch,
   fetchWithStatus,
   globalBatchFetch,
+  setSessionExpiredHandler,
+  resetSessionExpired,
   GetRequest,
   PostRequest,
   PutRequest,
