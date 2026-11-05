@@ -1,7 +1,15 @@
 import { Button, Form } from '@heroui/react';
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
+import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 import { Player } from '../../models/Player';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
@@ -97,8 +105,14 @@ export default function Draft() {
     setPlayers(shuffledPlayers);
   }, [players]);
 
+  // submittingRef blocks a second submit before the isSubmitting re-render
+  // lands (a double tap fired two POST /new 90 ms apart in production).
+  const submittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submittingRef.current) return;
 
     const currentPlayerId = JSON.parse(
       localStorage.getItem(AUTH_USER_DATA) || '{}'
@@ -122,8 +136,13 @@ export default function Draft() {
       return;
     }
 
+    submittingRef.current = true;
+    setIsSubmitting(true);
     const draftRequest = PostRequest(eventPath(eventId, '/new'), { players });
-    const data = await authFetch<{ id: number }>(draftRequest);
+    const data = await authFetch<{ id: number }>(draftRequest).finally(() => {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    });
 
     if (!data || 'error' in data) return;
 
@@ -167,15 +186,16 @@ export default function Draft() {
                 <Button variant="secondary" type="button" onPress={onShuffle}>
                   Shuffle
                 </Button>
-                <Button
+                <PendingButton
                   variant="primary"
                   type="submit"
+                  isPending={isSubmitting}
                   isDisabled={
                     players.length !== 4 || selectedKeys.some((key) => !key)
                   }
                 >
                   Play
-                </Button>
+                </PendingButton>
               </div>
             </div>
           </Form>
