@@ -9,7 +9,6 @@ import {
   eventPath,
 } from '../../components/Request';
 import { useLoadingState } from '../useLoadingState';
-import { showToast } from '../../components/Toast';
 import { Event, EventVisibility, ContentReach } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
 import { EventMember, EventRole } from '../../models/EventRole';
@@ -178,20 +177,8 @@ export async function updateEvent(
   payload: UpdateEventPayload
 ): Promise<boolean> {
   const request = PatchRequest(`/api/event/${id}`, payload);
-  const response = await fetch(request);
-
-  if (!response.ok) {
-    const data = await response
-      .json()
-      .catch(() => ({ error: 'Unknown error' }));
-    showToast({
-      title: `Error: ${data.error}`,
-      variant: 'danger',
-    });
-    return false;
-  }
-
-  return true;
+  const result = await authFetch<null>(request);
+  return result !== null;
 }
 
 export async function addEventMember(

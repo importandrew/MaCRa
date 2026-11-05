@@ -21,6 +21,7 @@ var (
 	ErrEmailNotVerified = errors.New("email not verified")
 	ErrInvalidOrigin    = errors.New("invalid origin")
 	ErrInvalidAuthToken = errors.New("invalid or expired token")
+	ErrSessionExpired   = errors.New("session expired, please log in again")
 	ErrMailFromEmpty    = errors.New("mail_from is empty")
 
 	ErrJWTKeyEmpty = errors.New("jwt key is empty")
@@ -67,6 +68,8 @@ var Errors = map[error]int{
 	ErrInvalidOrigin:            http.StatusBadRequest,
 	ErrInvalidAuthToken:         http.StatusBadRequest,
 
+	// 401
+	ErrSessionExpired: http.StatusUnauthorized,
 	// 404
 	ErrGameNotFound:   http.StatusNotFound,
 	ErrPlayerNotFound: http.StatusNotFound,

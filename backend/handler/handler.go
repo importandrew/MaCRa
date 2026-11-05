@@ -14,11 +14,11 @@ type Handler struct {
 	authmw middleware.Auth
 }
 
-func New(eventHandler event.Handler, player player.Handler, jwt []byte) Handler {
+func New(eventHandler event.Handler, player player.Handler, jwt []byte, cookieDomain string) Handler {
 	return Handler{
 		event:  eventHandler,
 		player: player,
-		authmw: middleware.NewAuth(jwt),
+		authmw: middleware.NewAuth(jwt, cookieDomain),
 	}
 }
 

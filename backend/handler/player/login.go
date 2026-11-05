@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/importandrew/MaCRa/handler/authcookie"
 	"github.com/importandrew/MaCRa/handler/httperr"
 	"github.com/importandrew/MaCRa/handler/token"
 )
@@ -20,8 +21,6 @@ type LoginResponse struct {
 	Name  string `json:"name"`
 	Token string `json:"token"`
 }
-
-const cookieTTL = 400 * 24 * 60 * 60 // 400 days in sec (max possible Max-Age)
 
 func (h Handler) Login(c *gin.Context) {
 	var req LoginRequest
@@ -42,7 +41,7 @@ func (h Handler) Login(c *gin.Context) {
 		return
 	}
 
-	h.writeAuthCookie(c, tkn, cookieTTL)
+	authcookie.Set(c, h.domain, tkn)
 
 	c.JSON(http.StatusOK, LoginResponse{
 		ID:    player.ID,

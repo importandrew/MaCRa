@@ -62,7 +62,7 @@ func main() {
 	// handler
 	eventHandler := ehndl.NewHandler(eventService, gameService)
 	playerHandler := phndl.NewHandler(playerService, cfg)
-	h := handler.New(eventHandler, playerHandler, []byte(cfg.JWTKey))
+	h := handler.New(eventHandler, playerHandler, []byte(cfg.JWTKey), cfg.CookieDomain)
 
 	// server
 	router := server.NewServer(cfg.AllowOrigins...)
