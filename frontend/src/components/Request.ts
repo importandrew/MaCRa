@@ -77,13 +77,15 @@ async function fetchWithStatus<T>(
   try {
     // A 401 from a public endpoint means the backend cleared a stale auth
     // cookie; an anonymous visitor then just repeats the request without it.
-    const retryRequest = request.clone();
+    // A Request body can be read only once, so keep a copy for that retry;
+    // other requests are never repeated and need no copy.
+    const retryRequest = redirectOn401 ? null : request.clone();
     let response = await fetch(request);
 
     if (response.status === 401) {
       const isSignedIn = AUTH_USER_DATA in localStorage;
 
-      if (redirectOn401 || isSignedIn || isSessionExpiredHandled) {
+      if (!retryRequest || isSignedIn || isSessionExpiredHandled) {
         handleSessionExpired(isSignedIn);
         return { data: null, status: response.status };
       }
