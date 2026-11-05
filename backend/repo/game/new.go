@@ -44,18 +44,26 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 		return 0, err
 	}
 
-	var playerID, liveGameID int
-	err = tx.QueryRow(ctx, `
-		SELECT gp.player_id, g.id
+	type liveGamePlayer struct {
+		PlayerID int `db:"player_id"`
+		GameID   int `db:"game_id"`
+	}
+
+	rows, err := tx.Query(ctx, `
+		SELECT gp.player_id, g.id AS game_id
 		FROM games g
 		JOIN game_players gp ON g.id = gp.game_id
 		WHERE gp.player_id = ANY($1) AND g.event_id = $2 AND g.status = $3
-		LIMIT 1`,
-		seating[:], eventID, models.GameLive).Scan(&playerID, &liveGameID)
+		FETCH FIRST 1 ROWS ONLY`,
+		seating[:], eventID, models.GameLive)
+	if err != nil {
+		return 0, fmt.Errorf("check live games: %w", err)
+	}
+	live, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[liveGamePlayer])
 	switch {
 	case err == nil:
 		return 0, fmt.Errorf("%w: player (ID %v) already in game (ID %v)",
-			models.ErrValidatePlayers, playerID, liveGameID)
+			models.ErrValidatePlayers, live.PlayerID, live.GameID)
 	case !errors.Is(err, pgx.ErrNoRows):
 		return 0, fmt.Errorf("check live games: %w", err)
 	}
@@ -63,7 +71,7 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 	now := time.Now().UTC()
 
 	// Insert game and get ID
-	rows, err := tx.Query(ctx, `
+	rows, err = tx.Query(ctx, `
 		INSERT INTO games(created_at, status, event_id) 
 		VALUES($1, $2, $3)
 		RETURNING id`,
