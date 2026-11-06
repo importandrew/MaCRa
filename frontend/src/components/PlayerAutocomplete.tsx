@@ -1,9 +1,16 @@
-import { Key } from 'react';
-import { Autocomplete, AutocompleteItem } from '@heroui/react';
+import {
+  CloseButton,
+  ComboBox,
+  Input,
+  Label,
+  ListBox,
+  type Key,
+} from '@heroui/react';
+import { useRef } from 'react';
 import { Player } from '../models/Player';
 
 function PlayerId({ id }: { id: number }) {
-  return <span className="text-xs">[{id}]</span>;
+  return <span className="text-xs text-muted">[{id}]</span>;
 }
 
 export type PlayerAutocompleteProps = {
@@ -14,6 +21,8 @@ export type PlayerAutocompleteProps = {
   disabledKeys?: string[];
 };
 
+// PlayerAutocomplete picks a player by typing part of the name: tap the field
+// and type, as with HeroUI v2 Autocomplete.
 export default function PlayerAutocomplete({
   label,
   items,
@@ -21,33 +30,57 @@ export default function PlayerAutocomplete({
   onSelectionChange,
   disabledKeys = [],
 }: PlayerAutocompleteProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleSelectionChange = (key: Key | null) => {
-    if (key == null) {
-      onSelectionChange(null);
-      return;
-    }
-    onSelectionChange(Number(key));
+    onSelectionChange(key == null ? null : Number(key));
+    // React Aria keeps focus in the input after a pick (it returns focus there
+    // when the list closes), which leaves the phone keyboard open. Drop the
+    // focus on the next frame, after the list has closed.
+    if (key != null) requestAnimationFrame(() => inputRef.current?.blur());
   };
 
   return (
-    <Autocomplete
-      label={label}
-      itemHeight={50}
+    <ComboBox
       selectedKey={selectedKey}
-      isClearable={true}
       disabledKeys={disabledKeys}
       className="w-full md:w-[300px]"
       onSelectionChange={handleSelectionChange}
     >
-      {items.map((player) => (
-        <AutocompleteItem
-          key={String(player.id)}
-          textValue={player.name}
-          endContent={<PlayerId id={player.id} />}
-        >
-          {player.name}
-        </AutocompleteItem>
-      ))}
-    </Autocomplete>
+      <Label>{label}</Label>
+      <ComboBox.InputGroup>
+        {/* The trigger arrow is absolutely positioned at the end of the field,
+            so the clear button sits just before it and the input reserves
+            room for both. */}
+        <Input
+          ref={inputRef}
+          className={selectedKey != null ? 'pe-14' : undefined}
+        />
+        {selectedKey != null && (
+          <CloseButton
+            aria-label={`Clear ${label}`}
+            onPress={() => handleSelectionChange(null)}
+            className="absolute end-7 top-1/2 z-10 -translate-y-1/2"
+          />
+        )}
+        <ComboBox.Trigger />
+      </ComboBox.InputGroup>
+      <ComboBox.Popover>
+        <ListBox>
+          {items.map((player) => (
+            <ListBox.Item
+              key={player.id}
+              id={String(player.id)}
+              textValue={player.name}
+            >
+              <span className="flex w-full items-center justify-between gap-2">
+                {player.name}
+                <PlayerId id={player.id} />
+              </span>
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </ComboBox.Popover>
+    </ComboBox>
   );
 }

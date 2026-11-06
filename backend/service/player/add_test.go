@@ -5,10 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestAdd(t *testing.T) {

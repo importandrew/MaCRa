@@ -1,9 +1,10 @@
-import { Avatar, Button } from '@heroui/react';
+import { Button } from '@heroui/react';
+import UserAvatar from '../UserAvatar';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
-import { RefreshIcon } from '../Icons/RefreshIcon';
+import RefreshButton from '../RefreshButton';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from '../CurrentGame/AnimatedScore';
 import '../CurrentGame/CurrentGame.css';
@@ -99,14 +100,9 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {top.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={top.name}
-                  />{' '}
-                  {top.name}
+                  <span className="shrink-0">{top.wind}</span>
+                  <UserAvatar name={top.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{top.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -121,14 +117,9 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {left.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={left.name}
-                  />{' '}
-                  {left.name}
+                  <span className="shrink-0">{left.wind}</span>
+                  <UserAvatar name={left.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{left.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -146,9 +137,9 @@ export default function Live() {
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    variant="flat"
-                    color="default"
+                    variant="tertiary"
                     type="button"
+                    aria-label="Rotate clockwise"
                     onPress={rotateClockwise}
                     className="text-xl"
                   >
@@ -156,9 +147,9 @@ export default function Live() {
                   </Button>
                   <Button
                     size="sm"
-                    variant="flat"
-                    color="default"
+                    variant="tertiary"
                     type="button"
+                    aria-label="Rotate counterclockwise"
                     onPress={rotateCounterClockwise}
                     className="text-xl"
                   >
@@ -171,14 +162,9 @@ export default function Live() {
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {right.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={right.name}
-                  />{' '}
-                  {right.name}
+                  <span className="shrink-0">{right.wind}</span>
+                  <UserAvatar name={right.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{right.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -190,28 +176,17 @@ export default function Live() {
               </div>
             </div>
             <div>
-              <Button
-                variant="light"
-                radius="full"
-                size="lg"
-                isIconOnly
-                onPress={refetch}
+              <RefreshButton
+                onRefresh={refetch}
                 className="absolute z-1 left-0 bottom-0"
-              >
-                <RefreshIcon className="text-gray-400" />
-              </Button>
+              />
             </div>
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
                 <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  {bot.wind}{' '}
-                  <Avatar
-                    className="transition-transform"
-                    color="default"
-                    size="md"
-                    name={bot.name}
-                  />{' '}
-                  {bot.name}
+                  <span className="shrink-0">{bot.wind}</span>
+                  <UserAvatar name={bot.name} className="shrink-0" />
+                  <span className="min-w-0 truncate">{bot.name}</span>
                 </span>
                 <span className="text-ellipsis overflow-hidden">
                   <AnimatedScore
@@ -225,7 +200,7 @@ export default function Live() {
             <div className="flex justify-end items-end">
               <ContextMenu
                 isOpen={isContextMenuOpen}
-                setIsOpen={setIsContextMenuOpen}
+                onOpen={() => setIsContextMenuOpen(true)}
                 onClose={closeContextMenuOpen}
               >
                 <LiveMenu
@@ -233,7 +208,6 @@ export default function Live() {
                   eventId={eventId}
                   onUndoSuccess={refetch}
                 />
-             
               </ContextMenu>
             </div>
           </div>

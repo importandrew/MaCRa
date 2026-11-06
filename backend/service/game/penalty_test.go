@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestPenalty(t *testing.T) {

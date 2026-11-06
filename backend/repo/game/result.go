@@ -6,8 +6,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, error) {

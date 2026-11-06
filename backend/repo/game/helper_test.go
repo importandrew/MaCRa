@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func getGamePlayers(t *testing.T, conn *pgxpool.Conn, gameID int) map[string]int {

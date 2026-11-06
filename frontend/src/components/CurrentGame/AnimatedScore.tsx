@@ -18,7 +18,7 @@ export default function AnimatedScore({
 
   const [displayScore, setDisplayScore] = useState(currentScore);
   const [animationClass, setAnimationClass] = useState('');
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const animationDuration = 2000; // 2 seconds
@@ -92,6 +92,9 @@ export default function AnimatedScore({
     return () => {
       cleanup();
     };
+    // Animate only when currentScore changes; previousScore is read as the
+    // starting value, and a change to it alone must not restart the animation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentScore]);
 
   return (

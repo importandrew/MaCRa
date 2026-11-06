@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/importandrew/MaCRa/handler/httperr"
 	"github.com/importandrew/MaCRa/models"
 )
@@ -103,6 +104,7 @@ func (h Handler) ResetPassword(c *gin.Context) {
 }
 
 // normalizeOrigin validates origin and returns scheme://host (no trailing slash/path).
+// Like CORS in server.NewServer, it always accepts the default domains; allowOrigins adds extra ones.
 func normalizeOrigin(origin string, allowOrigins []string) (string, error) {
 	u, err := url.Parse(origin)
 	if err != nil || u.Scheme == "" || u.Host == "" {
@@ -115,7 +117,11 @@ func normalizeOrigin(origin string, allowOrigins []string) (string, error) {
 
 	origin = strings.TrimRight(strings.TrimSpace(u.Scheme+"://"+u.Host), "/")
 
-	if !slices.Contains(allowOrigins, origin) {
+	allowed := slices.Concat(
+		[]string{"https://" + models.DefaultDomain, "https://" + models.DevDomain},
+		allowOrigins,
+	)
+	if !slices.Contains(allowed, origin) {
 		return "", models.ErrInvalidOrigin
 	}
 

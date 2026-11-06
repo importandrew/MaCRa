@@ -1,1 +1,4 @@
 dist
+
+# Local configs with real secrets (db_url, jwt_key). Keep only the .example tracked.
+backend_config*.json

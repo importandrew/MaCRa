@@ -5,8 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) InvalidateAuthTokens(ctx context.Context, userID int, purpose models.AuthPurpose) error {

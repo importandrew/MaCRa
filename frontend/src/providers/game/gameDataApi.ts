@@ -8,6 +8,7 @@ import {
   globalBatchFetch,
   publicFetch,
 } from '../../components/Request';
+import { useLoadingState } from '../useLoadingState';
 import {
   GameData,
   GamePlayers,
@@ -39,17 +40,19 @@ export async function undoLastRound(
 export const useFetchPlayerGamesHistory = (playerId: number) => {
   const [data, setData] = useState<GamesHistoryData | null>(null);
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(playerId);
 
   const fetchData = useCallback(async () => {
     const eventId = getStoredEventId();
     if (!eventId) {
       setIsError(true);
       setData(null);
+      finishLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
+    setIsError(false);
 
     const request = GetRequest(
       eventPath(eventId, `/player/${playerId}/game-history`)
@@ -58,13 +61,13 @@ export const useFetchPlayerGamesHistory = (playerId: number) => {
 
     if (!result) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result);
-    setIsLoading(false);
-  }, [playerId]);
+    finishLoading(true);
+  }, [playerId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -79,7 +82,10 @@ export const useFetchBatchGameResults = (
 ) => {
   const [data, setData] = useState<Record<number, GameResult> | null>(null);
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    `${eventId}/${gameIds.join(',')}`,
+    gameIds.length > 0
+  );
 
   const fetchData = useCallback(async () => {
     if (!gameIds.length) {
@@ -87,7 +93,7 @@ export const useFetchBatchGameResults = (
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
 
     const requests = gameIds.map((id) =>
@@ -98,12 +104,16 @@ export const useFetchBatchGameResults = (
 
     if (!results) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     const data: Record<number, GameResult> = results.reduce(
-      (acc: Record<number, GameResult>, result: GameResult, index: number) => {
+      (
+        acc: Record<number, GameResult>,
+        result: GameResult | null,
+        index: number
+      ) => {
         const id = gameIds[index];
         if (result) {
           acc[id] = result;
@@ -115,8 +125,8 @@ export const useFetchBatchGameResults = (
     );
 
     setData(data);
-    setIsLoading(false);
-  }, [gameIds, eventId]);
+    finishLoading(true);
+  }, [gameIds, eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -126,7 +136,7 @@ export const useFetchBatchGameResults = (
 };
 
 export const useFetchGameData = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState();
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState<GameData | null>(null);
   const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
@@ -135,24 +145,26 @@ export const useFetchGameData = () => {
     const eventId = getStoredEventId();
     if (!eventId) {
       setIsError(true);
+      finishLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
+    setIsError(false);
 
     const gameDataRequest = GetRequest(eventPath(eventId, '/now'));
     const data = await authFetch<GameData>(gameDataRequest);
 
     if (!data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(data);
 
     if (playersList.length) {
-      setIsLoading(false);
+      finishLoading(true);
       return;
     }
 
@@ -166,11 +178,14 @@ export const useFetchGameData = () => {
     }
 
     setPlayersList(playersResult?.players || []);
-    setIsLoading(false);
+    finishLoading(true);
   };
 
   useEffect(() => {
     fetchGameData();
+    // Fetch once on mount. fetchGameData isn't memoized and reads playersList,
+    // so listing it would refetch after every load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { data, playersList, isLoading, isError, refetch: fetchGameData };
@@ -187,10 +202,12 @@ export const useFetchGameResultData = (options?: GameResultFetchOptions) => {
   const [data, setData] = useState<GameResult | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    `${eventId}/${gameId}`
+  );
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
     setIsForbidden(false);
 
@@ -200,25 +217,25 @@ export const useFetchGameResultData = (options?: GameResultFetchOptions) => {
 
       if (result.status === 403) {
         setIsForbidden(true);
-        setIsLoading(false);
+        finishLoading(false);
         return;
       }
 
       if (!result.data) {
         setIsError(true);
-        setIsLoading(false);
+        finishLoading(false);
         return;
       }
 
       setData(result.data);
-      setIsLoading(false);
+      finishLoading(true);
       return;
     }
 
     const storedEventId = getStoredEventId();
     if (!storedEventId) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
@@ -227,13 +244,13 @@ export const useFetchGameResultData = (options?: GameResultFetchOptions) => {
 
     if (!data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(data);
-    setIsLoading(false);
-  }, [gameId, eventId]);
+    finishLoading(true);
+  }, [gameId, eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -249,7 +266,10 @@ export const useFetchGameLogsData = (
   const [data, setData] = useState<GameRoundLogs | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    gameId,
+    gameId != null
+  );
 
   const fetchData = useCallback(async () => {
     if (gameId == null) {
@@ -260,10 +280,11 @@ export const useFetchGameLogsData = (
     const resolvedEventId = eventId ?? getStoredEventId();
     if (!resolvedEventId) {
       setIsError(true);
+      finishLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
     setIsForbidden(false);
 
@@ -274,19 +295,19 @@ export const useFetchGameLogsData = (
 
     if (result.status === 403) {
       setIsForbidden(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     if (!result.data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result.data);
-    setIsLoading(false);
-  }, [gameId, eventId]);
+    finishLoading(true);
+  }, [gameId, eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -298,18 +319,21 @@ export const useFetchGameLogsData = (
 export const useFetchPlayerStatus = () => {
   const { selectedEventId } = useEvent();
   const [data, setData] = useState<PlayerStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    selectedEventId,
+    !!selectedEventId
+  );
   const [isError, setIsError] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!selectedEventId) {
       setIsError(false);
       setData(null);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
 
     const playerStatusRequest = GetRequest(
       `/api/event/${selectedEventId}/main`
@@ -319,13 +343,13 @@ export const useFetchPlayerStatus = () => {
     if (!data) {
       setData(null);
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(data);
-    setIsLoading(false);
-  }, [selectedEventId]);
+    finishLoading(true);
+  }, [selectedEventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -345,16 +369,19 @@ export const useFetchGameStatus = (eventId: number, gameId: number) => {
   );
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    `${eventId}/${gameId}`
+  );
 
   const fetchData = useCallback(async () => {
     if (!eventId || !gameId) {
       setIsError(true);
       setStatus(null);
+      finishLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
     setIsForbidden(false);
 
@@ -363,19 +390,19 @@ export const useFetchGameStatus = (eventId: number, gameId: number) => {
 
     if (result.status === 403) {
       setIsForbidden(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     if (!result.data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setStatus(result.data.status);
-    setIsLoading(false);
-  }, [eventId, gameId]);
+    finishLoading(true);
+  }, [eventId, gameId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -394,12 +421,14 @@ export const useFetchLiveGameData = (eventId: number, gameId: number) => {
   const [data, setData] = useState<GameView | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    `${eventId}/${gameId}`
+  );
   const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
   const playersFetchedRef = useRef(false);
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
     setIsForbidden(false);
 
@@ -408,20 +437,20 @@ export const useFetchLiveGameData = (eventId: number, gameId: number) => {
 
     if (liveResult.status === 403) {
       setIsForbidden(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     if (!liveResult.data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(liveResult.data);
 
     if (playersFetchedRef.current) {
-      setIsLoading(false);
+      finishLoading(true);
       return;
     }
 
@@ -432,7 +461,7 @@ export const useFetchLiveGameData = (eventId: number, gameId: number) => {
 
     if (playersResult.status === 403) {
       setIsForbidden(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
@@ -442,8 +471,8 @@ export const useFetchLiveGameData = (eventId: number, gameId: number) => {
 
     setPlayersList(playersResult.data?.players || []);
     playersFetchedRef.current = true;
-    setIsLoading(false);
-  }, [eventId, gameId]);
+    finishLoading(true);
+  }, [eventId, gameId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();

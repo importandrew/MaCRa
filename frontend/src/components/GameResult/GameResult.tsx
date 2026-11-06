@@ -1,4 +1,4 @@
-import { Button, Link } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
@@ -66,20 +66,20 @@ export default function GameResult() {
       {data ? (
         <div className="flex flex-col grow justify-center w-screen sm:max-w-[600px] h-full px-3 gap-3">
           <GameResultTable data={data} />
-          <div className="grid grid-cols-2 sm:flex sm:flex-row justify-center gap-3">
+          <div className="flex flex-wrap gap-3 [&>*]:flex-1 [&>*]:basis-[calc(50%-0.375rem)] sm:[&>*]:basis-0">
             <Button
               type="button"
               onPress={showChart}
-              color="default"
-              variant="flat"
+              variant="tertiary"
+              fullWidth
             >
               {isChartVisible ? 'Hide chart' : 'Show chart'}
             </Button>
             <Button
               type="button"
               onPress={showLogs}
-              color="secondary"
-              variant="flat"
+              variant="tertiary"
+              fullWidth
             >
               {isLogsVisible ? 'Hide logs' : 'Show logs'}
             </Button>
@@ -87,15 +87,12 @@ export default function GameResult() {
               <Button
                 type="button"
                 onPress={playAgain}
-                color="success"
-                variant="flat"
+                variant="primary"
+                fullWidth
               >
                 Play Again
               </Button>
             )}
-            <Button href="/" as={Link} color="primary" variant="flat">
-              Home
-            </Button>
           </div>
           {isLogsVisible && (
             <LogsMenu

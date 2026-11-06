@@ -7,7 +7,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const expirationTime = 90 * 24 * time.Hour
+const (
+	// Lifetime is 400 days, the longest cookie Max-Age browsers accept. The auth cookie's MaxAge
+	// is derived from it, so a token never expires while the cookie that carries it is still sent.
+	Lifetime = 400 * 24 * time.Hour
+	// RefreshAfter is how old a token gets before a request reissues it. Each visit then pushes
+	// the expiry forward, so active users never have to log in again.
+	RefreshAfter = 24 * time.Hour
+)
 
 var (
 	ErrWrongClaims        = errors.New("token claims are of wrong type")
@@ -21,34 +28,47 @@ type UserClaims struct {
 }
 
 func GenerateJWT(userID int, jwtKey []byte) (string, error) {
+	now := time.Now()
 	claims := &UserClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expirationTime)),
-		},
-		UserID: userID,
+		IssuedAt:  jwt.NewNumericDate(now),
+		ExpiresAt: jwt.NewNumericDate(now.Add(Lifetime)),
+		UserID:    userID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtKey)
 }
 
-func IdentifyUser(token string, jwtKey []byte) (int, error) {
+// Identity is the result of a valid token.
+type Identity struct {
+	UserID int
+	// NeedsRefresh reports that the token is older than RefreshAfter (judged by its expiry,
+	// so tokens issued with a shorter lifetime count as old too) and should be reissued.
+	NeedsRefresh bool
+}
+
+func IdentifyUser(token string, jwtKey []byte) (Identity, error) {
 	t, err := jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrWrongSigningMethod
 		}
 
 		return jwtKey, nil
-	})
+	}, jwt.WithExpirationRequired()) // a token without exp would otherwise never expire
 
 	if err != nil {
-		return 0, err
+		return Identity{}, err
 	}
 
 	claims, ok := t.Claims.(*UserClaims)
 	if !ok {
-		return 0, ErrWrongClaims
+		return Identity{}, ErrWrongClaims
 	}
 
-	return claims.UserID, nil
+	remaining := time.Until(claims.ExpiresAt.Time)
+
+	return Identity{
+		UserID:       claims.UserID,
+		NeedsRefresh: remaining < Lifetime-RefreshAfter,
+	}, nil
 }

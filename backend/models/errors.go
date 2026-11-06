@@ -11,6 +11,7 @@ var (
 	ErrGameNotLive              = errors.New("game is not live")
 	ErrGameNotEnded             = errors.New("game is not ended")
 	ErrValidateEnterRoundResult = errors.New("round result validate")
+	ErrValidatePenalty          = errors.New("penalty validate")
 
 	ErrPlayerNotFound   = errors.New("player not found")
 	ErrBadCredentials   = errors.New("email or password is incorrect")
@@ -21,6 +22,7 @@ var (
 	ErrEmailNotVerified = errors.New("email not verified")
 	ErrInvalidOrigin    = errors.New("invalid origin")
 	ErrInvalidAuthToken = errors.New("invalid or expired token")
+	ErrSessionExpired   = errors.New("session expired, please log in again")
 	ErrMailFromEmpty    = errors.New("mail_from is empty")
 
 	ErrJWTKeyEmpty = errors.New("jwt key is empty")
@@ -53,6 +55,7 @@ var Errors = map[error]int{
 	ErrBadCredentials:           http.StatusBadRequest,
 	ErrUserNotInPlayers:         http.StatusBadRequest,
 	ErrValidateEnterRoundResult: http.StatusBadRequest,
+	ErrValidatePenalty:          http.StatusBadRequest,
 	ErrValidatePlayers:          http.StatusBadRequest,
 	ErrNoRounds:                 http.StatusBadRequest,
 	ErrTooLate:                  http.StatusBadRequest,
@@ -67,6 +70,8 @@ var Errors = map[error]int{
 	ErrInvalidOrigin:            http.StatusBadRequest,
 	ErrInvalidAuthToken:         http.StatusBadRequest,
 
+	// 401
+	ErrSessionExpired: http.StatusUnauthorized,
 	// 404
 	ErrGameNotFound:   http.StatusNotFound,
 	ErrPlayerNotFound: http.StatusNotFound,

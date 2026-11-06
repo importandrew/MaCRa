@@ -2,12 +2,25 @@ package game
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"slices"
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
+// NewGame creates a live game in the event with the given seating
+// (east, south, west, north). It returns models.ErrValidatePlayers if any of
+// the players already has a live game in the event.
+//
+// The service checks this too, but two concurrent requests can both pass that
+// check. NewGame therefore takes a transaction-level advisory lock per
+// (event, player) and checks again inside the transaction, so a concurrent
+// creation for the same player waits until the first one commits and then
+// sees its game.
 func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, error) {
 	conn, err := r.db.Acquire(ctx)
 	if err != nil {
@@ -27,10 +40,38 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 	}
 	defer tx.Rollback(ctx)
 
+	if err := lockPlayersInEvent(ctx, tx, seating, eventID); err != nil {
+		return 0, err
+	}
+
+	type liveGamePlayer struct {
+		PlayerID int `db:"player_id"`
+		GameID   int `db:"game_id"`
+	}
+
+	rows, err := tx.Query(ctx, `
+		SELECT gp.player_id, g.id AS game_id
+		FROM games g
+		JOIN game_players gp ON g.id = gp.game_id
+		WHERE gp.player_id = ANY($1) AND g.event_id = $2 AND g.status = $3
+		FETCH FIRST 1 ROWS ONLY`,
+		seating[:], eventID, models.GameLive)
+	if err != nil {
+		return 0, fmt.Errorf("check live games: %w", err)
+	}
+	live, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[liveGamePlayer])
+	switch {
+	case err == nil:
+		return 0, fmt.Errorf("%w: player (ID %v) already in game (ID %v)",
+			models.ErrValidatePlayers, live.PlayerID, live.GameID)
+	case !errors.Is(err, pgx.ErrNoRows):
+		return 0, fmt.Errorf("check live games: %w", err)
+	}
+
 	now := time.Now().UTC()
 
 	// Insert game and get ID
-	rows, err := tx.Query(ctx, `
+	rows, err = tx.Query(ctx, `
 		INSERT INTO games(created_at, status, event_id) 
 		VALUES($1, $2, $3)
 		RETURNING id`,
@@ -62,4 +103,20 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 	}
 
 	return gameID, nil
+}
+
+// lockPlayersInEvent takes pg_advisory_xact_lock(eventID, playerID) for each
+// player, in ascending player order so that overlapping seatings cannot
+// deadlock. The locks are released when tx ends.
+func lockPlayersInEvent(ctx context.Context, tx pgx.Tx, seating [4]int, eventID int) error {
+	playerIDs := slices.Clone(seating[:])
+	slices.Sort(playerIDs)
+
+	for _, playerID := range playerIDs {
+		if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock($1, $2)`, eventID, playerID); err != nil {
+			return fmt.Errorf("lock player %d in event %d: %w", playerID, eventID, err)
+		}
+	}
+
+	return nil
 }

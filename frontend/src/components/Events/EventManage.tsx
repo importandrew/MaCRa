@@ -1,26 +1,19 @@
 import {
-  Accordion,
-  AccordionItem,
   Button,
   Card,
-  CardBody,
-  Tab,
-  Tabs,
   Checkbox,
   CheckboxGroup,
   Form,
   Input,
+  Label,
   Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  Textarea,
+  TextArea,
+  TextField,
 } from '@heroui/react';
 import { FormEvent, type ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LazyAccordion from '../LazyAccordion';
+import SegmentedPicker from '../SegmentedPicker';
 import { Player } from '../../models/Player';
 import { EventRole } from '../../models/EventRole';
 import {
@@ -43,6 +36,7 @@ import { GetRequest, authFetch } from '../Request';
 import { showToast } from '../Toast';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import PlayerAutocomplete from '../PlayerAutocomplete';
+import PendingButton from '../PendingButton';
 
 const ALL_ROLES: EventRole[] = ['player', 'referee', 'observer'];
 
@@ -68,44 +62,6 @@ const VISIBILITY_OPTIONS: { value: EventVisibility; label: string }[] = [
   { value: 'private', label: 'Private' },
   { value: 'public', label: 'Public' },
 ];
-
-type VisibilityTabsProps<T extends string> = {
-  label: string;
-  ariaLabel: string;
-  options: { value: T; label: string }[];
-  selectedKey: T;
-  onSelectionChange: (key: T) => void;
-  isOptionDisabled?: (value: T) => boolean;
-};
-
-function VisibilityTabs<T extends string>({
-  label,
-  ariaLabel,
-  options,
-  selectedKey,
-  onSelectionChange,
-  isOptionDisabled,
-}: VisibilityTabsProps<T>) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <p className="text-sm">{label}</p>
-      <Tabs
-        aria-label={ariaLabel}
-        fullWidth
-        selectedKey={selectedKey}
-        onSelectionChange={(key) => onSelectionChange(key as T)}
-      >
-        {options.map((opt) => (
-          <Tab
-            key={opt.value}
-            title={opt.label}
-            isDisabled={isOptionDisabled?.(opt.value)}
-          />
-        ))}
-      </Tabs>
-    </div>
-  );
-}
 
 export default function EventManage() {
   const navigate = useNavigate();
@@ -183,7 +139,7 @@ export default function EventManage() {
     setIsSaving(false);
 
     if (ok) {
-      showToast({ title: 'Event updated', color: 'success' });
+      showToast({ title: 'Event updated', variant: 'success' });
       refetch();
     }
   };
@@ -201,7 +157,7 @@ export default function EventManage() {
     setIsAddingMember(false);
 
     if (ok) {
-      showToast({ title: 'Member added', color: 'success' });
+      showToast({ title: 'Member added', variant: 'success' });
       setSelectedUserId('');
       setSelectedRoles([]);
       refetchMembers();
@@ -211,7 +167,7 @@ export default function EventManage() {
   const handleRemoveMember = async (userId: number) => {
     const ok = await removeEventMember(eventId, userId);
     if (ok) {
-      showToast({ title: 'Member removed', color: 'success' });
+      showToast({ title: 'Member removed', variant: 'success' });
       refetchMembers();
     }
   };
@@ -222,7 +178,7 @@ export default function EventManage() {
         isLoading={false}
         isError={false}
         isForbidden
-        onRefresh={() => { }}
+        onRefresh={() => {}}
         onGoHome={() => navigate(`/event/${eventId}`)}
       >
         {null}
@@ -242,202 +198,202 @@ export default function EventManage() {
       </h1>
 
       {hasMultipleManagingCapabilities && (
-        <Tabs
-          aria-label="Manage event sections"
-          fullWidth
+        <SegmentedPicker
+          ariaLabel="Manage event sections"
+          options={[
+            { value: 'overview', label: 'Overview' },
+            { value: 'members', label: 'Members' },
+          ]}
           selectedKey={activeTab}
-          onSelectionChange={(key) =>
-            setActiveTab(key as 'overview' | 'members')
-          }
-        >
-          {canManageEvent && <Tab key="overview" title="Overview" />}
-          {canManageMembers && <Tab key="members" title="Members" />}
-        </Tabs>
+          onSelectionChange={setActiveTab}
+        />
       )}
 
-      {activeTab === 'overview' &&
-        canManageEvent && (
-          <>
-            <Card>
-              <CardBody className="gap-2">
-                <p className="text-default-500">General</p>
-                <Form
-                  id="edit-event-form"
-                  onSubmit={handleSave}
+      {activeTab === 'overview' && canManageEvent && (
+        <>
+          <Card>
+            <Card.Content className="gap-2">
+              <p className="text-muted">General</p>
+              <Form
+                id="edit-event-form"
+                onSubmit={handleSave}
+                className="flex flex-col gap-3"
+              >
+                <TextField
+                  fullWidth
+                  isRequired
+                  value={editName}
+                  onChange={setEditName}
                 >
-                  <Input
-                    label="Name"
-                    value={editName}
-                    onValueChange={setEditName}
-                    isRequired
-                    variant="bordered"
+                  <Label>Name</Label>
+                  <Input />
+                </TextField>
+                <TextField
+                  fullWidth
+                  value={editDescription}
+                  onChange={setEditDescription}
+                >
+                  <Label>Description</Label>
+                  <TextArea />
+                </TextField>
+                <div className="w-full flex flex-col gap-2">
+                  <p className="text-muted">Visibility</p>
+                  <SegmentedPicker
+                    label="General"
+                    ariaLabel="Event visibility"
+                    options={VISIBILITY_OPTIONS}
+                    selectedKey={editVisibility}
+                    onSelectionChange={(value) => {
+                      setEditVisibility(value);
+                      applyVisibilityPreset(value);
+                    }}
                   />
-                  <Textarea
-                    label="Description"
-                    value={editDescription}
-                    onValueChange={setEditDescription}
-                    variant="bordered"
-                  />
-                  <div className="w-full flex flex-col gap-2">
-                    <p className="text-default-500">Visibility</p>
-                    <VisibilityTabs
-                      label="General"
-                      ariaLabel="Event visibility"
-                      options={VISIBILITY_OPTIONS}
-                      selectedKey={editVisibility}
-                      onSelectionChange={(value) => {
-                        setEditVisibility(value);
-                        applyVisibilityPreset(value);
-                      }}
+                  <div className="flex flex-col gap-5">
+                    <SegmentedPicker
+                      label="Ratings"
+                      ariaLabel="Ratings visibility"
+                      options={CONTENT_REACH_OPTIONS}
+                      selectedKey={editRatingsReach}
+                      onSelectionChange={setEditRatingsReach}
+                      isOptionDisabled={isReachOptionDisabled}
                     />
-                    <div className="flex flex-col gap-5">
-                      <VisibilityTabs
-                        label="Ratings"
-                        ariaLabel="Ratings visibility"
-                        options={CONTENT_REACH_OPTIONS}
-                        selectedKey={editRatingsReach}
-                        onSelectionChange={setEditRatingsReach}
-                        isOptionDisabled={isReachOptionDisabled}
-                      />
-                      <VisibilityTabs
-                        label="Live games & results"
-                        ariaLabel="Live games and results visibility"
-                        options={CONTENT_REACH_OPTIONS}
-                        selectedKey={editGamesReach}
-                        onSelectionChange={setEditGamesReach}
-                        isOptionDisabled={isReachOptionDisabled}
-                      />
-                    </div>
+                    <SegmentedPicker
+                      label="Live games & results"
+                      ariaLabel="Live games and results visibility"
+                      options={CONTENT_REACH_OPTIONS}
+                      selectedKey={editGamesReach}
+                      onSelectionChange={setEditGamesReach}
+                      isOptionDisabled={isReachOptionDisabled}
+                    />
                   </div>
-                </Form>
-              </CardBody>
-            </Card>
-            <Button
-              type="submit"
-              form="edit-event-form"
-              color="primary"
-              isLoading={isSaving}
-              isDisabled={!editName.trim()}
-              className="w-3/4 self-center"
-            >
-              Save changes
-            </Button>
-          </>
-        )}
-
-      {activeTab === 'members' &&
-        canManageMembers && (
-          <Accordion
-            selectionMode="multiple"
-          // defaultExpandedKeys={['members', 'add']}
-          >
-            <AccordionItem
-              key="add"
-              aria-label="Add members"
-              title="Add members"
-            >
-              <p className="text-sm text-default-500 mb-3">
-                All 4 players need the player role to start a game.
-              </p>
-              <Form onSubmit={handleAddMember} className="gap-4">
-                <PlayerAutocomplete
-                  label="User"
-                  items={players}
-                  selectedKey={selectedUserId || null}
-                  onSelectionChange={(id) =>
-                    setSelectedUserId(id != null ? String(id) : '')
-                  }
-                />
-                <CheckboxGroup
-                  label="Roles"
-                  value={selectedRoles}
-                  onValueChange={(v) => setSelectedRoles(v as EventRole[])}
-                >
-                  {ALL_ROLES.map((role) => {
-                    const meta = ROLE_META[role];
-                    return (
-                      <Checkbox
-                        key={role}
-                        value={role}
-                        classNames={{ label: 'flex items-center' }}
-                      >
-                        <span className="flex items-center gap-2 leading-none">
-                          {meta.icon({ className: 'w-6 h-6 shrink-0' })}
-                          {meta.label}
-                        </span>
-                      </Checkbox>
-                    );
-                  })}
-                </CheckboxGroup>
-                <Button
-                  type="submit"
-                  color="primary"
-                  isLoading={isAddingMember}
-                  isDisabled={!selectedUserId || !selectedRoles.length}
-                  className="w-3/4 self-center"
-                >
-                  Add member
-                </Button>
+                </div>
               </Form>
-            </AccordionItem>
+            </Card.Content>
+          </Card>
+          <PendingButton
+            type="submit"
+            form="edit-event-form"
+            variant="primary"
+            isPending={isSaving}
+            isDisabled={!editName.trim()}
+            className="w-3/4 self-center"
+          >
+            Save changes
+          </PendingButton>
+        </>
+      )}
 
-            <AccordionItem
-              key="members"
-              aria-label="Members"
-              title={`Members [${members?.length}]`}
-            >
-              {membersLoading ? (
-                <Spinner size="sm" />
-              ) : !members?.length ? (
-                <p className="text-sm text-default-500">No members yet</p>
-              ) : (
-                <Table
-                  hideHeader
-                  isStriped
-                  removeWrapper
-                  className="z-0"
-                  aria-label="Event members"
-                >
-                  <TableHeader>
-                    <TableColumn>Member</TableColumn>
-                    <TableColumn width={1}>Actions</TableColumn>
-                  </TableHeader>
-                  <TableBody emptyContent={"No members yet"}>
+      {activeTab === 'members' && canManageMembers && (
+        <LazyAccordion
+          allowsMultipleExpanded
+          sections={[
+            {
+              id: 'add',
+              title: 'Add members',
+              content: () => (
+                <>
+                  <p className="text-sm text-muted mb-3">
+                    All 4 players need the player role to start a game.
+                  </p>
+                  <Form
+                    onSubmit={handleAddMember}
+                    className="flex flex-col gap-4"
+                  >
+                    <PlayerAutocomplete
+                      label="User"
+                      items={players}
+                      selectedKey={selectedUserId || null}
+                      onSelectionChange={(id) =>
+                        setSelectedUserId(id != null ? String(id) : '')
+                      }
+                    />
+                    <CheckboxGroup
+                      value={selectedRoles}
+                      onChange={(v) => setSelectedRoles(v as EventRole[])}
+                    >
+                      <Label>Roles</Label>
+                      {ALL_ROLES.map((role) => {
+                        const meta = ROLE_META[role];
+                        return (
+                          <Checkbox key={role} value={role}>
+                            <Checkbox.Content>
+                              <Checkbox.Control>
+                                <Checkbox.Indicator />
+                              </Checkbox.Control>
+                              <span className="flex items-center gap-2 leading-none">
+                                {meta.icon({ className: 'w-6 h-6 shrink-0' })}
+                                {meta.label}
+                              </span>
+                            </Checkbox.Content>
+                          </Checkbox>
+                        );
+                      })}
+                    </CheckboxGroup>
+                    <PendingButton
+                      type="submit"
+                      variant="primary"
+                      isPending={isAddingMember}
+                      isDisabled={!selectedUserId || !selectedRoles.length}
+                      className="w-3/4 self-center"
+                    >
+                      Add member
+                    </PendingButton>
+                  </Form>
+                </>
+              ),
+            },
+            {
+              id: 'members',
+              title: `Members [${members?.length ?? 0}]`,
+              content: () =>
+                membersLoading ? (
+                  <Spinner size="sm" />
+                ) : !members?.length ? (
+                  <p className="text-sm text-muted">No members yet</p>
+                ) : (
+                  // One grid for all rows (rows use subgrid), like the v2 table:
+                  // name + roles in the first column, the action in the second,
+                  // so the action column lines up and names use all the room
+                  // their roles leave.
+                  <ul
+                    aria-label="Event members"
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3"
+                  >
                     {members.map((member) => {
-                      const orderedRoles = ALL_ROLES.filter((role) =>
-                        member.roles.includes(role)
-                      );
                       const isOwner = member.user_id === event.owner_user_id;
 
                       return (
-                        <TableRow key={member.user_id}>
-                          <TableCell>
-                            <div className="flex justify-between items-center gap-2 min-w-0">
-                              <span className="min-w-0 truncate">
-                                {member.name}
-                              </span>
-                              <div className="flex items-center gap-2 shrink-0 text-default-500">
-                                {orderedRoles.map((role) => {
-                                  const meta = ROLE_META[role];
-                                  return (
-                                    <span
-                                      key={role}
-                                      className="inline-flex shrink-0"
-                                      title={meta.label}
-                                      aria-label={meta.label}
-                                      role="img"
-                                    >
-                                      {meta.icon({ className: 'w-6 h-6' })}
-                                    </span>
-                                  );
-                                })}
-                              </div>
+                        <li
+                          key={member.user_id}
+                          className="col-span-2 grid grid-cols-subgrid items-center px-2 py-2 border-b border-separator text-foreground last:border-b-0"
+                        >
+                          <div className="flex min-w-0 items-center justify-between gap-2">
+                            <span className="min-w-0 truncate">
+                              {member.name}
+                            </span>
+                            <div className="flex shrink-0 items-center gap-2 text-muted">
+                              {ALL_ROLES.filter((role) =>
+                                member.roles.includes(role)
+                              ).map((role) => {
+                                const meta = ROLE_META[role];
+                                return (
+                                  <span
+                                    key={role}
+                                    className="inline-flex shrink-0"
+                                    title={meta.label}
+                                    aria-label={meta.label}
+                                    role="img"
+                                  >
+                                    {meta.icon({ className: 'w-6 h-6' })}
+                                  </span>
+                                );
+                              })}
                             </div>
-                          </TableCell>
-                          <TableCell className="w-0 whitespace-nowrap">
+                          </div>
+                          <div className="flex justify-center whitespace-nowrap">
                             {isOwner ? (
                               <span
-                                className="flex justify-center text-default-500"
+                                className="flex justify-center text-muted"
                                 title="Owner"
                                 aria-label="Owner"
                                 role="img"
@@ -447,8 +403,7 @@ export default function EventManage() {
                             ) : (
                               <Button
                                 size="sm"
-                                color="danger"
-                                variant="flat"
+                                variant="danger-soft"
                                 onPress={() =>
                                   handleRemoveMember(member.user_id)
                                 }
@@ -456,16 +411,16 @@ export default function EventManage() {
                                 Remove
                               </Button>
                             )}
-                          </TableCell>
-                        </TableRow>
+                          </div>
+                        </li>
                       );
                     })}
-                  </TableBody>
-                </Table>
-              )}
-            </AccordionItem>
-          </Accordion>
-        )}
+                  </ul>
+                ),
+            },
+          ]}
+        />
+      )}
     </div>
   );
 }

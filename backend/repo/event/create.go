@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 func (r *Repo) Create(ctx context.Context, event models.Event) (int, error) {
@@ -22,14 +23,14 @@ func (r *Repo) Create(ctx context.Context, event models.Event) (int, error) {
 	defer tx.Rollback(ctx)
 
 	args := pgx.NamedArgs{
-		"owner_id":     event.OwnerUserID,
-		"type":         event.Type,
-		"name":         event.Name,
-		"desc":         event.Description,
+		"owner_id":      event.OwnerUserID,
+		"type":          event.Type,
+		"name":          event.Name,
+		"desc":          event.Description,
 		"visibility":    event.Visibility,
 		"ratings_reach": event.RatingsReach,
 		"games_reach":   event.GamesReach,
-		"now":          time.Now().UTC(),
+		"now":           time.Now().UTC(),
 	}
 
 	rows, err := tx.Query(ctx, `

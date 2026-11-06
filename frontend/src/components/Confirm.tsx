@@ -1,19 +1,4 @@
-import {
-  Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@heroui/react';
-
-type ButtonColor =
-  | 'default'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning'
-  | 'danger';
+import { AlertDialog, Button } from '@heroui/react';
 
 export interface ConfirmProps {
   isOpen: boolean;
@@ -23,35 +8,40 @@ export interface ConfirmProps {
   headerText: string;
   cancelText: string;
   confirmText: string;
-  confirmButtonColor: ButtonColor;
+  confirmVariant: 'primary' | 'danger';
 }
 
+// Confirm is an alert dialog: a tap on the backdrop or ESC doesn't dismiss it,
+// so a stray tap can't silently cancel actions like "Abort game".
 export default function Confirm(props: ConfirmProps) {
   return (
-    <Modal isOpen={props.isOpen} onClose={props.onClose} placement="center">
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-1">
-              {props.headerText}
-            </ModalHeader>
-            <ModalBody>
-              <p>{props.prompt}</p>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="default" variant="light" onPress={onClose}>
-                {props.cancelText}
-              </Button>
-              <Button
-                color={props.confirmButtonColor}
-                onPress={props.onConfirm}
-              >
-                {props.confirmText}
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
+    <AlertDialog.Backdrop
+      isOpen={props.isOpen}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) props.onClose();
+      }}
+    >
+      <AlertDialog.Container placement="center">
+        <AlertDialog.Dialog className="sm:max-w-[400px]">
+          <AlertDialog.Header>
+            <AlertDialog.Icon
+              status={props.confirmVariant === 'danger' ? 'danger' : 'accent'}
+            />
+            <AlertDialog.Heading>{props.headerText}</AlertDialog.Heading>
+          </AlertDialog.Header>
+          <AlertDialog.Body>
+            <p>{props.prompt}</p>
+          </AlertDialog.Body>
+          <AlertDialog.Footer>
+            <Button slot="close" variant="tertiary">
+              {props.cancelText}
+            </Button>
+            <Button variant={props.confirmVariant} onPress={props.onConfirm}>
+              {props.confirmText}
+            </Button>
+          </AlertDialog.Footer>
+        </AlertDialog.Dialog>
+      </AlertDialog.Container>
+    </AlertDialog.Backdrop>
   );
 }

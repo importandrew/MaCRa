@@ -1,6 +1,15 @@
-import { Button, Form, Spinner } from '@heroui/react';
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Form } from '@heroui/react';
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
+import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 import { Player } from '../../models/Player';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
@@ -15,15 +24,25 @@ import PlayerSelector from './PlayerSelector';
 export default function Draft() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [players, setPlayers] = useState<(number | undefined)[]>([]);
+  // One slot per seat from the start: Shuffle only moves slots that exist,
+  // so with [] and one pick it had nothing to swap with.
+  const [players, setPlayers] = useState<(number | undefined)[]>([
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  ]);
   const eventId = getStoredEventId();
   const { data: members, isLoading: membersLoading } =
     useFetchEventMembers(eventId);
   const {
     hasCapability,
     isLoading: capsLoading,
-    me,
+    isError: capsError,
+    isForbidden: capsForbidden,
+    refetch: refetchCaps,
   } = useEventCapabilities(eventId);
+  const canCreateGame = hasCapability('create_game');
 
   const suggestions: Player[] = useMemo(
     () =>
@@ -36,16 +55,20 @@ export default function Draft() {
     [members]
   );
 
+  // 403 on /me means the user has no access to the event at all (e.g. they
+  // were removed from a private event), which is the same as no create_game.
+  // A network error leaves the capabilities unknown: LoadingTemplate shows
+  // "Try again" instead.
   useEffect(() => {
-    if (capsLoading || me === null) return;
-    if (!hasCapability('create_game')) {
+    if (capsLoading || capsError) return;
+    if (capsForbidden || !canCreateGame) {
       showToast({
         title: 'You cannot start a game in this event',
-        color: 'warning',
+        variant: 'warning',
       });
       navigate('/');
     }
-  }, [capsLoading, me, hasCapability, navigate]);
+  }, [capsLoading, capsError, capsForbidden, canCreateGame, navigate]);
 
   // Derived state for selectedKeys
   const selectedKeys = useMemo(
@@ -82,8 +105,14 @@ export default function Draft() {
     setPlayers(shuffledPlayers);
   }, [players]);
 
+  // submittingRef blocks a second submit before the isSubmitting re-render
+  // lands (a double tap fired two POST /new 90 ms apart in production).
+  const submittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submittingRef.current) return;
 
     const currentPlayerId = JSON.parse(
       localStorage.getItem(AUTH_USER_DATA) || '{}'
@@ -92,7 +121,7 @@ export default function Draft() {
     if (!players.includes(currentPlayerId)) {
       showToast({
         title: 'You should also pick youself to start the game',
-        color: 'warning',
+        variant: 'warning',
       });
       return;
     }
@@ -102,13 +131,18 @@ export default function Draft() {
       showToast({
         title: 'No event selected',
         description: 'Please select an event first',
-        color: 'warning',
+        variant: 'warning',
       });
       return;
     }
 
+    submittingRef.current = true;
+    setIsSubmitting(true);
     const draftRequest = PostRequest(eventPath(eventId, '/new'), { players });
-    const data = await authFetch<{ id: number }>(draftRequest);
+    const data = await authFetch<{ id: number }>(draftRequest).finally(() => {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    });
 
     if (!data || 'error' in data) return;
 
@@ -117,65 +151,56 @@ export default function Draft() {
 
   return (
     <div className="flex flex-col justify-center grow w-screen h-full my-auto">
-      {membersLoading || capsLoading ? (
-        <Spinner label="Loading..." size="lg" />
-      ) : (
-        <Form
-          validationBehavior="native"
-          onSubmit={onSubmit}
-          className="items-center"
-        >
-          <div className="flex flex-col gap-3 p-3">
-            {WIND_LABELS.map((wind: string, index: number) => (
-              <div
-                key={wind}
-                className="relative flex justify-center items-center"
-              >
-                <span className="absolute left-[-24px] text-base pr-3">
-                  {WIND_SYMBOLS[index]}
-                </span>
+      <LoadingTemplate
+        isLoading={membersLoading || capsLoading}
+        isError={capsError}
+        onRefresh={refetchCaps}
+      >
+        {/* Render the form only once create_game is confirmed, so it doesn't
+            flash before the redirect above. */}
+        {canCreateGame && (
+          <Form
+            validationBehavior="native"
+            onSubmit={onSubmit}
+            // v3 Form is a plain <form>, not a flex column as in v2, so
+            // items-center needs flex to center the selectors.
+            className="flex flex-col items-center"
+          >
+            <div className="flex w-full flex-col gap-3 p-3 md:w-auto">
+              {WIND_LABELS.map((wind: string, index: number) => (
                 <PlayerSelector
-                  wind={wind}
+                  key={wind}
+                  wind={`${WIND_SYMBOLS[index]} ${wind}`}
                   index={index}
                   players={players}
                   suggestions={suggestions}
                   selectedKeys={selectedKeys}
                   handleSuggestionsChange={handleSuggestionsChange}
                 />
-              </div>
-            ))}
+              ))}
 
-            <div className="flex justify-center gap-3">
-              <Button
-                variant="flat"
-                type="button"
-                color="default"
-                onPress={onClear}
-              >
-                Clear
-              </Button>
-              <Button
-                variant="flat"
-                type="button"
-                color="secondary"
-                onPress={onShuffle}
-              >
-                Shuffle
-              </Button>
-              <Button
-                variant="flat"
-                type="submit"
-                color="primary"
-                isDisabled={
-                  players.length !== 4 || selectedKeys.some((key) => !key)
-                }
-              >
-                Play
-              </Button>
+              <div className="flex justify-center gap-3">
+                <Button variant="tertiary" type="button" onPress={onClear}>
+                  Clear
+                </Button>
+                <Button variant="secondary" type="button" onPress={onShuffle}>
+                  Shuffle
+                </Button>
+                <PendingButton
+                  variant="primary"
+                  type="submit"
+                  isPending={isSubmitting}
+                  isDisabled={
+                    players.length !== 4 || selectedKeys.some((key) => !key)
+                  }
+                >
+                  Play
+                </PendingButton>
+              </div>
             </div>
-          </div>
-        </Form>
-      )}
+          </Form>
+        )}
+      </LoadingTemplate>
     </div>
   );
 }

@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/importandrew/MaCRa/handler/authcookie"
 )
 
 func (h Handler) Logout(c *gin.Context) {
-	h.writeAuthCookie(c, "", -1)
+	authcookie.Clear(c, h.domain)
 	c.Status(http.StatusOK)
 }

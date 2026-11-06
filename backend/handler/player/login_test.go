@@ -9,10 +9,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/importandrew/MaCRa/config"
-	"github.com/importandrew/MaCRa/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/importandrew/MaCRa/config"
+	"github.com/importandrew/MaCRa/models"
 )
 
 func TestHandler_Login(t *testing.T) {
@@ -96,7 +97,7 @@ func TestHandler_Login(t *testing.T) {
 				auth := cookies[0]
 				assert.Equal(t, "token", auth.Name)
 				assert.NotEmpty(t, auth.Value)
-				assert.Equal(t, "", auth.Domain)
+				assert.Empty(t, auth.Domain)
 				assert.False(t, auth.Secure)
 				assert.True(t, auth.HttpOnly)
 				assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)
@@ -124,7 +125,7 @@ func TestHandler_Login(t *testing.T) {
 			checkCookie: func(t *testing.T, w *httptest.ResponseRecorder) {
 				cookies := w.Result().Cookies()
 				assert.Len(t, cookies, 2)
-				assert.Equal(t, "", cookies[0].Domain)
+				assert.Empty(t, cookies[0].Domain)
 				assert.False(t, cookies[0].Secure)
 				assert.Equal(t, models.DefaultDomain, cookies[1].Domain)
 			},

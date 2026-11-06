@@ -1,4 +1,4 @@
-import { Chip, Divider } from '@heroui/react';
+import { Chip, Separator } from '@heroui/react';
 import { type ReactNode, useMemo } from 'react';
 import type { EventMember } from '../../models/EventRole';
 import { useFetchEventMembers } from '../../providers/event/eventApi';
@@ -37,7 +37,7 @@ function DetailRow({
 }) {
   return (
     <div>
-      <dt className="flex items-center gap-1.5 font-medium text-default-500">
+      <dt className="flex items-center gap-1.5 font-medium text-muted">
         {icon != null && (
           <span className="shrink-0" aria-hidden>
             {icon}
@@ -60,18 +60,12 @@ export default function EventOverview() {
     return owner?.name ?? null;
   }, [event, members]);
 
-  const referees = useMemo(
-    () => namesWithRole(members, 'referee'),
-    [members]
-  );
+  const referees = useMemo(() => namesWithRole(members, 'referee'), [members]);
   const observers = useMemo(
     () => namesWithRole(members, 'observer'),
     [members]
   );
-  const players = useMemo(
-    () => namesWithRole(members, 'player'),
-    [members]
-  );
+  const players = useMemo(() => namesWithRole(members, 'player'), [members]);
 
   if (!event) return null;
 
@@ -83,32 +77,23 @@ export default function EventOverview() {
       <div className="flex flex-col items-center gap-2 text-center">
         <h1
           className={`text-2xl font-semibold break-words w-full ${
-            isFinished ? 'text-default-500' : ''
+            isFinished ? 'text-muted' : ''
           }`}
         >
           {event.name}
         </h1>
         <div className="flex gap-1 flex-wrap justify-center">
-          <Chip
-            size="sm"
-            variant="flat"
-            startContent={
-              event.type === 'tournament' ? (
-                <TrophyIcon className={iconClass} />
-              ) : (
-                <UsersIcon className={iconClass} />
-              )
-            }
-          >
+          <Chip size="sm" variant="soft">
+            {event.type === 'tournament' ? (
+              <TrophyIcon className={iconClass} />
+            ) : (
+              <UsersIcon className={iconClass} />
+            )}
             {typeLabel}
           </Chip>
           {isFinished && (
-            <Chip
-              size="sm"
-              color="default"
-              variant="flat"
-              startContent={<CheckInCircleIcon className={iconClass} />}
-            >
+            <Chip size="sm" variant="soft">
+              <CheckInCircleIcon className={iconClass} />
               Finished
             </Chip>
           )}
@@ -116,12 +101,12 @@ export default function EventOverview() {
       </div>
 
       {event.description && (
-        <p className="text-default-600 break-words">{event.description}</p>
+        <p className="text-muted break-words">{event.description}</p>
       )}
 
-      <Divider />
+      <Separator />
 
-      <dl className="flex flex-col gap-3 text-default-600">
+      <dl className="flex flex-col gap-3 text-muted">
         <DetailRow icon={<CrownIcon className={iconClass} />} label="Owner">
           {ownerName ?? `User #${event.owner_user_id}`}
         </DetailRow>
@@ -130,17 +115,11 @@ export default function EventOverview() {
           label="Players"
         >
           {players.length}
-        </DetailRow>  
-        <DetailRow
-          icon={<ScalesIcon className={iconClass} />}
-          label="Referees"
-        >
+        </DetailRow>
+        <DetailRow icon={<ScalesIcon className={iconClass} />} label="Referees">
           {referees.length > 0 ? referees.join(', ') : '—'}
         </DetailRow>
-        <DetailRow
-          icon={<EyeIcon className={iconClass} />}
-          label="Observers"
-        >
+        <DetailRow icon={<EyeIcon className={iconClass} />} label="Observers">
           {observers.length > 0 ? observers.join(', ') : '—'}
         </DetailRow>
         <DetailRow

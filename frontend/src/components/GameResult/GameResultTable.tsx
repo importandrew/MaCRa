@@ -1,54 +1,54 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from '@heroui/react';
+import { Table } from '@heroui/react';
 import { GameResult } from '../../models/GameResult';
+import { UserData } from '../../models/UserData';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import { getDateTimeFormatted } from '../../utils/date-tools';
 
 // Table component for rendering game results
 export default function GameResultTable({ data }: { data: GameResult }) {
-  const currentPlayer = JSON.parse(
-    localStorage.getItem(AUTH_USER_DATA) || '{}'
-  ).name;
+  const currentPlayerId = (
+    JSON.parse(
+      localStorage.getItem(AUTH_USER_DATA) || '{}'
+    ) as Partial<UserData>
+  ).id;
 
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between items-center">
-        <span className="text-sm font-medium text-default-600">
-          Game #{data.id}
-        </span>
-        <span className="text-sm text-default-500">
+        <span className="text-sm font-medium text-muted">Game #{data.id}</span>
+        <span className="text-sm text-muted">
           {getDateTimeFormatted(data.finished_at)}
         </span>
       </div>
-      <Table
-        isStriped
-        removeWrapper
-        defaultSelectedKeys={[currentPlayer]}
-        color="primary"
-        selectionMode="single"
-        aria-label="Game results table"
-        className="z-10"
-      >
-        <TableHeader>
-          <TableColumn align="start">NAME</TableColumn>
-          <TableColumn align="end">GP</TableColumn>
-          <TableColumn align="end">TP</TableColumn>
-        </TableHeader>
-        <TableBody items={data.player_results}>
-          {(item) => (
-            <TableRow key={item.name}>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.gp}</TableCell>
-              <TableCell>{item.tp}</TableCell>
-            </TableRow>
-          )}
-        </TableBody>
+      <Table>
+        <Table.ScrollContainer>
+          <Table.Content aria-label="Game results table">
+            <Table.Header>
+              <Table.Column isRowHeader>NAME</Table.Column>
+              <Table.Column className="text-end">GP</Table.Column>
+              <Table.Column className="text-end">TP</Table.Column>
+            </Table.Header>
+            <Table.Body items={data.player_results}>
+              {(item) => (
+                <Table.Row
+                  // By id, not name: players can share a name, and React Aria
+                  // throws on duplicate keys in a collection.
+                  id={item.id}
+                  // Highlight the signed-in player's row.
+                  className={
+                    item.id === currentPlayerId
+                      ? 'bg-accent-soft font-medium'
+                      : undefined
+                  }
+                >
+                  <Table.Cell>{item.name}</Table.Cell>
+                  <Table.Cell className="text-end">{item.gp}</Table.Cell>
+                  <Table.Cell className="text-end">{item.tp}</Table.Cell>
+                </Table.Row>
+              )}
+            </Table.Body>
+          </Table.Content>
+        </Table.ScrollContainer>
       </Table>
     </div>
   );

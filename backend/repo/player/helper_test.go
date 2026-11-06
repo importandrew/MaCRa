@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/importandrew/MaCRa/models"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/importandrew/MaCRa/models"
 )
 
 const testEventID = 1

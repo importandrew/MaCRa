@@ -11,15 +11,13 @@ export default defineConfig(() => {
     plugins: [react(), compression(), tailwindcss()],
     build: {
       chunkSizeWarningLimit: 1024,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
-          manualChunks: function manualChunks(id) {
-            if (id.includes('node_modules/@heroui')) {
-              return 'heroui';
-            }
-            if (id.includes('node_modules')) {
-              return 'vendor';
-            }
+          codeSplitting: {
+            groups: [
+              { name: 'heroui', test: /node_modules[\\/]@heroui/, priority: 2 },
+              { name: 'vendor', test: /node_modules/, priority: 1 },
+            ],
           },
         },
       },

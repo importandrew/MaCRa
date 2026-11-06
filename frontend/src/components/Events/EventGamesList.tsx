@@ -1,17 +1,17 @@
-import { Button, CircularProgress, Listbox, ListboxItem } from '@heroui/react';
-import { useNavigate } from 'react-router-dom';
+import { ProgressCircle } from '@heroui/react';
 import {
   EventGameListItem,
   EventGameListPlayer,
 } from '../../models/EventGames';
-import { ItemCounter, ListboxWrapper } from '../History/History';
+import NavList from '../NavList';
+import PendingButton from '../PendingButton';
 
 type EventGamesListProps = {
   games: EventGameListItem[];
   emptyContent: string;
   ariaLabel: string;
   mode: 'live' | 'finished';
-  onSelect: (gameId: number) => void;
+  gameHref: (gameId: number) => string;
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -47,11 +47,9 @@ function PlayerRow({ player }: { player: EventGameListPlayer }) {
           : 'grid grid-cols-[minmax(0,1fr)_auto] gap-x-2 items-center text-base leading-5 min-w-0'
       }
     >
-      {hasWind && (
-        <span className="text-default-500 shrink-0">{player.wind}</span>
-      )}
+      {hasWind && <span className="text-muted shrink-0">{player.wind}</span>}
       <span className="truncate whitespace-nowrap min-w-0">{player.name}</span>
-      <span className="tabular-nums text-right shrink-0 text-default-700">
+      <span className="tabular-nums text-right shrink-0 text-foreground">
         {player.gp}
       </span>
     </div>
@@ -71,19 +69,21 @@ function GameListItemContent({
     <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 min-w-0 w-full items-center">
       {/* h-0: don't inflate row height; min-h-full + aspect-square: match players column */}
       <div className="h-0 min-h-full aspect-square">
-        <CircularProgress
-          aria-label={ariaLabel}
-          value={value}
-          color="primary"
-          showValueLabel
-          valueLabel={label}
-          classNames={{
-            base: 'h-full w-full max-w-none',
-            svgWrapper: 'h-full w-full',
-            svg: '!w-full !h-full',
-            value: 'text-lg font-medium',
-          }}
-        />
+        <div className="relative h-full w-full">
+          <ProgressCircle
+            aria-label={ariaLabel}
+            value={value}
+            className="h-full w-full"
+          >
+            <ProgressCircle.Track className="h-full w-full">
+              <ProgressCircle.TrackCircle />
+              <ProgressCircle.FillCircle />
+            </ProgressCircle.Track>
+          </ProgressCircle>
+          <span className="absolute inset-0 flex items-center justify-center text-lg font-medium">
+            {label}
+          </span>
+        </div>
       </div>
       <div className="flex flex-col min-w-0">
         {game.players.length > 0 ? (
@@ -91,9 +91,7 @@ function GameListItemContent({
             <PlayerRow key={player.id} player={player} />
           ))
         ) : (
-          <span className="text-small text-default-500 leading-5">
-            No players
-          </span>
+          <span className="text-sm text-muted leading-5">No players</span>
         )}
       </div>
     </div>
@@ -105,58 +103,33 @@ export function EventGamesList({
   emptyContent,
   ariaLabel,
   mode,
-  onSelect,
+  gameHref,
   hasMore,
   isLoadingMore,
   onLoadMore,
 }: EventGamesListProps) {
-  const items = games.map((game, index) => ({
-    key: game.id,
-    game,
-    isLastInList: index === games.length - 1,
-  }));
-
   return (
     <div className="flex flex-col w-full gap-3">
-      <ListboxWrapper>
-        <Listbox
-          emptyContent={<p className="text-center">{emptyContent}</p>}
-          aria-label={ariaLabel}
-          variant="flat"
-          color="primary"
-          items={items}
-          onAction={(key) => onSelect(Number(key))}
-        >
-          {(item) => (
-            <ListboxItem
-              key={item.key}
-              textValue={gameTextValue(item.game)}
-              showDivider={!item.isLastInList}
-              endContent={<ItemCounter />}
-            >
-              <GameListItemContent game={item.game} mode={mode} />
-            </ListboxItem>
-          )}
-        </Listbox>
-      </ListboxWrapper>
+      <NavList
+        ariaLabel={ariaLabel}
+        emptyContent={<p className="text-center">{emptyContent}</p>}
+        items={games.map((game) => ({
+          id: String(game.id),
+          href: gameHref(game.id),
+          textValue: gameTextValue(game),
+          content: <GameListItemContent game={game} mode={mode} />,
+        }))}
+      />
       {hasMore && (
-        <Button
-          variant="flat"
-          color="primary"
-          isLoading={isLoadingMore}
+        <PendingButton
+          variant="secondary"
+          isPending={isLoadingMore}
           onPress={onLoadMore}
           className="self-center"
         >
           Load more
-        </Button>
+        </PendingButton>
       )}
     </div>
   );
-}
-
-export function useEventGamesNavigate(eventId: number) {
-  const navigate = useNavigate();
-  return (gameId: number) => {
-    navigate(`/event/${eventId}/game/${gameId}`);
-  };
 }

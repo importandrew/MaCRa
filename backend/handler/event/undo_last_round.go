@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/importandrew/MaCRa/handler/httperr"
 	"github.com/importandrew/MaCRa/handler/reqctx"
 	"github.com/importandrew/MaCRa/models"

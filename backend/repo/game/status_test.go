@@ -4,9 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/importandrew/MaCRa/models"
 	"github.com/importandrew/MaCRa/repo/database"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSetStatus(t *testing.T) {

@@ -1,28 +1,27 @@
 import { Button } from '@heroui/react';
-import { useCallback } from 'react';
 import { BarsIcon } from '../Icons/BarsIcon';
 
+// ContextMenuButton is the round ≡ button that opens a SideMenu.
+// className sets only its position.
 export default function ContextMenuButton({
   onPress,
-  className = 'absolute z-100',
+  className = '',
+  ariaLabel,
 }: {
   onPress: () => void;
   className?: string;
+  ariaLabel: string;
 }) {
-  const handleOnPress = useCallback(() => {
-    onPress();
-  }, [onPress]);
-
   return (
     <Button
-      variant="light"
-      radius="full"
+      variant="ghost"
       size="lg"
       isIconOnly
-      onPress={handleOnPress}
-      className={className}
+      aria-label={ariaLabel}
+      onPress={onPress}
+      className={`rounded-full ${className}`}
     >
-      <BarsIcon className="text-gray-400" />
+      <BarsIcon className="text-muted" />
     </Button>
   );
 }

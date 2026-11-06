@@ -14,7 +14,7 @@ type EventService interface {
 	ListVisible(ctx context.Context, userID int) ([]models.EventListItem, error)
 	GetMe(ctx context.Context, eventID, userID int) (models.EventMe, error)
 	CanAccess(ctx context.Context, eventID, userID int) error
-	HasCapability(ctx context.Context, eventID, userID, gameID int, cap models.Capability) error
+	HasCapability(ctx context.Context, eventID, userID, gameID int, capability models.Capability) error
 	AddMemberRoles(ctx context.Context, eventID, targetUserID int, roles []models.EventRole) error
 	RemoveMembers(ctx context.Context, eventID int, targetUserIDs []int) error
 	ListMembers(ctx context.Context, eventID int) ([]models.EventMember, error)

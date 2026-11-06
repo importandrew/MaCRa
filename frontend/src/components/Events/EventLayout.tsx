@@ -1,4 +1,4 @@
-import { Button, DrawerBody, DrawerHeader, useDisclosure } from '@heroui/react';
+import { Button, Drawer, useOverlayState } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { hasCapability as checkCapability } from '../../providers/event/useEventCapabilities';
@@ -12,10 +12,10 @@ import {
   EventLayoutContextValue,
 } from '../../providers/event/eventLayoutContext';
 import Confirm from '../Confirm';
-import ContextMenuButton from '../ContextMenu/ContextMenuButton';
-import SideMenu from '../ContextMenu/SideMenu';
+import ContextMenu from '../ContextMenu/ContextMenu';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import { showToast } from '../Toast';
+import PendingButton from '../PendingButton';
 
 export default function EventLayout() {
   const { eventId: eventIdParam } = useParams();
@@ -25,9 +25,9 @@ export default function EventLayout() {
   const [isFinishing, setIsFinishing] = useState(false);
   const {
     isOpen: isFinishConfirmOpen,
-    onOpen: onFinishConfirmOpen,
-    onClose: onFinishConfirmClose,
-  } = useDisclosure();
+    open: onFinishConfirmOpen,
+    close: onFinishConfirmClose,
+  } = useOverlayState();
 
   const {
     data: event,
@@ -92,6 +92,17 @@ export default function EventLayout() {
 
   const closeDrawer = () => setIsDrawerOpen(false);
 
+  const menuItems = [
+    { label: 'Manage', path: '/manage', isAllowed: canManage },
+    { label: 'Rating', path: '/rating', isAllowed: canRating },
+    { label: 'Live games', path: '/games/live', isAllowed: canLiveGames },
+    {
+      label: 'Finished games',
+      path: '/games/finished',
+      isAllowed: canFinishedGames,
+    },
+  ];
+
   const goTo = (path: string) => {
     closeDrawer();
     navigate(path);
@@ -108,7 +119,7 @@ export default function EventLayout() {
 
     showToast({
       title: 'Event finished',
-      color: 'warning',
+      variant: 'warning',
     });
     refetch();
     closeDrawer();
@@ -128,61 +139,45 @@ export default function EventLayout() {
         onGoHome={() => navigate('/events')}
       >
         <div className="relative flex flex-col w-full max-w-full min-h-full min-w-0 overflow-x-hidden">
-          <ContextMenuButton
-            onPress={() => setIsDrawerOpen(true)}
-            className="fixed bottom-4 right-4 z-100"
-          />
-          <SideMenu isOpen={isDrawerOpen} onOpenChange={closeDrawer}>
-            <DrawerHeader className="flex flex-col gap-1">
-              <span className="break-words">{event?.name ?? 'Event'}</span>
-            </DrawerHeader>
-            <DrawerBody className="flex flex-col gap-2 flex-1">
-              {canManage && (
-                <Button
-                  variant="flat"
-                  onPress={() => goTo(`/event/${eventId}/manage`)}
-                >
-                  Manage
-                </Button>
-              )}
-              {canRating && (
-                <Button
-                  variant="flat"
-                  onPress={() => goTo(`/event/${eventId}/rating`)}
-                >
-                  Rating
-                </Button>
-              )}
-              {canLiveGames && (
-                <Button
-                  variant="flat"
-                  onPress={() => goTo(`/event/${eventId}/games/live`)}
-                >
-                  Live games
-                </Button>
-              )}
-              {canFinishedGames && (
-                <Button
-                  variant="flat"
-                  onPress={() => goTo(`/event/${eventId}/games/finished`)}
-                >
-                  Finished games
-                </Button>
-              )}
+          <ContextMenu
+            isOpen={isDrawerOpen}
+            onOpen={() => setIsDrawerOpen(true)}
+            onClose={closeDrawer}
+            buttonClassName="fixed bottom-4 right-4 z-10"
+          >
+            <Drawer.Header>
+              <Drawer.Heading className="break-words">
+                {event?.name ?? 'Event'}
+              </Drawer.Heading>
+            </Drawer.Header>
+            <Drawer.Body className="flex flex-col gap-2 flex-1">
+              {menuItems
+                .filter((item) => item.isAllowed)
+                .map((item) => (
+                  <Button
+                    key={item.path}
+                    variant="tertiary"
+                    fullWidth
+                    // Tertiary text is muted inside overlays; keep it readable.
+                    className="text-foreground"
+                    onPress={() => goTo(`/event/${eventId}${item.path}`)}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
 
               {canFinishEvent && (
-                <Button
-                  color="danger"
-                  variant="solid"
+                <PendingButton
+                  variant="danger"
                   className="mt-auto w-1/2 self-center"
-                  isLoading={isFinishing}
+                  isPending={isFinishing}
                   onPress={onFinishConfirmOpen}
                 >
                   Finish event
-                </Button>
+                </PendingButton>
               )}
-            </DrawerBody>
-          </SideMenu>
+            </Drawer.Body>
+          </ContextMenu>
           <Confirm
             isOpen={isFinishConfirmOpen}
             onClose={onFinishConfirmClose}
@@ -194,7 +189,7 @@ export default function EventLayout() {
             cancelText="Cancel"
             confirmText="Finish event"
             prompt="Are you sure you want to finish this event? This action cannot be undone."
-            confirmButtonColor="danger"
+            confirmVariant="danger"
           />
           <Outlet />
         </div>

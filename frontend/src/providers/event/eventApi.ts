@@ -8,7 +8,7 @@ import {
   publicFetch,
   eventPath,
 } from '../../components/Request';
-import { showToast } from '../../components/Toast';
+import { useLoadingState } from '../useLoadingState';
 import { Event, EventVisibility, ContentReach } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
 import { EventMember, EventRole } from '../../models/EventRole';
@@ -40,7 +40,10 @@ export const useFetchEvent = (id: number | null) => {
   const [data, setData] = useState<Event | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    id,
+    id != null
+  );
 
   const fetchData = useCallback(async () => {
     if (id == null) {
@@ -48,7 +51,7 @@ export const useFetchEvent = (id: number | null) => {
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
     setIsForbidden(false);
 
@@ -57,19 +60,19 @@ export const useFetchEvent = (id: number | null) => {
 
     if (result.status === 403) {
       setIsForbidden(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     if (!result.data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result.data);
-    setIsLoading(false);
-  }, [id]);
+    finishLoading(true);
+  }, [id, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -82,16 +85,19 @@ export const useFetchEventMe = (eventId: number | null) => {
   const [data, setData] = useState<EventMe | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(() => eventId != null);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    eventId,
+    eventId != null
+  );
 
   const fetchData = useCallback(async () => {
     if (eventId == null) {
       setData(null);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
     setIsForbidden(false);
 
@@ -100,19 +106,19 @@ export const useFetchEventMe = (eventId: number | null) => {
 
     if (result.status === 403) {
       setIsForbidden(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     if (!result.data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result.data);
-    setIsLoading(false);
-  }, [eventId]);
+    finishLoading(true);
+  }, [eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -124,7 +130,10 @@ export const useFetchEventMe = (eventId: number | null) => {
 export const useFetchEventMembers = (eventId: number | null) => {
   const [data, setData] = useState<EventMember[] | null>(null);
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    eventId,
+    eventId != null
+  );
 
   const fetchData = useCallback(async () => {
     if (eventId == null) {
@@ -132,7 +141,7 @@ export const useFetchEventMembers = (eventId: number | null) => {
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
 
     const request = GetRequest(`/api/event/${eventId}/members`);
@@ -140,13 +149,13 @@ export const useFetchEventMembers = (eventId: number | null) => {
 
     if (!result) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result);
-    setIsLoading(false);
-  }, [eventId]);
+    finishLoading(true);
+  }, [eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -168,20 +177,8 @@ export async function updateEvent(
   payload: UpdateEventPayload
 ): Promise<boolean> {
   const request = PatchRequest(`/api/event/${id}`, payload);
-  const response = await fetch(request);
-
-  if (!response.ok) {
-    const data = await response
-      .json()
-      .catch(() => ({ error: 'Unknown error' }));
-    showToast({
-      title: `Error: ${data.error}`,
-      color: 'danger',
-    });
-    return false;
-  }
-
-  return true;
+  const result = await authFetch<null>(request);
+  return result !== null;
 }
 
 export async function addEventMember(
@@ -216,10 +213,10 @@ export async function finishEvent(eventId: number): Promise<boolean> {
 export const useFetchVisibleEvents = () => {
   const [data, setData] = useState<Event[] | null>(null);
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState();
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
 
     const request = GetRequest('/api/event');
@@ -227,13 +224,13 @@ export const useFetchVisibleEvents = () => {
 
     if (result.status === 403 || !result.data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result.data);
-    setIsLoading(false);
-  }, []);
+    finishLoading(true);
+  }, [startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -245,7 +242,10 @@ export const useFetchVisibleEvents = () => {
 export const useFetchEventGameHistory = (eventId: number | null) => {
   const [data, setData] = useState<GamesHistoryData | null>(null);
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    eventId,
+    eventId != null
+  );
 
   const fetchData = useCallback(async () => {
     if (eventId == null) {
@@ -253,7 +253,7 @@ export const useFetchEventGameHistory = (eventId: number | null) => {
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
 
     const request = GetRequest(eventPath(eventId, '/game-history'));
@@ -261,13 +261,13 @@ export const useFetchEventGameHistory = (eventId: number | null) => {
 
     if (!result) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result);
-    setIsLoading(false);
-  }, [eventId]);
+    finishLoading(true);
+  }, [eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
@@ -286,7 +286,10 @@ export const useFetchEventGames = (
   const [hasMore, setHasMore] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    `${eventId}/${status}`,
+    eventId != null && status != null
+  );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const fetchPage = useCallback(
@@ -300,7 +303,7 @@ export const useFetchEventGames = (
       if (append) {
         setIsLoadingMore(true);
       } else {
-        setIsLoading(true);
+        startLoading();
       }
       setIsError(false);
       setIsForbidden(false);
@@ -315,14 +318,14 @@ export const useFetchEventGames = (
 
       if (result.status === 403) {
         setIsForbidden(true);
-        setIsLoading(false);
+        finishLoading(false);
         setIsLoadingMore(false);
         return;
       }
 
       if (!result.data) {
         setIsError(true);
-        setIsLoading(false);
+        finishLoading(false);
         setIsLoadingMore(false);
         return;
       }
@@ -331,10 +334,10 @@ export const useFetchEventGames = (
         append ? [...prev, ...result.data!.games] : result.data!.games
       );
       setHasMore(result.data.has_more);
-      setIsLoading(false);
+      finishLoading(true);
       setIsLoadingMore(false);
     },
-    [eventId, status]
+    [eventId, status, startLoading, finishLoading]
   );
 
   const refetch = useCallback(() => {
@@ -366,7 +369,10 @@ export const useFetchEventRatings = (eventId: number | null) => {
   const [data, setData] = useState<EventRatingsData | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, startLoading, finishLoading } = useLoadingState(
+    eventId,
+    eventId != null
+  );
 
   const fetchData = useCallback(async () => {
     if (eventId == null) {
@@ -374,7 +380,7 @@ export const useFetchEventRatings = (eventId: number | null) => {
       return;
     }
 
-    setIsLoading(true);
+    startLoading();
     setIsError(false);
     setIsForbidden(false);
 
@@ -383,19 +389,19 @@ export const useFetchEventRatings = (eventId: number | null) => {
 
     if (result.status === 403) {
       setIsForbidden(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     if (!result.data) {
       setIsError(true);
-      setIsLoading(false);
+      finishLoading(false);
       return;
     }
 
     setData(result.data);
-    setIsLoading(false);
-  }, [eventId]);
+    finishLoading(true);
+  }, [eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();

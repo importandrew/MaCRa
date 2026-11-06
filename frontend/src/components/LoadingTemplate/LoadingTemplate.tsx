@@ -1,5 +1,6 @@
-import { Spinner, Button } from '@heroui/react';
+import { Button } from '@heroui/react';
 import ForbiddenState from './ForbiddenState';
+import LoadingSpinner from './LoadingSpinner';
 
 interface LoadingTemplateProps {
   isLoading: boolean;
@@ -17,7 +18,7 @@ const LoadingTemplate = (props: LoadingTemplateProps) => {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-auto my-auto justify-center items-center">
-        <Spinner label="Loading..." size="lg" />
+        <LoadingSpinner label="Loading..." />
       </div>
     );
   }

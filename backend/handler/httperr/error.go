@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/importandrew/MaCRa/logger"
 	"github.com/importandrew/MaCRa/models"
 )

@@ -1,4 +1,4 @@
-import { Button, Spinner, useDisclosure } from '@heroui/react';
+import { useOverlayState } from '@heroui/react';
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
@@ -10,17 +10,22 @@ import { CheckInCircleIcon } from '../Icons/CheckInCircleIcon';
 import { EyeIcon } from '../Icons/EyeIcon';
 import { RankingIcon } from '../Icons/RankingIcon';
 import MainButton from './MainButton';
+import { LinkButton } from '../LinkButton';
+import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
-const iconClass = 'w-6 h-6 text-default-500';
+const iconClass = 'w-6 h-6 text-muted';
 
 export default function Landing() {
   const { isAuthenticated } = useContext(AuthContext);
-  const { selectedEvent, selectedEventId, isLoading: eventLoading } =
-    useEvent();
+  const {
+    selectedEvent,
+    selectedEventId,
+    isLoading: eventLoading,
+  } = useEvent();
   const { data, isLoading } = useFetchPlayerStatus();
   const { hasCapability, isLoading: capsLoading } =
     useEventCapabilities(selectedEventId);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
   const canCreateGame = hasCapability('create_game');
   const canRating = hasCapability('view_ratings');
@@ -42,7 +47,7 @@ export default function Landing() {
         {selectedEvent && selectedEventId != null && (
           <Link
             to={eventBase}
-            className="text-sm text-default-500 font-sans max-w-md break-words"
+            className="text-sm text-muted font-sans max-w-md break-words"
             title={selectedEvent.name}
           >
             {selectedEvent.name}
@@ -52,46 +57,41 @@ export default function Landing() {
           (canRating || canLiveGames || canFinishedGames) && (
             <div className="flex items-center gap-1">
               {canRating && (
-                <Button
-                  as={Link}
+                <LinkButton
                   to={`${eventBase}/rating`}
                   isIconOnly
-                  variant="light"
+                  variant="ghost"
                   aria-label="Rating"
                 >
                   <RankingIcon className={iconClass} />
-                </Button>
+                </LinkButton>
               )}
               {canLiveGames && (
-                <Button
-                  as={Link}
+                <LinkButton
                   to={`${eventBase}/games/live`}
                   isIconOnly
-                  variant="light"
+                  variant="ghost"
                   aria-label="Live games"
                 >
                   <EyeIcon className={iconClass} />
-                </Button>
+                </LinkButton>
               )}
               {canFinishedGames && (
-                <Button
-                  as={Link}
+                <LinkButton
                   to={`${eventBase}/games/finished`}
                   isIconOnly
-                  variant="light"
+                  variant="ghost"
                   aria-label="Finished games"
                 >
                   <CheckInCircleIcon className={iconClass} />
-                </Button>
+                </LinkButton>
               )}
             </div>
           )}
       </div>
 
       <div className="flex flex-col-reverse w-screen px-6 mb-6 gap-3">
-        {!isAuthenticated && (
-          <MainButton text="Login to play" link="/login" />
-        )}
+        {!isAuthenticated && <MainButton text="Login to play" link="/login" />}
 
         {isAuthenticated && !selectedEventId && !eventLoading && (
           <MainButton text="Select event to play" onPress={onOpen} />
@@ -101,7 +101,7 @@ export default function Landing() {
           selectedEventId &&
           (eventLoading || isLoading || capsLoading) && (
             <div className="flex justify-center">
-              <Spinner label="Loading..." size="lg" />
+              <LoadingSpinner label="Loading..." />
             </div>
           )}
 
@@ -114,12 +114,12 @@ export default function Landing() {
               <MainButton text="New game" link="/new" />
             )}
             {data?.has_last && (
-              <MainButton text="Last game" color="secondary" link="/last" />
+              <MainButton text="Last game" variant="secondary" link="/last" />
             )}
             {data?.has_last && (
               <MainButton
                 text="Played games"
-                color="default"
+                variant="tertiary"
                 link="/history"
               />
             )}
