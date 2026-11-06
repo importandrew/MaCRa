@@ -28,9 +28,27 @@ function DeltaButton({ playerId, playerName, onOpen }: DeltaButtonProps) {
       onClick={() => onOpen(playerId)}
       className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full hover:bg-default/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
-      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path d="M7 20V7M3.5 10.5 7 6l3.5 4.5" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M17 4v13m-3.5-3.5L17 18l3.5-4.5" stroke="#dc2626" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        aria-hidden="true"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <path
+          d="M7 20V7M3.5 10.5 7 6l3.5 4.5"
+          stroke="#16a34a"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M17 4v13m-3.5-3.5L17 18l3.5-4.5"
+          stroke="#dc2626"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </button>
   );
@@ -135,7 +153,11 @@ export default function CurrentGame() {
                     />
                   </span>
                   {!isEntryOpen && (
-                    <DeltaButton playerId={roundData.opp.id} playerName={roundData.opp.name} onOpen={openDelta} />
+                    <DeltaButton
+                      playerId={roundData.opp.id}
+                      playerName={roundData.opp.name}
+                      onOpen={openDelta}
+                    />
                   )}
                 </div>
               </div>
@@ -165,7 +187,11 @@ export default function CurrentGame() {
                     />
                   </span>
                   {!isEntryOpen && (
-                    <DeltaButton playerId={roundData.left.id} playerName={roundData.left.name} onOpen={openDelta} />
+                    <DeltaButton
+                      playerId={roundData.left.id}
+                      playerName={roundData.left.name}
+                      onOpen={openDelta}
+                    />
                   )}
                 </div>
               </div>
@@ -220,7 +246,11 @@ export default function CurrentGame() {
                     />
                   </span>
                   {!isEntryOpen && (
-                    <DeltaButton playerId={roundData.right.id} playerName={roundData.right.name} onOpen={openDelta} />
+                    <DeltaButton
+                      playerId={roundData.right.id}
+                      playerName={roundData.right.name}
+                      onOpen={openDelta}
+                    />
                   )}
                 </div>
               </div>
@@ -253,7 +283,11 @@ export default function CurrentGame() {
                     />
                   </span>
                   {!isEntryOpen && (
-                    <DeltaButton playerId={roundData.me.id} playerName={roundData.me.name} onOpen={openDelta} />
+                    <DeltaButton
+                      playerId={roundData.me.id}
+                      playerName={roundData.me.name}
+                      onOpen={openDelta}
+                    />
                   )}
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { Button, Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
+import { Modal } from '@heroui/react';
 import { useMemo, useRef } from 'react';
 import './Delta.css';
 
@@ -117,7 +117,11 @@ function candidateHands(scores: LinearScore[]): number[] {
 }
 
 function currentRank(players: DeltaPlayer[], selectedPlayerId: number): Rank {
-  return rankOf(players.map((p) => ({ id: p.id, base: p.score, slope: 0 })), selectedPlayerId, 0);
+  return rankOf(
+    players.map((p) => ({ id: p.id, base: p.score, slope: 0 })),
+    selectedPlayerId,
+    0
+  );
 }
 
 function getGainTargets(
@@ -145,7 +149,8 @@ function getGainTargets(
   for (const [place, handValue] of bestByPlace) {
     bestAtHand.set(handValue, Math.min(place, bestAtHand.get(handValue) ?? 5));
   }
-  return [...bestAtHand].map(([handValue, place]) => ({ place, handValue }))
+  return [...bestAtHand]
+    .map(([handValue, place]) => ({ place, handValue }))
     .sort((a, b) => a.handValue - b.handValue);
 }
 
@@ -204,9 +209,15 @@ function TargetList({ targets }: TargetListProps) {
   return (
     <div className="delta-thresholds">
       {targets.map(({ place, handValue }) => (
-        <span key={place} className="delta-threshold" title={`Reach ${ordinal(place)} place`}>
+        <span
+          key={place}
+          className="delta-threshold"
+          title={`Reach ${place}${ordinal(place)} place`}
+        >
           <strong className="tabular-nums">{handValue}</strong>
-          <span className="text-default-500">→ {place}{ordinal(place)}</span>
+          <span className="text-muted">
+            → {place}{ordinal(place)}
+          </span>
         </span>
       ))}
     </div>
@@ -215,6 +226,7 @@ function TargetList({ targets }: TargetListProps) {
 
 type OpponentCardProps = {
   player: DeltaPlayer;
+  selectedScore: number;
   directTargets: PlaceTarget[];
   discardTargets: LossTarget[];
   area: OpponentArea;
@@ -222,39 +234,72 @@ type OpponentCardProps = {
 
 function OpponentCard({
   player,
+  selectedScore,
   directTargets,
   discardTargets,
   area,
 }: OpponentCardProps) {
   return (
-    <section className={`delta-opponent delta-opponent--${area} rounded-large border border-divider bg-content1 p-2 sm:p-3 shadow-small`}>
-      <div className="delta-identity border-b border-divider pb-1.5">
-        <div className="delta-wind text-default-500" aria-label={windLabel(player.wind) ? `Wind ${windLabel(player.wind)}` : undefined}>
+    <section
+      className={`delta-opponent delta-opponent--${area} rounded-lg border border-border bg-surface p-2 shadow-sm sm:p-3`}
+    >
+      <div className="delta-identity border-b border-border pb-1.5">
+        <div
+          className="delta-wind text-muted"
+          aria-label={windLabel(player.wind) ? `Wind ${windLabel(player.wind)}` : undefined}
+        >
           {windLabel(player.wind)}
         </div>
         <div className="delta-person">
-          <div className="delta-name font-semibold text-foreground" title={player.name}>{player.name}</div>
-          <div className={`delta-score tabular-nums ${player.score < 0 ? 'text-danger' : 'text-default-500'}`}>
-            {player.score.toLocaleString('en-US')}
+          <div className="delta-name font-semibold text-foreground" title={player.name}>
+            {player.name}
+          </div>
+          <div className="delta-score-line">
+            <span className="delta-score tabular-nums text-muted">
+              {player.score.toLocaleString('en-US')}
+            </span>
+            <span
+              className={`delta-score-gap tabular-nums ${
+                selectedScore > player.score
+                  ? 'delta-score-gap--ahead'
+                  : selectedScore < player.score
+                    ? 'delta-score-gap--behind'
+                    : 'delta-score-gap--equal'
+              }`}
+              title="Selected player's score minus this player's score"
+              aria-label={`Score advantage of selected player: ${selectedScore - player.score}`}
+            >
+              {selectedScore - player.score > 0 ? '+' : ''}
+              {(selectedScore - player.score).toLocaleString('en-US')}
+            </span>
           </div>
         </div>
       </div>
       {directTargets.length > 0 && (
-        <div className="delta-action delta-action--gain bg-success-100 text-success-700" title={`Win on a discard from ${player.name}`}>
-          <span className="delta-action__label">Win</span>
+        <div
+          className="delta-action delta-action--direct"
+          title={`Win on a discard from ${player.name}`}
+        >
           <TargetList targets={directTargets} />
         </div>
       )}
       {discardTargets.length > 0 && (
-        <div className="delta-action delta-action--loss bg-danger-100 text-danger-700" title={`Deal into a win by ${player.name}`}>
-          <span className="delta-action__label">Deal in</span>
+        <div
+          className="delta-action delta-action--loss"
+          title={`Deal into a win by ${player.name}`}
+        >
           <div className="delta-thresholds">
             {discardTargets.map(({ finalPlace, tiedThrough, handValue }) => (
-              <span key={`${finalPlace}-${tiedThrough}-${handValue}`} className="delta-threshold">
+              <span
+                key={`${finalPlace}-${tiedThrough}-${handValue}`}
+                className="delta-threshold"
+              >
                 <strong className="tabular-nums">{handValue}</strong>
-                <span className="text-default-500">
+                <span className="text-muted">
                   → {finalPlace}{ordinal(finalPlace)}
-                  {tiedThrough > finalPlace ? `–${tiedThrough}${ordinal(tiedThrough)}` : ''}
+                  {tiedThrough > finalPlace
+                    ? `–${tiedThrough}${ordinal(tiedThrough)}`
+                    : ''}
                 </span>
               </span>
             ))}
@@ -274,23 +319,30 @@ function computeEmpty() {
     rightPlayer: null as DeltaPlayer | null,
     bottomPlayer: null as DeltaPlayer | null,
     selfTargets: [] as PlaceTarget[],
-    opponentTargets: {} as Record<number, {
-      direct: PlaceTarget[];
-      discard: LossTarget[];
-    }>,
+    opponentTargets: {} as Record<
+      number,
+      { direct: PlaceTarget[]; discard: LossTarget[] }
+    >,
   };
 }
 
-export default function Delta({ isOpen, onClose, selectedPlayerId, players }: DeltaProps) {
+export default function Delta({
+  isOpen,
+  onClose,
+  selectedPlayerId,
+  players,
+}: DeltaProps) {
   // CurrentGame passes a newly created array on each render.
-  const playersKey = JSON.stringify(players.map((p) =>
-    [p.id, p.name, p.score, p.position, p.wind]
-  ));
+  const playersKey = JSON.stringify(
+    players.map((p) => [p.id, p.name, p.score, p.position, p.wind])
+  );
 
   const lastCalculations = useRef<ReturnType<typeof computeEmpty> | null>(null);
   const calculations = useMemo(() => {
     const empty = computeEmpty();
-    if (!isOpen || selectedPlayerId === null) return lastCalculations.current ?? empty;
+    if (!isOpen || selectedPlayerId === null) {
+      return lastCalculations.current ?? empty;
+    }
     const positions = getTablePositions(players, selectedPlayerId);
     if (!positions.selectedPlayer) return empty;
     const opponentTargets: typeof empty.opponentTargets = {};
@@ -309,116 +361,150 @@ export default function Delta({ isOpen, onClose, selectedPlayerId, players }: De
     };
     lastCalculations.current = result;
     return result;
-  // The primitive key includes every player field used by these calculations.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // The primitive key includes every player field used by these calculations.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedPlayerId, playersKey]);
 
   const {
-    rank, selectedPlayer, topPlayer, leftPlayer, rightPlayer, bottomPlayer,
-    selfTargets, opponentTargets,
+    rank,
+    selectedPlayer,
+    topPlayer,
+    leftPlayer,
+    rightPlayer,
+    bottomPlayer,
+    selfTargets,
+    opponentTargets,
   } = calculations;
 
   return (
-    <Modal
+    <Modal.Backdrop
       isOpen={isOpen}
-      onClose={onClose}
-      size="full"
-      placement="center"
-      scrollBehavior="inside"
-      classNames={{
-        base: 'delta-modal bg-background text-foreground rounded-none',
-        header: 'delta-modal__header border-b border-divider',
-        body: 'delta-modal__body',
-        closeButton: 'hidden',
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
     >
-      <ModalContent>
-        {() => (
-          <>
-            <ModalHeader className="relative pr-14">
-              <div className="flex flex-col gap-1">
-                <span>Position thresholds</span>
-                {selectedPlayer && (
-                  <span className="text-sm font-normal text-default-500">
-                    {selectedPlayer.name} · {rank.first}{ordinal(rank.first)}{rank.last > rank.first ? `–${rank.last}${ordinal(rank.last)} (tie)` : ''} place
-                  </span>
-                )}
-              </div>
-              <Button
-                isIconOnly
-                variant="light"
-                radius="full"
-                size="sm"
-                aria-label="Close position thresholds"
-                onPress={onClose}
-                className="absolute right-3 top-1/2 z-20 -translate-y-1/2 text-default-600"
+      <Modal.Container
+        placement="center"
+        size="full"
+        scroll="inside"
+        className="delta-modal"
+      >
+        <Modal.Dialog aria-label="Position thresholds" className="bg-surface text-foreground">
+          <Modal.Header className="delta-modal__header relative border-b border-border pr-14">
+            <div className="flex flex-col gap-1">
+              <span>Position thresholds</span>
+              {selectedPlayer && (
+                <span className="text-sm font-normal text-muted">
+                  {selectedPlayer.name} · {rank.first}
+                  {ordinal(rank.first)}
+                  {rank.last > rank.first
+                    ? `–${rank.last}${ordinal(rank.last)} (tie)`
+                    : ''}{' '}
+                  place
+                </span>
+              )}
+            </div>
+            <Modal.CloseTrigger
+              className="absolute right-3 top-1/2 z-20 -translate-y-1/2"
+              aria-label="Close position thresholds"
+            >
+              <svg
+                aria-hidden="true"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
               >
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
-              </Button>
-            </ModalHeader>
-            <ModalBody>
-              {!selectedPlayer ? (
-                <div className="flex min-h-48 items-center justify-center text-default-500">Player not found</div>
-              ) : (
-                <div className="delta-layout">
-                  {topPlayer && (
-                    <OpponentCard player={topPlayer}
-                      directTargets={opponentTargets[topPlayer.id].direct}
-                      discardTargets={opponentTargets[topPlayer.id].discard}
-                      area="top" />
-                  )}
-                  {leftPlayer && (
-                    <OpponentCard player={leftPlayer}
-                      directTargets={opponentTargets[leftPlayer.id].direct}
-                      discardTargets={opponentTargets[leftPlayer.id].discard}
-                      area="left" />
-                  )}
-                  <section className="delta-selected rounded-large border-2 border-primary bg-content1 p-2 sm:p-3 shadow-small">
-                    <div className="delta-identity border-b border-divider pb-1.5">
-                      <div className="delta-wind text-primary">{windLabel(selectedPlayer.wind)}</div>
-                      <div className="delta-person">
-                        <div className="delta-name font-semibold" title={selectedPlayer.name}>
-                          {selectedPlayer.name}
-                        </div>
-                        <div className="delta-score tabular-nums">
-                          {selectedPlayer.score.toLocaleString('en-US')}
-                        </div>
-                        <div className="text-xs text-default-500">
-                          {rank.first}{ordinal(rank.first)}
-                          {rank.last > rank.first ? `–${rank.last}${ordinal(rank.last)} (tie)` : ''}
-                        </div>
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </Modal.CloseTrigger>
+          </Modal.Header>
+          <Modal.Body className="delta-modal__body">
+            {!selectedPlayer ? (
+              <div className="flex min-h-48 items-center justify-center text-muted">
+                Player not found
+              </div>
+            ) : (
+              <div className="delta-layout">
+                {topPlayer && (
+                  <OpponentCard
+                    player={topPlayer}
+                    selectedScore={selectedPlayer.score}
+                    directTargets={opponentTargets[topPlayer.id].direct}
+                    discardTargets={opponentTargets[topPlayer.id].discard}
+                    area="top"
+                  />
+                )}
+                {leftPlayer && (
+                  <OpponentCard
+                    player={leftPlayer}
+                    selectedScore={selectedPlayer.score}
+                    directTargets={opponentTargets[leftPlayer.id].direct}
+                    discardTargets={opponentTargets[leftPlayer.id].discard}
+                    area="left"
+                  />
+                )}
+                <section className="delta-selected rounded-lg border-2 border-accent bg-surface p-2 shadow-sm sm:p-3">
+                  <div className="delta-identity border-b border-border pb-1.5">
+                    <div className="delta-wind text-accent">
+                      {windLabel(selectedPlayer.wind)}
+                    </div>
+                    <div className="delta-person">
+                      <div
+                        className="delta-name font-semibold"
+                        title={selectedPlayer.name}
+                      >
+                        {selectedPlayer.name}
+                      </div>
+                      <div className="delta-score tabular-nums">
+                        {selectedPlayer.score.toLocaleString('en-US')}
+                      </div>
+                      <div className="text-xs text-muted">
+                        {rank.first}{ordinal(rank.first)}
+                        {rank.last > rank.first
+                          ? `–${rank.last}${ordinal(rank.last)} (tie)`
+                          : ''}
                       </div>
                     </div>
-                    {selfTargets.length > 0 && (
-                      <div className="delta-action delta-action--gain bg-success-100 text-success-700">
-                        <span className="delta-action__label">Self</span>
-                        <TargetList targets={selfTargets} />
-                      </div>
-                    )}
-                  </section>
-                  {rightPlayer && (
-                    <OpponentCard player={rightPlayer}
-                      directTargets={opponentTargets[rightPlayer.id].direct}
-                      discardTargets={opponentTargets[rightPlayer.id].discard}
-                      area="right" />
-                  )}
-                  {bottomPlayer && (
-                    <OpponentCard player={bottomPlayer}
-                      directTargets={opponentTargets[bottomPlayer.id].direct}
-                      discardTargets={opponentTargets[bottomPlayer.id].discard}
-                      area="bottom" />
-                  )}
-                  <div className="delta-legend text-xs text-default-500">
-                    Green: gain a place · Red: risk losing a place · Values: minimum fan
                   </div>
+                  {selfTargets.length > 0 && (
+                    <div className="delta-action delta-action--self">
+                      <TargetList targets={selfTargets} />
+                    </div>
+                  )}
+                </section>
+                {rightPlayer && (
+                  <OpponentCard
+                    player={rightPlayer}
+                    selectedScore={selectedPlayer.score}
+                    directTargets={opponentTargets[rightPlayer.id].direct}
+                    discardTargets={opponentTargets[rightPlayer.id].discard}
+                    area="right"
+                  />
+                )}
+                {bottomPlayer && (
+                  <OpponentCard
+                    player={bottomPlayer}
+                    selectedScore={selectedPlayer.score}
+                    directTargets={opponentTargets[bottomPlayer.id].direct}
+                    discardTargets={opponentTargets[bottomPlayer.id].discard}
+                    area="bottom"
+                  />
+                )}
+                <div className="delta-legend" aria-label="Threshold legend">
+                  <span className="delta-legend__item delta-action--self">Self</span>
+                  <span className="delta-legend__item delta-action--direct">Win from this player</span>
+                  <span className="delta-legend__item delta-action--loss">Deal into this player</span>
+                  <span className="delta-legend__note">Values: minimum fan</span>
                 </div>
-              )}
-            </ModalBody>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
+              </div>
+            )}
+          </Modal.Body>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
   );
 }

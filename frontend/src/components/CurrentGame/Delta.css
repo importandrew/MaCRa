@@ -1,5 +1,4 @@
-/* Position cards are oriented relative to the selected player.
-   Colors, borders and typography use HeroUI/Tailwind theme tokens. */
+/* Delta modal: layout remains fixed relative to the device owner's seat. */
 .delta-modal {
   width: 100vw;
   max-width: none;
@@ -8,7 +7,6 @@
 }
 
 .delta-modal__header { flex-shrink: 0; }
-
 .delta-modal__body {
   min-height: 0;
   overflow-y: auto;
@@ -36,7 +34,6 @@
   flex-direction: column;
   gap: 0.45rem;
 }
-
 .delta-opponent--top { grid-area: top; }
 .delta-opponent--left { grid-area: left; }
 .delta-opponent--right { grid-area: right; }
@@ -49,13 +46,7 @@
   gap: 0.4rem;
   min-width: 0;
 }
-
-.delta-wind {
-  flex: 0 0 auto;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
+.delta-wind { flex: 0 0 auto; font-size: 1.15rem; font-weight: 600; }
 .delta-person { min-width: 0; flex: 1; }
 .delta-name {
   overflow: hidden;
@@ -63,51 +54,66 @@
   white-space: nowrap;
   font-size: 0.875rem;
 }
-
 .delta-score { font-size: 0.8rem; }
 
+/* Matching action and legend swatches; no labels inside threshold cards. */
 .delta-action {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.25rem 0.5rem;
   padding: 0.35rem 0.45rem;
+  border: 1px solid;
   border-radius: 0.5rem;
   font-size: 0.75rem;
 }
-
-.delta-action--gain {
-
+.delta-action--self {
+  color: #15803d;
+  background: rgb(34 197 94 / 0.09);
+  border-color: rgb(22 163 74 / 0.65);
 }
-
+.delta-action--direct {
+  color: #1d4ed8;
+  background: rgb(59 130 246 / 0.09);
+  border-color: rgb(37 99 235 / 0.65);
+}
 .delta-action--loss {
-
+  color: #b91c1c;
+  background: rgb(239 68 68 / 0.09);
+  border-color: rgb(220 38 38 / 0.65);
 }
-
-.delta-action__label {
-  font-weight: 600;
-  flex: 0 0 auto;
-}
-
 .delta-thresholds {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.2rem 0.6rem;
 }
-
 .delta-threshold {
   display: inline-flex;
   align-items: baseline;
   gap: 0.15rem;
   white-space: nowrap;
 }
-
 .delta-legend {
   grid-area: legend;
-  text-align: center;
-  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.65rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.75rem;
 }
+.delta-legend__item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.delta-legend__note { color: var(--color-muted, #71717a); }
 
 @media (max-width: 640px) {
   .delta-layout {
@@ -115,11 +121,35 @@
     gap: 0.35rem;
     align-items: start;
   }
-
   .delta-opponent, .delta-selected { gap: 0.35rem; }
   .delta-identity { flex-wrap: wrap; gap: 0.1rem 0.25rem; }
   .delta-name { font-size: 0.75rem; }
   .delta-wind { font-size: 0.9rem; }
   .delta-action { padding: 0.25rem; font-size: 0.68rem; }
   .delta-thresholds { gap: 0.15rem 0.35rem; }
+  .delta-legend { font-size: 0.68rem; }
+}
+
+/* Neutral score; colored gap is always selected player minus opponent. */
+.delta-score-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.45rem;
+}
+.delta-score-gap {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.delta-score-gap::before {
+  content: 'Δ ';
+  font-weight: 400;
+}
+.delta-score-gap--ahead { color: #15803d; }
+.delta-score-gap--behind { color: #b91c1c; }
+.delta-score-gap--equal { color: #71717a; }
+@media (max-width: 640px) {
+  .delta-score-line { gap: 0.1rem 0.3rem; }
+  .delta-score-gap { font-size: 0.68rem; }
 }
