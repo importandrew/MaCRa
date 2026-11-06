@@ -47,6 +47,9 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			eventAccess.GET("/me", h.event.GetMe)
 			eventAccess.GET("/ratings", h.event.Ratings)
 			eventAccess.GET("/games", h.event.ListGames)
+			eventAccess.GET("/members", h.event.ListMembers)
+			eventAccess.GET("/game-history", h.event.GameHistory)
+			eventAccess.GET("/player/:playerId/game-history", middleware.RequirePlayer, h.event.PlayerGameHistory)
 
 			eventGame := eventAccess.Group("/game/:gameId", middleware.RequireGame, h.event.GameBelongsToEvent)
 			{
@@ -68,17 +71,13 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 
 			required.POST("/event", h.event.Create)
 
-			event := api.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess)
+			event := required.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess)
 			{
 				event.PATCH("", h.event.Update)
 				event.POST("/finish", h.event.FinishEvent)
 
-				event.GET("/members", h.event.ListMembers)
 				event.POST("/members", h.event.AddMembers)
 				event.DELETE("/members", h.event.RemoveMember)
-
-				event.GET("/game-history", h.event.GameHistory)
-				event.GET("/player/:playerId/game-history", middleware.RequirePlayer, h.event.PlayerGameHistory)
 
 				// user relative game block
 				{
