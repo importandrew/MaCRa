@@ -85,4 +85,16 @@ func TestHandler_PlayerGameHistory(t *testing.T) {
 
 		assert.Equal(t, http.StatusForbidden, w.Code)
 	})
+
+	t.Run("own history needs no watch_results", func(t *testing.T) {
+		// No HasCapability expectation: the mock fails the test if it is called.
+		eventSvc := NewMockEventService(t)
+		eventSvc.EXPECT().PlayerGameHistory(mock.Anything, 1, 5).Return([]int{4}, nil)
+
+		handler := NewHandler(eventSvc, NewMockGameService(t))
+		c, w := newGameHistoryContext(5, 1, 5)
+		handler.PlayerGameHistory(c)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
 }

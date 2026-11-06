@@ -35,9 +35,13 @@ func (h Handler) PlayerGameHistory(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
 	playerID := reqctx.GetPlayerID(c)
 
-	if err := h.event.HasCapability(c.Request.Context(), eventID, userID, 0, models.CapWatchResults); err != nil {
-		httperr.Error(c, err)
-		return
+	// A player always sees their own history; access to the event itself is
+	// checked by HasAccess. Other players' history follows watch_results.
+	if playerID != userID {
+		if err := h.event.HasCapability(c.Request.Context(), eventID, userID, 0, models.CapWatchResults); err != nil {
+			httperr.Error(c, err)
+			return
+		}
 	}
 
 	gameIDs, err := h.event.PlayerGameHistory(c.Request.Context(), eventID, playerID)
