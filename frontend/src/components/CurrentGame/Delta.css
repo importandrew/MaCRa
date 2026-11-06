@@ -350,3 +350,18 @@
 .delta-help-example__row > strong {
   min-width: 6.5rem;
 }
+delta-help-backdrop-button {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.delta-help-panel {
+  position: relative;
+  z-index: 1;
+}

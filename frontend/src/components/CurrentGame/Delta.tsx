@@ -447,14 +447,19 @@ function HelpOverlay({
   if (!visible) return null;
   if (fallback) {
     return (
-      <div className="delta-help-backdrop" onClick={onClose}>
-        <section
-          className="delta-help-panel"
-          role="dialog"
-          aria-modal="true"
-          aria-label="How to read Delta"
-          onClick={(event) => event.stopPropagation()}
-        >
+          <div className="delta-help-backdrop">
+            <button
+              type="button"
+              className="delta-help-backdrop-button"
+              onClick={onClose}
+              aria-label="Close help by clicking outside"
+            />
+            <section
+              className="delta-help-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-label="How to read Delta"
+            >
           <div className="delta-help-heading">
             <h2>How to read Delta</h2>
             <button className="delta-help-close" type="button" onClick={onClose} aria-label="Close help">×</button>
@@ -475,22 +480,22 @@ function HelpOverlay({
             </div>
             <div className="delta-help-example__row">
               <strong>Δ +8</strong>
-              <span>Selected player's score minus this opponent's score.
+              <span>Selected player&apos;s score minus this opponent&apos;s score.
                 Green means ahead; red means behind.</span>
             </div>
           </div>
           <div className="delta-help-example">
             <div className="delta-help-example__row">
               <span className="delta-legend__item delta-action--self">Self</span>
-              <span>On the selected player's card: minimum hand fan needed to reach a higher place by self-draw (tsumo).</span>
+              <span>On the selected player&apos;s card: minimum hand fan needed to reach a higher place by self-draw (tsumo).</span>
             </div>
             <div className="delta-help-example__row">
               <span className="delta-legend__item delta-action--direct">Win from this player</span>
-              <span>On an opponent's card: minimum hand fan needed to reach the indicated place by winning on that opponent's discard.</span>
+              <span>On an opponent&apos;s card: minimum hand fan needed to reach the indicated place by winning on that opponent&apos;s discard.</span>
             </div>
             <div className="delta-help-example__row">
               <span className="delta-legend__item delta-action--loss">Deal into this player</span>
-              <span>On an opponent's card: hand value at which discarding into that opponent's winning hand causes the indicated fall in standing.</span>
+              <span>On an opponent&apos;s card: hand value at which discarding into that opponent&apos;s winning hand causes the indicated fall in standing.</span>
             </div>
           </div>
           <div className="delta-help-demo">
@@ -503,7 +508,7 @@ function HelpOverlay({
           </div>
           <p>
             The numbers before the arrows are <strong>hand fan values</strong>, not changes
-            to the player's total score. Each attainable place appears once.
+            to the player&apos;s total score. Each attainable place appears once.
             When both a sole place and a tied place are possible, the sole place
             takes priority, even if it requires a more expensive hand.
           </p>
