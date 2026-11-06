@@ -15,17 +15,14 @@
 
 .delta-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 1.1fr) minmax(0, 1fr);
-  grid-template-areas:
-    ". top ."
-    "left selected right"
-    ". bottom ."
-    "legend legend legend";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-areas: ". top ." "left center right" ". bottom .";
   align-items: center;
-  gap: 0.75rem;
+  gap: clamp(0.35rem, 1.5vw, 0.85rem);
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
+  max-width: 1050px;
+  margin: auto;
+  padding: 0.4rem 0;
 }
 
 .delta-opponent, .delta-selected {
@@ -34,11 +31,39 @@
   flex-direction: column;
   gap: 0.45rem;
 }
-.delta-opponent--top { grid-area: top; }
-.delta-opponent--left { grid-area: left; }
-.delta-opponent--right { grid-area: right; }
-.delta-opponent--bottom { grid-area: bottom; }
-.delta-selected { grid-area: selected; }
+.delta-opponent--top, .delta-seat--top { grid-area: top; }
+.delta-opponent--left, .delta-seat--left { grid-area: left; }
+.delta-opponent--right, .delta-seat--right { grid-area: right; }
+.delta-opponent--bottom, .delta-seat--bottom { grid-area: bottom; }
+.delta-selected {
+  border-color: #d4a72c;
+  background: color-mix(in srgb, #f9e7ad 26%, var(--color-surface, white));
+  box-shadow: 0 0 0 1px rgb(212 167 44 / 25%);
+}
+.delta-current-rank, .delta-no-targets { font-size: 0.72rem; }
+.delta-center {
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.delta-back {
+  cursor: pointer;
+  border: 1px solid var(--color-border, #d4d4d8);
+  background: var(--color-surface, white);
+  color: inherit;
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  max-width: 100%;
+}
+.delta-back:hover { background: rgb(128 128 128 / 0.09); }
+.delta-back:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.delta-center__hint { color: #71717a; text-align: center; font-size: 0.7rem; }
 
 .delta-identity {
   display: flex;
@@ -152,4 +177,176 @@
 @media (max-width: 640px) {
   .delta-score-line { gap: 0.1rem 0.3rem; }
   .delta-score-gap { font-size: 0.68rem; }
+}
+
+@media (max-width: 640px) {
+  .delta-opponent, .delta-selected { padding: 0.3rem; }
+  .delta-name { white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
+  .delta-threshold { white-space: normal; }
+  .delta-back { font-size: 0.7rem; padding: 0.4rem 0.25rem; }
+  .delta-center__hint { font-size: 0.62rem; }
+}
+
+/* Left and right seats occupy the same grid row and stretch equally. */
+.delta-opponent--left, .delta-opponent--right,
+.delta-seat--left, .delta-seat--right {
+  align-self: stretch;
+}
+.delta-center {
+  align-self: stretch;
+}
+.delta-help-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  width: 100%;
+  padding: 0.35rem 0.15rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--color-border, #d4d4d8);
+  background: var(--color-surface, white);
+  color: inherit;
+}
+.delta-help-trigger:hover { background: rgb(128 128 128 / 0.08); }
+.delta-help-trigger:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.delta-help-trigger__title { font-size: 0.75rem; font-weight: 600; }
+.delta-help-trigger__swatches {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+.delta-help-trigger .delta-legend__item {
+  font-size: 0.6rem;
+  padding: 0.15rem 0.25rem;
+}
+.delta-help-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 0.55);
+}
+.delta-help-panel {
+  width: min(100%, 540px);
+  max-height: min(85dvh, 700px);
+  overflow-y: auto;
+  background: var(--color-surface, white);
+  color: var(--color-foreground, #18181b);
+  border-radius: 0.85rem;
+  padding: 1rem;
+  box-shadow: 0 15px 50px rgb(0 0 0 / 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  font-size: 0.85rem;
+}
+.delta-help-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.delta-help-close {
+  border: 1px solid var(--color-border, #d4d4d8);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  font-size: 1.35rem;
+}
+.delta-help-example { display: grid; gap: 0.6rem; }
+.delta-help-example__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.delta-help-demo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.delta-help-demo .delta-action { flex: 0 0 auto; }
+@media (max-width: 640px) {
+  .delta-help-trigger__title { font-size: 0.65rem; }
+  .delta-help-trigger .delta-legend__item { font-size: 0.54rem; }
+  .delta-help-panel { font-size: 0.8rem; }
+}
+
+/* One-screen annotated help, without moving or replacing the live cards. */
+.delta-annotation-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+.delta-annotation-layer__dismiss {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(0 0 0 / 0.38);
+  cursor: pointer;
+  pointer-events: auto;
+  border: 0;
+}
+.delta-annotation-layer__top {
+  position: absolute;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #18181b;
+  color: #fff;
+  border-radius: 0.6rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: auto;
+  z-index: 2;
+}
+.delta-annotation-layer__top button {
+  font-size: 1.25rem;
+  padding: 0 0.25rem;
+  cursor: pointer;
+}
+.delta-annotation-target {
+  position: absolute;
+  border: 2px solid #fbbf24;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.15);
+  pointer-events: none;
+}
+.delta-annotation-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  background: #18181b;
+  color: #fff;
+  border: 1px solid #fbbf24;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  line-height: 1.25;
+  font-size: 0.72rem;
+  font-weight: 500;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 0.22);
+  pointer-events: none;
+}
+
+.delta-annotation-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.delta-help-example__row > strong {
+  min-width: 6.5rem;
 }
