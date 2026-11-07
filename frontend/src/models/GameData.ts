@@ -1,5 +1,3 @@
-import { WIND_SYMBOLS } from '../utils/constants';
-
 export type GamePlayers = { id: number; players: PlayerOrder[] };
 
 export interface GameData {
@@ -14,14 +12,16 @@ export interface GameData {
 
 export interface PlayerScore {
   name: string;
-  wind: typeof WIND_SYMBOLS;
+  // A wind symbol, e.g. '東'.
+  wind: string;
   score: number;
   id: number;
 }
 
 export interface RoundData {
   num: number;
-  kanji: typeof WIND_SYMBOLS & number;
+  // Round wind and number, e.g. '東1'.
+  kanji: string;
 }
 
 export interface PlayerOrder {
