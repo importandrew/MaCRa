@@ -16,10 +16,11 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+// LoginResponse is the signed-in user. The session token travels only in the
+// HttpOnly cookie, never in the body, so page scripts can't read it.
 type LoginResponse struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Token string `json:"token"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 func (h Handler) Login(c *gin.Context) {
@@ -44,8 +45,7 @@ func (h Handler) Login(c *gin.Context) {
 	authcookie.Set(c, h.domain, tkn)
 
 	c.JSON(http.StatusOK, LoginResponse{
-		ID:    player.ID,
-		Name:  player.Name,
-		Token: tkn,
+		ID:   player.ID,
+		Name: player.Name,
 	})
 }
