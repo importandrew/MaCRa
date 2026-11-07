@@ -1,367 +1,501 @@
-/* Delta modal: layout remains fixed relative to the device owner's seat. */
+/* HeroUI v3 tokens; four seats retain their actual table positions. */
 .delta-modal {
   width: 100vw;
   max-width: none;
   height: 100dvh;
   margin: 0;
 }
-
-.delta-modal__header { flex-shrink: 0; }
+.delta-modal__header {
+  flex-shrink: 0;
+}
 .delta-modal__body {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-
 .delta-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr);
-  grid-template-areas: ". top ." "left center right" ". bottom .";
+  grid-template-areas: '. top .' 'left center right' '. bottom .';
   align-items: center;
-  gap: clamp(0.35rem, 1.5vw, 0.85rem);
+  gap: clamp(0.25rem, 1.5vw, 0.75rem);
   width: 100%;
   max-width: 1050px;
   margin: auto;
   padding: 0.4rem 0;
 }
-
-.delta-opponent, .delta-selected {
+.delta-seat--top {
+  grid-area: top;
+}
+.delta-seat--left {
+  grid-area: left;
+}
+.delta-seat--right {
+  grid-area: right;
+}
+.delta-seat--bottom {
+  grid-area: bottom;
+}
+.delta-player-card {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  background: var(--color-surface, var(--surface));
+  border: 1px solid var(--color-border, var(--border));
 }
-.delta-opponent--top, .delta-seat--top { grid-area: top; }
-.delta-opponent--left, .delta-seat--left { grid-area: left; }
-.delta-opponent--right, .delta-seat--right { grid-area: right; }
-.delta-opponent--bottom, .delta-seat--bottom { grid-area: bottom; }
 .delta-selected {
-  border-color: #d4a72c;
-  background: color-mix(in srgb, #f9e7ad 26%, var(--color-surface, white));
-  box-shadow: 0 0 0 1px rgb(212 167 44 / 25%);
+  border: 2px solid var(--color-accent, var(--accent));
+  background: var(--color-accent-soft, var(--accent-soft));
 }
-.delta-current-rank, .delta-no-targets { font-size: 0.72rem; }
-.delta-center {
-  grid-area: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+.delta-card-header,
+.delta-card-content {
+  padding: 0;
   min-width: 0;
 }
-.delta-back {
-  cursor: pointer;
-  border: 1px solid var(--color-border, #d4d4d8);
-  background: var(--color-surface, white);
-  color: inherit;
-  border-radius: 0.6rem;
-  padding: 0.55rem 0.7rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  max-width: 100%;
+.delta-card-header {
+  border-bottom: 1px solid var(--color-border, var(--border));
+  padding-bottom: 0.25rem;
 }
-.delta-back:hover { background: rgb(128 128 128 / 0.09); }
-.delta-back:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
-.delta-center__hint { color: #71717a; text-align: center; font-size: 0.7rem; }
-
+.delta-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.delta-seat--left,
+.delta-seat--right {
+  align-self: stretch;
+}
 .delta-identity {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
+  min-width: 0;
+  width: 100%;
+}
+.delta-wind {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.delta-person {
+  flex: 1;
   min-width: 0;
 }
-.delta-wind { flex: 0 0 auto; font-size: 1.15rem; font-weight: 600; }
-.delta-person { min-width: 0; flex: 1; }
 .delta-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  font-weight: 600;
 }
-.delta-score { font-size: 0.8rem; }
-
-/* Matching action and legend swatches; no labels inside threshold cards. */
+.delta-score-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.35rem;
+}
+.delta-score {
+  font-size: 0.75rem;
+  color: var(--color-muted, var(--muted));
+}
+.delta-score-gap {
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-muted, var(--muted));
+}
+.delta-score-gap--ahead {
+  color: var(--color-success, var(--success));
+}
+.delta-score-gap--behind {
+  color: var(--color-danger, var(--danger));
+}
+.delta-current-rank,
+.delta-header-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--color-muted, var(--muted));
+}
+.delta-no-targets {
+  font-size: 0.7rem;
+  color: var(--color-muted, var(--muted));
+}
 .delta-action {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.5rem;
-  padding: 0.35rem 0.45rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.3rem 0.25rem;
   border: 1px solid;
   border-radius: 0.5rem;
   font-size: 0.75rem;
 }
 .delta-action--self {
-  color: #15803d;
-  background: rgb(34 197 94 / 0.09);
-  border-color: rgb(22 163 74 / 0.65);
+  --delta-tone: var(--color-success, var(--success));
+  color: var(--color-success-soft-foreground, var(--success-soft-foreground));
+  background: var(--color-success-soft, var(--success-soft));
+  border-color: var(--color-success, var(--success));
 }
 .delta-action--direct {
-  color: #1d4ed8;
-  background: rgb(59 130 246 / 0.09);
-  border-color: rgb(37 99 235 / 0.65);
+  --delta-tone: var(--color-accent, var(--accent));
+  color: var(--color-accent-soft-foreground, var(--accent-soft-foreground));
+  background: var(--color-accent-soft, var(--accent-soft));
+  border-color: var(--color-accent, var(--accent));
 }
 .delta-action--loss {
-  color: #b91c1c;
-  background: rgb(239 68 68 / 0.09);
-  border-color: rgb(220 38 38 / 0.65);
+  --delta-tone: var(--color-danger, var(--danger));
+  color: var(--color-danger-soft-foreground, var(--danger-soft-foreground));
+  background: var(--color-danger-soft, var(--danger-soft));
+  border-color: var(--color-danger, var(--danger));
 }
 .delta-thresholds {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.2rem 0.6rem;
+  display: grid;
+  grid-template-columns: max-content;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 100%;
 }
 .delta-threshold {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.15rem;
+  display: grid;
+  grid-template-columns: minmax(1.4rem, max-content) 0.9rem 1.6rem;
+  align-items: center;
+  gap: 0.25rem;
   white-space: nowrap;
 }
-.delta-legend {
-  grid-area: legend;
+.delta-hand-value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-weight: 700;
+}
+.delta-place-badge {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--delta-tone, var(--color-accent, var(--accent)));
+  color: var(--color-surface, var(--surface));
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.delta-selected .delta-current-rank {
+  --delta-tone: var(--color-accent, var(--accent));
+}
+.delta-header-subtitle {
+  --delta-tone: var(--color-accent, var(--accent));
+}
+.delta-center {
+  grid-area: center;
+  align-self: stretch;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.delta-center > button {
+  max-width: 100%;
+  font-size: 0.72rem;
+  text-align: center;
+  white-space: normal;
+}
+.delta-help-swatches {
+  display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 0.65rem;
-  padding: 0.5rem 0.25rem;
-  font-size: 0.75rem;
+  justify-content: center;
+  gap: 0.2rem;
 }
 .delta-legend__item {
   display: inline-flex;
-  align-items: center;
-  padding: 0.3rem 0.55rem;
   border: 1px solid;
-  border-radius: 0.5rem;
-  font-weight: 600;
+  border-radius: 0.4rem;
+  padding: 0.12rem 0.25rem;
+  font-size: 0.62rem;
   white-space: nowrap;
 }
-.delta-legend__note { color: var(--color-muted, #71717a); }
-
 @media (max-width: 640px) {
   .delta-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: 0.35rem;
+    gap: 0.25rem;
     align-items: start;
   }
-  .delta-opponent, .delta-selected { gap: 0.35rem; }
-  .delta-identity { flex-wrap: wrap; gap: 0.1rem 0.25rem; }
-  .delta-name { font-size: 0.75rem; }
-  .delta-wind { font-size: 0.9rem; }
-  .delta-action { padding: 0.25rem; font-size: 0.68rem; }
-  .delta-thresholds { gap: 0.15rem 0.35rem; }
-  .delta-legend { font-size: 0.68rem; }
+  .delta-player-card {
+    padding: 0.3rem;
+    gap: 0.25rem;
+  }
+  .delta-identity {
+    flex-wrap: wrap;
+    gap: 0.1rem 0.2rem;
+  }
+  .delta-name {
+    font-size: 0.68rem;
+  }
+  .delta-wind {
+    font-size: 0.82rem;
+  }
+  .delta-score {
+    font-size: 0.67rem;
+  }
+  .delta-action {
+    padding: 0.2rem 0.05rem;
+    font-size: 0.67rem;
+  }
+  .delta-threshold {
+    grid-template-columns: minmax(1.2rem, max-content) 0.75rem 1.3rem;
+    gap: 0.1rem;
+  }
+  .delta-place-badge {
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 0.66rem;
+  }
+  .delta-center > button {
+    font-size: 0.62rem;
+    padding-inline: 0.2rem;
+  }
+  .delta-legend__item {
+    font-size: 0.55rem;
+  }
 }
-
-/* Neutral score; colored gap is always selected player minus opponent. */
-.delta-score-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.15rem 0.45rem;
+/* Static help: one 320px illustration, scaled only by container width. */
+.delta-help-modal {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  margin: 0;
 }
-.delta-score-gap {
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.delta-score-gap::before {
-  content: 'Δ ';
-  font-weight: 400;
-}
-.delta-score-gap--ahead { color: #15803d; }
-.delta-score-gap--behind { color: #b91c1c; }
-.delta-score-gap--equal { color: #71717a; }
-@media (max-width: 640px) {
-  .delta-score-line { gap: 0.1rem 0.3rem; }
-  .delta-score-gap { font-size: 0.68rem; }
-}
-
-@media (max-width: 640px) {
-  .delta-opponent, .delta-selected { padding: 0.3rem; }
-  .delta-name { white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
-  .delta-threshold { white-space: normal; }
-  .delta-back { font-size: 0.7rem; padding: 0.4rem 0.25rem; }
-  .delta-center__hint { font-size: 0.62rem; }
-}
-
-/* Left and right seats occupy the same grid row and stretch equally. */
-.delta-opponent--left, .delta-opponent--right,
-.delta-seat--left, .delta-seat--right {
-  align-self: stretch;
-}
-.delta-center {
-  align-self: stretch;
-}
-.delta-help-trigger {
+.delta-help-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
-  cursor: pointer;
-  width: 100%;
-  padding: 0.35rem 0.15rem;
-  border-radius: 0.6rem;
-  border: 1px solid var(--color-border, #d4d4d8);
-  background: var(--color-surface, white);
-  color: inherit;
-}
-.delta-help-trigger:hover { background: rgb(128 128 128 / 0.08); }
-.delta-help-trigger:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
-.delta-help-trigger__title { font-size: 0.75rem; font-weight: 600; }
-.delta-help-trigger__swatches {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.2rem;
-}
-.delta-help-trigger .delta-legend__item {
-  font-size: 0.6rem;
-  padding: 0.15rem 0.25rem;
-}
-.delta-help-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: rgb(0 0 0 / 0.55);
-}
-.delta-help-panel {
-  width: min(100%, 540px);
-  max-height: min(85dvh, 700px);
-  overflow-y: auto;
-  background: var(--color-surface, white);
-  color: var(--color-foreground, #18181b);
-  border-radius: 0.85rem;
-  padding: 1rem;
-  box-shadow: 0 15px 50px rgb(0 0 0 / 0.3);
-  display: flex;
-  flex-direction: column;
   gap: 0.85rem;
-  font-size: 0.85rem;
+  overflow-y: auto;
 }
-.delta-help-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 1.05rem;
-  font-weight: 700;
+.delta-help-intro,
+.delta-help-explanation {
+  width: min(100%, 420px);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
-.delta-help-close {
-  border: 1px solid var(--color-border, #d4d4d8);
-  border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
-  cursor: pointer;
-  font-size: 1.35rem;
+.delta-help-explanation {
+  display: grid;
+  gap: 0.4rem;
 }
-.delta-help-example { display: grid; gap: 0.6rem; }
-.delta-help-example__row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.delta-help-close-trigger {
+  margin-left: auto;
+  font-size: 1.4rem;
 }
-.delta-help-demo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+.delta-help-illustration {
+  position: relative;
+  flex: 0 0 auto;
+  width: 320px;
+  height: 350px;
+  max-width: 100%;
 }
-.delta-help-demo .delta-action { flex: 0 0 auto; }
-@media (max-width: 640px) {
-  .delta-help-trigger__title { font-size: 0.65rem; }
-  .delta-help-trigger .delta-legend__item { font-size: 0.54rem; }
-  .delta-help-panel { font-size: 0.8rem; }
-}
-
-/* One-screen annotated help, without moving or replacing the live cards. */
-.delta-annotation-layer {
-  position: fixed;
+.delta-help-mini-table {
+  position: absolute;
   inset: 0;
-  z-index: 200;
-  pointer-events: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 98px 120px 98px;
+  grid-template-areas: '. top .' 'left center right' '. bottom .';
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 17px;
+  padding-bottom: 17px;
 }
-.delta-annotation-layer__dismiss {
+.delta-help-mini-table .delta-player-card {
+  padding: 0.2rem;
+  gap: 0.15rem;
+}
+.delta-help-mini-table .delta-identity {
+  gap: 0.12rem;
+}
+.delta-help-mini-table .delta-wind {
+  font-size: 0.72rem;
+}
+.delta-help-mini-table .delta-name {
+  font-size: 0.6rem;
+}
+.delta-help-mini-table .delta-score {
+  font-size: 0.57rem;
+}
+.delta-help-mini-table .delta-score-gap {
+  font-size: 0.53rem;
+}
+.delta-help-mini-table .delta-action {
+  padding: 0.1rem;
+  font-size: 0.6rem;
+}
+.delta-help-mini-table .delta-place-badge {
+  width: 1.05rem;
+  height: 1.05rem;
+  font-size: 0.55rem;
+}
+.delta-help-mini-table .delta-threshold {
+  grid-template-columns: minmax(0.9rem, max-content) 0.6rem 1.05rem;
+  gap: 0.1rem;
+}
+.delta-help-mini-center {
+  grid-area: center;
+  text-align: center;
+  color: var(--color-muted, var(--muted));
+}
+.delta-help-leaders {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  background: rgb(0 0 0 / 0.38);
-  cursor: pointer;
-  pointer-events: auto;
-  border: 0;
+  pointer-events: none;
 }
-.delta-annotation-layer__top {
+.delta-help-leaders path {
+  fill: none;
+  stroke: var(--color-accent, var(--accent));
+  stroke-width: 1.3;
+  stroke-dasharray: 3 3;
+}
+.delta-help-label {
   position: absolute;
-  top: max(8px, env(safe-area-inset-top));
-  left: 50%;
-  transform: translateX(-50%);
+  display: inline-flex;
+  max-width: 98px;
+  padding: 0.2rem 0.3rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--color-border, var(--border));
+  background: var(--color-surface, var(--surface));
+  color: var(--color-foreground, var(--foreground));
+  font-size: 0.62rem;
+  line-height: 1.15;
+}
+.delta-help-label--one {
+  top: 3px;
+  left: 0;
+}
+.delta-help-label--two {
+  top: 3px;
+  right: 0;
+}
+.delta-help-label--three {
+  top: 150px;
+  left: 0;
+}
+.delta-help-label--four {
+  top: 150px;
+  right: 0;
+}
+.delta-help-label--five {
+  bottom: 0;
+  left: 0;
+}
+.delta-help-label--six {
+  bottom: 0;
+  right: 0;
+}
+
+/* Fill the modal's available height; short viewports scroll instead of crushing cards. */
+.delta-modal__body {
   display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  background: #18181b;
-  color: #fff;
-  border-radius: 0.6rem;
-  padding: 0.3rem 0.5rem 0.3rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  pointer-events: auto;
+  flex-direction: column;
+}
+.delta-layout {
+  flex: 1 0 auto;
+  min-height: 100%;
+  grid-template-rows: minmax(112px, 1fr) minmax(156px, 1.3fr) minmax(112px, 1fr);
+  align-items: stretch;
+  margin: 0 auto;
+}
+.delta-player-card {
+  position: relative;
+  height: 100%;
+  justify-content: flex-start;
+}
+.delta-card--clickable {
+  cursor: pointer;
+}
+.delta-card-hitarea {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: inherit;
+  cursor: pointer;
+}
+.delta-card-hitarea:focus-visible {
+  outline: 2px solid var(--color-accent, var(--accent));
+  outline-offset: 2px;
+}
+.delta-card--clickable:hover {
+  border-color: var(--color-accent, var(--accent));
+}
+.delta-seat--left,
+.delta-seat--right {
+  height: 100%;
+}
+.delta-help-illustration {
+  width: 320px;
+  height: 410px;
+}
+.delta-help-mini-table {
+  inset: 45px 0 45px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 95px 110px 95px;
+  padding: 0;
+  align-items: stretch;
+}
+.delta-help-mini-table .delta-player-card {
+  height: auto;
+  align-self: center;
+  min-height: 76px;
+}
+.delta-help-leaders {
   z-index: 2;
 }
-.delta-annotation-layer__top button {
-  font-size: 1.25rem;
-  padding: 0 0.25rem;
-  cursor: pointer;
+.delta-help-label {
+  z-index: 3;
 }
-.delta-annotation-target {
-  position: absolute;
-  border: 2px solid #fbbf24;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.15);
-  pointer-events: none;
+.delta-help-label--one {
+  top: 6px;
+  left: 0;
 }
-.delta-annotation-label {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  background: #18181b;
-  color: #fff;
-  border: 1px solid #fbbf24;
-  border-radius: 0.5rem;
-  padding: 0.35rem 0.5rem;
-  line-height: 1.25;
-  font-size: 0.72rem;
-  font-weight: 500;
-  box-shadow: 0 3px 12px rgb(0 0 0 / 0.22);
-  pointer-events: none;
+.delta-help-label--two {
+  top: 6px;
+  right: 0;
 }
-
-.delta-annotation-lines {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-  pointer-events: none;
+.delta-help-label--three {
+  top: 182px;
+  left: 0;
 }
-.delta-help-example__row > strong {
-  min-width: 6.5rem;
+.delta-help-label--four {
+  top: 182px;
+  right: 0;
 }
-delta-help-backdrop-button {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: default;
+.delta-help-label--five {
+  bottom: 6px;
+  left: 0;
+}
+.delta-help-label--six {
+  bottom: 6px;
+  right: 0;
+}
+@media (max-width: 640px) {
+  .delta-layout {
+    grid-template-rows: minmax(108px, 1fr) minmax(152px, 1.3fr) minmax(
+        108px,
+        1fr
+      );
+  }
 }
 
-.delta-help-panel {
-  position: relative;
-  z-index: 1;
+/* Keep the illustrated example independent of the full-height live layout. */
+.delta-help-mini-table .delta-card-content {
+  gap: 0.12rem;
+}
+.delta-help-mini-table .delta-player-card {
+  max-height: 108px;
 }

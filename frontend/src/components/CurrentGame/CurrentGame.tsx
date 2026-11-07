@@ -1,58 +1,16 @@
 import { Button } from '@heroui/react';
-import { useEffect, useRef, useState } from 'react';
-import { GameData } from '../../models/GameData';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { GameData } from '../../models/GameData';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import RefreshButton from '../RefreshButton';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
-import AnimatedScore from './AnimatedScore';
 import Delta from './Delta';
-import UserAvatar from '../UserAvatar';
 import TableMenu from './Menu/TableMenu';
-import { RoundEntryPanel, SeatMarks } from './RoundEntry';
+import { RoundEntryPanel } from './RoundEntry';
+import CurrentGameSeat from './CurrentGameSeat';
 import { useRoundEntry } from './useRoundEntry';
 import './CurrentGame.css';
-
-type DeltaButtonProps = {
-  playerId: number;
-  playerName: string;
-  onOpen: (id: number) => void;
-};
-
-function DeltaButton({ playerId, playerName, onOpen }: DeltaButtonProps) {
-  return (
-    <button
-      type="button"
-      aria-label={`Show position thresholds for ${playerName}`}
-      title={`Position thresholds for ${playerName}`}
-      onClick={() => onOpen(playerId)}
-      className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full hover:bg-default/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-    >
-      <svg
-        aria-hidden="true"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        <path
-          d="M7 20V7M3.5 10.5 7 6l3.5 4.5"
-          stroke="#16a34a"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M17 4v13m-3.5-3.5L17 18l3.5-4.5"
-          stroke="#dc2626"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </button>
-  );
-}
 
 export default function CurrentGame() {
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
@@ -121,6 +79,19 @@ export default function CurrentGame() {
     }
   }, [roundData]);
 
+  const deltaPlayers = useMemo(
+    () =>
+      roundData
+        ? [
+            { ...roundData.me, position: 'bottom' as const },
+            { ...roundData.right, position: 'right' as const },
+            { ...roundData.opp, position: 'top' as const },
+            { ...roundData.left, position: 'left' as const },
+          ]
+        : [],
+    [roundData]
+  );
+
   return (
     <LoadingTemplate
       isLoading={isLoading}
@@ -133,67 +104,28 @@ export default function CurrentGame() {
             <div></div>
             <div className="relative self-center h-full w-full">
               <div className="table-top-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
-                {/* Toward the center, so the name stays at the screen edge. */}
-                {isEntryOpen && (
-                  <SeatMarks entry={entry} player={roundData.opp} />
-                )}
-                <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  <span className="shrink-0">{roundData.opp.wind}</span>
-                  <UserAvatar name={roundData.opp.name} className="shrink-0" />
-                  <span className="min-w-0 truncate">{roundData.opp.name}</span>
-                </span>
-                <div className="flex items-center justify-center gap-1">
-                  <span
-                    className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
-                  >
-                    <AnimatedScore
-                      previousScores={previousScores}
-                      currentScores={currentScores}
-                      playerId={roundData.opp.id}
-                    />
-                  </span>
-                  {!isEntryOpen && (
-                    <DeltaButton
-                      playerId={roundData.opp.id}
-                      playerName={roundData.opp.name}
-                      onOpen={openDelta}
-                    />
-                  )}
-                </div>
+                <CurrentGameSeat
+                  player={roundData.opp}
+                  entry={entry}
+                  isEntryOpen={isEntryOpen}
+                  previousScores={previousScores}
+                  currentScores={currentScores}
+                  onOpenDelta={openDelta}
+                />
               </div>
             </div>
             <div></div>
             <div className="relative self-center h-full w-full">
               <div className="table-right-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
-                {/* Toward the center, so the name stays at the screen edge. */}
-                {isEntryOpen && (
-                  <SeatMarks entry={entry} player={roundData.left} isSideSeat />
-                )}
-                <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  <span className="shrink-0">{roundData.left.wind}</span>
-                  <UserAvatar name={roundData.left.name} className="shrink-0" />
-                  <span className="min-w-0 truncate">
-                    {roundData.left.name}
-                  </span>
-                </span>
-                <div className="flex items-center justify-center gap-1">
-                  <span
-                    className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
-                  >
-                    <AnimatedScore
-                      previousScores={previousScores}
-                      currentScores={currentScores}
-                      playerId={roundData.left.id}
-                    />
-                  </span>
-                  {!isEntryOpen && (
-                    <DeltaButton
-                      playerId={roundData.left.id}
-                      playerName={roundData.left.name}
-                      onOpen={openDelta}
-                    />
-                  )}
-                </div>
+                <CurrentGameSeat
+                  player={roundData.left}
+                  entry={entry}
+                  isEntryOpen={isEntryOpen}
+                  isSideSeat
+                  previousScores={previousScores}
+                  currentScores={currentScores}
+                  onOpenDelta={openDelta}
+                />
               </div>
             </div>
 
@@ -217,42 +149,15 @@ export default function CurrentGame() {
 
             <div className="relative self-center h-full w-full">
               <div className="table-left-side absolute flex flex-col w-screen md:w-max whitespace-nowrap">
-                {/* Toward the center, so the name stays at the screen edge. */}
-                {isEntryOpen && (
-                  <SeatMarks
-                    entry={entry}
-                    player={roundData.right}
-                    isSideSeat
-                  />
-                )}
-                <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  <span className="shrink-0">{roundData.right.wind}</span>
-                  <UserAvatar
-                    name={roundData.right.name}
-                    className="shrink-0"
-                  />
-                  <span className="min-w-0 truncate">
-                    {roundData.right.name}
-                  </span>
-                </span>
-                <div className="flex items-center justify-center gap-1">
-                  <span
-                    className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
-                  >
-                    <AnimatedScore
-                      previousScores={previousScores}
-                      currentScores={currentScores}
-                      playerId={roundData.right.id}
-                    />
-                  </span>
-                  {!isEntryOpen && (
-                    <DeltaButton
-                      playerId={roundData.right.id}
-                      playerName={roundData.right.name}
-                      onOpen={openDelta}
-                    />
-                  )}
-                </div>
+                <CurrentGameSeat
+                  player={roundData.right}
+                  entry={entry}
+                  isEntryOpen={isEntryOpen}
+                  isSideSeat
+                  previousScores={previousScores}
+                  currentScores={currentScores}
+                  onOpenDelta={openDelta}
+                />
               </div>
             </div>
             <div>
@@ -263,33 +168,14 @@ export default function CurrentGame() {
             </div>
             <div className="relative self-center h-full w-full">
               <div className="table-bottom-side absolute px-6 flex flex-col w-screen whitespace-nowrap">
-                {/* Toward the center, so the name stays at the screen edge. */}
-                {isEntryOpen && (
-                  <SeatMarks entry={entry} player={roundData.me} />
-                )}
-                <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-                  <span className="shrink-0">{roundData.me.wind}</span>
-                  <UserAvatar name={roundData.me.name} className="shrink-0" />
-                  <span className="min-w-0 truncate">{roundData.me.name}</span>
-                </span>
-                <div className="flex items-center justify-center gap-1">
-                  <span
-                    className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}
-                  >
-                    <AnimatedScore
-                      previousScores={previousScores}
-                      currentScores={currentScores}
-                      playerId={roundData.me.id}
-                    />
-                  </span>
-                  {!isEntryOpen && (
-                    <DeltaButton
-                      playerId={roundData.me.id}
-                      playerName={roundData.me.name}
-                      onOpen={openDelta}
-                    />
-                  )}
-                </div>
+                <CurrentGameSeat
+                  player={roundData.me}
+                  entry={entry}
+                  isEntryOpen={isEntryOpen}
+                  previousScores={previousScores}
+                  currentScores={currentScores}
+                  onOpenDelta={openDelta}
+                />
               </div>
             </div>
             <div className="flex justify-end items-end">
@@ -306,12 +192,8 @@ export default function CurrentGame() {
             isOpen={isDeltaOpen}
             onClose={() => setIsDeltaOpen(false)}
             selectedPlayerId={deltaPlayerId}
-            players={[
-              { ...roundData.me, position: 'bottom' },
-              { ...roundData.right, position: 'right' },
-              { ...roundData.opp, position: 'top' },
-              { ...roundData.left, position: 'left' },
-            ]}
+            players={deltaPlayers}
+            onSelectPlayer={setDeltaPlayerId}
           />
         </div>
       ) : null}
