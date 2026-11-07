@@ -24,11 +24,6 @@ import (
 // with models.ErrUndoFinalRound if one of its players has started another
 // live game in the event: a player can't have two live games.
 func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int) error {
-	players, err := r.Players(ctx, gameID)
-	if err != nil {
-		return fmt.Errorf("players: %w", err)
-	}
-
 	conn, err := r.db.Acquire(ctx)
 	if err != nil {
 		return err
@@ -65,6 +60,10 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int) error {
 	case models.GameEnded:
 		if game.FinishedAt != nil && game.FinishedAt.Add(models.UndoFinalRoundTimeout).Before(time.Now()) {
 			return models.ErrTooLate
+		}
+		players, err := gamePlayers(ctx, tx, gameID)
+		if err != nil {
+			return fmt.Errorf("players: %w", err)
 		}
 		seating := [4]int{players.East, players.South, players.West, players.North}
 		if err := reviveGame(ctx, tx, gameID, game.EventID, seating); err != nil {
@@ -105,7 +104,7 @@ func reviveGame(ctx context.Context, tx pgx.Tx, gameID, eventID int, seating [4]
 	name, err := pgx.CollectOneRow(rows, pgx.RowTo[string])
 	switch {
 	case err == nil:
-		return fmt.Errorf("%w: %s has already started another game", models.ErrUndoFinalRound, name)
+		return models.PlayerInAnotherGameError{Name: name}
 	case !errors.Is(err, pgx.ErrNoRows):
 		return fmt.Errorf("check live games: %w", err)
 	}

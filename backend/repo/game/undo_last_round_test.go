@@ -14,6 +14,7 @@ import (
 	"github.com/importandrew/MaCRa/repo/database"
 )
 
+//nolint:gocognit
 func TestUndoLastRound(t *testing.T) {
 	db, err := database.NewTestDB()
 	if err != nil {
@@ -28,9 +29,10 @@ func TestUndoLastRound(t *testing.T) {
 		setup   func(t *testing.T, repo *Repo, conn *pgxpool.Conn)
 		logSize int
 
-		expectedErr    error
-		expectedStatus models.GameStatus
-		expectedRounds int
+		expectedErr     error
+		expectedErrText string
+		expectedStatus  models.GameStatus
+		expectedRounds  int
 	}{
 		"live game": {
 			rounds:         3,
@@ -82,9 +84,10 @@ func TestUndoLastRound(t *testing.T) {
 				createTestGame(t, conn, 2)
 				createTestGamePlayers(t, conn, 2, [4]int{5, 2, 6, 7})
 			},
-			expectedErr:    models.ErrUndoFinalRound,
-			expectedStatus: models.GameEnded,
-			expectedRounds: 16,
+			expectedErr:     models.ErrUndoFinalRound,
+			expectedErrText: "2 has already started another game",
+			expectedStatus:  models.GameEnded,
+			expectedRounds:  16,
 		},
 		"aborted game": {
 			rounds:  3,
@@ -123,6 +126,9 @@ func TestUndoLastRound(t *testing.T) {
 
 			if testCase.expectedErr != nil {
 				assert.ErrorIs(t, err, testCase.expectedErr)
+				if testCase.expectedErrText != "" {
+					assert.EqualError(t, err, testCase.expectedErrText)
+				}
 			} else {
 				assert.NoError(t, err)
 			}
@@ -158,11 +164,10 @@ func TestUndoLastRound_Concurrent(t *testing.T) {
 		for n := 1; n <= 3; n++ {
 			createTestRound(t, conn, 1, preAddRound{roundNumber: n, outcome: models.Draw})
 		}
-		// UndoLastRound holds two pool connections at once (its own and one
-		// for Players), so free this one and keep the attempts few.
+		// Free this connection: each attempt takes its own.
 		conn.Release()
 
-		const attempts = 2
+		const attempts = 5
 		errs := make(chan error, attempts)
 		var wg sync.WaitGroup
 		for range attempts {

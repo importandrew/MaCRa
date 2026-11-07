@@ -98,3 +98,20 @@ var Errors = map[error]int{
 	ErrEventAlreadyFinished: http.StatusConflict,
 	ErrEventHasOngoingGames: http.StatusConflict,
 }
+
+// PlayerInAnotherGameError is returned when the final round can't be undone
+// because one of the game's players has started another game. It is
+// ErrUndoFinalRound for errors.Is (and so a 409), and its text names the
+// player, for the client to show as is.
+type PlayerInAnotherGameError struct {
+	Name string
+}
+
+func (e PlayerInAnotherGameError) Error() string {
+	return e.Name + " has already started another game"
+}
+
+// Is reports whether target is ErrUndoFinalRound.
+func (e PlayerInAnotherGameError) Is(target error) bool {
+	return target == ErrUndoFinalRound
+}

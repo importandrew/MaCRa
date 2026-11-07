@@ -27,20 +27,20 @@ import { getStoredEventId, useEvent } from '../event/eventConstants';
 
 // undoLastRound undoes the last log entry of the game. logSize is the number
 // of log entries the referee saw; the server answers 409 if the log has
-// changed since. It returns the response status (0 if not sent).
+// changed since, or if the final round can't be undone. The caller reports
+// 409 itself.
 export async function undoLastRound(
   gameId: number,
   logSize: number,
   eventId?: number
-): Promise<number> {
+): Promise<FetchResponse<null>> {
   const resolvedEventId = eventId ?? getStoredEventId();
-  if (!resolvedEventId) return 0;
+  if (!resolvedEventId) return { data: null, status: 0 };
 
   const request = DeleteRequest(
     eventGamePath(resolvedEventId, gameId, `/undo-round?log_size=${logSize}`)
   );
-  const { status } = await fetchWithStatus<null>(request);
-  return status;
+  return fetchWithStatus<null>(request, { quietStatuses: [409] });
 }
 
 export const useFetchPlayerGamesHistory = (playerId: number) => {
@@ -286,17 +286,18 @@ export const useFetchGameLogsData = (
     gameId != null
   );
 
-  const fetchData = useCallback(async () => {
+  // fetchData loads the log and returns it (null on an error).
+  const fetchData = useCallback(async (): Promise<GameRoundLogs | null> => {
     if (gameId == null) {
       setData(null);
-      return;
+      return null;
     }
 
     const resolvedEventId = eventId ?? getStoredEventId();
     if (!resolvedEventId) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     startLoading();
@@ -311,17 +312,18 @@ export const useFetchGameLogsData = (
     if (result.status === 403) {
       setIsForbidden(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     if (!result.data) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     setData(result.data);
     finishLoading(true);
+    return result.data;
   }, [gameId, eventId, startLoading, finishLoading]);
 
   useEffect(() => {
