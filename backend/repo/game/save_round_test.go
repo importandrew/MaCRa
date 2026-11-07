@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -82,7 +83,50 @@ func TestSaveRoundOutcome(t *testing.T) {
 				ForceNextRound:  false,
 			},
 			expectedErr: assert.NoError,
-			twiceErr:    assert.Error,
+			twiceErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+			},
+		},
+		"penalty twice from the same log": {
+			preAddPlayers: []int{1, 2, 3, 4},
+			preAddGames: []preAddGame{
+				{
+					gameID:    1,
+					playerIDs: [4]int{1, 2, 3, 4},
+				},
+			},
+			gameID: 1,
+			roundData: models.RoundData{
+				Round:           1,
+				Outcome:         models.Penalty,
+				LoserID:         2,
+				Value:           10,
+				EastStartScore:  0,
+				SouthStartScore: -10,
+				LogSize:         0,
+			},
+			expectedErr: assert.NoError,
+			twiceErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+			},
+		},
+		"stale log size": {
+			preAddPlayers: []int{1, 2, 3, 4},
+			preAddGames: []preAddGame{
+				{
+					gameID:    1,
+					playerIDs: [4]int{1, 2, 3, 4},
+				},
+			},
+			gameID: 1,
+			roundData: models.RoundData{
+				Round:   1,
+				Outcome: models.Draw,
+				LogSize: 1,
+			},
+			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+			},
 		},
 	}
 
@@ -142,4 +186,51 @@ func TestSaveRoundOutcome(t *testing.T) {
 			assert.Equal(t, testCase.roundData.NorthStartScore, scores["north"])
 		})
 	}
+}
+
+// TestSaveRoundOutcome_ConcurrentPenalties checks that two entries computed
+// from the same log (a double tap on two phones) can't both be saved.
+func TestSaveRoundOutcome_ConcurrentPenalties(t *testing.T) {
+	db, err := database.NewTestDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	db.Test(t, "concurrent penalties", func(t *testing.T) {
+		repo := NewRepo(db)
+		ctx := context.Background()
+
+		conn, err := db.Acquire(ctx)
+		require.NoError(t, err)
+		for _, id := range []int{1, 2, 3, 4} {
+			createTestUser(t, conn, id)
+		}
+		createTestGame(t, conn, 1)
+		createTestGamePlayers(t, conn, 1, [4]int{1, 2, 3, 4})
+		// SaveRoundOutcome holds two pool connections at once (its own and
+		// one for Players), so free this one and keep the attempts few.
+		conn.Release()
+
+		data := models.RoundData{Round: 1, Outcome: models.Penalty, LoserID: 2, Value: 10, SouthStartScore: -10}
+
+		const attempts = 2
+		errs := make(chan error, attempts)
+		var wg sync.WaitGroup
+		for range attempts {
+			wg.Go(func() { errs <- repo.SaveRoundOutcome(ctx, 1, data) })
+		}
+		wg.Wait()
+		close(errs)
+
+		saved := 0
+		for err := range errs {
+			if err == nil {
+				saved++
+				continue
+			}
+			assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+		}
+		assert.Equal(t, 1, saved)
+	})
 }

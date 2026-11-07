@@ -14,6 +14,8 @@ type PenaltyRequest struct {
 	LoserID        int  `json:"loser"`
 	Value          int  `json:"value"`
 	ForceNextRound bool `json:"force_next_round"`
+	// LogSize is the number of round log entries the table showed (GameNow.log_size).
+	LogSize *int `json:"log_size"`
 }
 
 func (h Handler) Penalty(c *gin.Context) {
@@ -26,7 +28,7 @@ func (h Handler) Penalty(c *gin.Context) {
 		return
 	}
 
-	now, err := h.game.Penalty(c.Request.Context(), models.Penalty, callerID, req.LoserID, req.Value, req.ForceNextRound, eventID)
+	now, err := h.game.Penalty(c.Request.Context(), models.Penalty, callerID, req.LoserID, req.Value, req.ForceNextRound, eventID, req.LogSize)
 	if err != nil {
 		httperr.Error(c, err)
 		return

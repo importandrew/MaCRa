@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { GameData, Outcome } from '../../models/GameData';
 import { getStoredEventId } from '../../providers/event/eventConstants';
-import { authFetch, PostRequest, eventPath } from '../Request';
+import { fetchWithStatus, PostRequest, eventPath } from '../Request';
 import { showToast } from '../Toast';
 
 export const MIN_HAND = 8;
@@ -15,7 +16,13 @@ export type PenaltyType = Outcome.Penalty | Outcome.FalseMahjong;
 
 // useRoundEntry holds the round entry on the game screen: the outcome and
 // values in the center of the table, and the +/− marks next to each seat.
-export function useRoundEntry(onSubmitted: (data: GameData) => void) {
+// table is the game as the screen shows it; an entry is refused when the
+// server's game has moved on since, and onStale then refreshes the table.
+export function useRoundEntry(
+  table: GameData | null,
+  onSubmitted: (data: GameData) => void,
+  onStale: () => void
+) {
   const navigate = useNavigate();
 
   const [outcome, setOutcome] = useState<EntryOutcome | null>(null);
@@ -26,7 +33,7 @@ export function useRoundEntry(onSubmitted: (data: GameData) => void) {
   const [fine, setFine] = useState(START_FINE);
   const [falseMahjongFine, setFalseMahjongFine] = useState<number | null>(null);
   const [forceNextRound, setForceNextRound] = useState(false);
-  const [isPending, setIsPending] = useState(false);
+  const { isPending, run } = useSubmitOnce();
 
   const isWin = outcome === Outcome.Self || outcome === Outcome.Deal;
   const isPenalty = outcome === Outcome.Penalty;
@@ -79,11 +86,12 @@ export function useRoundEntry(onSubmitted: (data: GameData) => void) {
     setForceNextRound(false);
   };
 
-  const submit = async () => {
-    const eventId = getStoredEventId();
-    if (!eventId || !outcome) return;
+  const submit = () => run(send);
 
-    setIsPending(true);
+  const send = async () => {
+    const eventId = getStoredEventId();
+    if (!eventId || !outcome || !table) return;
+
     const request = isPenalty
       ? PostRequest(
           eventPath(eventId, isFalseMahjong ? '/false-mahjong' : '/penalty'),
@@ -91,6 +99,7 @@ export function useRoundEntry(onSubmitted: (data: GameData) => void) {
             loser,
             value: isFalseMahjong ? falseMahjongFine : fine,
             force_next_round: forceNextRound,
+            log_size: table.log_size,
           }
         )
       : PostRequest(eventPath(eventId, '/round'), {
@@ -98,9 +107,26 @@ export function useRoundEntry(onSubmitted: (data: GameData) => void) {
           won: isWin ? winner : null,
           dealt: outcome === Outcome.Deal ? loser : null,
           score: isWin ? hand : 0,
+          log_size: table.log_size,
         });
-    const data = await authFetch<GameData>(request, { isToastEnabled: true });
-    setIsPending(false);
+    const { data, status } = await fetchWithStatus<GameData>(request, {
+      quietStatuses: [409],
+    });
+
+    // 409: someone else has entered a round or a penalty since this table
+    // was loaded. Don't store this entry on top of it; show the table as it
+    // is now and let the player decide whether to enter the next round.
+    if (status === 409) {
+      showToast({
+        title: isPenalty
+          ? 'The table has changed'
+          : `Round ${table.round.kanji} has already been entered`,
+        description: 'Check the refreshed table and enter again if needed.',
+        variant: 'warning',
+      });
+      onStale();
+      return;
+    }
 
     if (!data) return;
 

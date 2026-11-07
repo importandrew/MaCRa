@@ -9,6 +9,8 @@ type GameNow struct {
 	ID     int        `json:"id"`
 	Status GameStatus `json:"status"`
 	Round  Round      `json:"round"`
+	// LogSize is the number of round log entries; a new entry sends it back.
+	LogSize int `json:"log_size"`
 
 	Me    PlayerWindScore `json:"me"`
 	Right PlayerWindScore `json:"right"`

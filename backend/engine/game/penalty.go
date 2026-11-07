@@ -30,6 +30,8 @@ func (g *Game) FalseMahjong(loser, value int, forceNextRound bool) error {
 		}
 	}
 
+	g.logSize++
+
 	if forceNextRound {
 		return g.NextRound()
 	}
@@ -53,6 +55,8 @@ func (g *Game) Penalty(loser, value int, forceNextRound bool) error {
 	ps := g.score[loser]
 	ps.GP -= value
 	g.score[loser] = ps
+
+	g.logSize++
 
 	if forceNextRound {
 		return g.NextRound()

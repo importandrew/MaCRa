@@ -18,6 +18,7 @@ func TestPenalty(t *testing.T) {
 		penalizedID    int
 		value          int
 		forceNextRound bool
+		seenLogSize    *int
 		mockSetup      func(*MockGameRepo, *MockPlayerRepo, int)
 		expectedErr    assert.ErrorAssertionFunc
 		checkNow       func(*testing.T, models.GameNow)
@@ -85,6 +86,38 @@ func TestPenalty(t *testing.T) {
 				m.EXPECT().CurrentGame(mock.Anything, 999, testEventID).Return(0, models.ErrGameNotFound)
 			},
 			expectedErr: assert.Error,
+		},
+		"penalty tapped twice": {
+			playerID:    1,
+			penalizedID: 1,
+			value:       10,
+			seenLogSize: new(0),
+			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				penaltyLog := models.RoundLog{
+					ID: 1, Round: 1, EventSequence: 1,
+					Outcome: models.Penalty, Loser: 1, Value: 10,
+					CreatedAt: time.Now(),
+				}
+				expectCurrentGame(m, 1, gameID, []models.RoundLog{penaltyLog}, 1)
+			},
+			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+			},
+		},
+		"log changed while saving": {
+			playerID:    1,
+			penalizedID: 1,
+			value:       10,
+			seenLogSize: new(0),
+			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectCurrentGame(m, 1, gameID, nil, 1)
+				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
+					return data.LogSize == 0
+				})).Return(models.ErrRoundAlreadyEntered)
+			},
+			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+			},
 		},
 		"repo error": {
 			playerID:       1,
@@ -174,6 +207,7 @@ func TestPenalty(t *testing.T) {
 				testCase.value,
 				testCase.forceNextRound,
 				testEventID,
+				testCase.seenLogSize,
 			)
 
 			testCase.expectedErr(t, err)

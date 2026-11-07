@@ -12,9 +12,15 @@ func (s *Service) EnterRound(
 	outcome models.Outcome,
 	value, winnerID, loserID int,
 	eventID int,
+	seenLogSize *int,
 ) (models.GameNow, error) {
 	game, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
+		return models.GameNow{}, err
+	}
+
+	logSize := game.LogSize()
+	if err := checkLogSize(logSize, seenLogSize); err != nil {
 		return models.GameNow{}, err
 	}
 
@@ -38,6 +44,7 @@ func (s *Service) EnterRound(
 		SouthStartScore: score[players[models.South]].GP,
 		WestStartScore:  score[players[models.West]].GP,
 		NorthStartScore: score[players[models.North]].GP,
+		LogSize:         logSize,
 	}
 
 	err = s.gameRepo.SaveRoundOutcome(ctx, game.ID(), roundOutcome)

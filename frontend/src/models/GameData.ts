@@ -7,6 +7,9 @@ export interface GameData {
   opp: PlayerScore;
   left: PlayerScore;
   round: RoundData;
+  // log_size is the number of round log entries; a new entry sends it back so
+  // that the server refuses an entry made from an outdated table.
+  log_size: number;
   status: 'created' | 'live' | 'ended' | 'aborted';
 }
 

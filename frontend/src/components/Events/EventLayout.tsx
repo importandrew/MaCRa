@@ -1,5 +1,6 @@
 import { Button, Drawer, useOverlayState } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { hasCapability as checkCapability } from '../../providers/event/useEventCapabilities';
 import {
@@ -22,7 +23,7 @@ export default function EventLayout() {
   const eventId = eventIdParam ? parseInt(eventIdParam, 10) : null;
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isFinishing, setIsFinishing] = useState(false);
+  const { isPending: isFinishing, run } = useSubmitOnce();
   const {
     isOpen: isFinishConfirmOpen,
     open: onFinishConfirmOpen,
@@ -111,9 +112,7 @@ export default function EventLayout() {
   const handleFinishEvent = async () => {
     if (eventId == null) return;
 
-    setIsFinishing(true);
     const ok = await finishEvent(eventId);
-    setIsFinishing(false);
 
     if (!ok) return;
 
@@ -183,7 +182,7 @@ export default function EventLayout() {
             onClose={onFinishConfirmClose}
             onConfirm={() => {
               onFinishConfirmClose();
-              handleFinishEvent();
+              void run(handleFinishEvent);
             }}
             headerText="Confirm finish event"
             cancelText="Cancel"

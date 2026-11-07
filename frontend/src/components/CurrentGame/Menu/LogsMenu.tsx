@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
 import GameLogs from '../../GameResult/GameLogs';
 import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
@@ -18,19 +19,19 @@ export default function LogsMenu({
   onUndoSuccess?: () => void;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [undoLoading, setUndoLoading] = useState(false);
+  const { isPending: undoLoading, run } = useSubmitOnce();
 
-  const handleUndoConfirm = async () => {
-    if (gameId == null) return;
-    setConfirmOpen(false);
-    setUndoLoading(true);
-    const ok = await undoLastRound(gameId, eventId);
-    setUndoLoading(false);
-    if (ok) {
-      showToast({ title: 'Last round undone', variant: 'warning' });
-      onUndoSuccess?.();
-    }
-  };
+  // A second Undo tap would remove one more round, so run it once.
+  const handleUndoConfirm = () =>
+    run(async () => {
+      if (gameId == null) return;
+      setConfirmOpen(false);
+      const ok = await undoLastRound(gameId, eventId);
+      if (ok) {
+        showToast({ title: 'Last round undone', variant: 'warning' });
+        onUndoSuccess?.();
+      }
+    });
 
   return (
     <div className="flex flex-col justify-center mb-3 gap-2">

@@ -17,10 +17,14 @@ export default function CurrentGame() {
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [isEntryOpen, setIsEntryOpen] = useState(false);
-  const entry = useRoundEntry((next) => {
-    setRoundData(next);
-    setIsEntryOpen(false);
-  });
+  const entry = useRoundEntry(
+    roundData,
+    (next) => {
+      setRoundData(next);
+      setIsEntryOpen(false);
+    },
+    () => void onRefresh()
+  );
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}
   );

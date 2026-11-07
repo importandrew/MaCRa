@@ -16,6 +16,8 @@ type EnterRoundResultRequest struct {
 	Value    int            `json:"score"`
 	WinnerID int            `json:"won"`
 	LoserID  int            `json:"dealt"`
+	// LogSize is the number of round log entries the table showed (GameNow.log_size).
+	LogSize *int `json:"log_size"`
 }
 
 func (h Handler) EnterRoundResult(c *gin.Context) {
@@ -28,7 +30,7 @@ func (h Handler) EnterRoundResult(c *gin.Context) {
 		return
 	}
 
-	now, err := h.game.EnterRound(c.Request.Context(), callerID, req.Outcome, req.Value, req.WinnerID, req.LoserID, eventID)
+	now, err := h.game.EnterRound(c.Request.Context(), callerID, req.Outcome, req.Value, req.WinnerID, req.LoserID, eventID, req.LogSize)
 	if err != nil {
 		httperr.Error(c, err)
 		return
