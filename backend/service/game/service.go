@@ -12,8 +12,7 @@ type GameRepo interface {
 	Players(ctx context.Context, gameID int) (models.StartingPlayers, error)
 	GameLog(ctx context.Context, gameID int) ([]models.RoundLog, error)
 	SaveRoundOutcome(ctx context.Context, gameID int, data models.RoundData) error
-	DeleteLastRound(ctx context.Context, gameID int) error
-	Unfinalize(ctx context.Context, gameID int) error
+	UndoLastRound(ctx context.Context, gameID, logSize int) error
 	NewGame(ctx context.Context, seating [4]int, eventID int) (int, error)
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)
 	GameResults(ctx context.Context, gameIDs []int) (map[int]models.GameResult, error)

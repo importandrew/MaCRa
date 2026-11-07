@@ -13,7 +13,7 @@ import (
 // saving, in case the log changes in between.
 func checkLogSize(logSize, seen int) error {
 	if seen != logSize {
-		return fmt.Errorf("%w (seen %d log entries, the game has %d)", models.ErrRoundAlreadyEntered, seen, logSize)
+		return fmt.Errorf("%w (seen %d log entries, the game has %d)", models.ErrLogChanged, seen, logSize)
 	}
 
 	return nil

@@ -101,7 +101,7 @@ func TestPenalty(t *testing.T) {
 				expectCurrentGame(m, 1, gameID, []models.RoundLog{penaltyLog}, 1)
 			},
 			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 		"log changed while saving": {
@@ -113,10 +113,10 @@ func TestPenalty(t *testing.T) {
 				expectCurrentGame(m, 1, gameID, nil, 1)
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
 					return data.LogSize == 0
-				})).Return(models.ErrRoundAlreadyEntered)
+				})).Return(models.ErrLogChanged)
 			},
 			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 		"repo error": {

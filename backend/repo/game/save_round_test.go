@@ -84,7 +84,7 @@ func TestSaveRoundOutcome(t *testing.T) {
 			},
 			expectedErr: assert.NoError,
 			twiceErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 		"penalty twice from the same log": {
@@ -107,7 +107,7 @@ func TestSaveRoundOutcome(t *testing.T) {
 			},
 			expectedErr: assert.NoError,
 			twiceErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 		"stale log size": {
@@ -125,7 +125,7 @@ func TestSaveRoundOutcome(t *testing.T) {
 				LogSize: 1,
 			},
 			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 	}
@@ -229,7 +229,7 @@ func TestSaveRoundOutcome_ConcurrentPenalties(t *testing.T) {
 				saved++
 				continue
 			}
-			assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+			assert.ErrorIs(t, err, models.ErrLogChanged)
 		}
 		assert.Equal(t, 1, saved)
 	})

@@ -25,18 +25,22 @@ import {
 import { GameView } from '../../models/GameView';
 import { getStoredEventId, useEvent } from '../event/eventConstants';
 
+// undoLastRound undoes the last log entry of the game. logSize is the number
+// of log entries the referee saw; the server answers 409 if the log has
+// changed since. It returns the response status (0 if not sent).
 export async function undoLastRound(
   gameId: number,
+  logSize: number,
   eventId?: number
-): Promise<boolean> {
+): Promise<number> {
   const resolvedEventId = eventId ?? getStoredEventId();
-  if (!resolvedEventId) return false;
+  if (!resolvedEventId) return 0;
 
   const request = DeleteRequest(
-    eventGamePath(resolvedEventId, gameId, '/undo-round')
+    eventGamePath(resolvedEventId, gameId, `/undo-round?log_size=${logSize}`)
   );
-  const result = await authFetch<null>(request);
-  return result !== null;
+  const { status } = await fetchWithStatus<null>(request);
+  return status;
 }
 
 export const useFetchPlayerGamesHistory = (playerId: number) => {
@@ -326,6 +330,8 @@ export const useFetchGameLogsData = (
 
   return { data, isError, isForbidden, isLoading, fetchData };
 };
+
+export type GameLogsState = ReturnType<typeof useFetchGameLogsData>;
 
 export const useFetchPlayerStatus = () => {
   const { selectedEventId } = useEvent();

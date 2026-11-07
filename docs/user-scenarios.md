@@ -138,7 +138,8 @@ Applies to regular events; tournament games will get their own rules.
 
 - After the 16th round the game ends by itself and the result page (`/last`) opens: final scores, chart, log, "Play again".
 - If the game has ended while a player's table was still open (another player entered the last round, or it was finished), their next entry or Refresh shows "The game has ended" and opens the result page; if it was aborted, "The game was aborted" and the home page.
-- A referee can undo the last round within an hour after the end; the game becomes live again. After that the result is final.
+- A referee can undo the last round within an hour after the end; the game becomes live again. After that the result is final. The undo is refused if one of the players has already started another game ("<Name> has already started another game"): a player can't have two live games.
+- **Undo is never applied twice**: like an entry, an undo carries the number of log entries the referee sees. If someone has entered or undone an entry since (two referees pressing Undo at once, a double tap), it is refused with "The game has changed since you opened it" and the log reloads.
 - **Abandoned games**: a game left live (players walked away) blocks its players and the event's finish. Staff see a mark on live games with no new round for more than ~3 hours and decide themselves (abort or finish); nothing happens automatically.
 
 ## 5. Watching

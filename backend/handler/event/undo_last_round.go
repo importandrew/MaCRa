@@ -1,7 +1,9 @@
 package event
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -20,7 +22,15 @@ func (h Handler) UndoLastRound(c *gin.Context) {
 		return
 	}
 
-	err := h.event.UndoLastRound(c.Request.Context(), gameID)
+	// log_size is the number of round log entries the referee saw; the undo
+	// is refused if the log has changed since (see repo UndoLastRound).
+	logSize, err := strconv.Atoi(c.Query("log_size"))
+	if err != nil || logSize < 0 {
+		httperr.ErrorWithCode(c, http.StatusBadRequest, errors.New("log_size query parameter is required"))
+		return
+	}
+
+	err = h.event.UndoLastRound(c.Request.Context(), gameID, logSize)
 	if err != nil {
 		httperr.Error(c, err)
 		return

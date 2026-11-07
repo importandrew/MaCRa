@@ -4,7 +4,10 @@ import GameLogs from '../../GameResult/GameLogs';
 import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
 import { UndoIcon } from '../../Icons/UndoIcon';
-import { undoLastRound } from '../../../providers/game/gameDataApi';
+import {
+  undoLastRound,
+  useFetchGameLogsData,
+} from '../../../providers/game/gameDataApi';
 import PendingButton from '../../PendingButton';
 
 export default function LogsMenu({
@@ -20,16 +23,25 @@ export default function LogsMenu({
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { isPending: undoLoading, run } = useSubmitOnce();
+  const logs = useFetchGameLogsData(gameId, eventId);
+  const logSize = logs.data?.round_logs.length;
 
-  // A second Undo tap would remove one more round, so run it once.
+  // Undo sends the size of the log shown above, so the server refuses it if
+  // someone else has entered or undone an entry since (409, the server's
+  // message is shown); the log then reloads. A second tap is ignored too.
   const handleUndoConfirm = () =>
     run(async () => {
-      if (gameId == null) return;
+      if (gameId == null || logSize == null) return;
       setConfirmOpen(false);
-      const ok = await undoLastRound(gameId, eventId);
-      if (ok) {
+      const status = await undoLastRound(gameId, logSize, eventId);
+      if (status === 200) {
         showToast({ title: 'Last round undone', variant: 'warning' });
+        void logs.fetchData();
         onUndoSuccess?.();
+        return;
+      }
+      if (status === 409) {
+        void logs.fetchData();
       }
     });
 
@@ -40,6 +52,7 @@ export default function LogsMenu({
         isLogVisible={true}
         gameId={gameId}
         eventId={eventId}
+        logs={logs}
       ></GameLogs>
       {canUndoLastRound && (
         <>
@@ -49,7 +62,7 @@ export default function LogsMenu({
             size="sm"
             onPress={() => setConfirmOpen(true)}
             isPending={undoLoading}
-            isDisabled={gameId == null}
+            isDisabled={gameId == null || !logSize}
 
             icon={<UndoIcon />}
           >

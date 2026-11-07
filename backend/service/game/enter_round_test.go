@@ -82,7 +82,7 @@ func TestEnterRound(t *testing.T) {
 				expectCurrentGame(m, 1, gameID, []models.RoundLog{drawLog}, 1)
 			},
 			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 		"ok self": {
