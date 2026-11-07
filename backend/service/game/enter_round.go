@@ -12,7 +12,7 @@ func (s *Service) EnterRound(
 	outcome models.Outcome,
 	value, winnerID, loserID int,
 	eventID int,
-	seenLogSize *int,
+	seenLogSize int,
 ) (models.GameNow, error) {
 	game, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {

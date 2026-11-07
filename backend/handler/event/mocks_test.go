@@ -48,7 +48,7 @@ func (_m *MockGameService) EXPECT() *MockGameService_Expecter {
 }
 
 // EnterRound provides a mock function for the type MockGameService
-func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize *int) (models.GameNow, error) {
+func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize int) (models.GameNow, error) {
 	ret := _mock.Called(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 
 	if len(ret) == 0 {
@@ -57,15 +57,15 @@ func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outc
 
 	var r0 models.GameNow
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int, *int) (models.GameNow, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int, int) (models.GameNow, error)); ok {
 		return returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int, *int) models.GameNow); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int, int) models.GameNow); ok {
 		r0 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 	} else {
 		r0 = ret.Get(0).(models.GameNow)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Outcome, int, int, int, int, *int) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Outcome, int, int, int, int, int) error); ok {
 		r1 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 	} else {
 		r1 = ret.Error(1)
@@ -86,12 +86,12 @@ type MockGameService_EnterRound_Call struct {
 //   - winnerID int
 //   - loserID int
 //   - eventID int
-//   - seenLogSize *int
+//   - seenLogSize int
 func (_e *MockGameService_Expecter) EnterRound(ctx any, playerID any, outcome any, value any, winnerID any, loserID any, eventID any, seenLogSize any) *MockGameService_EnterRound_Call {
 	return &MockGameService_EnterRound_Call{Call: _e.mock.On("EnterRound", ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)}
 }
 
-func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize *int)) *MockGameService_EnterRound_Call {
+func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize int)) *MockGameService_EnterRound_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -121,9 +121,9 @@ func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, pla
 		if args[6] != nil {
 			arg6 = args[6].(int)
 		}
-		var arg7 *int
+		var arg7 int
 		if args[7] != nil {
-			arg7 = args[7].(*int)
+			arg7 = args[7].(int)
 		}
 		run(
 			arg0,
@@ -144,7 +144,7 @@ func (_c *MockGameService_EnterRound_Call) Return(gameNow models.GameNow, err er
 	return _c
 }
 
-func (_c *MockGameService_EnterRound_Call) RunAndReturn(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize *int) (models.GameNow, error)) *MockGameService_EnterRound_Call {
+func (_c *MockGameService_EnterRound_Call) RunAndReturn(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize int) (models.GameNow, error)) *MockGameService_EnterRound_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -621,7 +621,7 @@ func (_c *MockGameService_Now_Call) RunAndReturn(run func(ctx context.Context, p
 }
 
 // Penalty provides a mock function for the type MockGameService
-func (_mock *MockGameService) Penalty(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize *int) (models.GameNow, error) {
+func (_mock *MockGameService) Penalty(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error) {
 	ret := _mock.Called(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 
 	if len(ret) == 0 {
@@ -630,15 +630,15 @@ func (_mock *MockGameService) Penalty(ctx context.Context, penaltyType models.Ou
 
 	var r0 models.GameNow
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int, *int) (models.GameNow, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int, int) (models.GameNow, error)); ok {
 		return returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int, *int) models.GameNow); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int, int) models.GameNow); ok {
 		r0 = returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 	} else {
 		r0 = ret.Get(0).(models.GameNow)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, models.Outcome, int, int, int, bool, int, *int) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, models.Outcome, int, int, int, bool, int, int) error); ok {
 		r1 = returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 	} else {
 		r1 = ret.Error(1)
@@ -659,12 +659,12 @@ type MockGameService_Penalty_Call struct {
 //   - value int
 //   - forceNextRound bool
 //   - eventID int
-//   - seenLogSize *int
+//   - seenLogSize int
 func (_e *MockGameService_Expecter) Penalty(ctx any, penaltyType any, playerID any, penalizedID any, value any, forceNextRound any, eventID any, seenLogSize any) *MockGameService_Penalty_Call {
 	return &MockGameService_Penalty_Call{Call: _e.mock.On("Penalty", ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)}
 }
 
-func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize *int)) *MockGameService_Penalty_Call {
+func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize int)) *MockGameService_Penalty_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -694,9 +694,9 @@ func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, penalt
 		if args[6] != nil {
 			arg6 = args[6].(int)
 		}
-		var arg7 *int
+		var arg7 int
 		if args[7] != nil {
-			arg7 = args[7].(*int)
+			arg7 = args[7].(int)
 		}
 		run(
 			arg0,
@@ -717,7 +717,7 @@ func (_c *MockGameService_Penalty_Call) Return(gameNow models.GameNow, err error
 	return _c
 }
 
-func (_c *MockGameService_Penalty_Call) RunAndReturn(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize *int) (models.GameNow, error)) *MockGameService_Penalty_Call {
+func (_c *MockGameService_Penalty_Call) RunAndReturn(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error)) *MockGameService_Penalty_Call {
 	_c.Call.Return(run)
 	return _c
 }

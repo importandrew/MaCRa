@@ -14,8 +14,8 @@ import (
 type GameService interface {
 	Now(ctx context.Context, playerID, eventID int) (models.GameNow, error)
 	LastGameResult(ctx context.Context, playerID, eventID int) (models.GameResult, error)
-	EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value, winnerID, loserID, eventID int, seenLogSize *int) (models.GameNow, error)
-	Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int, seenLogSize *int) (models.GameNow, error)
+	EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value, winnerID, loserID, eventID int, seenLogSize int) (models.GameNow, error)
+	Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error)
 	Finish(ctx context.Context, gameID int) error
 	ViewLive(ctx context.Context, gameID int) (models.GameView, error)
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)

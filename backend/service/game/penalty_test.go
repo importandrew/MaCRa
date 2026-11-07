@@ -18,7 +18,7 @@ func TestPenalty(t *testing.T) {
 		penalizedID    int
 		value          int
 		forceNextRound bool
-		seenLogSize    *int
+		seenLogSize    int
 		mockSetup      func(*MockGameRepo, *MockPlayerRepo, int)
 		expectedErr    assert.ErrorAssertionFunc
 		checkNow       func(*testing.T, models.GameNow)
@@ -91,7 +91,7 @@ func TestPenalty(t *testing.T) {
 			playerID:    1,
 			penalizedID: 1,
 			value:       10,
-			seenLogSize: new(0),
+			seenLogSize: 0,
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
 				penaltyLog := models.RoundLog{
 					ID: 1, Round: 1, EventSequence: 1,
@@ -108,7 +108,7 @@ func TestPenalty(t *testing.T) {
 			playerID:    1,
 			penalizedID: 1,
 			value:       10,
-			seenLogSize: new(0),
+			seenLogSize: 0,
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
 				expectCurrentGame(m, 1, gameID, nil, 1)
 				m.EXPECT().SaveRoundOutcome(mock.Anything, gameID, mock.MatchedBy(func(data models.RoundData) bool {
@@ -131,6 +131,7 @@ func TestPenalty(t *testing.T) {
 			expectedErr: assert.Error,
 		},
 		"round 16 with forceNextRound false": {
+			seenLogSize:    15,
 			playerID:       1,
 			penalizedID:    1,
 			value:          10,
@@ -161,6 +162,7 @@ func TestPenalty(t *testing.T) {
 			},
 		},
 		"round 16 with forceNextRound true": {
+			seenLogSize:    15,
 			playerID:       1,
 			penalizedID:    1,
 			value:          10,

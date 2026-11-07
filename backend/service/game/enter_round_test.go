@@ -19,7 +19,7 @@ func TestEnterRound(t *testing.T) {
 		value       int
 		winnerID    int
 		loserID     int
-		seenLogSize *int
+		seenLogSize int
 		mockSetup   func(*MockGameRepo, *MockPlayerRepo, int)
 		expectedErr assert.ErrorAssertionFunc
 		checkNow    func(*testing.T, models.GameNow)
@@ -57,7 +57,7 @@ func TestEnterRound(t *testing.T) {
 		"ok with the log size the table showed": {
 			playerID:    1,
 			outcome:     models.Draw,
-			seenLogSize: new(1),
+			seenLogSize: 1,
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
 				drawLog := models.RoundLog{ID: 1, Round: 1, EventSequence: 1, Outcome: models.Draw, CreatedAt: time.Now()}
 				drawLog2 := models.RoundLog{ID: 2, Round: 2, EventSequence: 1, Outcome: models.Draw, CreatedAt: time.Now()}
@@ -76,7 +76,7 @@ func TestEnterRound(t *testing.T) {
 		"round already entered by someone else": {
 			playerID:    1,
 			outcome:     models.Draw,
-			seenLogSize: new(0),
+			seenLogSize: 0,
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
 				drawLog := models.RoundLog{ID: 1, Round: 1, EventSequence: 1, Outcome: models.Draw, CreatedAt: time.Now()}
 				expectCurrentGame(m, 1, gameID, []models.RoundLog{drawLog}, 1)
@@ -174,11 +174,12 @@ func TestEnterRound(t *testing.T) {
 			expectedErr: assert.Error,
 		},
 		"round 16": {
-			playerID: 1,
-			outcome:  models.Deal,
-			value:    8,
-			winnerID: 1,
-			loserID:  2,
+			seenLogSize: 15,
+			playerID:    1,
+			outcome:     models.Deal,
+			value:       8,
+			winnerID:    1,
+			loserID:     2,
 			mockSetup: func(m *MockGameRepo, mp *MockPlayerRepo, gameID int) {
 				logs := drawRoundLogs(15)
 				expectCurrentGame(m, 1, gameID, logs, 1)
@@ -256,7 +257,7 @@ func TestEnterRound_FinalRound_OK(t *testing.T) {
 			data.North.ID == 4
 	})).Return(nil)
 
-	now, err := service.EnterRound(context.Background(), 1, models.Deal, 8, 1, 2, testEventID, nil)
+	now, err := service.EnterRound(context.Background(), 1, models.Deal, 8, 1, 2, testEventID, 15)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 100, now.ID)
@@ -274,7 +275,7 @@ func TestEnterRound_FinalRound_Error(t *testing.T) {
 	mockGameRepo.EXPECT().SaveRoundOutcome(mock.Anything, 100, mock.Anything).Return(nil)
 	mockGameRepo.EXPECT().Finalize(mock.Anything, mock.Anything).Return(errors.New("finalization error"))
 
-	_, err := service.EnterRound(context.Background(), 1, models.Deal, 8, 1, 2, testEventID, nil)
+	_, err := service.EnterRound(context.Background(), 1, models.Deal, 8, 1, 2, testEventID, 15)
 
 	assert.Error(t, err)
 }
