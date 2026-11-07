@@ -2,8 +2,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { GameData, Outcome } from '../../models/GameData';
+import { GameStatusResponse } from '../../providers/game/gameDataApi';
 import { getStoredEventId } from '../../providers/event/eventConstants';
-import { fetchWithStatus, PostRequest, eventPath } from '../Request';
+import {
+  fetchWithStatus,
+  GetRequest,
+  PostRequest,
+  eventGamePath,
+  eventPath,
+} from '../Request';
 import { showToast } from '../Toast';
 
 export const MIN_HAND = 8;
@@ -17,11 +24,12 @@ export type PenaltyType = Outcome.Penalty | Outcome.FalseMahjong;
 // useRoundEntry holds the round entry on the game screen: the outcome and
 // values in the center of the table, and the +/− marks next to each seat.
 // table is the game as the screen shows it; an entry is refused when the
-// server's game has moved on since, and onStale then refreshes the table.
+// server's game has moved on since, and onStale then refreshes the table and
+// returns it (null if it can't be loaded).
 export function useRoundEntry(
   table: GameData | null,
   onSubmitted: (data: GameData) => void,
-  onStale: () => void
+  onStale: () => Promise<GameData | null>
 ) {
   const navigate = useNavigate();
 
@@ -88,6 +96,27 @@ export function useRoundEntry(
 
   const submit = () => run(send);
 
+  // showGameGone tells the player why their game is gone: an ended game opens
+  // its result, an aborted one the home page.
+  const showGameGone = async (eventId: number, gameId: number) => {
+    const { data } = await fetchWithStatus<GameStatusResponse>(
+      GetRequest(eventGamePath(eventId, gameId, '/status')),
+      { isToastEnabled: false }
+    );
+
+    if (data?.status === 'ended') {
+      showToast({ title: 'The game has ended', variant: 'warning' });
+      navigate('/last');
+      return;
+    }
+    if (data?.status === 'aborted') {
+      showToast({ title: 'The game was aborted', variant: 'warning' });
+      navigate('/');
+      return;
+    }
+    showToast({ title: 'Error: game not found', variant: 'danger' });
+  };
+
   const send = async () => {
     const eventId = getStoredEventId();
     if (!eventId || !outcome || !table) return;
@@ -110,21 +139,30 @@ export function useRoundEntry(
           log_size: table.log_size,
         });
     const { data, status } = await fetchWithStatus<GameData>(request, {
-      quietStatuses: [409],
+      quietStatuses: [404, 409],
     });
 
-    // 409: someone else has entered a round or a penalty since this table
-    // was loaded. Don't store this entry on top of it; show the table as it
-    // is now and let the player decide whether to enter the next round.
+    // 404: the player has no live game any more: someone else entered the
+    // last round, finished or aborted it.
+    if (status === 404) {
+      await showGameGone(eventId, table.id);
+      return;
+    }
+
+    // 409: someone else has changed the round log since this table was
+    // loaded. Don't store this entry on top of it; show the table as it is
+    // now and let the player decide whether to enter it again.
     if (status === 409) {
+      const fresh = await onStale();
+      if (!fresh) {
+        await showGameGone(eventId, table.id);
+        return;
+      }
       showToast({
-        title: isPenalty
-          ? 'The table has changed'
-          : `Round ${table.round.kanji} has already been entered`,
+        title: staleTitle(table, fresh),
         description: 'Check the refreshed table and enter again if needed.',
         variant: 'warning',
       });
-      onStale();
       return;
     }
 
@@ -171,3 +209,18 @@ export function useRoundEntry(
 }
 
 export type RoundEntry = ReturnType<typeof useRoundEntry>;
+
+// staleTitle says what changed between the table the player saw and the
+// table now: a round entered, a penalty entered, or an entry undone.
+function staleTitle(seen: GameData, now: GameData): string {
+  if (now.round.num > seen.round.num) {
+    return `Round ${seen.round.kanji} has already been entered`;
+  }
+  if (now.round.num < seen.round.num) {
+    return 'The last round has been undone';
+  }
+  if (now.log_size > seen.log_size) {
+    return 'A penalty has just been entered';
+  }
+  return 'The last entry has been undone';
+}

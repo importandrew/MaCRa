@@ -23,7 +23,7 @@ export default function CurrentGame() {
       setRoundData(next);
       setIsEntryOpen(false);
     },
-    () => void onRefresh()
+    () => onRefresh()
   );
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}

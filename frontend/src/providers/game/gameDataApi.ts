@@ -141,12 +141,13 @@ export const useFetchGameData = () => {
   const [data, setData] = useState<GameData | null>(null);
   const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
 
-  const fetchGameData = async () => {
+  // fetchGameData loads the table and returns it, or null on an error.
+  const fetchGameData = async (): Promise<GameData | null> => {
     const eventId = getStoredEventId();
     if (!eventId) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     startLoading();
@@ -158,14 +159,14 @@ export const useFetchGameData = () => {
     if (!data) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     setData(data);
 
     if (playersList.length) {
       finishLoading(true);
-      return;
+      return data;
     }
 
     const gamePlayersRequest = GetRequest(
@@ -179,6 +180,7 @@ export const useFetchGameData = () => {
 
     setPlayersList(playersResult?.players || []);
     finishLoading(true);
+    return data;
   };
 
   useEffect(() => {
