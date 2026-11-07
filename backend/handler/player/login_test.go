@@ -49,6 +49,7 @@ func TestHandler_Login(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, 1, response.ID)
 				assert.Equal(t, "Test User", response.Name)
+				assert.NotContains(t, w.Body.String(), "token")
 			},
 			checkCookie: func(t *testing.T, w *httptest.ResponseRecorder) {
 				cookies := w.Result().Cookies()
@@ -89,6 +90,7 @@ func TestHandler_Login(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, 2, response.ID)
 				assert.Equal(t, "Another User", response.Name)
+				assert.NotContains(t, w.Body.String(), "token")
 			},
 			checkCookie: func(t *testing.T, w *httptest.ResponseRecorder) {
 				cookies := w.Result().Cookies()
