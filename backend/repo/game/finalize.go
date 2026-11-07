@@ -62,16 +62,15 @@ func (r *Repo) Finalize(ctx context.Context, data models.FinalGameData) error {
 		return fmt.Errorf("batch insert player results: %w", err)
 	}
 
-	// Update game status
-	err = r.SetStatus(ctx, data.GameID, models.GameEnded)
+	// In the same transaction as the results: SetStatus would take another
+	// pool connection and commit the status on its own.
+	res, err := tx.Exec(ctx, `UPDATE games SET status = $1, finished_at = $2 WHERE id = $3`,
+		models.GameEnded, now, data.GameID)
 	if err != nil {
-		return fmt.Errorf("set status: %w", err)
+		return fmt.Errorf("set game ended: %w", err)
 	}
-
-	// Set finished_at
-	_, err = conn.Exec(ctx, `UPDATE games SET finished_at = $1 WHERE id = $2`, time.Now().UTC(), data.GameID)
-	if err != nil {
-		return fmt.Errorf("set finished_at for game %d: %w", data.GameID, err)
+	if res.RowsAffected() == 0 {
+		return models.ErrGameNotFound
 	}
 
 	// Commit transaction

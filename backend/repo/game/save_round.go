@@ -18,11 +18,6 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 	}
 	defer conn.Release()
 
-	players, err := r.Players(ctx, gameID)
-	if err != nil {
-		return fmt.Errorf("players: %w", err)
-	}
-
 	// Start transaction
 	tx, err := conn.Begin(ctx)
 	if err != nil {
@@ -32,6 +27,11 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 
 	if err := lockUnchangedLog(ctx, tx, gameID, data.LogSize); err != nil {
 		return err
+	}
+
+	players, err := gamePlayers(ctx, tx, gameID)
+	if err != nil {
+		return fmt.Errorf("players: %w", err)
 	}
 
 	// Insert round event (event_sequence is auto-incremented by database trigger)
