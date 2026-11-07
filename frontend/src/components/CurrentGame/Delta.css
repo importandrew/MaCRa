@@ -1,0 +1,501 @@
+/* HeroUI v3 tokens; four seats retain their actual table positions. */
+.delta-modal {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  margin: 0;
+}
+.delta-modal__header {
+  flex-shrink: 0;
+}
+.delta-modal__body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.delta-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-areas: '. top .' 'left center right' '. bottom .';
+  align-items: center;
+  gap: clamp(0.25rem, 1.5vw, 0.75rem);
+  width: 100%;
+  max-width: 1050px;
+  margin: auto;
+  padding: 0.4rem 0;
+}
+.delta-seat--top {
+  grid-area: top;
+}
+.delta-seat--left {
+  grid-area: left;
+}
+.delta-seat--right {
+  grid-area: right;
+}
+.delta-seat--bottom {
+  grid-area: bottom;
+}
+.delta-player-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface, var(--surface));
+  border: 1px solid var(--color-border, var(--border));
+}
+.delta-selected {
+  border: 2px solid var(--color-accent, var(--accent));
+  background: var(--color-accent-soft, var(--accent-soft));
+}
+.delta-card-header,
+.delta-card-content {
+  padding: 0;
+  min-width: 0;
+}
+.delta-card-header {
+  border-bottom: 1px solid var(--color-border, var(--border));
+  padding-bottom: 0.25rem;
+}
+.delta-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.delta-seat--left,
+.delta-seat--right {
+  align-self: stretch;
+}
+.delta-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  width: 100%;
+}
+.delta-wind {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.delta-person {
+  flex: 1;
+  min-width: 0;
+}
+.delta-name {
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
+.delta-score-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.35rem;
+}
+.delta-score {
+  font-size: 0.75rem;
+  color: var(--color-muted, var(--muted));
+}
+.delta-score-gap {
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-muted, var(--muted));
+}
+.delta-score-gap--ahead {
+  color: var(--color-success, var(--success));
+}
+.delta-score-gap--behind {
+  color: var(--color-danger, var(--danger));
+}
+.delta-current-rank,
+.delta-header-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--color-muted, var(--muted));
+}
+.delta-no-targets {
+  font-size: 0.7rem;
+  color: var(--color-muted, var(--muted));
+}
+.delta-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.3rem 0.25rem;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+}
+.delta-action--self {
+  --delta-tone: var(--color-success, var(--success));
+  color: var(--color-success-soft-foreground, var(--success-soft-foreground));
+  background: var(--color-success-soft, var(--success-soft));
+  border-color: var(--color-success, var(--success));
+}
+.delta-action--direct {
+  --delta-tone: var(--color-accent, var(--accent));
+  color: var(--color-accent-soft-foreground, var(--accent-soft-foreground));
+  background: var(--color-accent-soft, var(--accent-soft));
+  border-color: var(--color-accent, var(--accent));
+}
+.delta-action--loss {
+  --delta-tone: var(--color-danger, var(--danger));
+  color: var(--color-danger-soft-foreground, var(--danger-soft-foreground));
+  background: var(--color-danger-soft, var(--danger-soft));
+  border-color: var(--color-danger, var(--danger));
+}
+.delta-thresholds {
+  display: grid;
+  grid-template-columns: max-content;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 100%;
+}
+.delta-threshold {
+  display: grid;
+  grid-template-columns: minmax(1.4rem, max-content) 0.9rem 1.6rem;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+.delta-hand-value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  font-weight: 700;
+}
+.delta-place-badge {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--delta-tone, var(--color-accent, var(--accent)));
+  color: var(--color-surface, var(--surface));
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.delta-selected .delta-current-rank {
+  --delta-tone: var(--color-accent, var(--accent));
+}
+.delta-header-subtitle {
+  --delta-tone: var(--color-accent, var(--accent));
+}
+.delta-center {
+  grid-area: center;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.delta-center > button {
+  max-width: 100%;
+  font-size: 0.72rem;
+  text-align: center;
+  white-space: normal;
+}
+.delta-help-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem;
+}
+.delta-legend__item {
+  display: inline-flex;
+  border: 1px solid;
+  border-radius: 0.4rem;
+  padding: 0.12rem 0.25rem;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .delta-layout {
+    gap: 0.25rem;
+    align-items: start;
+  }
+  .delta-player-card {
+    padding: 0.3rem;
+    gap: 0.25rem;
+  }
+  .delta-identity {
+    flex-wrap: wrap;
+    gap: 0.1rem 0.2rem;
+  }
+  .delta-name {
+    font-size: 0.68rem;
+  }
+  .delta-wind {
+    font-size: 0.82rem;
+  }
+  .delta-score {
+    font-size: 0.67rem;
+  }
+  .delta-action {
+    padding: 0.2rem 0.05rem;
+    font-size: 0.67rem;
+  }
+  .delta-threshold {
+    grid-template-columns: minmax(1.2rem, max-content) 0.75rem 1.3rem;
+    gap: 0.1rem;
+  }
+  .delta-place-badge {
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 0.66rem;
+  }
+  .delta-center > button {
+    font-size: 0.62rem;
+    padding-inline: 0.2rem;
+  }
+  .delta-legend__item {
+    font-size: 0.55rem;
+  }
+}
+/* Static help: one 320px illustration, scaled only by container width. */
+.delta-help-modal {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  margin: 0;
+}
+.delta-help-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  overflow-y: auto;
+}
+.delta-help-intro,
+.delta-help-explanation {
+  width: min(100%, 420px);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.delta-help-explanation {
+  display: grid;
+  gap: 0.4rem;
+}
+.delta-help-close-trigger {
+  margin-left: auto;
+  font-size: 1.4rem;
+}
+.delta-help-illustration {
+  position: relative;
+  flex: 0 0 auto;
+  width: 320px;
+  height: 350px;
+  max-width: 100%;
+}
+.delta-help-mini-table {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 98px 120px 98px;
+  grid-template-areas: '. top .' 'left center right' '. bottom .';
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 17px;
+  padding-bottom: 17px;
+}
+.delta-help-mini-table .delta-player-card {
+  padding: 0.2rem;
+  gap: 0.15rem;
+}
+.delta-help-mini-table .delta-identity {
+  gap: 0.12rem;
+}
+.delta-help-mini-table .delta-wind {
+  font-size: 0.72rem;
+}
+.delta-help-mini-table .delta-name {
+  font-size: 0.6rem;
+}
+.delta-help-mini-table .delta-score {
+  font-size: 0.57rem;
+}
+.delta-help-mini-table .delta-score-gap {
+  font-size: 0.53rem;
+}
+.delta-help-mini-table .delta-action {
+  padding: 0.1rem;
+  font-size: 0.6rem;
+}
+.delta-help-mini-table .delta-place-badge {
+  width: 1.05rem;
+  height: 1.05rem;
+  font-size: 0.55rem;
+}
+.delta-help-mini-table .delta-threshold {
+  grid-template-columns: minmax(0.9rem, max-content) 0.6rem 1.05rem;
+  gap: 0.1rem;
+}
+.delta-help-mini-center {
+  grid-area: center;
+  text-align: center;
+  color: var(--color-muted, var(--muted));
+}
+.delta-help-leaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.delta-help-leaders path {
+  fill: none;
+  stroke: var(--color-accent, var(--accent));
+  stroke-width: 1.3;
+  stroke-dasharray: 3 3;
+}
+.delta-help-label {
+  position: absolute;
+  display: inline-flex;
+  max-width: 98px;
+  padding: 0.2rem 0.3rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--color-border, var(--border));
+  background: var(--color-surface, var(--surface));
+  color: var(--color-foreground, var(--foreground));
+  font-size: 0.62rem;
+  line-height: 1.15;
+}
+.delta-help-label--one {
+  top: 3px;
+  left: 0;
+}
+.delta-help-label--two {
+  top: 3px;
+  right: 0;
+}
+.delta-help-label--three {
+  top: 150px;
+  left: 0;
+}
+.delta-help-label--four {
+  top: 150px;
+  right: 0;
+}
+.delta-help-label--five {
+  bottom: 0;
+  left: 0;
+}
+.delta-help-label--six {
+  bottom: 0;
+  right: 0;
+}
+
+/* Fill the modal's available height; short viewports scroll instead of crushing cards. */
+.delta-modal__body {
+  display: flex;
+  flex-direction: column;
+}
+.delta-layout {
+  flex: 1 0 auto;
+  min-height: 100%;
+  grid-template-rows: minmax(112px, 1fr) minmax(156px, 1.3fr) minmax(112px, 1fr);
+  align-items: stretch;
+  margin: 0 auto;
+}
+.delta-player-card {
+  position: relative;
+  height: 100%;
+  justify-content: flex-start;
+}
+.delta-card--clickable {
+  cursor: pointer;
+}
+.delta-card-hitarea {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: inherit;
+  cursor: pointer;
+}
+.delta-card-hitarea:focus-visible {
+  outline: 2px solid var(--color-accent, var(--accent));
+  outline-offset: 2px;
+}
+.delta-card--clickable:hover {
+  border-color: var(--color-accent, var(--accent));
+}
+.delta-seat--left,
+.delta-seat--right {
+  height: 100%;
+}
+.delta-help-illustration {
+  width: 320px;
+  height: 410px;
+}
+.delta-help-mini-table {
+  inset: 45px 0 45px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 95px 110px 95px;
+  padding: 0;
+  align-items: stretch;
+}
+.delta-help-mini-table .delta-player-card {
+  height: auto;
+  align-self: center;
+  min-height: 76px;
+}
+.delta-help-leaders {
+  z-index: 2;
+}
+.delta-help-label {
+  z-index: 3;
+}
+.delta-help-label--one {
+  top: 6px;
+  left: 0;
+}
+.delta-help-label--two {
+  top: 6px;
+  right: 0;
+}
+.delta-help-label--three {
+  top: 182px;
+  left: 0;
+}
+.delta-help-label--four {
+  top: 182px;
+  right: 0;
+}
+.delta-help-label--five {
+  bottom: 6px;
+  left: 0;
+}
+.delta-help-label--six {
+  bottom: 6px;
+  right: 0;
+}
+@media (max-width: 640px) {
+  .delta-layout {
+    grid-template-rows: minmax(108px, 1fr) minmax(152px, 1.3fr) minmax(
+        108px,
+        1fr
+      );
+  }
+}
+
+/* Keep the illustrated example independent of the full-height live layout. */
+.delta-help-mini-table .delta-card-content {
+  gap: 0.12rem;
+}
+.delta-help-mini-table .delta-player-card {
+  max-height: 108px;
+}
