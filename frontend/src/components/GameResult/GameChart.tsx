@@ -11,6 +11,7 @@ import {
   YAxis,
   useActiveTooltipLabel,
 } from 'recharts';
+import { Outcome } from '../../models/GameData';
 import {
   PreparedGameRoundLogs,
   PreparedRoundLog,
@@ -24,42 +25,54 @@ const SERIES_COLORS = [
   'var(--chart-4)',
 ];
 
-// A chart point: the round number and each player's total after it, by seat.
+// A chart point: one log entry and each player's total after it, by seat.
+// A round can have several entries (a penalty or false mahjong besides its
+// outcome); each gets its own point, so `step` (the entry's position) is the
+// x value, not the round number, which repeats.
 interface ChartPoint {
+  step: number;
   round: number;
+  outcome: Outcome | null;
   scores: number[];
 }
+
+// Penalties and false mahjong are extra entries inside a round.
+const isExtraEntry = (point: ChartPoint) =>
+  point.outcome === Outcome.Penalty || point.outcome === Outcome.FalseMahjong;
 
 function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
   const totalAfter = (round: PreparedRoundLog, index: number) =>
     round.initial_scores[index] + (round.score_changes?.[index] ?? 0);
 
-  // One point per round. A round can have several log entries (a penalty or
-  // false mahjong besides its outcome); the point shows the totals after the
-  // last one. Repeated x values would make recharts match the first of them.
-  const points: ChartPoint[] = [
-    { round: 0, scores: input.players.map(() => 0) },
-  ];
-  for (const round of input.rounds) {
-    const point = {
+  return [
+    { step: 0, round: 0, outcome: null, scores: input.players.map(() => 0) },
+    ...input.rounds.map((round, index) => ({
+      step: index + 1,
       round: round.round,
-      scores: input.players.map((_, index) => totalAfter(round, index)),
-    };
-    if (points[points.length - 1].round === round.round) {
-      points[points.length - 1] = point;
-    } else {
-      points.push(point);
-    }
-  }
-  return points;
+      outcome: round.outcome,
+      scores: input.players.map((_, seat) => totalAfter(round, seat)),
+    })),
+  ];
 }
 
-// Reports the round under the finger or pointer (recharts tracks it for both
+function describePoint(point: ChartPoint): string {
+  if (point.step === 0) return 'Start';
+  if (point.outcome === Outcome.Penalty) return `Round ${point.round}, penalty`;
+  if (point.outcome === Outcome.FalseMahjong)
+    return `Round ${point.round}, false mahjong`;
+  return `After round ${point.round}`;
+}
+
+// The x-axis label: the round number, or a dot for an extra entry.
+const tickLabel = (point: ChartPoint | undefined) =>
+  !point ? '' : isExtraEntry(point) ? '•' : String(point.round);
+
+// Reports the step under the finger or pointer (recharts tracks it for both
 // mouse and touch), or null when none is.
-function ActiveRoundReporter({
+function ActiveStepReporter({
   onChange,
 }: {
-  onChange: (round: number | null) => void;
+  onChange: (step: number | null) => void;
 }) {
   const label = useActiveTooltipLabel();
   useEffect(() => {
@@ -74,10 +87,10 @@ export default function GameChart({
   preparedData: PreparedGameRoundLogs;
 }) {
   const chartData = transformGameDataForChart(preparedData);
-  // The round under the finger or pointer; the final scores otherwise.
-  const [activeRound, setActiveRound] = useState<number | null>(null);
+  // The entry under the finger or pointer; the final scores otherwise.
+  const [activeStep, setActiveStep] = useState<number | null>(null);
   const shown =
-    chartData.find((point) => point.round === activeRound) ??
+    chartData.find((point) => point.step === activeStep) ??
     chartData[chartData.length - 1];
   const isFinal = shown === chartData[chartData.length - 1];
 
@@ -86,11 +99,7 @@ export default function GameChart({
       <Card.Header className="flex-row items-baseline justify-between gap-3">
         <Card.Title>Score by round</Card.Title>
         <span className="text-sm text-muted">
-          {isFinal
-            ? 'Final'
-            : shown.round === 0
-              ? 'Start'
-              : `After round ${shown.round}`}
+          {isFinal ? 'Final' : describePoint(shown)}
         </span>
       </Card.Header>
       <Card.Content className="gap-3">
@@ -121,7 +130,8 @@ export default function GameChart({
             >
               <CartesianGrid vertical={false} stroke="var(--separator)" />
               <XAxis
-                dataKey="round"
+                dataKey="step"
+                tickFormatter={(step: number) => tickLabel(chartData[step])}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'var(--muted)', fontSize: 12 }}
@@ -139,7 +149,7 @@ export default function GameChart({
                 content={() => null}
                 cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }}
               />
-              <ActiveRoundReporter onChange={setActiveRound} />
+              <ActiveStepReporter onChange={setActiveStep} />
               {preparedData.players.map((player, index) => (
                 <Line
                   key={player.id}
