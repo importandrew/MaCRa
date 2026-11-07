@@ -18,11 +18,6 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 	}
 	defer conn.Release()
 
-	players, err := r.Players(ctx, gameID)
-	if err != nil {
-		return fmt.Errorf("players: %w", err)
-	}
-
 	// Start transaction
 	tx, err := conn.Begin(ctx)
 	if err != nil {
@@ -32,6 +27,11 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 
 	if err := lockUnchangedLog(ctx, tx, gameID, data.LogSize); err != nil {
 		return err
+	}
+
+	players, err := gamePlayers(ctx, tx, gameID)
+	if err != nil {
+		return fmt.Errorf("players: %w", err)
 	}
 
 	// Insert round event (event_sequence is auto-incremented by database trigger)
@@ -102,7 +102,7 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 }
 
 // lockUnchangedLog locks the game row, so that concurrent entries to one game
-// are saved one at a time, and refuses the entry with ErrRoundAlreadyEntered
+// are saved one at a time, and refuses the entry with ErrLogChanged
 // unless the game still has logSize round log entries. The entry was computed
 // from a game replayed from that many entries; saving it after another entry
 // got in first would apply it to a game it wasn't computed for (a
@@ -122,7 +122,7 @@ func lockUnchangedLog(ctx context.Context, tx pgx.Tx, gameID, logSize int) error
 	}
 
 	if current != logSize {
-		return fmt.Errorf("%w (computed from %d log entries, the game has %d)", models.ErrRoundAlreadyEntered, logSize, current)
+		return fmt.Errorf("%w (computed from %d log entries, the game has %d)", models.ErrLogChanged, logSize, current)
 	}
 
 	return nil

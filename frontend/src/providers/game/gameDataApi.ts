@@ -25,18 +25,22 @@ import {
 import { GameView } from '../../models/GameView';
 import { getStoredEventId, useEvent } from '../event/eventConstants';
 
+// undoLastRound undoes the last log entry of the game. logSize is the number
+// of log entries the referee saw; the server answers 409 if the log has
+// changed since, or if the final round can't be undone. The caller reports
+// 409 itself.
 export async function undoLastRound(
   gameId: number,
+  logSize: number,
   eventId?: number
-): Promise<boolean> {
+): Promise<FetchResponse<null>> {
   const resolvedEventId = eventId ?? getStoredEventId();
-  if (!resolvedEventId) return false;
+  if (!resolvedEventId) return { data: null, status: 0 };
 
   const request = DeleteRequest(
-    eventGamePath(resolvedEventId, gameId, '/undo-round')
+    eventGamePath(resolvedEventId, gameId, `/undo-round?log_size=${logSize}`)
   );
-  const result = await authFetch<null>(request);
-  return result !== null;
+  return fetchWithStatus<null>(request, { quietStatuses: [409] });
 }
 
 export const useFetchPlayerGamesHistory = (playerId: number) => {
@@ -282,17 +286,18 @@ export const useFetchGameLogsData = (
     gameId != null
   );
 
-  const fetchData = useCallback(async () => {
+  // fetchData loads the log and returns it (null on an error).
+  const fetchData = useCallback(async (): Promise<GameRoundLogs | null> => {
     if (gameId == null) {
       setData(null);
-      return;
+      return null;
     }
 
     const resolvedEventId = eventId ?? getStoredEventId();
     if (!resolvedEventId) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     startLoading();
@@ -307,17 +312,18 @@ export const useFetchGameLogsData = (
     if (result.status === 403) {
       setIsForbidden(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     if (!result.data) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     setData(result.data);
     finishLoading(true);
+    return result.data;
   }, [gameId, eventId, startLoading, finishLoading]);
 
   useEffect(() => {
@@ -326,6 +332,8 @@ export const useFetchGameLogsData = (
 
   return { data, isError, isForbidden, isLoading, fetchData };
 };
+
+export type GameLogsState = ReturnType<typeof useFetchGameLogsData>;
 
 export const useFetchPlayerStatus = () => {
   const { selectedEventId } = useEvent();

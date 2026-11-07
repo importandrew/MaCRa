@@ -2119,16 +2119,16 @@ func (_c *MockEventService_RemoveMembers_Call) RunAndReturn(run func(ctx context
 }
 
 // UndoLastRound provides a mock function for the type MockEventService
-func (_mock *MockEventService) UndoLastRound(ctx context.Context, gameID int) error {
-	ret := _mock.Called(ctx, gameID)
+func (_mock *MockEventService) UndoLastRound(ctx context.Context, gameID int, logSize int) error {
+	ret := _mock.Called(ctx, gameID, logSize)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UndoLastRound")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
-		r0 = returnFunc(ctx, gameID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = returnFunc(ctx, gameID, logSize)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -2143,11 +2143,12 @@ type MockEventService_UndoLastRound_Call struct {
 // UndoLastRound is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockEventService_Expecter) UndoLastRound(ctx any, gameID any) *MockEventService_UndoLastRound_Call {
-	return &MockEventService_UndoLastRound_Call{Call: _e.mock.On("UndoLastRound", ctx, gameID)}
+//   - logSize int
+func (_e *MockEventService_Expecter) UndoLastRound(ctx any, gameID any, logSize any) *MockEventService_UndoLastRound_Call {
+	return &MockEventService_UndoLastRound_Call{Call: _e.mock.On("UndoLastRound", ctx, gameID, logSize)}
 }
 
-func (_c *MockEventService_UndoLastRound_Call) Run(run func(ctx context.Context, gameID int)) *MockEventService_UndoLastRound_Call {
+func (_c *MockEventService_UndoLastRound_Call) Run(run func(ctx context.Context, gameID int, logSize int)) *MockEventService_UndoLastRound_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -2157,9 +2158,14 @@ func (_c *MockEventService_UndoLastRound_Call) Run(run func(ctx context.Context,
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2170,7 +2176,7 @@ func (_c *MockEventService_UndoLastRound_Call) Return(err error) *MockEventServi
 	return _c
 }
 
-func (_c *MockEventService_UndoLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockEventService_UndoLastRound_Call {
+func (_c *MockEventService_UndoLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int, logSize int) error) *MockEventService_UndoLastRound_Call {
 	_c.Call.Return(run)
 	return _c
 }

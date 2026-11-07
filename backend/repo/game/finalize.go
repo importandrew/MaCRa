@@ -62,80 +62,15 @@ func (r *Repo) Finalize(ctx context.Context, data models.FinalGameData) error {
 		return fmt.Errorf("batch insert player results: %w", err)
 	}
 
-	// Update game status
-	err = r.SetStatus(ctx, data.GameID, models.GameEnded)
+	// In the same transaction as the results: SetStatus would take another
+	// pool connection and commit the status on its own.
+	res, err := tx.Exec(ctx, `UPDATE games SET status = $1, finished_at = $2 WHERE id = $3`,
+		models.GameEnded, now, data.GameID)
 	if err != nil {
-		return fmt.Errorf("set status: %w", err)
+		return fmt.Errorf("set game ended: %w", err)
 	}
-
-	// Set finished_at
-	_, err = conn.Exec(ctx, `UPDATE games SET finished_at = $1 WHERE id = $2`, time.Now().UTC(), data.GameID)
-	if err != nil {
-		return fmt.Errorf("set finished_at for game %d: %w", data.GameID, err)
-	}
-
-	// Commit transaction
-	if err = tx.Commit(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Unfinalize deletes players' scores and sets game status to live. Called by UndoLastRound when game is already finished.
-func (r *Repo) Unfinalize(ctx context.Context, gameID int) error {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	// Start transaction
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	rows, err := tx.Query(ctx,
-		`SELECT finished_at FROM games WHERE id = $1`,
-		gameID,
-	)
-	if err != nil {
-		return err
-	}
-
-	finishedAt, err := pgx.CollectOneRow(rows, pgx.RowTo[time.Time])
-	if err != nil {
-		return fmt.Errorf("select finished_at: %w", err)
-	}
-
-	if finishedAt.Add(models.UndoFinalRoundTimeout).Before(time.Now()) {
-		return models.ErrTooLate
-	}
-
-	// Batch insert all player results at once
-	_, err = tx.Exec(ctx,
-		`DELETE FROM player_results where game_id = $1`,
-		gameID,
-	)
-	if err != nil {
-		return fmt.Errorf("batch delete player results: %w", err)
-	}
-
-	// Update game status
-	err = r.SetStatus(ctx, gameID, models.GameLive)
-	if err != nil {
-		return fmt.Errorf("set status: %w", err)
-	}
-
-	// Set finished_at
-	_, err = conn.Exec(ctx,
-		`UPDATE games SET finished_at = null WHERE id = $1`,
-		gameID,
-	)
-	if err != nil {
-		return fmt.Errorf("unset finished_at for game %d: %w", gameID, err)
+	if res.RowsAffected() == 0 {
+		return models.ErrGameNotFound
 	}
 
 	// Commit transaction
