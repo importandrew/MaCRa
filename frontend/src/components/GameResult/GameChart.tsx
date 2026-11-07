@@ -67,6 +67,32 @@ function describePoint(point: ChartPoint): string {
 const tickLabel = (point: ChartPoint | undefined) =>
   !point ? '' : isExtraEntry(point) ? '•' : String(point.round);
 
+// Which points get an x-axis label. recharts thins crowded labels from the end
+// on its own, which dropped e.g. the second-to-last round and gave uneven runs
+// like "1 3 • 6". Instead, label every round, or every 2nd, 5th or 10th one,
+// whichever fits; dots for extra entries only while every round fits.
+const Y_AXIS_WIDTH = 36;
+const DIGIT_WIDTH = 7; // px per digit of a 12px label, with some slack
+const LABEL_GAP = 6;
+function pickTicks(points: ChartPoint[], chartWidth: number): number[] {
+  const plotWidth = chartWidth - Y_AXIS_WIDTH - 16;
+  const stepWidth = plotWidth / Math.max(points.length - 1, 1);
+  const lastRound = points[points.length - 1].round;
+  const labelWidth = String(lastRound).length * DIGIT_WIDTH + LABEL_GAP;
+  // Rounds between labels; the distance in px also counts extra entries.
+  const roundsPerStep = (points.length - 1) / Math.max(lastRound, 1);
+  const every =
+    [1, 2, 5, 10].find((n) => (n * stepWidth) / roundsPerStep >= labelWidth) ??
+    20;
+  return points
+    .filter((point) =>
+      isExtraEntry(point)
+        ? every === 1 && stepWidth >= labelWidth
+        : point.round % every === 0
+    )
+    .map((point) => point.step);
+}
+
 // Reports the step under the finger or pointer (recharts tracks it for both
 // mouse and touch), or null when none is.
 function ActiveStepReporter({
@@ -93,6 +119,7 @@ export default function GameChart({
     chartData.find((point) => point.step === activeStep) ??
     chartData[chartData.length - 1];
   const isFinal = shown === chartData[chartData.length - 1];
+  const [chartWidth, setChartWidth] = useState(0);
 
   return (
     <Card className="mb-3">
@@ -123,7 +150,11 @@ export default function GameChart({
             between rounds). Show the ring for keyboard focus only, as HeroUI
             does; a click or tap focuses it too, which drew a box around it. */}
         <div className="h-60 sm:h-72 -mx-2 select-none touch-pan-y [&_:focus]:outline-none [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-solid [&_.recharts-surface:focus-visible]:outline-(--focus) [&_.recharts-surface:focus-visible]:rounded-md">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            onResize={(width) => setChartWidth(width)}
+          >
             <LineChart
               data={chartData}
               margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
@@ -131,17 +162,18 @@ export default function GameChart({
               <CartesianGrid vertical={false} stroke="var(--separator)" />
               <XAxis
                 dataKey="step"
+                ticks={pickTicks(chartData, chartWidth)}
+                interval={0}
                 tickFormatter={(step: number) => tickLabel(chartData[step])}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'var(--muted)', fontSize: 12 }}
-                minTickGap={12}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'var(--muted)', fontSize: 12 }}
-                width={36}
+                width={Y_AXIS_WIDTH}
               />
               <ReferenceLine y={0} stroke="var(--muted)" />
               {/* Only the crosshair and active dots: values are in the readout. */}
