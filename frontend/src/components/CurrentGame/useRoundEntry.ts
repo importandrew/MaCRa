@@ -2,15 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { GameData, Outcome } from '../../models/GameData';
-import { GameStatusResponse } from '../../providers/game/gameDataApi';
 import { getStoredEventId } from '../../providers/event/eventConstants';
-import {
-  fetchWithStatus,
-  GetRequest,
-  PostRequest,
-  eventGamePath,
-  eventPath,
-} from '../Request';
+import { fetchWithStatus, PostRequest, eventPath } from '../Request';
 import { showToast } from '../Toast';
 
 export const MIN_HAND = 8;
@@ -25,7 +18,8 @@ export type PenaltyType = Outcome.Penalty | Outcome.FalseMahjong;
 // values in the center of the table, and the +/− marks next to each seat.
 // table is the game as the screen shows it; an entry is refused when the
 // server's game has moved on since, and onStale then refreshes the table and
-// returns it (null if it can't be loaded).
+// returns it (null if it can't be loaded, e.g. the game has ended: onStale
+// tells the player then).
 export function useRoundEntry(
   table: GameData | null,
   onSubmitted: (data: GameData) => void,
@@ -96,27 +90,6 @@ export function useRoundEntry(
 
   const submit = () => run(send);
 
-  // showGameGone tells the player why their game is gone: an ended game opens
-  // its result, an aborted one the home page.
-  const showGameGone = async (eventId: number, gameId: number) => {
-    const { data } = await fetchWithStatus<GameStatusResponse>(
-      GetRequest(eventGamePath(eventId, gameId, '/status')),
-      { isToastEnabled: false }
-    );
-
-    if (data?.status === 'ended') {
-      showToast({ title: 'The game has ended', variant: 'warning' });
-      navigate('/last');
-      return;
-    }
-    if (data?.status === 'aborted') {
-      showToast({ title: 'The game was aborted', variant: 'warning' });
-      navigate('/');
-      return;
-    }
-    showToast({ title: 'Error: game not found', variant: 'danger' });
-  };
-
   const send = async () => {
     const eventId = getStoredEventId();
     if (!eventId || !outcome || !table) return;
@@ -143,9 +116,9 @@ export function useRoundEntry(
     });
 
     // 404: the player has no live game any more: someone else entered the
-    // last round, finished or aborted it.
+    // last round, finished or aborted it. The refresh tells them which.
     if (status === 404) {
-      await showGameGone(eventId, table.id);
+      await onStale();
       return;
     }
 
@@ -154,10 +127,7 @@ export function useRoundEntry(
     // now and let the player decide whether to enter it again.
     if (status === 409) {
       const fresh = await onStale();
-      if (!fresh) {
-        await showGameGone(eventId, table.id);
-        return;
-      }
+      if (!fresh) return;
       showToast({
         title: staleTitle(table, fresh),
         description: 'Check the refreshed table and enter again if needed.',

@@ -137,7 +137,7 @@ Applies to regular events; tournament games will get their own rules.
 ### The end of a game
 
 - After the 16th round the game ends by itself and the result page (`/last`) opens: final scores, chart, log, "Play again".
-- If the game has ended while a player's table was still open (another player entered the last round, or it was finished), their next entry shows "The game has ended" and opens the result page; if it was aborted, "The game was aborted" and the home page.
+- If the game has ended while a player's table was still open (another player entered the last round, or it was finished), their next entry or Refresh shows "The game has ended" and opens the result page; if it was aborted, "The game was aborted" and the home page.
 - A referee can undo the last round within an hour after the end; the game becomes live again. After that the result is final.
 - **Abandoned games**: a game left live (players walked away) blocks its players and the event's finish. Staff see a mark on live games with no new round for more than ~3 hours and decide themselves (abort or finish); nothing happens automatically.
 
