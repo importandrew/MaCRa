@@ -203,3 +203,10 @@ Applies to regular events; tournament games will get their own rules.
 - "Settings" in the user menu (for visitors too). Profile is about the account; Settings are about the app on this device.
 - Language (English and Russian for a start; from the browser language on the first visit), theme (light / dark / system), keep the screen on at the table (on by default, only on the game screen), default position of the Auto-refresh switches, larger text.
 - All settings are stored on the device. The language is also saved in the account of a signed-in user, so emails come in that language: changing it while signed in updates both; on a new device with no choice yet, the account's language is used.
+
+### Screen sizes
+
+- Phones come first; the desktop layout must keep working too.
+- The narrowest supported width is 320 CSS px (the WCAG 2.1 reflow minimum; e.g. iPhone SE 1st gen). From 320 px up, every page works without horizontal scrolling and nothing is cut off.
+- Narrower screens (e.g. 280 px on the cover screen of a folding phone) are best effort: sideways scrolling is acceptable there, and cheap fixes are welcome.
+- UI changes are checked at 320 px, at a common phone width (360–390 px) and on desktop.

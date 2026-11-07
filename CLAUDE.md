@@ -27,7 +27,7 @@ The rules above still apply in full. Put personal overrides in `.claude/settings
 
 `docs/user-scenarios.md` is the agreed, desired behavior of the app, area by area. Read the relevant area before changing what users see or may do; if the code and the file disagree, raise it with the owner instead of picking one silently. Principles that apply everywhere:
 
-- Mobile first (most users are on phones). Game screens avoid the keyboard: steppers and toggles, players picked by seat.
+- Mobile first (most users are on phones); supported from 320 px wide. Game screens avoid the keyboard: steppers and toggles, players picked by seat.
 - At the table, scores change only when the player taps Refresh or enters a round; elsewhere auto-refresh is an opt-in switch.
 - The event owner always has staff rights; a player always sees their own games while they can open the event; without access to an event, nothing in it is visible.
 - An event's game rules freeze after its first game, and each game is replayed with the rules it started with; permissions can change at any time.
