@@ -16,6 +16,7 @@ type Game struct {
 	round          int
 	rules          Rules
 	score          models.GameScore
+	logSize        int // round log entries applied: results and penalties
 }
 
 type Config struct {
@@ -67,6 +68,13 @@ func (g *Game) Status() models.GameStatus {
 
 func (g *Game) Round() int {
 	return g.round
+}
+
+// LogSize returns the number of round log entries applied to the game: round
+// results, penalties and false mahjongs. Clients send it back with a new entry
+// so that an entry made from an outdated table is refused.
+func (g *Game) LogSize() int {
+	return g.logSize
 }
 
 func (g *Game) Score() models.GameScore {

@@ -8,6 +8,7 @@ import {
   TextField,
 } from '@heroui/react';
 import { FormEvent, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import {
   CONTENT_REACH_OPTIONS,
@@ -41,7 +42,7 @@ export default function EventCreate() {
   const [visibility, setVisibility] = useState<EventVisibility>('private');
   const [ratingsReach, setRatingsReach] = useState<ContentReach>('members');
   const [gamesReach, setGamesReach] = useState<ContentReach>('members');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isPending: isSubmitting, run } = useSubmitOnce();
 
   const publicReachDisabled = visibility === 'private';
   const isReachOptionDisabled = (value: ContentReach) =>
@@ -54,10 +55,12 @@ export default function EventCreate() {
     setGamesReach(reach);
   };
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    void run(submit);
+  };
 
+  const submit = async () => {
     const id = await createEvent({
       type,
       name: name.trim(),
@@ -66,8 +69,6 @@ export default function EventCreate() {
       ratings_reach: ratingsReach,
       games_reach: gamesReach,
     });
-
-    setIsSubmitting(false);
 
     if (!id) return;
 

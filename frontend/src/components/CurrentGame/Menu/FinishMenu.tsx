@@ -1,7 +1,7 @@
 import { Button, useOverlayState } from '@heroui/react';
 import { PostRequest, authFetch, eventGamePath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
-import { useState } from 'react';
+import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import { WarningIcon } from '../../Icons/WarningIcon';
 import Confirm from '../../Confirm';
@@ -15,7 +15,7 @@ export default function FinishMenu({
   canFinish?: boolean;
 }) {
   const navigate = useNavigate();
-  const [isFinishing, setIsFinishing] = useState(false);
+  const { isPending: isFinishing, run } = useSubmitOnce();
   const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
   const handleFinish = async () => {
@@ -24,18 +24,13 @@ export default function FinishMenu({
     const eventId = getStoredEventId();
     if (!eventId) return;
 
-    setIsFinishing(true);
     const finishRequest = PostRequest(
       eventGamePath(eventId, gameId, '/finish')
     );
     const data = await authFetch<null>(finishRequest);
 
-    if (!data) {
-      setIsFinishing(false);
-      return;
-    }
+    if (!data) return;
 
-    setIsFinishing(false);
     showToast({
       title: 'Game finished',
       variant: 'warning',
@@ -63,7 +58,7 @@ export default function FinishMenu({
         onClose={onClose}
         onConfirm={() => {
           onClose();
-          handleFinish();
+          void run(handleFinish);
         }}
         isOpen={isOpen}
         headerText="Confirm finish game"

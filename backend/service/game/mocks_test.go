@@ -17,10 +17,19 @@ func NewMockGameRepo(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockGameRepo {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockGameRepo{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -73,7 +82,7 @@ type MockGameRepo_CurrentGame_Call struct {
 //   - ctx context.Context
 //   - playerID int
 //   - eventID int
-func (_e *MockGameRepo_Expecter) CurrentGame(ctx interface{}, playerID interface{}, eventID interface{}) *MockGameRepo_CurrentGame_Call {
+func (_e *MockGameRepo_Expecter) CurrentGame(ctx any, playerID any, eventID any) *MockGameRepo_CurrentGame_Call {
 	return &MockGameRepo_CurrentGame_Call{Call: _e.mock.On("CurrentGame", ctx, playerID, eventID)}
 }
 
@@ -135,7 +144,7 @@ type MockGameRepo_DeleteLastRound_Call struct {
 // DeleteLastRound is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameRepo_Expecter) DeleteLastRound(ctx interface{}, gameID interface{}) *MockGameRepo_DeleteLastRound_Call {
+func (_e *MockGameRepo_Expecter) DeleteLastRound(ctx any, gameID any) *MockGameRepo_DeleteLastRound_Call {
 	return &MockGameRepo_DeleteLastRound_Call{Call: _e.mock.On("DeleteLastRound", ctx, gameID)}
 }
 
@@ -201,7 +210,7 @@ type MockGameRepo_EventID_Call struct {
 // EventID is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameRepo_Expecter) EventID(ctx interface{}, gameID interface{}) *MockGameRepo_EventID_Call {
+func (_e *MockGameRepo_Expecter) EventID(ctx any, gameID any) *MockGameRepo_EventID_Call {
 	return &MockGameRepo_EventID_Call{Call: _e.mock.On("EventID", ctx, gameID)}
 }
 
@@ -258,7 +267,7 @@ type MockGameRepo_Finalize_Call struct {
 // Finalize is a helper method to define mock.On call
 //   - ctx context.Context
 //   - data models.FinalGameData
-func (_e *MockGameRepo_Expecter) Finalize(ctx interface{}, data interface{}) *MockGameRepo_Finalize_Call {
+func (_e *MockGameRepo_Expecter) Finalize(ctx any, data any) *MockGameRepo_Finalize_Call {
 	return &MockGameRepo_Finalize_Call{Call: _e.mock.On("Finalize", ctx, data)}
 }
 
@@ -326,7 +335,7 @@ type MockGameRepo_GameLog_Call struct {
 // GameLog is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameRepo_Expecter) GameLog(ctx interface{}, gameID interface{}) *MockGameRepo_GameLog_Call {
+func (_e *MockGameRepo_Expecter) GameLog(ctx any, gameID any) *MockGameRepo_GameLog_Call {
 	return &MockGameRepo_GameLog_Call{Call: _e.mock.On("GameLog", ctx, gameID)}
 }
 
@@ -392,7 +401,7 @@ type MockGameRepo_GameResult_Call struct {
 // GameResult is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameRepo_Expecter) GameResult(ctx interface{}, gameID interface{}) *MockGameRepo_GameResult_Call {
+func (_e *MockGameRepo_Expecter) GameResult(ctx any, gameID any) *MockGameRepo_GameResult_Call {
 	return &MockGameRepo_GameResult_Call{Call: _e.mock.On("GameResult", ctx, gameID)}
 }
 
@@ -460,7 +469,7 @@ type MockGameRepo_GameResults_Call struct {
 // GameResults is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameIDs []int
-func (_e *MockGameRepo_Expecter) GameResults(ctx interface{}, gameIDs interface{}) *MockGameRepo_GameResults_Call {
+func (_e *MockGameRepo_Expecter) GameResults(ctx any, gameIDs any) *MockGameRepo_GameResults_Call {
 	return &MockGameRepo_GameResults_Call{Call: _e.mock.On("GameResults", ctx, gameIDs)}
 }
 
@@ -527,7 +536,7 @@ type MockGameRepo_IsPlayerInGame_Call struct {
 //   - ctx context.Context
 //   - gameID int
 //   - playerID int
-func (_e *MockGameRepo_Expecter) IsPlayerInGame(ctx interface{}, gameID interface{}, playerID interface{}) *MockGameRepo_IsPlayerInGame_Call {
+func (_e *MockGameRepo_Expecter) IsPlayerInGame(ctx any, gameID any, playerID any) *MockGameRepo_IsPlayerInGame_Call {
 	return &MockGameRepo_IsPlayerInGame_Call{Call: _e.mock.On("IsPlayerInGame", ctx, gameID, playerID)}
 }
 
@@ -599,7 +608,7 @@ type MockGameRepo_LastGame_Call struct {
 //   - ctx context.Context
 //   - playerID int
 //   - eventID int
-func (_e *MockGameRepo_Expecter) LastGame(ctx interface{}, playerID interface{}, eventID interface{}) *MockGameRepo_LastGame_Call {
+func (_e *MockGameRepo_Expecter) LastGame(ctx any, playerID any, eventID any) *MockGameRepo_LastGame_Call {
 	return &MockGameRepo_LastGame_Call{Call: _e.mock.On("LastGame", ctx, playerID, eventID)}
 }
 
@@ -671,7 +680,7 @@ type MockGameRepo_NewGame_Call struct {
 //   - ctx context.Context
 //   - seating [4]int
 //   - eventID int
-func (_e *MockGameRepo_Expecter) NewGame(ctx interface{}, seating interface{}, eventID interface{}) *MockGameRepo_NewGame_Call {
+func (_e *MockGameRepo_Expecter) NewGame(ctx any, seating any, eventID any) *MockGameRepo_NewGame_Call {
 	return &MockGameRepo_NewGame_Call{Call: _e.mock.On("NewGame", ctx, seating, eventID)}
 }
 
@@ -742,7 +751,7 @@ type MockGameRepo_Players_Call struct {
 // Players is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameRepo_Expecter) Players(ctx interface{}, gameID interface{}) *MockGameRepo_Players_Call {
+func (_e *MockGameRepo_Expecter) Players(ctx any, gameID any) *MockGameRepo_Players_Call {
 	return &MockGameRepo_Players_Call{Call: _e.mock.On("Players", ctx, gameID)}
 }
 
@@ -800,7 +809,7 @@ type MockGameRepo_SaveRoundOutcome_Call struct {
 //   - ctx context.Context
 //   - gameID int
 //   - data models.RoundData
-func (_e *MockGameRepo_Expecter) SaveRoundOutcome(ctx interface{}, gameID interface{}, data interface{}) *MockGameRepo_SaveRoundOutcome_Call {
+func (_e *MockGameRepo_Expecter) SaveRoundOutcome(ctx any, gameID any, data any) *MockGameRepo_SaveRoundOutcome_Call {
 	return &MockGameRepo_SaveRoundOutcome_Call{Call: _e.mock.On("SaveRoundOutcome", ctx, gameID, data)}
 }
 
@@ -863,7 +872,7 @@ type MockGameRepo_SetStatus_Call struct {
 //   - ctx context.Context
 //   - gameID int
 //   - status models.GameStatus
-func (_e *MockGameRepo_Expecter) SetStatus(ctx interface{}, gameID interface{}, status interface{}) *MockGameRepo_SetStatus_Call {
+func (_e *MockGameRepo_Expecter) SetStatus(ctx any, gameID any, status any) *MockGameRepo_SetStatus_Call {
 	return &MockGameRepo_SetStatus_Call{Call: _e.mock.On("SetStatus", ctx, gameID, status)}
 }
 
@@ -934,7 +943,7 @@ type MockGameRepo_Status_Call struct {
 // Status is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameRepo_Expecter) Status(ctx interface{}, gameID interface{}) *MockGameRepo_Status_Call {
+func (_e *MockGameRepo_Expecter) Status(ctx any, gameID any) *MockGameRepo_Status_Call {
 	return &MockGameRepo_Status_Call{Call: _e.mock.On("Status", ctx, gameID)}
 }
 
@@ -991,7 +1000,7 @@ type MockGameRepo_Unfinalize_Call struct {
 // Unfinalize is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameRepo_Expecter) Unfinalize(ctx interface{}, gameID interface{}) *MockGameRepo_Unfinalize_Call {
+func (_e *MockGameRepo_Expecter) Unfinalize(ctx any, gameID any) *MockGameRepo_Unfinalize_Call {
 	return &MockGameRepo_Unfinalize_Call{Call: _e.mock.On("Unfinalize", ctx, gameID)}
 }
 
@@ -1029,10 +1038,19 @@ func NewMockPlayerRepo(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockPlayerRepo {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockPlayerRepo{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -1084,7 +1102,7 @@ type MockPlayerRepo_Get_Call struct {
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id int
-func (_e *MockPlayerRepo_Expecter) Get(ctx interface{}, id interface{}) *MockPlayerRepo_Get_Call {
+func (_e *MockPlayerRepo_Expecter) Get(ctx any, id any) *MockPlayerRepo_Get_Call {
 	return &MockPlayerRepo_Get_Call{Call: _e.mock.On("Get", ctx, id)}
 }
 
@@ -1122,10 +1140,19 @@ func NewMockGameEngine(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockGameEngine {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockGameEngine{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -1167,7 +1194,7 @@ type MockGameEngine_CurrentWind_Call struct {
 
 // CurrentWind is a helper method to define mock.On call
 //   - id int
-func (_e *MockGameEngine_Expecter) CurrentWind(id interface{}) *MockGameEngine_CurrentWind_Call {
+func (_e *MockGameEngine_Expecter) CurrentWind(id any) *MockGameEngine_CurrentWind_Call {
 	return &MockGameEngine_CurrentWind_Call{Call: _e.mock.On("CurrentWind", id)}
 }
 
@@ -1265,7 +1292,7 @@ type MockGameEngine_EnterRoundResult_Call struct {
 //   - hand int
 //   - loser int
 //   - winner int
-func (_e *MockGameEngine_Expecter) EnterRoundResult(outcome interface{}, hand interface{}, loser interface{}, winner interface{}) *MockGameEngine_EnterRoundResult_Call {
+func (_e *MockGameEngine_Expecter) EnterRoundResult(outcome any, hand any, loser any, winner any) *MockGameEngine_EnterRoundResult_Call {
 	return &MockGameEngine_EnterRoundResult_Call{Call: _e.mock.On("EnterRoundResult", outcome, hand, loser, winner)}
 }
 
@@ -1333,7 +1360,7 @@ type MockGameEngine_FalseMahjong_Call struct {
 //   - loser int
 //   - value int
 //   - forceNextRound bool
-func (_e *MockGameEngine_Expecter) FalseMahjong(loser interface{}, value interface{}, forceNextRound interface{}) *MockGameEngine_FalseMahjong_Call {
+func (_e *MockGameEngine_Expecter) FalseMahjong(loser any, value any, forceNextRound any) *MockGameEngine_FalseMahjong_Call {
 	return &MockGameEngine_FalseMahjong_Call{Call: _e.mock.On("FalseMahjong", loser, value, forceNextRound)}
 }
 
@@ -1482,7 +1509,7 @@ type MockGameEngine_Left_Call struct {
 
 // Left is a helper method to define mock.On call
 //   - id int
-func (_e *MockGameEngine_Expecter) Left(id interface{}) *MockGameEngine_Left_Call {
+func (_e *MockGameEngine_Expecter) Left(id any) *MockGameEngine_Left_Call {
 	return &MockGameEngine_Left_Call{Call: _e.mock.On("Left", id)}
 }
 
@@ -1505,6 +1532,50 @@ func (_c *MockGameEngine_Left_Call) Return(n int) *MockGameEngine_Left_Call {
 }
 
 func (_c *MockGameEngine_Left_Call) RunAndReturn(run func(id int) int) *MockGameEngine_Left_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LogSize provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) LogSize() int {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for LogSize")
+	}
+
+	var r0 int
+	if returnFunc, ok := ret.Get(0).(func() int); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	return r0
+}
+
+// MockGameEngine_LogSize_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LogSize'
+type MockGameEngine_LogSize_Call struct {
+	*mock.Call
+}
+
+// LogSize is a helper method to define mock.On call
+func (_e *MockGameEngine_Expecter) LogSize() *MockGameEngine_LogSize_Call {
+	return &MockGameEngine_LogSize_Call{Call: _e.mock.On("LogSize")}
+}
+
+func (_c *MockGameEngine_LogSize_Call) Run(run func()) *MockGameEngine_LogSize_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_LogSize_Call) Return(n int) *MockGameEngine_LogSize_Call {
+	_c.Call.Return(n)
+	return _c
+}
+
+func (_c *MockGameEngine_LogSize_Call) RunAndReturn(run func() int) *MockGameEngine_LogSize_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1577,7 +1648,7 @@ type MockGameEngine_Opposite_Call struct {
 
 // Opposite is a helper method to define mock.On call
 //   - id int
-func (_e *MockGameEngine_Expecter) Opposite(id interface{}) *MockGameEngine_Opposite_Call {
+func (_e *MockGameEngine_Expecter) Opposite(id any) *MockGameEngine_Opposite_Call {
 	return &MockGameEngine_Opposite_Call{Call: _e.mock.On("Opposite", id)}
 }
 
@@ -1630,7 +1701,7 @@ type MockGameEngine_Penalty_Call struct {
 //   - loser int
 //   - value int
 //   - forceNextRound bool
-func (_e *MockGameEngine_Expecter) Penalty(loser interface{}, value interface{}, forceNextRound interface{}) *MockGameEngine_Penalty_Call {
+func (_e *MockGameEngine_Expecter) Penalty(loser any, value any, forceNextRound any) *MockGameEngine_Penalty_Call {
 	return &MockGameEngine_Penalty_Call{Call: _e.mock.On("Penalty", loser, value, forceNextRound)}
 }
 
@@ -1692,7 +1763,7 @@ type MockGameEngine_PlayerBySeatInRound_Call struct {
 // PlayerBySeatInRound is a helper method to define mock.On call
 //   - round int
 //   - seat models.Wind
-func (_e *MockGameEngine_Expecter) PlayerBySeatInRound(round interface{}, seat interface{}) *MockGameEngine_PlayerBySeatInRound_Call {
+func (_e *MockGameEngine_Expecter) PlayerBySeatInRound(round any, seat any) *MockGameEngine_PlayerBySeatInRound_Call {
 	return &MockGameEngine_PlayerBySeatInRound_Call{Call: _e.mock.On("PlayerBySeatInRound", round, seat)}
 }
 
@@ -1748,7 +1819,7 @@ type MockGameEngine_PlayerByStartingSeat_Call struct {
 
 // PlayerByStartingSeat is a helper method to define mock.On call
 //   - seat models.Wind
-func (_e *MockGameEngine_Expecter) PlayerByStartingSeat(seat interface{}) *MockGameEngine_PlayerByStartingSeat_Call {
+func (_e *MockGameEngine_Expecter) PlayerByStartingSeat(seat any) *MockGameEngine_PlayerByStartingSeat_Call {
 	return &MockGameEngine_PlayerByStartingSeat_Call{Call: _e.mock.On("PlayerByStartingSeat", seat)}
 }
 
@@ -1800,7 +1871,7 @@ type MockGameEngine_PlayerByWindInRound_Call struct {
 // PlayerByWindInRound is a helper method to define mock.On call
 //   - round int
 //   - wind models.Wind
-func (_e *MockGameEngine_Expecter) PlayerByWindInRound(round interface{}, wind interface{}) *MockGameEngine_PlayerByWindInRound_Call {
+func (_e *MockGameEngine_Expecter) PlayerByWindInRound(round any, wind any) *MockGameEngine_PlayerByWindInRound_Call {
 	return &MockGameEngine_PlayerByWindInRound_Call{Call: _e.mock.On("PlayerByWindInRound", round, wind)}
 }
 
@@ -1902,7 +1973,7 @@ type MockGameEngine_Right_Call struct {
 
 // Right is a helper method to define mock.On call
 //   - id int
-func (_e *MockGameEngine_Expecter) Right(id interface{}) *MockGameEngine_Right_Call {
+func (_e *MockGameEngine_Expecter) Right(id any) *MockGameEngine_Right_Call {
 	return &MockGameEngine_Right_Call{Call: _e.mock.On("Right", id)}
 }
 
@@ -2043,7 +2114,7 @@ type MockGameEngine_RoundStartWind_Call struct {
 
 // RoundStartWind is a helper method to define mock.On call
 //   - id int
-func (_e *MockGameEngine_Expecter) RoundStartWind(id interface{}) *MockGameEngine_RoundStartWind_Call {
+func (_e *MockGameEngine_Expecter) RoundStartWind(id any) *MockGameEngine_RoundStartWind_Call {
 	return &MockGameEngine_RoundStartWind_Call{Call: _e.mock.On("RoundStartWind", id)}
 }
 
@@ -2140,7 +2211,7 @@ type MockGameEngine_StartWind_Call struct {
 
 // StartWind is a helper method to define mock.On call
 //   - id int
-func (_e *MockGameEngine_Expecter) StartWind(id interface{}) *MockGameEngine_StartWind_Call {
+func (_e *MockGameEngine_Expecter) StartWind(id any) *MockGameEngine_StartWind_Call {
 	return &MockGameEngine_StartWind_Call{Call: _e.mock.On("StartWind", id)}
 }
 

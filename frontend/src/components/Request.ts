@@ -10,6 +10,8 @@ export type FetchResponse<T> = {
 type FetchOptions = {
   isToastEnabled?: boolean;
   redirectOn401?: boolean;
+  // quietStatuses are error statuses the caller reports itself: no toast.
+  quietStatuses?: number[];
 };
 
 // sessionGeneration grows each time an expired session is handled. A 401 to
@@ -67,7 +69,11 @@ async function fetchWithStatus<T>(
   request: Request,
   params?: FetchOptions
 ): Promise<FetchResponse<T>> {
-  const { isToastEnabled = true, redirectOn401 = true } = params || {};
+  const {
+    isToastEnabled = true,
+    redirectOn401 = true,
+    quietStatuses = [],
+  } = params || {};
 
   try {
     // A 401 from a public endpoint means the backend cleared a stale auth
@@ -97,7 +103,11 @@ async function fetchWithStatus<T>(
       const data = await response
         .json()
         .catch(() => ({ error: 'Unknown error' }));
-      if (isToastEnabled && response.status !== 403) {
+      if (
+        isToastEnabled &&
+        response.status !== 403 &&
+        !quietStatuses.includes(response.status)
+      ) {
         showToast({
           title: `Error: ${data.error}`,
           variant: 'danger',

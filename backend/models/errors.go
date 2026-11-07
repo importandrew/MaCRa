@@ -27,7 +27,9 @@ var (
 
 	ErrJWTKeyEmpty = errors.New("jwt key is empty")
 
-	ErrOutcomeExists = errors.New("non-penalty outcome already exists")
+	// ErrRoundAlreadyEntered means the entry was made from an outdated table:
+	// someone else has entered a round or a penalty since.
+	ErrRoundAlreadyEntered = errors.New("the table has changed: this round has already been entered")
 
 	ErrValidatePlayers = errors.New("validate game players")
 
@@ -87,7 +89,7 @@ var Errors = map[error]int{
 
 	// 409
 	ErrPlayerExists:         http.StatusConflict,
-	ErrOutcomeExists:        http.StatusConflict,
+	ErrRoundAlreadyEntered:  http.StatusConflict,
 	ErrMemberInCurrentGame:  http.StatusConflict,
 	ErrEventAlreadyFinished: http.StatusConflict,
 	ErrEventHasOngoingGames: http.StatusConflict,

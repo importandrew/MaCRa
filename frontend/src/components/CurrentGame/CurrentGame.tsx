@@ -10,6 +10,8 @@ import UserAvatar from '../UserAvatar';
 import TableMenu from './Menu/TableMenu';
 import { RoundEntryPanel, SeatMarks } from './RoundEntry';
 import { useRoundEntry } from './useRoundEntry';
+import { useShowGameGone } from './useShowGameGone';
+import { getStoredEventId } from '../../providers/event/eventConstants';
 import './CurrentGame.css';
 
 export default function CurrentGame() {
@@ -17,10 +19,14 @@ export default function CurrentGame() {
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [isEntryOpen, setIsEntryOpen] = useState(false);
-  const entry = useRoundEntry((next) => {
-    setRoundData(next);
-    setIsEntryOpen(false);
-  });
+  const entry = useRoundEntry(
+    roundData,
+    (next) => {
+      setRoundData(next);
+      setIsEntryOpen(false);
+    },
+    () => onRefresh()
+  );
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}
   );
@@ -41,10 +47,18 @@ export default function CurrentGame() {
   // The round entry clears after a submit (in useRoundEntry) and on refresh,
   // including undo, as agreed with the owner. Closing it with the kanji keeps
   // the choices.
-  const onRefresh = () => {
+  // A 404 for a table on screen means its game has ended or been aborted:
+  // open the result (or home) instead of a loading error.
+  const showGameGone = useShowGameGone();
+  const onRefresh = async () => {
     entry.reset();
     setIsEntryOpen(false);
-    return refetch();
+    const { data: fresh, status } = await refetch();
+    const eventId = getStoredEventId();
+    if (status === 404 && roundData && eventId) {
+      await showGameGone(eventId, roundData.id);
+    }
+    return fresh;
   };
 
   useEffect(() => {

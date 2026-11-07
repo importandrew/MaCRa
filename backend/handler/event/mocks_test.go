@@ -17,10 +17,19 @@ func NewMockGameService(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockGameService {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockGameService{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -39,8 +48,8 @@ func (_m *MockGameService) EXPECT() *MockGameService_Expecter {
 }
 
 // EnterRound provides a mock function for the type MockGameService
-func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int) (models.GameNow, error) {
-	ret := _mock.Called(ctx, playerID, outcome, value, winnerID, loserID, eventID)
+func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize int) (models.GameNow, error) {
+	ret := _mock.Called(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 
 	if len(ret) == 0 {
 		panic("no return value specified for EnterRound")
@@ -48,16 +57,16 @@ func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outc
 
 	var r0 models.GameNow
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int) (models.GameNow, error)); ok {
-		return returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int, int) (models.GameNow, error)); ok {
+		return returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int) models.GameNow); ok {
-		r0 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Outcome, int, int, int, int, int) models.GameNow); ok {
+		r0 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 	} else {
 		r0 = ret.Get(0).(models.GameNow)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Outcome, int, int, int, int) error); ok {
-		r1 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Outcome, int, int, int, int, int) error); ok {
+		r1 = returnFunc(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -77,11 +86,12 @@ type MockGameService_EnterRound_Call struct {
 //   - winnerID int
 //   - loserID int
 //   - eventID int
-func (_e *MockGameService_Expecter) EnterRound(ctx interface{}, playerID interface{}, outcome interface{}, value interface{}, winnerID interface{}, loserID interface{}, eventID interface{}) *MockGameService_EnterRound_Call {
-	return &MockGameService_EnterRound_Call{Call: _e.mock.On("EnterRound", ctx, playerID, outcome, value, winnerID, loserID, eventID)}
+//   - seenLogSize int
+func (_e *MockGameService_Expecter) EnterRound(ctx any, playerID any, outcome any, value any, winnerID any, loserID any, eventID any, seenLogSize any) *MockGameService_EnterRound_Call {
+	return &MockGameService_EnterRound_Call{Call: _e.mock.On("EnterRound", ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)}
 }
 
-func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int)) *MockGameService_EnterRound_Call {
+func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize int)) *MockGameService_EnterRound_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -111,6 +121,10 @@ func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, pla
 		if args[6] != nil {
 			arg6 = args[6].(int)
 		}
+		var arg7 int
+		if args[7] != nil {
+			arg7 = args[7].(int)
+		}
 		run(
 			arg0,
 			arg1,
@@ -119,6 +133,7 @@ func (_c *MockGameService_EnterRound_Call) Run(run func(ctx context.Context, pla
 			arg4,
 			arg5,
 			arg6,
+			arg7,
 		)
 	})
 	return _c
@@ -129,7 +144,7 @@ func (_c *MockGameService_EnterRound_Call) Return(gameNow models.GameNow, err er
 	return _c
 }
 
-func (_c *MockGameService_EnterRound_Call) RunAndReturn(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int) (models.GameNow, error)) *MockGameService_EnterRound_Call {
+func (_c *MockGameService_EnterRound_Call) RunAndReturn(run func(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize int) (models.GameNow, error)) *MockGameService_EnterRound_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -168,7 +183,7 @@ type MockGameService_EventID_Call struct {
 // EventID is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameService_Expecter) EventID(ctx interface{}, gameID interface{}) *MockGameService_EventID_Call {
+func (_e *MockGameService_Expecter) EventID(ctx any, gameID any) *MockGameService_EventID_Call {
 	return &MockGameService_EventID_Call{Call: _e.mock.On("EventID", ctx, gameID)}
 }
 
@@ -225,7 +240,7 @@ type MockGameService_Finish_Call struct {
 // Finish is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameService_Expecter) Finish(ctx interface{}, gameID interface{}) *MockGameService_Finish_Call {
+func (_e *MockGameService_Expecter) Finish(ctx any, gameID any) *MockGameService_Finish_Call {
 	return &MockGameService_Finish_Call{Call: _e.mock.On("Finish", ctx, gameID)}
 }
 
@@ -291,7 +306,7 @@ type MockGameService_GameResult_Call struct {
 // GameResult is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameService_Expecter) GameResult(ctx interface{}, gameID interface{}) *MockGameService_GameResult_Call {
+func (_e *MockGameService_Expecter) GameResult(ctx any, gameID any) *MockGameService_GameResult_Call {
 	return &MockGameService_GameResult_Call{Call: _e.mock.On("GameResult", ctx, gameID)}
 }
 
@@ -358,7 +373,7 @@ type MockGameService_HUD_Call struct {
 //   - ctx context.Context
 //   - gameID int
 //   - linger int
-func (_e *MockGameService_Expecter) HUD(ctx interface{}, gameID interface{}, linger interface{}) *MockGameService_HUD_Call {
+func (_e *MockGameService_Expecter) HUD(ctx any, gameID any, linger any) *MockGameService_HUD_Call {
 	return &MockGameService_HUD_Call{Call: _e.mock.On("HUD", ctx, gameID, linger)}
 }
 
@@ -430,7 +445,7 @@ type MockGameService_LastGameResult_Call struct {
 //   - ctx context.Context
 //   - playerID int
 //   - eventID int
-func (_e *MockGameService_Expecter) LastGameResult(ctx interface{}, playerID interface{}, eventID interface{}) *MockGameService_LastGameResult_Call {
+func (_e *MockGameService_Expecter) LastGameResult(ctx any, playerID any, eventID any) *MockGameService_LastGameResult_Call {
 	return &MockGameService_LastGameResult_Call{Call: _e.mock.On("LastGameResult", ctx, playerID, eventID)}
 }
 
@@ -501,7 +516,7 @@ type MockGameService_Logs_Call struct {
 // Logs is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameService_Expecter) Logs(ctx interface{}, gameID interface{}) *MockGameService_Logs_Call {
+func (_e *MockGameService_Expecter) Logs(ctx any, gameID any) *MockGameService_Logs_Call {
 	return &MockGameService_Logs_Call{Call: _e.mock.On("Logs", ctx, gameID)}
 }
 
@@ -568,7 +583,7 @@ type MockGameService_Now_Call struct {
 //   - ctx context.Context
 //   - playerID int
 //   - eventID int
-func (_e *MockGameService_Expecter) Now(ctx interface{}, playerID interface{}, eventID interface{}) *MockGameService_Now_Call {
+func (_e *MockGameService_Expecter) Now(ctx any, playerID any, eventID any) *MockGameService_Now_Call {
 	return &MockGameService_Now_Call{Call: _e.mock.On("Now", ctx, playerID, eventID)}
 }
 
@@ -606,8 +621,8 @@ func (_c *MockGameService_Now_Call) RunAndReturn(run func(ctx context.Context, p
 }
 
 // Penalty provides a mock function for the type MockGameService
-func (_mock *MockGameService) Penalty(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int) (models.GameNow, error) {
-	ret := _mock.Called(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID)
+func (_mock *MockGameService) Penalty(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error) {
+	ret := _mock.Called(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Penalty")
@@ -615,16 +630,16 @@ func (_mock *MockGameService) Penalty(ctx context.Context, penaltyType models.Ou
 
 	var r0 models.GameNow
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int) (models.GameNow, error)); ok {
-		return returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int, int) (models.GameNow, error)); ok {
+		return returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int) models.GameNow); ok {
-		r0 = returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int, int) models.GameNow); ok {
+		r0 = returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 	} else {
 		r0 = ret.Get(0).(models.GameNow)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, models.Outcome, int, int, int, bool, int) error); ok {
-		r1 = returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, models.Outcome, int, int, int, bool, int, int) error); ok {
+		r1 = returnFunc(ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -644,11 +659,12 @@ type MockGameService_Penalty_Call struct {
 //   - value int
 //   - forceNextRound bool
 //   - eventID int
-func (_e *MockGameService_Expecter) Penalty(ctx interface{}, penaltyType interface{}, playerID interface{}, penalizedID interface{}, value interface{}, forceNextRound interface{}, eventID interface{}) *MockGameService_Penalty_Call {
-	return &MockGameService_Penalty_Call{Call: _e.mock.On("Penalty", ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID)}
+//   - seenLogSize int
+func (_e *MockGameService_Expecter) Penalty(ctx any, penaltyType any, playerID any, penalizedID any, value any, forceNextRound any, eventID any, seenLogSize any) *MockGameService_Penalty_Call {
+	return &MockGameService_Penalty_Call{Call: _e.mock.On("Penalty", ctx, penaltyType, playerID, penalizedID, value, forceNextRound, eventID, seenLogSize)}
 }
 
-func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int)) *MockGameService_Penalty_Call {
+func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize int)) *MockGameService_Penalty_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -678,6 +694,10 @@ func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, penalt
 		if args[6] != nil {
 			arg6 = args[6].(int)
 		}
+		var arg7 int
+		if args[7] != nil {
+			arg7 = args[7].(int)
+		}
 		run(
 			arg0,
 			arg1,
@@ -686,6 +706,7 @@ func (_c *MockGameService_Penalty_Call) Run(run func(ctx context.Context, penalt
 			arg4,
 			arg5,
 			arg6,
+			arg7,
 		)
 	})
 	return _c
@@ -696,7 +717,7 @@ func (_c *MockGameService_Penalty_Call) Return(gameNow models.GameNow, err error
 	return _c
 }
 
-func (_c *MockGameService_Penalty_Call) RunAndReturn(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int) (models.GameNow, error)) *MockGameService_Penalty_Call {
+func (_c *MockGameService_Penalty_Call) RunAndReturn(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error)) *MockGameService_Penalty_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -735,7 +756,7 @@ type MockGameService_Players_Call struct {
 // Players is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameService_Expecter) Players(ctx interface{}, gameID interface{}) *MockGameService_Players_Call {
+func (_e *MockGameService_Expecter) Players(ctx any, gameID any) *MockGameService_Players_Call {
 	return &MockGameService_Players_Call{Call: _e.mock.On("Players", ctx, gameID)}
 }
 
@@ -801,7 +822,7 @@ type MockGameService_Status_Call struct {
 // Status is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameService_Expecter) Status(ctx interface{}, gameID interface{}) *MockGameService_Status_Call {
+func (_e *MockGameService_Expecter) Status(ctx any, gameID any) *MockGameService_Status_Call {
 	return &MockGameService_Status_Call{Call: _e.mock.On("Status", ctx, gameID)}
 }
 
@@ -867,7 +888,7 @@ type MockGameService_ViewLive_Call struct {
 // ViewLive is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockGameService_Expecter) ViewLive(ctx interface{}, gameID interface{}) *MockGameService_ViewLive_Call {
+func (_e *MockGameService_Expecter) ViewLive(ctx any, gameID any) *MockGameService_ViewLive_Call {
 	return &MockGameService_ViewLive_Call{Call: _e.mock.On("ViewLive", ctx, gameID)}
 }
 
@@ -905,10 +926,19 @@ func NewMockEventService(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockEventService {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockEventService{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -951,7 +981,7 @@ type MockEventService_AbortGame_Call struct {
 // AbortGame is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockEventService_Expecter) AbortGame(ctx interface{}, gameID interface{}) *MockEventService_AbortGame_Call {
+func (_e *MockEventService_Expecter) AbortGame(ctx any, gameID any) *MockEventService_AbortGame_Call {
 	return &MockEventService_AbortGame_Call{Call: _e.mock.On("AbortGame", ctx, gameID)}
 }
 
@@ -1010,7 +1040,7 @@ type MockEventService_AddMemberRoles_Call struct {
 //   - eventID int
 //   - targetUserID int
 //   - roles []models.EventRole
-func (_e *MockEventService_Expecter) AddMemberRoles(ctx interface{}, eventID interface{}, targetUserID interface{}, roles interface{}) *MockEventService_AddMemberRoles_Call {
+func (_e *MockEventService_Expecter) AddMemberRoles(ctx any, eventID any, targetUserID any, roles any) *MockEventService_AddMemberRoles_Call {
 	return &MockEventService_AddMemberRoles_Call{Call: _e.mock.On("AddMemberRoles", ctx, eventID, targetUserID, roles)}
 }
 
@@ -1078,7 +1108,7 @@ type MockEventService_CanAccess_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - userID int
-func (_e *MockEventService_Expecter) CanAccess(ctx interface{}, eventID interface{}, userID interface{}) *MockEventService_CanAccess_Call {
+func (_e *MockEventService_Expecter) CanAccess(ctx any, eventID any, userID any) *MockEventService_CanAccess_Call {
 	return &MockEventService_CanAccess_Call{Call: _e.mock.On("CanAccess", ctx, eventID, userID)}
 }
 
@@ -1149,7 +1179,7 @@ type MockEventService_Create_Call struct {
 // Create is a helper method to define mock.On call
 //   - ctx context.Context
 //   - params models.EventCreateParams
-func (_e *MockEventService_Expecter) Create(ctx interface{}, params interface{}) *MockEventService_Create_Call {
+func (_e *MockEventService_Expecter) Create(ctx any, params any) *MockEventService_Create_Call {
 	return &MockEventService_Create_Call{Call: _e.mock.On("Create", ctx, params)}
 }
 
@@ -1206,7 +1236,7 @@ type MockEventService_Finish_Call struct {
 // Finish is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventService_Expecter) Finish(ctx interface{}, eventID interface{}) *MockEventService_Finish_Call {
+func (_e *MockEventService_Expecter) Finish(ctx any, eventID any) *MockEventService_Finish_Call {
 	return &MockEventService_Finish_Call{Call: _e.mock.On("Finish", ctx, eventID)}
 }
 
@@ -1274,7 +1304,7 @@ type MockEventService_GameHistory_Call struct {
 // GameHistory is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventService_Expecter) GameHistory(ctx interface{}, eventID interface{}) *MockEventService_GameHistory_Call {
+func (_e *MockEventService_Expecter) GameHistory(ctx any, eventID any) *MockEventService_GameHistory_Call {
 	return &MockEventService_GameHistory_Call{Call: _e.mock.On("GameHistory", ctx, eventID)}
 }
 
@@ -1340,7 +1370,7 @@ type MockEventService_Get_Call struct {
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventService_Expecter) Get(ctx interface{}, eventID interface{}) *MockEventService_Get_Call {
+func (_e *MockEventService_Expecter) Get(ctx any, eventID any) *MockEventService_Get_Call {
 	return &MockEventService_Get_Call{Call: _e.mock.On("Get", ctx, eventID)}
 }
 
@@ -1407,7 +1437,7 @@ type MockEventService_GetMe_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - userID int
-func (_e *MockEventService_Expecter) GetMe(ctx interface{}, eventID interface{}, userID interface{}) *MockEventService_GetMe_Call {
+func (_e *MockEventService_Expecter) GetMe(ctx any, eventID any, userID any) *MockEventService_GetMe_Call {
 	return &MockEventService_GetMe_Call{Call: _e.mock.On("GetMe", ctx, eventID, userID)}
 }
 
@@ -1445,8 +1475,8 @@ func (_c *MockEventService_GetMe_Call) RunAndReturn(run func(ctx context.Context
 }
 
 // HasCapability provides a mock function for the type MockEventService
-func (_mock *MockEventService) HasCapability(ctx context.Context, eventID int, userID int, gameID int, cap models.Capability) error {
-	ret := _mock.Called(ctx, eventID, userID, gameID, cap)
+func (_mock *MockEventService) HasCapability(ctx context.Context, eventID int, userID int, gameID int, capability models.Capability) error {
+	ret := _mock.Called(ctx, eventID, userID, gameID, capability)
 
 	if len(ret) == 0 {
 		panic("no return value specified for HasCapability")
@@ -1454,7 +1484,7 @@ func (_mock *MockEventService) HasCapability(ctx context.Context, eventID int, u
 
 	var r0 error
 	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, models.Capability) error); ok {
-		r0 = returnFunc(ctx, eventID, userID, gameID, cap)
+		r0 = returnFunc(ctx, eventID, userID, gameID, capability)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1471,12 +1501,12 @@ type MockEventService_HasCapability_Call struct {
 //   - eventID int
 //   - userID int
 //   - gameID int
-//   - cap models.Capability
-func (_e *MockEventService_Expecter) HasCapability(ctx interface{}, eventID interface{}, userID interface{}, gameID interface{}, cap interface{}) *MockEventService_HasCapability_Call {
-	return &MockEventService_HasCapability_Call{Call: _e.mock.On("HasCapability", ctx, eventID, userID, gameID, cap)}
+//   - capability models.Capability
+func (_e *MockEventService_Expecter) HasCapability(ctx any, eventID any, userID any, gameID any, capability any) *MockEventService_HasCapability_Call {
+	return &MockEventService_HasCapability_Call{Call: _e.mock.On("HasCapability", ctx, eventID, userID, gameID, capability)}
 }
 
-func (_c *MockEventService_HasCapability_Call) Run(run func(ctx context.Context, eventID int, userID int, gameID int, cap models.Capability)) *MockEventService_HasCapability_Call {
+func (_c *MockEventService_HasCapability_Call) Run(run func(ctx context.Context, eventID int, userID int, gameID int, capability models.Capability)) *MockEventService_HasCapability_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1514,7 +1544,7 @@ func (_c *MockEventService_HasCapability_Call) Return(err error) *MockEventServi
 	return _c
 }
 
-func (_c *MockEventService_HasCapability_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int, gameID int, cap models.Capability) error) *MockEventService_HasCapability_Call {
+func (_c *MockEventService_HasCapability_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int, gameID int, capability models.Capability) error) *MockEventService_HasCapability_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1556,7 +1586,7 @@ type MockEventService_ListGamesByStatus_Call struct {
 //   - status models.GameStatus
 //   - limit int
 //   - offset int
-func (_e *MockEventService_Expecter) ListGamesByStatus(ctx interface{}, eventID interface{}, status interface{}, limit interface{}, offset interface{}) *MockEventService_ListGamesByStatus_Call {
+func (_e *MockEventService_Expecter) ListGamesByStatus(ctx any, eventID any, status any, limit any, offset any) *MockEventService_ListGamesByStatus_Call {
 	return &MockEventService_ListGamesByStatus_Call{Call: _e.mock.On("ListGamesByStatus", ctx, eventID, status, limit, offset)}
 }
 
@@ -1639,7 +1669,7 @@ type MockEventService_ListMembers_Call struct {
 // ListMembers is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventService_Expecter) ListMembers(ctx interface{}, eventID interface{}) *MockEventService_ListMembers_Call {
+func (_e *MockEventService_Expecter) ListMembers(ctx any, eventID any) *MockEventService_ListMembers_Call {
 	return &MockEventService_ListMembers_Call{Call: _e.mock.On("ListMembers", ctx, eventID)}
 }
 
@@ -1707,7 +1737,7 @@ type MockEventService_ListVisible_Call struct {
 // ListVisible is a helper method to define mock.On call
 //   - ctx context.Context
 //   - userID int
-func (_e *MockEventService_Expecter) ListVisible(ctx interface{}, userID interface{}) *MockEventService_ListVisible_Call {
+func (_e *MockEventService_Expecter) ListVisible(ctx any, userID any) *MockEventService_ListVisible_Call {
 	return &MockEventService_ListVisible_Call{Call: _e.mock.On("ListVisible", ctx, userID)}
 }
 
@@ -1774,7 +1804,7 @@ type MockEventService_MainGameInfo_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - userID int
-func (_e *MockEventService_Expecter) MainGameInfo(ctx interface{}, eventID interface{}, userID interface{}) *MockEventService_MainGameInfo_Call {
+func (_e *MockEventService_Expecter) MainGameInfo(ctx any, eventID any, userID any) *MockEventService_MainGameInfo_Call {
 	return &MockEventService_MainGameInfo_Call{Call: _e.mock.On("MainGameInfo", ctx, eventID, userID)}
 }
 
@@ -1846,7 +1876,7 @@ type MockEventService_NewGame_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - playerIDs []int
-func (_e *MockEventService_Expecter) NewGame(ctx interface{}, eventID interface{}, playerIDs interface{}) *MockEventService_NewGame_Call {
+func (_e *MockEventService_Expecter) NewGame(ctx any, eventID any, playerIDs any) *MockEventService_NewGame_Call {
 	return &MockEventService_NewGame_Call{Call: _e.mock.On("NewGame", ctx, eventID, playerIDs)}
 }
 
@@ -1920,7 +1950,7 @@ type MockEventService_PlayerGameHistory_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - playerID int
-func (_e *MockEventService_Expecter) PlayerGameHistory(ctx interface{}, eventID interface{}, playerID interface{}) *MockEventService_PlayerGameHistory_Call {
+func (_e *MockEventService_Expecter) PlayerGameHistory(ctx any, eventID any, playerID any) *MockEventService_PlayerGameHistory_Call {
 	return &MockEventService_PlayerGameHistory_Call{Call: _e.mock.On("PlayerGameHistory", ctx, eventID, playerID)}
 }
 
@@ -1993,7 +2023,7 @@ type MockEventService_Ratings_Call struct {
 // Ratings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventService_Expecter) Ratings(ctx interface{}, eventID interface{}) *MockEventService_Ratings_Call {
+func (_e *MockEventService_Expecter) Ratings(ctx any, eventID any) *MockEventService_Ratings_Call {
 	return &MockEventService_Ratings_Call{Call: _e.mock.On("Ratings", ctx, eventID)}
 }
 
@@ -2051,7 +2081,7 @@ type MockEventService_RemoveMembers_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - targetUserIDs []int
-func (_e *MockEventService_Expecter) RemoveMembers(ctx interface{}, eventID interface{}, targetUserIDs interface{}) *MockEventService_RemoveMembers_Call {
+func (_e *MockEventService_Expecter) RemoveMembers(ctx any, eventID any, targetUserIDs any) *MockEventService_RemoveMembers_Call {
 	return &MockEventService_RemoveMembers_Call{Call: _e.mock.On("RemoveMembers", ctx, eventID, targetUserIDs)}
 }
 
@@ -2113,7 +2143,7 @@ type MockEventService_UndoLastRound_Call struct {
 // UndoLastRound is a helper method to define mock.On call
 //   - ctx context.Context
 //   - gameID int
-func (_e *MockEventService_Expecter) UndoLastRound(ctx interface{}, gameID interface{}) *MockEventService_UndoLastRound_Call {
+func (_e *MockEventService_Expecter) UndoLastRound(ctx any, gameID any) *MockEventService_UndoLastRound_Call {
 	return &MockEventService_UndoLastRound_Call{Call: _e.mock.On("UndoLastRound", ctx, gameID)}
 }
 
@@ -2170,7 +2200,7 @@ type MockEventService_Update_Call struct {
 // Update is a helper method to define mock.On call
 //   - ctx context.Context
 //   - params models.UpdateEventParams
-func (_e *MockEventService_Expecter) Update(ctx interface{}, params interface{}) *MockEventService_Update_Call {
+func (_e *MockEventService_Expecter) Update(ctx any, params any) *MockEventService_Update_Call {
 	return &MockEventService_Update_Call{Call: _e.mock.On("Update", ctx, params)}
 }
 

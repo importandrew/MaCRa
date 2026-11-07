@@ -129,13 +129,15 @@ Applies to regular events; tournament games will get their own rules.
 - Shows the four seats in seating order, the scores and the round (東1…北4).
 - Usually one player at the table keeps the score; any of the four may enter.
 - **Entering a round**: tap the round kanji; pick the outcome (draw, self-draw, deal-in, penalty), 👍/👎 next to the seats, the hand value (stepper from 8, or type the number) or the fine (from 1; false mahjong 30 or 60; optionally move to the next round). While filling it in, each seat shows the score change the entry will make, so mistakes are seen before OK. After OK the scores update and the entry resets.
-- **No silent duplicates**: an entry carries the round number the player sees. If the server is already past it, the entry is refused ("Round 東3 has already been entered"), the table refreshes, and the player decides whether to enter the next round. Entering two forgotten rounds in a row still works.
+- **What a round holds**: exactly one main outcome (draw, self-draw or deal-in), which ends the round, and any number of penalties and false mahjongs, before it or instead of it (a penalty with "move to the next round" ends the round without a main outcome).
+- **No silent duplicates**: an entry carries the number of entries in the game's round log as the player's table shows it (results and penalties alike, so a penalty tapped twice is caught too, though it doesn't change the round). If the log has changed since, the entry is refused, the table refreshes, and the message says what changed: "Round 東3 has already been entered", "A penalty has just been entered", or, after a referee's undo, "The last round has been undone" / "The last entry has been undone". The player decides whether to enter it again. Entering two forgotten rounds in a row still works.
 - **Refreshing**: scores never change on their own, so a player's picture of the game isn't disturbed. The app checks every 10–15 seconds whether the table changed and then highlights the Refresh button; the player refreshes when ready.
 - **Table menu**: round log, fan table, Finish (count the game now, with a confirmation; seated players and referees; not in tournaments), Abort (don't count it; referees, or the seated players before the first round), undo of the last round (referees).
 
 ### The end of a game
 
 - After the 16th round the game ends by itself and the result page (`/last`) opens: final scores, chart, log, "Play again".
+- If the game has ended while a player's table was still open (another player entered the last round, or it was finished), their next entry or Refresh shows "The game has ended" and opens the result page; if it was aborted, "The game was aborted" and the home page.
 - A referee can undo the last round within an hour after the end; the game becomes live again. After that the result is final.
 - **Abandoned games**: a game left live (players walked away) blocks its players and the event's finish. Staff see a mark on live games with no new round for more than ~3 hours and decide themselves (abort or finish); nothing happens automatically.
 

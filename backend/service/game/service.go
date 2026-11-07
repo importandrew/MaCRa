@@ -33,6 +33,7 @@ type GameEngine interface {
 	Status() models.GameStatus
 	IsLive() bool
 	Round() int
+	LogSize() int
 	End() error
 	NextRound() error
 	Score() models.GameScore

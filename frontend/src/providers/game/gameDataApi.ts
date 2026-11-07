@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DeleteRequest,
   GetRequest,
+  FetchResponse,
   authFetch,
   eventGamePath,
   eventPath,
+  fetchWithStatus,
   globalBatchFetch,
   publicFetch,
 } from '../../components/Request';
@@ -141,35 +143,43 @@ export const useFetchGameData = () => {
   const [data, setData] = useState<GameData | null>(null);
   const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
 
-  const fetchGameData = async () => {
+  // fetchGameData loads the table and returns the /now response (data is
+  // null on an error). Once a table is shown, a 404 means its game has ended
+  // or been aborted; the caller tells the player (useShowGameGone), so there
+  // is no error toast then.
+  const fetchGameData = async (): Promise<FetchResponse<GameData>> => {
+    const shownGame = data;
     const eventId = getStoredEventId();
     if (!eventId) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return { data: null, status: 0 };
     }
 
     startLoading();
     setIsError(false);
 
     const gameDataRequest = GetRequest(eventPath(eventId, '/now'));
-    const data = await authFetch<GameData>(gameDataRequest);
+    const result = await fetchWithStatus<GameData>(gameDataRequest, {
+      quietStatuses: shownGame ? [404] : [],
+    });
+    const { data: fresh } = result;
 
-    if (!data) {
+    if (!fresh) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return result;
     }
 
-    setData(data);
+    setData(fresh);
 
     if (playersList.length) {
       finishLoading(true);
-      return;
+      return result;
     }
 
     const gamePlayersRequest = GetRequest(
-      eventGamePath(eventId, data.id, '/players')
+      eventGamePath(eventId, fresh.id, '/players')
     );
     const playersResult = await authFetch<GamePlayers>(gamePlayersRequest);
 
@@ -179,6 +189,7 @@ export const useFetchGameData = () => {
 
     setPlayersList(playersResult?.players || []);
     finishLoading(true);
+    return result;
   };
 
   useEffect(() => {

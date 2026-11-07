@@ -1,6 +1,7 @@
 import { Button, Card } from '@heroui/react';
 import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useLocation } from 'react-router-dom';
 import { globalFetch, PostRequest } from '../Request';
 import { showToast } from '../Toast';
@@ -16,14 +17,13 @@ export default function CheckEmailPage() {
   const stateEmail = (location.state as CheckEmailState | null)?.email ?? '';
 
   const [email, setEmail] = useState(stateEmail);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isPending: isLoading, run } = useSubmitOnce();
 
   const handleResend = useCallback(async () => {
     if (!email) {
       return;
     }
 
-    setIsLoading(true);
     const data = await globalFetch<object>(
       PostRequest('/auth/resend-verification', {
         email,
@@ -31,7 +31,6 @@ export default function CheckEmailPage() {
       }),
       { redirectOn401: false }
     );
-    setIsLoading(false);
 
     if (!data) {
       return;
@@ -72,7 +71,7 @@ export default function CheckEmailPage() {
                 <Button
                   variant="primary"
                   isDisabled={!email}
-                  onPress={handleResend}
+                  onPress={() => run(handleResend)}
                 >
                   Resend verification email
                 </Button>

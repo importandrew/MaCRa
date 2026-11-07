@@ -57,6 +57,7 @@ func (g *Game) EnterRoundResult(outcome models.Outcome, hand, loser, winner int)
 	default:
 		return fmt.Errorf("%w: invalid outcome: %s", models.ErrValidateEnterRoundResult, outcome)
 	}
+	g.logSize++
 
 	err := g.NextRound()
 	if err != nil {

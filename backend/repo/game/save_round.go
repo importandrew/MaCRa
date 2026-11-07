@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -24,36 +23,16 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 		return fmt.Errorf("players: %w", err)
 	}
 
-	// Check if a main outcome (deal, self, draw) already exists for this round
-	// Only one can happen per round
-	mainOutcomes := []models.Outcome{models.Deal, models.Self, models.Draw}
-	if slices.Contains(mainOutcomes, data.Outcome) {
-		rows, err := conn.Query(ctx, `
-			SELECT EXISTS(
-				SELECT 1 FROM rounds
-				WHERE game_id = $1 AND round_number = $2 AND outcome = any($3)
-			)`,
-			gameID, data.Round, mainOutcomes)
-		if err != nil {
-			return fmt.Errorf("check existing outcome: %w", err)
-		}
-
-		exists, err := pgx.CollectOneRow(rows, pgx.RowTo[bool])
-		if err != nil {
-			return fmt.Errorf("check existing outcome: %w", err)
-		}
-
-		if exists {
-			return fmt.Errorf("round %d: %w", data.Round, models.ErrOutcomeExists)
-		}
-	}
-
 	// Start transaction
 	tx, err := conn.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
+
+	if err := lockUnchangedLog(ctx, tx, gameID, data.LogSize); err != nil {
+		return err
+	}
 
 	// Insert round event (event_sequence is auto-incremented by database trigger)
 	type roundInsertResult struct {
@@ -117,6 +96,33 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 	// Commit transaction
 	if err = tx.Commit(ctx); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// lockUnchangedLog locks the game row, so that concurrent entries to one game
+// are saved one at a time, and refuses the entry with ErrRoundAlreadyEntered
+// unless the game still has logSize round log entries. The entry was computed
+// from a game replayed from that many entries; saving it after another entry
+// got in first would apply it to a game it wasn't computed for (a
+// double-tapped penalty would be fined twice).
+func lockUnchangedLog(ctx context.Context, tx pgx.Tx, gameID, logSize int) error {
+	if _, err := tx.Exec(ctx, `SELECT 1 FROM games WHERE id = $1 FOR UPDATE`, gameID); err != nil {
+		return fmt.Errorf("lock game: %w", err)
+	}
+
+	rows, err := tx.Query(ctx, `SELECT count(*) FROM rounds WHERE game_id = $1`, gameID)
+	if err != nil {
+		return fmt.Errorf("count rounds: %w", err)
+	}
+	current, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
+	if err != nil {
+		return fmt.Errorf("count rounds: %w", err)
+	}
+
+	if current != logSize {
+		return fmt.Errorf("%w (computed from %d log entries, the game has %d)", models.ErrRoundAlreadyEntered, logSize, current)
 	}
 
 	return nil

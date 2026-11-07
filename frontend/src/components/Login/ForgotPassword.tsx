@@ -1,6 +1,7 @@
 import { Button, Card } from '@heroui/react';
 import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { globalFetch, PostRequest } from '../Request';
 import { showToast } from '../Toast';
 import EmailInput from './EmailInput';
@@ -8,12 +9,10 @@ import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { isPending: isLoading, run } = useSubmitOnce();
   const [sent, setSent] = useState(false);
 
   const handleSubmit = useCallback(async () => {
-    setIsLoading(true);
-
     const data = await globalFetch<object>(
       PostRequest('/auth/forgot-password', {
         email,
@@ -22,7 +21,6 @@ export default function ForgotPasswordPage() {
       { redirectOn401: false }
     );
 
-    setIsLoading(false);
     if (!data) {
       return;
     }
@@ -59,7 +57,7 @@ export default function ForgotPasswordPage() {
                     <Button
                       variant="primary"
                       isDisabled={!email}
-                      onPress={handleSubmit}
+                      onPress={() => run(handleSubmit)}
                     >
                       Send reset link
                     </Button>

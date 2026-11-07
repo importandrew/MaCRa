@@ -7,6 +7,7 @@ import {
   TextField,
 } from '@heroui/react';
 import { useCallback, useEffect, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import {
@@ -22,7 +23,7 @@ export default function ProfilePage() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const { isPending: isSaving, run } = useSubmitOnce();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,13 +63,9 @@ export default function ProfilePage() {
       return;
     }
 
-    setIsSaving(true);
     const updatedData = await updateProfileApi(name.trim());
 
-    if (!updatedData) {
-      setIsSaving(false);
-      return;
-    }
+    if (!updatedData) return;
 
     // Update localStorage
     localStorage.setItem(AUTH_USER_DATA, JSON.stringify(updatedData));
@@ -78,8 +75,6 @@ export default function ProfilePage() {
       title: 'Profile updated successfully',
       variant: 'success',
     });
-
-    setIsSaving(false);
   }, [name]);
 
   if (isLoading) {
@@ -117,7 +112,7 @@ export default function ProfilePage() {
               </Button>
               <PendingButton
                 variant="primary"
-                onPress={handleSave}
+                onPress={() => run(handleSave)}
                 isPending={isSaving}
                 isDisabled={!name.trim() || name.trim() === userData?.name}
               >
