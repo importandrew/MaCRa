@@ -34,13 +34,24 @@ function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
   const totalAfter = (round: PreparedRoundLog, index: number) =>
     round.initial_scores[index] + (round.score_changes?.[index] ?? 0);
 
-  return [
+  // One point per round. A round can have several log entries (a penalty or
+  // false mahjong besides its outcome); the point shows the totals after the
+  // last one. Repeated x values would make recharts match the first of them.
+  const points: ChartPoint[] = [
     { round: 0, scores: input.players.map(() => 0) },
-    ...input.rounds.map((round) => ({
+  ];
+  for (const round of input.rounds) {
+    const point = {
       round: round.round,
       scores: input.players.map((_, index) => totalAfter(round, index)),
-    })),
-  ];
+    };
+    if (points[points.length - 1].round === round.round) {
+      points[points.length - 1] = point;
+    } else {
+      points.push(point);
+    }
+  }
+  return points;
 }
 
 // Reports the round under the finger or pointer (recharts tracks it for both
@@ -99,7 +110,10 @@ export default function GameChart({
             </li>
           ))}
         </ul>
-        <div className="h-60 sm:h-72 -mx-2 select-none touch-pan-y">
+        {/* recharts makes the chart focusable for keyboard users (arrow keys move
+            between rounds). Show the ring for keyboard focus only, as HeroUI
+            does; a click or tap focuses it too, which drew a box around it. */}
+        <div className="h-60 sm:h-72 -mx-2 select-none touch-pan-y [&_:focus]:outline-none [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-solid [&_.recharts-surface:focus-visible]:outline-(--focus) [&_.recharts-surface:focus-visible]:rounded-md">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
