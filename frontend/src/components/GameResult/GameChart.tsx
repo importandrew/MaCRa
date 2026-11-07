@@ -26,79 +26,81 @@ const SERIES_COLORS = [
 ];
 
 // A chart point: one log entry and each player's total after it, by seat.
-// A round can have several entries (a penalty or false mahjong besides its
-// outcome); each gets its own point, so `step` (the entry's position) is the
-// x value, not the round number, which repeats.
+// The x axis counts rounds: round r ends at x = r. A round can have several
+// entries (a penalty or false mahjong besides its outcome); they share the
+// stretch from r - 1 to r evenly, so rounds stay evenly spaced and the last
+// entry of round r is the one at x = r.
 interface ChartPoint {
-  step: number;
+  x: number;
   round: number;
   outcome: Outcome | null;
+  isLastInRound: boolean;
   scores: number[];
 }
-
-// Penalties and false mahjong are extra entries inside a round.
-const isExtraEntry = (point: ChartPoint) =>
-  point.outcome === Outcome.Penalty || point.outcome === Outcome.FalseMahjong;
 
 function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
   const totalAfter = (round: PreparedRoundLog, index: number) =>
     round.initial_scores[index] + (round.score_changes?.[index] ?? 0);
+  const entriesInRound = new Map<number, number>();
+  for (const round of input.rounds) {
+    entriesInRound.set(round.round, (entriesInRound.get(round.round) ?? 0) + 1);
+  }
 
-  return [
-    { step: 0, round: 0, outcome: null, scores: input.players.map(() => 0) },
-    ...input.rounds.map((round, index) => ({
-      step: index + 1,
+  const points: ChartPoint[] = [
+    {
+      x: 0,
+      round: 0,
+      outcome: null,
+      isLastInRound: true,
+      scores: input.players.map(() => 0),
+    },
+  ];
+  let indexInRound = 0;
+  input.rounds.forEach((round, index) => {
+    const previous = input.rounds[index - 1];
+    indexInRound = previous?.round === round.round ? indexInRound + 1 : 1;
+    const count = entriesInRound.get(round.round) ?? 1;
+    points.push({
+      x: round.round - 1 + indexInRound / count,
       round: round.round,
       outcome: round.outcome,
+      isLastInRound: indexInRound === count,
       scores: input.players.map((_, seat) => totalAfter(round, seat)),
-    })),
-  ];
+    });
+  });
+  return points;
 }
 
 function describePoint(point: ChartPoint): string {
-  if (point.step === 0) return 'Start';
+  if (point.round === 0) return 'Start';
   if (point.outcome === Outcome.Penalty) return `Round ${point.round}, penalty`;
   if (point.outcome === Outcome.FalseMahjong)
     return `Round ${point.round}, false mahjong`;
-  return `After round ${point.round}`;
+  return point.isLastInRound
+    ? `After round ${point.round}`
+    : `Round ${point.round}`;
 }
 
-// The x-axis label: the round number, or a dot for an extra entry.
-const tickLabel = (point: ChartPoint | undefined) =>
-  !point ? '' : isExtraEntry(point) ? '•' : String(point.round);
-
-// Which points get an x-axis label. recharts thins crowded labels from the end
-// on its own, which dropped e.g. the second-to-last round and gave uneven runs
-// like "1 3 • 6". Instead, label every round, or every 2nd, 5th or 10th one,
-// whichever fits; dots for extra entries only while every round fits.
+// The labeled rounds: every round, or every 2nd, 5th or 10th one, whichever
+// fits. recharts' own thinning drops labels from the end unevenly.
 const Y_AXIS_WIDTH = 36;
 const DIGIT_WIDTH = 7; // px per digit of a 12px label, with some slack
 const LABEL_GAP = 6;
-function pickTicks(points: ChartPoint[], chartWidth: number): number[] {
-  const plotWidth = chartWidth - Y_AXIS_WIDTH - 16;
-  const stepWidth = plotWidth / Math.max(points.length - 1, 1);
-  const lastRound = points[points.length - 1].round;
+function pickTicks(lastRound: number, chartWidth: number): number[] {
+  const roundWidth = (chartWidth - Y_AXIS_WIDTH - 16) / Math.max(lastRound, 1);
   const labelWidth = String(lastRound).length * DIGIT_WIDTH + LABEL_GAP;
-  // Rounds between labels; the distance in px also counts extra entries.
-  const roundsPerStep = (points.length - 1) / Math.max(lastRound, 1);
-  const every =
-    [1, 2, 5, 10].find((n) => (n * stepWidth) / roundsPerStep >= labelWidth) ??
-    20;
-  return points
-    .filter((point) =>
-      isExtraEntry(point)
-        ? every === 1 && stepWidth >= labelWidth
-        : point.round % every === 0
-    )
-    .map((point) => point.step);
+  const every = [1, 2, 5, 10].find((n) => n * roundWidth >= labelWidth) ?? 20;
+  const ticks = [];
+  for (let round = 0; round <= lastRound; round += every) ticks.push(round);
+  return ticks;
 }
 
-// Reports the step under the finger or pointer (recharts tracks it for both
-// mouse and touch), or null when none is.
-function ActiveStepReporter({
+// Reports the x of the point under the finger or pointer (recharts tracks it
+// for both mouse and touch), or null when there is none.
+function ActivePointReporter({
   onChange,
 }: {
-  onChange: (step: number | null) => void;
+  onChange: (x: number | null) => void;
 }) {
   const label = useActiveTooltipLabel();
   useEffect(() => {
@@ -114,11 +116,10 @@ export default function GameChart({
 }) {
   const chartData = transformGameDataForChart(preparedData);
   // The entry under the finger or pointer; the final scores otherwise.
-  const [activeStep, setActiveStep] = useState<number | null>(null);
-  const shown =
-    chartData.find((point) => point.step === activeStep) ??
-    chartData[chartData.length - 1];
-  const isFinal = shown === chartData[chartData.length - 1];
+  const [activeX, setActiveX] = useState<number | null>(null);
+  const last = chartData[chartData.length - 1];
+  const shown = chartData.find((point) => point.x === activeX) ?? last;
+  const isFinal = shown === last;
   const [chartWidth, setChartWidth] = useState(0);
 
   return (
@@ -161,10 +162,11 @@ export default function GameChart({
             >
               <CartesianGrid vertical={false} stroke="var(--separator)" />
               <XAxis
-                dataKey="step"
-                ticks={pickTicks(chartData, chartWidth)}
+                dataKey="x"
+                type="number"
+                domain={[0, last.round]}
+                ticks={pickTicks(last.round, chartWidth)}
                 interval={0}
-                tickFormatter={(step: number) => tickLabel(chartData[step])}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'var(--muted)', fontSize: 12 }}
@@ -181,7 +183,7 @@ export default function GameChart({
                 content={() => null}
                 cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }}
               />
-              <ActiveStepReporter onChange={setActiveStep} />
+              <ActivePointReporter onChange={setActiveX} />
               {preparedData.players.map((player, index) => (
                 <Line
                   key={player.id}
