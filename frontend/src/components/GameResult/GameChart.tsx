@@ -1,9 +1,10 @@
 import { Card } from '@heroui/react';
-import { useEffect, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceDot,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -25,6 +26,8 @@ const SERIES_COLORS = [
   'var(--chart-4)',
 ];
 
+const ACTIVE_DOT = { r: 4, stroke: 'var(--surface)', strokeWidth: 2 };
+
 // A chart point: one log entry and each player's total after it, by seat.
 // The x axis counts rounds: round r ends at x = r. A round can have several
 // entries (a penalty or false mahjong besides its outcome); they share the
@@ -35,6 +38,10 @@ interface ChartPoint {
   round: number;
   outcome: Outcome | null;
   isLastInRound: boolean;
+  // For a round with several entries of one kind (penalties): which one this
+  // is and how many there are.
+  sameKindNumber: number;
+  sameKindCount: number;
   scores: number[];
 }
 
@@ -42,9 +49,14 @@ function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
   const totalAfter = (round: PreparedRoundLog, index: number) =>
     round.initial_scores[index] + (round.score_changes?.[index] ?? 0);
   const entriesInRound = new Map<number, number>();
+  const kindKey = (round: PreparedRoundLog) =>
+    `${round.round}:${round.outcome}`;
+  const kindCount = new Map<string, number>();
   for (const round of input.rounds) {
     entriesInRound.set(round.round, (entriesInRound.get(round.round) ?? 0) + 1);
+    kindCount.set(kindKey(round), (kindCount.get(kindKey(round)) ?? 0) + 1);
   }
+  const kindSeen = new Map<string, number>();
 
   const points: ChartPoint[] = [
     {
@@ -52,6 +64,8 @@ function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
       round: 0,
       outcome: null,
       isLastInRound: true,
+      sameKindNumber: 1,
+      sameKindCount: 1,
       scores: input.players.map(() => 0),
     },
   ];
@@ -60,11 +74,14 @@ function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
     const previous = input.rounds[index - 1];
     indexInRound = previous?.round === round.round ? indexInRound + 1 : 1;
     const count = entriesInRound.get(round.round) ?? 1;
+    kindSeen.set(kindKey(round), (kindSeen.get(kindKey(round)) ?? 0) + 1);
     points.push({
       x: round.round - 1 + indexInRound / count,
       round: round.round,
       outcome: round.outcome,
       isLastInRound: indexInRound === count,
+      sameKindNumber: kindSeen.get(kindKey(round)) ?? 1,
+      sameKindCount: kindCount.get(kindKey(round)) ?? 1,
       scores: input.players.map((_, seat) => totalAfter(round, seat)),
     });
   });
@@ -73,9 +90,14 @@ function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
 
 function describePoint(point: ChartPoint): string {
   if (point.round === 0) return 'Start';
-  if (point.outcome === Outcome.Penalty) return `Round ${point.round}, penalty`;
+  const nth =
+    point.sameKindCount > 1
+      ? ` ${point.sameKindNumber} of ${point.sameKindCount}`
+      : '';
+  if (point.outcome === Outcome.Penalty)
+    return `Round ${point.round}, penalty${nth}`;
   if (point.outcome === Outcome.FalseMahjong)
-    return `Round ${point.round}, false mahjong`;
+    return `Round ${point.round}, false mahjong${nth}`;
   return point.isLastInRound
     ? `After round ${point.round}`
     : `Round ${point.round}`;
@@ -115,12 +137,54 @@ export default function GameChart({
   preparedData: PreparedGameRoundLogs;
 }) {
   const chartData = transformGameDataForChart(preparedData);
-  // The entry under the finger or pointer; the final scores otherwise.
-  const [activeX, setActiveX] = useState<number | null>(null);
   const last = chartData[chartData.length - 1];
-  const shown = chartData.find((point) => point.x === activeX) ?? last;
-  const isFinal = shown === last;
   const [chartWidth, setChartWidth] = useState(0);
+
+  // Two ways to pick a point: hovering (mouse, finger), and a selected point
+  // that stays: set by a click or tap, moved by the arrow keys. A key press
+  // shows the selected point even while the pointer rests on the chart;
+  // moving the pointer to another point shows that one again.
+  const [hoverX, setHoverX] = useState<number | null>(null);
+  const [selectedX, setSelectedX] = useState<number | null>(null);
+  const [preferSelected, setPreferSelected] = useState(false);
+  const onHover = useCallback((x: number | null) => {
+    setHoverX(x);
+    setPreferSelected(false);
+  }, []);
+  const shownX = preferSelected ? selectedX : (hoverX ?? selectedX);
+  const shown = chartData.find((point) => point.x === shownX) ?? last;
+  const isFinal = shown === last;
+  // Our own marker for the selected point; recharts draws the hover one.
+  const marked =
+    shownX !== null &&
+    shownX === selectedX &&
+    (preferSelected || hoverX === null)
+      ? shown
+      : null;
+
+  const chartRef = useRef<HTMLDivElement>(null);
+  const onClick = () => {
+    if (hoverX !== null) setSelectedX(hoverX);
+    // So the arrow keys work right after a click (without a focus ring).
+    chartRef.current?.focus({ preventScroll: true });
+  };
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const index = chartData.indexOf(shown);
+    const next =
+      event.key === 'ArrowLeft'
+        ? Math.max(index - 1, 0)
+        : event.key === 'ArrowRight'
+          ? Math.min(index + 1, chartData.length - 1)
+          : event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? chartData.length - 1
+              : null;
+    if (next === null) return;
+    event.preventDefault();
+    setSelectedX(chartData[next].x);
+    setPreferSelected(true);
+  };
 
   return (
     <Card className="mb-3">
@@ -147,10 +211,24 @@ export default function GameChart({
             </li>
           ))}
         </ul>
-        {/* recharts makes the chart focusable for keyboard users (arrow keys move
-            between rounds). Show the ring for keyboard focus only, as HeroUI
-            does; a click or tap focuses it too, which drew a box around it. */}
-        <div className="h-60 sm:h-72 -mx-2 select-none touch-pan-y [&_:focus]:outline-none [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-solid [&_.recharts-surface:focus-visible]:outline-(--focus) [&_.recharts-surface:focus-visible]:rounded-md">
+        {/* Focusable for the arrow keys; the ring shows for keyboard focus only,
+            as in HeroUI. recharts' own keyboard layer is off: it only worked
+            when the SVG itself had focus, and lost to the hovering pointer. */}
+        <div
+          ref={chartRef}
+          tabIndex={0}
+          // A slider over the chart's points: the ARIA pattern for picking one
+          // of an ordered set with the arrow keys, Home and End.
+          role="slider"
+          aria-label="Score by round"
+          aria-valuemin={0}
+          aria-valuemax={chartData.length - 1}
+          aria-valuenow={chartData.indexOf(shown)}
+          aria-valuetext={`${isFinal ? 'Final' : describePoint(shown)}: ${preparedData.players.map((player, index) => `${player.name} ${shown.scores[index]}`).join(', ')}`}
+          onClick={onClick}
+          onKeyDown={onKeyDown}
+          className="h-60 sm:h-72 -mx-2 rounded-md select-none touch-pan-y outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-(--focus) [&_:focus]:outline-none"
+        >
           <ResponsiveContainer
             width="100%"
             height="100%"
@@ -159,6 +237,7 @@ export default function GameChart({
             <LineChart
               data={chartData}
               margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+              accessibilityLayer={false}
             >
               <CartesianGrid vertical={false} stroke="var(--separator)" />
               <XAxis
@@ -178,12 +257,17 @@ export default function GameChart({
                 width={Y_AXIS_WIDTH}
               />
               <ReferenceLine y={0} stroke="var(--muted)" />
-              {/* Only the crosshair and active dots: values are in the readout. */}
+              {/* Only the crosshair and active dots: values are in the readout.
+                  Hidden while a key press shows the selected point. */}
               <Tooltip
                 content={() => null}
-                cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }}
+                cursor={
+                  preferSelected
+                    ? false
+                    : { stroke: 'var(--muted)', strokeDasharray: '3 3' }
+                }
               />
-              <ActivePointReporter onChange={setActiveX} />
+              <ActivePointReporter onChange={onHover} />
               {preparedData.players.map((player, index) => (
                 <Line
                   key={player.id}
@@ -192,14 +276,27 @@ export default function GameChart({
                   stroke={SERIES_COLORS[index]}
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{
-                    r: 4,
-                    stroke: 'var(--surface)',
-                    strokeWidth: 2,
-                  }}
+                  activeDot={preferSelected ? false : ACTIVE_DOT}
                   isAnimationActive={false}
                 />
               ))}
+              {marked && (
+                <ReferenceLine
+                  x={marked.x}
+                  stroke="var(--muted)"
+                  strokeDasharray="3 3"
+                />
+              )}
+              {marked &&
+                marked.scores.map((score, index) => (
+                  <ReferenceDot
+                    key={index}
+                    x={marked.x}
+                    y={score}
+                    fill={SERIES_COLORS[index]}
+                    {...ACTIVE_DOT}
+                  />
+                ))}
             </LineChart>
           </ResponsiveContainer>
         </div>
