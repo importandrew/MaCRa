@@ -15,9 +15,11 @@ import { MahjongTileIcon } from '../Icons/MahjongTileIcon';
 
 const iconClass = 'w-6 h-6';
 
+// namesWithRole lists the staff by name. Non-members get only the staff from
+// /members, so it is never used for players (see player_count).
 function namesWithRole(
   members: EventMember[] | null,
-  role: 'referee' | 'observer' | 'player'
+  role: 'referee' | 'observer'
 ): string[] {
   if (!members) return [];
   return members
@@ -65,7 +67,6 @@ export default function EventOverview() {
     () => namesWithRole(members, 'observer'),
     [members]
   );
-  const players = useMemo(() => namesWithRole(members, 'player'), [members]);
 
   if (!event) return null;
 
@@ -114,7 +115,7 @@ export default function EventOverview() {
           icon={<MahjongTileIcon className={iconClass} />}
           label="Players"
         >
-          {players.length}
+          {event.player_count ?? '—'}
         </DetailRow>
         <DetailRow icon={<ScalesIcon className={iconClass} />} label="Referees">
           {referees.length > 0 ? referees.join(', ') : '—'}

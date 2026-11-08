@@ -161,6 +161,8 @@ export default function EventManage() {
         setSelectedUserId('');
         setSelectedRoles([]);
         refetchMembers();
+        // The overview's player count comes with the event.
+        refetch();
       }
     });
   };
@@ -171,6 +173,7 @@ export default function EventManage() {
       if (ok) {
         showToast({ title: 'Member removed', variant: 'success' });
         refetchMembers();
+        refetch();
       }
     });
 
