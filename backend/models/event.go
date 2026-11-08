@@ -40,6 +40,15 @@ type Event struct {
 	FinishedAt   *time.Time      `db:"finished_at" json:"finished_at"`
 }
 
+// EventDetails is an event with what its overview shows besides the event
+// itself. PlayerCount is shown to everyone who can open the event, also to
+// non-members, who don't get the member list.
+type EventDetails struct {
+	Event
+
+	PlayerCount int `json:"player_count"`
+}
+
 type EventListItem struct {
 	Event
 

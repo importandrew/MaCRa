@@ -25,6 +25,7 @@ type EventRepo interface {
 	RemoveMembers(ctx context.Context, eventID int, userIDs []int) error
 	GetMemberRoles(ctx context.Context, eventID int, userID int) ([]models.EventRole, error)
 	ListMembers(ctx context.Context, eventID int) ([]models.EventMember, error)
+	CountPlayers(ctx context.Context, eventID int) (int, error)
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)
 	ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit, offset int) ([]models.EventGameItemRow, error)

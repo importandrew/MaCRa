@@ -17,10 +17,19 @@ func NewMockEventRepo(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockEventRepo {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockEventRepo{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -65,7 +74,7 @@ type MockEventRepo_AddMemberRoles_Call struct {
 //   - eventID int
 //   - userID int
 //   - roles []models.EventRole
-func (_e *MockEventRepo_Expecter) AddMemberRoles(ctx interface{}, eventID interface{}, userID interface{}, roles interface{}) *MockEventRepo_AddMemberRoles_Call {
+func (_e *MockEventRepo_Expecter) AddMemberRoles(ctx any, eventID any, userID any, roles any) *MockEventRepo_AddMemberRoles_Call {
 	return &MockEventRepo_AddMemberRoles_Call{Call: _e.mock.On("AddMemberRoles", ctx, eventID, userID, roles)}
 }
 
@@ -107,6 +116,72 @@ func (_c *MockEventRepo_AddMemberRoles_Call) RunAndReturn(run func(ctx context.C
 	return _c
 }
 
+// CountPlayers provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) CountPlayers(ctx context.Context, eventID int) (int, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CountPlayers")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (int, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) int); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_CountPlayers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountPlayers'
+type MockEventRepo_CountPlayers_Call struct {
+	*mock.Call
+}
+
+// CountPlayers is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) CountPlayers(ctx any, eventID any) *MockEventRepo_CountPlayers_Call {
+	return &MockEventRepo_CountPlayers_Call{Call: _e.mock.On("CountPlayers", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_CountPlayers_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_CountPlayers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_CountPlayers_Call) Return(n int, err error) *MockEventRepo_CountPlayers_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockEventRepo_CountPlayers_Call) RunAndReturn(run func(ctx context.Context, eventID int) (int, error)) *MockEventRepo_CountPlayers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Create provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) Create(ctx context.Context, event models.Event) (int, error) {
 	ret := _mock.Called(ctx, event)
@@ -141,7 +216,7 @@ type MockEventRepo_Create_Call struct {
 // Create is a helper method to define mock.On call
 //   - ctx context.Context
 //   - event models.Event
-func (_e *MockEventRepo_Expecter) Create(ctx interface{}, event interface{}) *MockEventRepo_Create_Call {
+func (_e *MockEventRepo_Expecter) Create(ctx any, event any) *MockEventRepo_Create_Call {
 	return &MockEventRepo_Create_Call{Call: _e.mock.On("Create", ctx, event)}
 }
 
@@ -198,7 +273,7 @@ type MockEventRepo_Finish_Call struct {
 // Finish is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventRepo_Expecter) Finish(ctx interface{}, eventID interface{}) *MockEventRepo_Finish_Call {
+func (_e *MockEventRepo_Expecter) Finish(ctx any, eventID any) *MockEventRepo_Finish_Call {
 	return &MockEventRepo_Finish_Call{Call: _e.mock.On("Finish", ctx, eventID)}
 }
 
@@ -266,7 +341,7 @@ type MockEventRepo_GameHistory_Call struct {
 // GameHistory is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventRepo_Expecter) GameHistory(ctx interface{}, eventID interface{}) *MockEventRepo_GameHistory_Call {
+func (_e *MockEventRepo_Expecter) GameHistory(ctx any, eventID any) *MockEventRepo_GameHistory_Call {
 	return &MockEventRepo_GameHistory_Call{Call: _e.mock.On("GameHistory", ctx, eventID)}
 }
 
@@ -332,7 +407,7 @@ type MockEventRepo_Get_Call struct {
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventRepo_Expecter) Get(ctx interface{}, eventID interface{}) *MockEventRepo_Get_Call {
+func (_e *MockEventRepo_Expecter) Get(ctx any, eventID any) *MockEventRepo_Get_Call {
 	return &MockEventRepo_Get_Call{Call: _e.mock.On("Get", ctx, eventID)}
 }
 
@@ -401,7 +476,7 @@ type MockEventRepo_GetMemberRoles_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - userID int
-func (_e *MockEventRepo_Expecter) GetMemberRoles(ctx interface{}, eventID interface{}, userID interface{}) *MockEventRepo_GetMemberRoles_Call {
+func (_e *MockEventRepo_Expecter) GetMemberRoles(ctx any, eventID any, userID any) *MockEventRepo_GetMemberRoles_Call {
 	return &MockEventRepo_GetMemberRoles_Call{Call: _e.mock.On("GetMemberRoles", ctx, eventID, userID)}
 }
 
@@ -473,7 +548,7 @@ type MockEventRepo_List_Call struct {
 
 // List is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockEventRepo_Expecter) List(ctx interface{}) *MockEventRepo_List_Call {
+func (_e *MockEventRepo_Expecter) List(ctx any) *MockEventRepo_List_Call {
 	return &MockEventRepo_List_Call{Call: _e.mock.On("List", ctx)}
 }
 
@@ -536,7 +611,7 @@ type MockEventRepo_ListEndedPlayerResults_Call struct {
 // ListEndedPlayerResults is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventRepo_Expecter) ListEndedPlayerResults(ctx interface{}, eventID interface{}) *MockEventRepo_ListEndedPlayerResults_Call {
+func (_e *MockEventRepo_Expecter) ListEndedPlayerResults(ctx any, eventID any) *MockEventRepo_ListEndedPlayerResults_Call {
 	return &MockEventRepo_ListEndedPlayerResults_Call{Call: _e.mock.On("ListEndedPlayerResults", ctx, eventID)}
 }
 
@@ -604,7 +679,7 @@ type MockEventRepo_ListGames_Call struct {
 // ListGames is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventRepo_Expecter) ListGames(ctx interface{}, eventID interface{}) *MockEventRepo_ListGames_Call {
+func (_e *MockEventRepo_Expecter) ListGames(ctx any, eventID any) *MockEventRepo_ListGames_Call {
 	return &MockEventRepo_ListGames_Call{Call: _e.mock.On("ListGames", ctx, eventID)}
 }
 
@@ -675,7 +750,7 @@ type MockEventRepo_ListGamesByStatus_Call struct {
 //   - status models.GameStatus
 //   - limit int
 //   - offset int
-func (_e *MockEventRepo_Expecter) ListGamesByStatus(ctx interface{}, eventID interface{}, status interface{}, limit interface{}, offset interface{}) *MockEventRepo_ListGamesByStatus_Call {
+func (_e *MockEventRepo_Expecter) ListGamesByStatus(ctx any, eventID any, status any, limit any, offset any) *MockEventRepo_ListGamesByStatus_Call {
 	return &MockEventRepo_ListGamesByStatus_Call{Call: _e.mock.On("ListGamesByStatus", ctx, eventID, status, limit, offset)}
 }
 
@@ -758,7 +833,7 @@ type MockEventRepo_ListMembers_Call struct {
 // ListMembers is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventRepo_Expecter) ListMembers(ctx interface{}, eventID interface{}) *MockEventRepo_ListMembers_Call {
+func (_e *MockEventRepo_Expecter) ListMembers(ctx any, eventID any) *MockEventRepo_ListMembers_Call {
 	return &MockEventRepo_ListMembers_Call{Call: _e.mock.On("ListMembers", ctx, eventID)}
 }
 
@@ -827,7 +902,7 @@ type MockEventRepo_PlayerGameHistory_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - playerID int
-func (_e *MockEventRepo_Expecter) PlayerGameHistory(ctx interface{}, eventID interface{}, playerID interface{}) *MockEventRepo_PlayerGameHistory_Call {
+func (_e *MockEventRepo_Expecter) PlayerGameHistory(ctx any, eventID any, playerID any) *MockEventRepo_PlayerGameHistory_Call {
 	return &MockEventRepo_PlayerGameHistory_Call{Call: _e.mock.On("PlayerGameHistory", ctx, eventID, playerID)}
 }
 
@@ -890,7 +965,7 @@ type MockEventRepo_RemoveMembers_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - userIDs []int
-func (_e *MockEventRepo_Expecter) RemoveMembers(ctx interface{}, eventID interface{}, userIDs interface{}) *MockEventRepo_RemoveMembers_Call {
+func (_e *MockEventRepo_Expecter) RemoveMembers(ctx any, eventID any, userIDs any) *MockEventRepo_RemoveMembers_Call {
 	return &MockEventRepo_RemoveMembers_Call{Call: _e.mock.On("RemoveMembers", ctx, eventID, userIDs)}
 }
 
@@ -952,7 +1027,7 @@ type MockEventRepo_Update_Call struct {
 // Update is a helper method to define mock.On call
 //   - ctx context.Context
 //   - event models.Event
-func (_e *MockEventRepo_Expecter) Update(ctx interface{}, event interface{}) *MockEventRepo_Update_Call {
+func (_e *MockEventRepo_Expecter) Update(ctx any, event any) *MockEventRepo_Update_Call {
 	return &MockEventRepo_Update_Call{Call: _e.mock.On("Update", ctx, event)}
 }
 
