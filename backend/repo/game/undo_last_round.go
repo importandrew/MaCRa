@@ -81,10 +81,15 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int) error {
 }
 
 // reviveGame makes an ended game live again: it deletes the players' results
-// and clears finished_at. It refuses with models.ErrUndoFinalRound if one of
-// the players already has another live game in the event, checked under the
-// same advisory locks NewGame takes.
+// and clears finished_at. Like NewGame, it refuses with
+// models.ErrEventAlreadyFinished in a finished event, and with
+// models.ErrUndoFinalRound if one of the players already has another live game
+// in the event, checked under the same locks NewGame takes.
 func reviveGame(ctx context.Context, tx pgx.Tx, gameID, eventID int, seating [4]int) error {
+	if err := lockOpenEvent(ctx, tx, eventID); err != nil {
+		return err
+	}
+
 	if err := lockPlayersInEvent(ctx, tx, seating, eventID); err != nil {
 		return err
 	}
