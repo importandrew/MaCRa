@@ -10,6 +10,9 @@ import { InputArgs } from '../../models/Input';
 import { EyeClosedIcon } from './EyeClosed';
 import { EyeIcon } from './EyeOpen';
 
+// maxPasswordBytes mirrors the backend limit (bcrypt's).
+const maxPasswordBytes = 72;
+
 // autoComplete is 'current-password' to sign in and 'new-password' where the
 // user sets a password (sign up, reset), so password managers suggest one.
 export default function PasswordInput({
@@ -22,9 +25,20 @@ export default function PasswordInput({
     <TextField
       name="password"
       autoComplete={autoComplete}
-      validate={(value: string) =>
-        !value.length ? 'Password is required' : null
-      }
+      validate={(value: string) => {
+        if (!value.length) {
+          return 'Password is required';
+        }
+        // bcrypt on the backend takes at most 72 bytes; only a new password
+        // is checked, so an existing one is never refused here.
+        if (
+          autoComplete === 'new-password' &&
+          new TextEncoder().encode(value).length > maxPasswordBytes
+        ) {
+          return 'Password is too long';
+        }
+        return null;
+      }}
       onChange={onChange}
     >
       <Label>Password</Label>

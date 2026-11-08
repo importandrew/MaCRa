@@ -9,6 +9,18 @@ import (
 )
 
 func (s *Service) Add(ctx context.Context, email, name, password string) (models.Player, error) {
+	if err := checkEmail(email); err != nil {
+		return models.Player{}, err
+	}
+
+	if err := checkName(name); err != nil {
+		return models.Player{}, err
+	}
+
+	if err := checkNewPassword(password); err != nil {
+		return models.Player{}, err
+	}
+
 	hash, err := hashPassword(password)
 	if err != nil {
 		return models.Player{}, err

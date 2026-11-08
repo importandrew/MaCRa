@@ -64,6 +64,25 @@ func TestAdd(t *testing.T) {
 			},
 			expectedErr: assert.Error,
 		},
+		"invalid email": {
+			email:       "alice",
+			name:        "Alice",
+			password:    "password123",
+			mockSetup:   func(*MockPlayerRepo, string, string, string) {},
+			expectedErr: errorIs(models.ErrInvalidEmail),
+		},
+		"empty name": {
+			email:       "alice@example.com",
+			password:    "password123",
+			mockSetup:   func(*MockPlayerRepo, string, string, string) {},
+			expectedErr: errorIs(models.ErrEmptyName),
+		},
+		"empty password": {
+			email:       "alice@example.com",
+			name:        "Alice",
+			mockSetup:   func(*MockPlayerRepo, string, string, string) {},
+			expectedErr: errorIs(models.ErrEmptyPassword),
+		},
 	}
 
 	for name, testCase := range testData {
