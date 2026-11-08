@@ -60,6 +60,10 @@ func (s *Service) ForgotPassword(ctx context.Context, email, origin string) erro
 }
 
 func (s *Service) ResetPassword(ctx context.Context, rawToken, password string) error {
+	if err := checkNewPassword(password); err != nil {
+		return err
+	}
+
 	token, err := s.lookupToken(ctx, rawToken, models.AuthPurposePasswordReset)
 	if err != nil {
 		return err

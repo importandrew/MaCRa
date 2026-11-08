@@ -128,6 +128,10 @@ func TestLogin(t *testing.T) {
 				if testCase.password == wrongPassword {
 					assert.Equal(t, models.ErrBadCredentials, err)
 				}
+				// An unknown email gets the same answer as a wrong password.
+				if name == "email not found" {
+					assert.Equal(t, models.ErrBadCredentials, err)
+				}
 				if name == "email not verified" {
 					assert.Equal(t, models.ErrEmailNotVerified, err)
 				}

@@ -19,6 +19,11 @@ var (
 	ErrPlayerExists     = errors.New("player with this email already exists")
 	ErrEmptyName        = errors.New("name cannot be empty")
 	ErrLongName         = errors.New("name cannot exceed 50 characters")
+	ErrEmptyEmail       = errors.New("email cannot be empty")
+	ErrLongEmail        = errors.New("email cannot exceed 50 characters")
+	ErrInvalidEmail     = errors.New("email is not a valid address")
+	ErrEmptyPassword    = errors.New("password cannot be empty")
+	ErrLongPassword     = errors.New("password cannot exceed 72 bytes")
 	ErrEmailNotVerified = errors.New("email not verified")
 	ErrInvalidOrigin    = errors.New("invalid origin")
 	ErrInvalidAuthToken = errors.New("invalid or expired token")
@@ -66,6 +71,11 @@ var Errors = map[error]int{
 	ErrTooLate:                  http.StatusBadRequest,
 	ErrEmptyName:                http.StatusBadRequest,
 	ErrLongName:                 http.StatusBadRequest,
+	ErrEmptyEmail:               http.StatusBadRequest,
+	ErrLongEmail:                http.StatusBadRequest,
+	ErrInvalidEmail:             http.StatusBadRequest,
+	ErrEmptyPassword:            http.StatusBadRequest,
+	ErrLongPassword:             http.StatusBadRequest,
 	ErrMissingPlayerRole:        http.StatusBadRequest,
 	ErrPlayerNotInEvent:         http.StatusBadRequest,
 	ErrGameNotInEvent:           http.StatusBadRequest,
