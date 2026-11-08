@@ -353,9 +353,9 @@
   font-size: calc(8.8 * var(--u));
 }
 .delta-help-mini-table .delta-threshold {
-  grid-template-columns: minmax(calc(14.4 * var(--u)), max-content) calc(
-      9.6 * var(--u)
-    ) calc(16.8 * var(--u));
+  grid-template-columns:
+    minmax(calc(14.4 * var(--u)), max-content) calc(9.6 * var(--u))
+    calc(16.8 * var(--u));
   gap: calc(1.6 * var(--u));
 }
 .delta-help-leaders {
