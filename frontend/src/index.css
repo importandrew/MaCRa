@@ -12,6 +12,24 @@ body {
   @apply bg-background text-foreground;
 }
 
+/* Series colors for charts (one per player). HeroUI has no chart tokens, and
+   its status colors (success, danger, …) already mean win and loss. A
+   validated categorical palette: adjacent pairs stay apart under color
+   blindness; two light steps are under 3:1 on white, so charts also show the
+   values as text. The dark steps are tuned for a dark surface. */
+:root {
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+}
+.dark {
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+}
+
 /* Long unbroken text (URLs, ids in error toasts) wraps inside the toast
    instead of overflowing it on phones. */
 @layer components {

@@ -11,6 +11,7 @@ import {
   TextField,
 } from '@heroui/react';
 import { FormEvent, type ReactNode, useEffect, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import LazyAccordion from '../LazyAccordion';
 import SegmentedPicker from '../SegmentedPicker';
@@ -85,12 +86,13 @@ export default function EventManage() {
   const [editRatingsReach, setEditRatingsReach] =
     useState<ContentReach>('members');
   const [editGamesReach, setEditGamesReach] = useState<ContentReach>('members');
-  const [isSaving, setIsSaving] = useState(false);
+  const { isPending: isSaving, run: runSave } = useSubmitOnce();
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [selectedRoles, setSelectedRoles] = useState<EventRole[]>([]);
-  const [isAddingMember, setIsAddingMember] = useState(false);
+  const { isPending: isAddingMember, run: runAddMember } = useSubmitOnce();
+  const { run: runRemoveMember } = useSubmitOnce();
   const [activeTab, setActiveTab] = useState<'overview' | 'members'>(
     canManageEvent ? 'overview' : 'members'
   );
@@ -125,52 +127,52 @@ export default function EventManage() {
     setEditGamesReach(reach);
   };
 
-  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSave = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    void runSave(async () => {
+      const ok = await updateEvent(eventId, {
+        name: editName.trim(),
+        description: editDescription.trim() || undefined,
+        visibility: editVisibility,
+        ratings_reach: editRatingsReach,
+        games_reach: editGamesReach,
+      });
 
-    setIsSaving(true);
-    const ok = await updateEvent(eventId, {
-      name: editName.trim(),
-      description: editDescription.trim() || undefined,
-      visibility: editVisibility,
-      ratings_reach: editRatingsReach,
-      games_reach: editGamesReach,
+      if (ok) {
+        showToast({ title: 'Event updated', variant: 'success' });
+        refetch();
+      }
     });
-    setIsSaving(false);
-
-    if (ok) {
-      showToast({ title: 'Event updated', variant: 'success' });
-      refetch();
-    }
   };
 
-  const handleAddMember = async (e: FormEvent<HTMLFormElement>) => {
+  const handleAddMember = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedUserId || !selectedRoles.length) return;
 
-    setIsAddingMember(true);
-    const ok = await addEventMember(
-      eventId,
-      parseInt(selectedUserId, 10),
-      selectedRoles
-    );
-    setIsAddingMember(false);
+    void runAddMember(async () => {
+      const ok = await addEventMember(
+        eventId,
+        parseInt(selectedUserId, 10),
+        selectedRoles
+      );
 
-    if (ok) {
-      showToast({ title: 'Member added', variant: 'success' });
-      setSelectedUserId('');
-      setSelectedRoles([]);
-      refetchMembers();
-    }
+      if (ok) {
+        showToast({ title: 'Member added', variant: 'success' });
+        setSelectedUserId('');
+        setSelectedRoles([]);
+        refetchMembers();
+      }
+    });
   };
 
-  const handleRemoveMember = async (userId: number) => {
-    const ok = await removeEventMember(eventId, userId);
-    if (ok) {
-      showToast({ title: 'Member removed', variant: 'success' });
-      refetchMembers();
-    }
-  };
+  const handleRemoveMember = (userId: number) =>
+    runRemoveMember(async () => {
+      const ok = await removeEventMember(eventId, userId);
+      if (ok) {
+        showToast({ title: 'Member removed', variant: 'success' });
+        refetchMembers();
+      }
+    });
 
   if (isForbidden || (!canManageEvent && !canManageMembers)) {
     return (

@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DeleteRequest,
   GetRequest,
+  FetchResponse,
   authFetch,
   eventGamePath,
   eventPath,
+  fetchWithStatus,
   globalBatchFetch,
   publicFetch,
 } from '../../components/Request';
@@ -23,18 +25,22 @@ import {
 import { GameView } from '../../models/GameView';
 import { getStoredEventId, useEvent } from '../event/eventConstants';
 
+// undoLastRound undoes the last log entry of the game. logSize is the number
+// of log entries the referee saw; the server answers 409 if the log has
+// changed since, or if the final round can't be undone. The caller reports
+// 409 itself.
 export async function undoLastRound(
   gameId: number,
+  logSize: number,
   eventId?: number
-): Promise<boolean> {
+): Promise<FetchResponse<null>> {
   const resolvedEventId = eventId ?? getStoredEventId();
-  if (!resolvedEventId) return false;
+  if (!resolvedEventId) return { data: null, status: 0 };
 
   const request = DeleteRequest(
-    eventGamePath(resolvedEventId, gameId, '/undo-round')
+    eventGamePath(resolvedEventId, gameId, `/undo-round?log_size=${logSize}`)
   );
-  const result = await authFetch<null>(request);
-  return result !== null;
+  return fetchWithStatus<null>(request, { quietStatuses: [409] });
 }
 
 export const useFetchPlayerGamesHistory = (playerId: number) => {
@@ -141,35 +147,43 @@ export const useFetchGameData = () => {
   const [data, setData] = useState<GameData | null>(null);
   const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
 
-  const fetchGameData = async () => {
+  // fetchGameData loads the table and returns the /now response (data is
+  // null on an error). Once a table is shown, a 404 means its game has ended
+  // or been aborted; the caller tells the player (useShowGameGone), so there
+  // is no error toast then.
+  const fetchGameData = async (): Promise<FetchResponse<GameData>> => {
+    const shownGame = data;
     const eventId = getStoredEventId();
     if (!eventId) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return { data: null, status: 0 };
     }
 
     startLoading();
     setIsError(false);
 
     const gameDataRequest = GetRequest(eventPath(eventId, '/now'));
-    const data = await authFetch<GameData>(gameDataRequest);
+    const result = await fetchWithStatus<GameData>(gameDataRequest, {
+      quietStatuses: shownGame ? [404] : [],
+    });
+    const { data: fresh } = result;
 
-    if (!data) {
+    if (!fresh) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return result;
     }
 
-    setData(data);
+    setData(fresh);
 
     if (playersList.length) {
       finishLoading(true);
-      return;
+      return result;
     }
 
     const gamePlayersRequest = GetRequest(
-      eventGamePath(eventId, data.id, '/players')
+      eventGamePath(eventId, fresh.id, '/players')
     );
     const playersResult = await authFetch<GamePlayers>(gamePlayersRequest);
 
@@ -179,6 +193,7 @@ export const useFetchGameData = () => {
 
     setPlayersList(playersResult?.players || []);
     finishLoading(true);
+    return result;
   };
 
   useEffect(() => {
@@ -259,9 +274,13 @@ export const useFetchGameResultData = (options?: GameResultFetchOptions) => {
   return { data, isError, isForbidden, isLoading, fetchData };
 };
 
+// useFetchGameLogsData loads the round log of a game, and again each time
+// reloadKey changes (a table screen passes its table, so the log reloads with
+// it).
 export const useFetchGameLogsData = (
   gameId: number | null,
-  eventId?: number
+  eventId?: number,
+  reloadKey?: unknown
 ) => {
   const [data, setData] = useState<GameRoundLogs | null>(null);
   const [isError, setIsError] = useState(false);
@@ -271,17 +290,18 @@ export const useFetchGameLogsData = (
     gameId != null
   );
 
-  const fetchData = useCallback(async () => {
+  // fetchData loads the log and returns it (null on an error).
+  const fetchData = useCallback(async (): Promise<GameRoundLogs | null> => {
     if (gameId == null) {
       setData(null);
-      return;
+      return null;
     }
 
     const resolvedEventId = eventId ?? getStoredEventId();
     if (!resolvedEventId) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     startLoading();
@@ -296,25 +316,28 @@ export const useFetchGameLogsData = (
     if (result.status === 403) {
       setIsForbidden(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     if (!result.data) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     setData(result.data);
     finishLoading(true);
+    return result.data;
   }, [gameId, eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, reloadKey]);
 
   return { data, isError, isForbidden, isLoading, fetchData };
 };
+
+export type GameLogsState = ReturnType<typeof useFetchGameLogsData>;
 
 export const useFetchPlayerStatus = () => {
   const { selectedEventId } = useEvent();

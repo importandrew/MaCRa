@@ -7,9 +7,14 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int) (models.GameNow, error) {
+func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error) {
 	game, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
+		return models.GameNow{}, err
+	}
+
+	logSize := game.LogSize()
+	if err := checkLogSize(logSize, seenLogSize); err != nil {
 		return models.GameNow{}, err
 	}
 
@@ -38,6 +43,7 @@ func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playe
 		WestStartScore:  score[players[models.West]].GP,
 		NorthStartScore: score[players[models.North]].GP,
 		ForceNextRound:  forceNextRound,
+		LogSize:         logSize,
 	}
 
 	err = s.gameRepo.SaveRoundOutcome(ctx, game.ID(), roundOutcome)

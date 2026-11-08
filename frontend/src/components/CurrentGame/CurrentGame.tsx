@@ -10,6 +10,9 @@ import TableMenu from './Menu/TableMenu';
 import { RoundEntryPanel } from './RoundEntry';
 import CurrentGameSeat from './CurrentGameSeat';
 import { useRoundEntry } from './useRoundEntry';
+import { useShowGameGone } from './useShowGameGone';
+import { useTableLogs } from './useTableLogs';
+import { getStoredEventId } from '../../providers/event/eventConstants';
 import './CurrentGame.css';
 
 export default function CurrentGame() {
@@ -23,10 +26,15 @@ export default function CurrentGame() {
     setDeltaPlayerId(playerId);
     setIsDeltaOpen(true);
   };
-  const entry = useRoundEntry((next) => {
-    setRoundData(next);
-    setIsEntryOpen(false);
-  });
+  const entry = useRoundEntry(
+    roundData,
+    (next) => {
+      setRoundData(next);
+      setIsEntryOpen(false);
+    },
+    () => onRefresh()
+  );
+  const logs = useTableLogs(roundData, () => onRefresh());
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}
   );
@@ -47,10 +55,18 @@ export default function CurrentGame() {
   // The round entry clears after a submit (in useRoundEntry) and on refresh,
   // including undo, as agreed with the owner. Closing it with the kanji keeps
   // the choices.
-  const onRefresh = () => {
+  // A 404 for a table on screen means its game has ended or been aborted:
+  // open the result (or home) instead of a loading error.
+  const showGameGone = useShowGameGone();
+  const onRefresh = async () => {
     entry.reset();
     setIsEntryOpen(false);
-    return refetch();
+    const { data: fresh, status } = await refetch();
+    const eventId = getStoredEventId();
+    if (status === 404 && roundData && eventId) {
+      await showGameGone(eventId, roundData.id);
+    }
+    return fresh;
   };
 
   useEffect(() => {
@@ -184,7 +200,12 @@ export default function CurrentGame() {
                 onOpen={() => setIsContextMenuOpen(true)}
                 onClose={() => setIsContextMenuOpen(false)}
               >
-                <TableMenu gameId={roundData.id} onRefetchNow={onRefresh} />
+                <TableMenu
+                  gameId={roundData.id}
+                  onRefetchNow={onRefresh}
+                  logs={logs}
+                  logSize={roundData.log_size}
+                />
               </ContextMenu>
             </div>
           </div>

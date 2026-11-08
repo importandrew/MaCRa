@@ -1,6 +1,7 @@
 import { Button, Card } from '@heroui/react';
 import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { globalFetch, PostRequest } from '../Request';
 import { showToast } from '../Toast';
@@ -13,7 +14,7 @@ export default function ResetPasswordPage() {
   const navigate = useNavigate();
 
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { isPending: isLoading, run } = useSubmitOnce();
 
   const handleSubmit = useCallback(async () => {
     if (!token) {
@@ -21,12 +22,10 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setIsLoading(true);
     const data = await globalFetch<object>(
       PostRequest('/auth/reset-password', { token, password }),
       { redirectOn401: false }
     );
-    setIsLoading(false);
 
     if (!data) {
       return;
@@ -67,7 +66,7 @@ export default function ResetPasswordPage() {
                     <Button
                       variant="primary"
                       isDisabled={!password}
-                      onPress={handleSubmit}
+                      onPress={() => run(handleSubmit)}
                     >
                       Update password
                     </Button>

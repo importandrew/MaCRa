@@ -1,7 +1,7 @@
 import { Button, useOverlayState } from '@heroui/react';
 import { DeleteRequest, authFetch, eventGamePath } from '../../Request';
 import { getStoredEventId } from '../../../providers/event/eventConstants';
-import { useState } from 'react';
+import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import { WarningIcon } from '../../Icons/WarningIcon';
 import Confirm from '../../Confirm';
@@ -15,7 +15,7 @@ export default function AbortMenu({
   canAbort?: boolean;
 }) {
   const navigate = useNavigate();
-  const [isAborting, setIsAborting] = useState(false);
+  const { isPending: isAborting, run } = useSubmitOnce();
   const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
   if (!canAbort) {
@@ -25,24 +25,16 @@ export default function AbortMenu({
   const handleAbort = async () => {
     if (!gameId) return;
 
-    setIsAborting(true);
     const eventId = getStoredEventId();
-    if (!eventId) {
-      setIsAborting(false);
-      return;
-    }
+    if (!eventId) return;
 
     const abortRequest = DeleteRequest(
       eventGamePath(eventId, gameId, '/abort')
     );
     const data = await authFetch<null>(abortRequest);
 
-    if (!data) {
-      setIsAborting(false);
-      return;
-    }
+    if (!data) return;
 
-    setIsAborting(false);
     showToast({
       title: 'Game aborted',
       variant: 'warning',
@@ -66,7 +58,7 @@ export default function AbortMenu({
         onClose={onClose}
         onConfirm={() => {
           onClose();
-          handleAbort();
+          void run(handleAbort);
         }}
         isOpen={isOpen}
         headerText="Confirm abort game"

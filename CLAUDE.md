@@ -23,6 +23,16 @@ MaCRa (Mahjong Competitive Rules assistant) tracks MCR mahjong games: live score
 
 The rules above still apply in full. Put personal overrides in `.claude/settings.local.json`, which is gitignored.
 
+## Product behavior
+
+`docs/user-scenarios.md` is the agreed, desired behavior of the app, area by area. Read the relevant area before changing what users see or may do; if the code and the file disagree, raise it with the owner instead of picking one silently. Principles that apply everywhere:
+
+- Mobile first (most users are on phones); supported from 320 px wide. Game screens avoid the keyboard: steppers and toggles, players picked by seat.
+- At the table, scores change only when the player taps Refresh or enters a round; elsewhere auto-refresh is an opt-in switch.
+- The event owner always has staff rights; a player always sees their own games while they can open the event; without access to an event, nothing in it is visible.
+- An event's game rules freeze after its first game, and each game is replayed with the rules it started with; permissions can change at any time.
+- Players' privacy: emails are never shown to other users; non-members get staff names and a player count, not the member list (ratings and games show names only as their reach allows).
+
 ## Backend ↔ frontend contracts
 
 - The frontend reaches the API at `VITE_API_ADDR` from `frontend/.env.<mode>`. For local dev, the backend's `allow_origins` and `cookie_domain` in `backend_config.json` must match the frontend origin, or auth cookies and CORS break.

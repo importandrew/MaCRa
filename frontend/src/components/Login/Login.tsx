@@ -8,6 +8,7 @@ import {
   TextField,
 } from '@heroui/react';
 import { Key, useCallback, useContext, useState } from 'react';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
   Link,
   useLocation,
@@ -34,7 +35,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { isPending: isLoading, run } = useSubmitOnce();
 
   const { signIn } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -60,8 +61,6 @@ export default function LoginPage() {
   );
 
   const handleLogin = useCallback(async () => {
-    setIsLoading(true);
-
     const result = await fetchWithStatus<UserData>(
       PostRequest('/auth/login', { email, password }),
       { redirectOn401: false }
@@ -73,18 +72,14 @@ export default function LoginPage() {
     }
 
     if (!result.data) {
-      setIsLoading(false);
       return;
     }
 
     signIn(result.data);
     navigate(from, { replace: true });
-    setIsLoading(false);
   }, [email, password, signIn, navigate, from]);
 
   const handleSignup = useCallback(async () => {
-    setIsLoading(true);
-
     const data = await globalFetch<object>(
       PostRequest('/auth/signup', {
         email,
@@ -95,7 +90,6 @@ export default function LoginPage() {
     );
 
     if (!data) {
-      setIsLoading(false);
       return;
     }
 
@@ -134,7 +128,7 @@ export default function LoginPage() {
                       <Button
                         variant="primary"
                         isDisabled={!email || !password}
-                        onPress={handleLogin}
+                        onPress={() => run(handleLogin)}
                       >
                         Sign In
                       </Button>
@@ -177,7 +171,7 @@ export default function LoginPage() {
                         variant="primary"
                         isDisabled={!email || !password || !name}
                         className="mt-3"
-                        onPress={handleSignup}
+                        onPress={() => run(handleSignup)}
                       >
                         Sign Up
                       </Button>
