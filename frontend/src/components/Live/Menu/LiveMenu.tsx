@@ -4,6 +4,7 @@ import { useEventCapabilities } from '../../../providers/event/useEventCapabilit
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
 import LogsMenu from '../../CurrentGame/Menu/LogsMenu';
+import { GameLogsState } from '../../../providers/game/gameDataApi';
 import AbortMenu from '../../CurrentGame/Menu/AbortMenu';
 import FinishMenu from '../../CurrentGame/Menu/FinishMenu';
 import { FansMenu } from '../../CurrentGame/Menu/FansMenu';
@@ -12,10 +13,17 @@ export default function LiveMenu({
   gameId = null,
   eventId,
   onUndoSuccess,
+  logs,
+  logSize,
 }: {
   gameId: number | null;
   eventId?: number;
-  onUndoSuccess?: () => void;
+  // onUndoSuccess reloads the screen; it is also called after an undo
+  // refused because the log has changed.
+  onUndoSuccess?: () => Promise<unknown>;
+  // logs and logSize are the screen's, see useTableLogs.
+  logs: GameLogsState;
+  logSize: number;
 }) {
   const { hasCapability } = useEventCapabilities(eventId ?? null);
   const canUndoLastRound = hasCapability('undo_round');
@@ -40,6 +48,9 @@ export default function LiveMenu({
                   eventId={eventId}
                   canUndoLastRound={canUndoLastRound}
                   onUndoSuccess={onUndoSuccess}
+                  onStale={onUndoSuccess}
+                  tableLogs={logs}
+                  tableLogSize={logSize}
                 />
               ),
             },

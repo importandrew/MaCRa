@@ -11,6 +11,7 @@ import TableMenu from './Menu/TableMenu';
 import { RoundEntryPanel, SeatMarks } from './RoundEntry';
 import { useRoundEntry } from './useRoundEntry';
 import { useShowGameGone } from './useShowGameGone';
+import { useTableLogs } from './useTableLogs';
 import { getStoredEventId } from '../../providers/event/eventConstants';
 import './CurrentGame.css';
 
@@ -27,6 +28,7 @@ export default function CurrentGame() {
     },
     () => onRefresh()
   );
+  const logs = useTableLogs(roundData, () => onRefresh());
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}
   );
@@ -228,7 +230,12 @@ export default function CurrentGame() {
                 onOpen={() => setIsContextMenuOpen(true)}
                 onClose={() => setIsContextMenuOpen(false)}
               >
-                <TableMenu gameId={roundData.id} onRefetchNow={onRefresh} />
+                <TableMenu
+                  gameId={roundData.id}
+                  onRefetchNow={onRefresh}
+                  logs={logs}
+                  logSize={roundData.log_size}
+                />
               </ContextMenu>
             </div>
           </div>

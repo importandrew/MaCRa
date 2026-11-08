@@ -56,6 +56,8 @@ type GameView struct {
 	ID     int        `json:"id"`
 	Status GameStatus `json:"status"`
 	Round  Round      `json:"round"`
+	// LogSize is the number of round log entries, as in GameNow.
+	LogSize int `json:"log_size"`
 
 	PlayerScores []PlayerWindScore `json:"player_scores"`
 }

@@ -274,9 +274,13 @@ export const useFetchGameResultData = (options?: GameResultFetchOptions) => {
   return { data, isError, isForbidden, isLoading, fetchData };
 };
 
+// useFetchGameLogsData loads the round log of a game, and again each time
+// reloadKey changes (a table screen passes its table, so the log reloads with
+// it).
 export const useFetchGameLogsData = (
   gameId: number | null,
-  eventId?: number
+  eventId?: number,
+  reloadKey?: unknown
 ) => {
   const [data, setData] = useState<GameRoundLogs | null>(null);
   const [isError, setIsError] = useState(false);
@@ -328,7 +332,7 @@ export const useFetchGameLogsData = (
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, reloadKey]);
 
   return { data, isError, isForbidden, isLoading, fetchData };
 };

@@ -5,6 +5,7 @@ import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
 import { UndoIcon } from '../../Icons/UndoIcon';
 import {
+  GameLogsState,
   undoLastRound,
   useFetchGameLogsData,
 } from '../../../providers/game/gameDataApi';
@@ -12,28 +13,42 @@ import PendingButton from '../../PendingButton';
 import { Outcome } from '../../../models/GameData';
 import { GameRoundLogs } from '../../../models/GameResult';
 
+// LogsMenu shows a game's round log with the Undo button. A table screen
+// passes its own log and size (tableLogs, tableLogSize from useTableLogs), so
+// the menu shows and undoes the state the table shows; without them (the
+// result page), the menu loads the log itself.
 export default function LogsMenu({
   gameId,
   eventId,
   canUndoLastRound = false,
   onUndoSuccess,
+  tableLogs,
+  tableLogSize,
+  onStale,
 }: {
   gameId: number | null;
   eventId?: number;
   canUndoLastRound?: boolean;
   onUndoSuccess?: () => void;
+  tableLogs?: GameLogsState;
+  tableLogSize?: number;
+  // onStale reloads the table screen after an undo refused because the log
+  // has changed.
+  onStale?: () => Promise<unknown>;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { isPending: undoLoading, run } = useSubmitOnce();
-  const logs = useFetchGameLogsData(gameId, eventId);
-  const logSize = logs.data?.round_logs.length;
+  const ownLogs = useFetchGameLogsData(tableLogs ? null : gameId, eventId);
+  const logs = tableLogs ?? ownLogs;
+  const logSize = tableLogSize ?? logs.data?.round_logs.length;
 
-  // Undo sends the size of the log shown above, so the server refuses it
-  // (409) if someone else has entered or undone an entry since; the log then
-  // reloads and the message says what changed, as for a round entry. A 409
-  // with the log unchanged means the final round can't be undone: a player
-  // has started another game (the server's message names them). A second
-  // tap is ignored.
+  // Undo sends the log size the referee sees, so the server refuses it (409)
+  // if someone else has entered or undone an entry since; the table screen
+  // (onStale) and the log then reload, and the message says what changed, as
+  // for a round entry.
+  // A 409 with the log unchanged means the final round can't be undone: a
+  // player has started another game (the server's message names them). A
+  // second tap is ignored.
   const handleUndoConfirm = () =>
     run(async () => {
       if (gameId == null || logSize == null) return;
@@ -42,14 +57,17 @@ export default function LogsMenu({
       const { status, error } = await undoLastRound(gameId, logSize, eventId);
       if (status === 200) {
         showToast({ title: 'Last round undone', variant: 'warning' });
-        void logs.fetchData();
+        // A table screen reloads its log with the table.
+        if (!tableLogs) void logs.fetchData();
         onUndoSuccess?.();
         return;
       }
       if (status !== 409) return;
 
-      // An undo and a new entry can bring the log back to the same size, so
-      // compare the last entry too.
+      // The table first, so the log loaded next matches it. An undo and a
+      // new entry can bring the log back to the same size, so compare the
+      // last entry too.
+      await onStale?.();
       const fresh = await logs.fetchData();
       const isChanged =
         fresh != null &&

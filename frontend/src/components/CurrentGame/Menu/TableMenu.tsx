@@ -8,15 +8,23 @@ import AbortMenu from './AbortMenu';
 import FinishMenu from './FinishMenu';
 import { FansMenu } from './FansMenu';
 import LazyAccordion from '../../LazyAccordion';
+import { GameLogsState } from '../../../providers/game/gameDataApi';
 
 // TableMenu is the ≡ menu of the game screen. Penalties are entered in the
 // round card (tap the round kanji), not here.
 export default function TableMenu({
   gameId = null,
   onRefetchNow,
+  logs,
+  logSize,
 }: {
   gameId: number | null;
-  onRefetchNow?: () => void;
+  // onRefetchNow reloads the table; it is also called after an undo refused
+  // because the log has changed.
+  onRefetchNow?: () => Promise<unknown>;
+  // logs and logSize are the table's, see useTableLogs.
+  logs: GameLogsState;
+  logSize: number;
 }) {
   const { selectedEventId } = useEvent();
   const { data: eventMe } = useFetchEventMe(selectedEventId);
@@ -42,6 +50,9 @@ export default function TableMenu({
                     gameId={gameId}
                     canUndoLastRound={canUndo}
                     onUndoSuccess={onRefetchNow}
+                    onStale={onRefetchNow}
+                    tableLogs={logs}
+                    tableLogSize={logSize}
                   />
                 </div>
               ),
