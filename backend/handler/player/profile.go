@@ -29,7 +29,7 @@ func (h Handler) UpdateProfile(c *gin.Context) {
 	userID := reqctx.GetUserID(c)
 
 	var req UpdateProfileRequest
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}

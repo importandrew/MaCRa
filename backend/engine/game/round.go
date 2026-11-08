@@ -28,7 +28,7 @@ func (g *Game) NextRound() error {
 		g.currentSeating.NextRoundSeating()
 	}
 	g.round += 1
-	logger.WithField("next", g.round).Info("game moved to the next round")
+	logger.WithField("next", g.round).Debug("game moved to the next round")
 
 	return nil
 }
@@ -84,7 +84,7 @@ func validateDraw(hand, loser, winner int) error {
 }
 
 func (g *Game) draw() {
-	logger.WithField("result", "draw").Info(g.score.String())
+	logger.WithField("result", "draw").Debug(g.score.String())
 }
 
 func (g *Game) validateSelf(hand, loser, winner int) error {
@@ -120,7 +120,7 @@ func (g *Game) self(hand, winner int) {
 	}
 
 	logger.WithField("result", fmt.Sprintf("self by %d (hand: %d)", winner, hand)).
-		Info(g.score.String())
+		Debug(g.score.String())
 }
 
 func (g *Game) validateDeal(hand, loser, winner int) error {
@@ -167,5 +167,5 @@ func (g *Game) deal(hand, loser, winner int) {
 	}
 
 	logger.WithField("result", fmt.Sprintf("deal-in by %d into %d (hand: %d)", loser, winner, hand)).
-		Info(g.score.String())
+		Debug(g.score.String())
 }

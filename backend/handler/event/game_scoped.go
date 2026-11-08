@@ -127,7 +127,7 @@ func (h Handler) GameHUD(c *gin.Context) {
 		linger int `form:"linger"`
 	}
 
-	if err := c.BindQuery(&req); err != nil {
+	if err := c.ShouldBindQuery(&req); err != nil {
 		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}

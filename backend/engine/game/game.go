@@ -39,7 +39,7 @@ func NewGame(cfg Config) *Game {
 		score:          NewScore(cfg.Players),
 	}
 
-	log.Infof("playing: %v", cfg.Players)
+	log.Debugf("playing: %v", cfg.Players)
 	return &game
 }
 
@@ -49,7 +49,7 @@ func (g *Game) End() error {
 	}
 	g.status = models.GameEnded
 	g.score.CalculateTP()
-	logger.WithField("final result", g.score.Final()).Info("game ended")
+	logger.WithField("final result", g.score.Final()).Debug("game ended")
 
 	return nil
 }
