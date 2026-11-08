@@ -15,6 +15,7 @@ export default function LiveMenu({
   onUndoSuccess,
   logs,
   logSize,
+  onGameEnded,
 }: {
   gameId: number | null;
   eventId?: number;
@@ -24,6 +25,8 @@ export default function LiveMenu({
   // logs and logSize are the screen's, see useTableLogs.
   logs: GameLogsState;
   logSize: number;
+  // onGameEnded reloads the game page, which then shows the result.
+  onGameEnded: () => void;
 }) {
   const { hasCapability } = useEventCapabilities(eventId ?? null);
   const canUndoLastRound = hasCapability('undo_round');
@@ -68,6 +71,7 @@ export default function LiveMenu({
             gameId={gameId}
             eventId={eventId ?? null}
             canFinish={canFinish}
+            onFinished={onGameEnded}
           />
           <AbortMenu
             gameId={gameId}

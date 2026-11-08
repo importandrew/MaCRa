@@ -1,4 +1,5 @@
 import { Drawer } from '@heroui/react';
+import { useNavigate } from 'react-router-dom';
 import { useFetchEventMe } from '../../../providers/event/eventApi';
 import { useEvent } from '../../../providers/event/eventConstants';
 import { BookIcon } from '../../Icons/BookIcon';
@@ -26,6 +27,7 @@ export default function TableMenu({
   logs: GameLogsState;
   logSize: number;
 }) {
+  const navigate = useNavigate();
   const { selectedEventId, selectedEvent } = useEvent();
   const { data: eventMe } = useFetchEventMe(selectedEventId);
 
@@ -76,6 +78,7 @@ export default function TableMenu({
             gameId={gameId}
             eventId={selectedEventId}
             canFinish={canFinish}
+            onFinished={() => navigate('/last')}
           />
           <AbortMenu
             gameId={gameId}

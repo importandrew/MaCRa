@@ -1,7 +1,6 @@
 import { Button, useOverlayState } from '@heroui/react';
 import { PostRequest, authFetch, eventGamePath } from '../../Request';
 import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
-import { useNavigate } from 'react-router-dom';
 import { WarningIcon } from '../../Icons/WarningIcon';
 import Confirm from '../../Confirm';
 import { showToast } from '../../Toast';
@@ -10,14 +9,18 @@ export default function FinishMenu({
   gameId,
   eventId,
   canFinish = false,
+  onFinished,
 }: {
   gameId: number | null;
   // eventId is the event of the shown game: the URL's on the live view, the
   // selected one at the table.
   eventId: number | null;
   canFinish?: boolean;
+  // onFinished shows the result: /last at the table, where the finished game
+  // is the user's last one; the game's own page on the live view, where the
+  // user may be a referee who didn't play it.
+  onFinished: () => void;
 }) {
-  const navigate = useNavigate();
   const { isPending: isFinishing, run } = useSubmitOnce();
   const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
@@ -36,7 +39,7 @@ export default function FinishMenu({
       variant: 'warning',
     });
 
-    navigate('/last');
+    onFinished();
   };
 
   if (!canFinish) {

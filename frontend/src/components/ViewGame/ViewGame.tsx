@@ -23,7 +23,7 @@ export default function ViewGame() {
 
   if (!isLoading && !isError && !isForbidden) {
     if (status === 'live') {
-      return <Live />;
+      return <Live onGameEnded={onRefresh} />;
     }
     if (status === 'ended') {
       return <GameResult />;
