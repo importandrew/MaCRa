@@ -92,6 +92,10 @@ func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool
 	case models.CapUndoRound:
 		return authCtx.hasRole(models.EventReferee)
 	case models.CapWatchLive, models.CapWatchResults:
+		// A seated player always sees their own game, whatever the games reach.
+		if authCtx.IsSeatedInGame {
+			return true
+		}
 		return authCtx.canViewContent(authCtx.Event.GamesReach, authCtx.baseWatchGamesAccess())
 	case models.CapViewRatings:
 		return authCtx.canViewContent(authCtx.Event.RatingsReach, authCtx.baseViewRatingsAccess())

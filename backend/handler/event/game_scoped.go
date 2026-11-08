@@ -69,7 +69,14 @@ func (h Handler) GameResult(c *gin.Context) {
 }
 
 func (h Handler) GamePlayers(c *gin.Context) {
+	userID := reqctx.GetUserID(c)
+	eventID := reqctx.GetEventID(c)
 	gameID := reqctx.GetGameID(c)
+
+	if err := h.canWatchGame(c.Request.Context(), eventID, userID, gameID); err != nil {
+		httperr.Error(c, err)
+		return
+	}
 
 	players, err := h.game.Players(c.Request.Context(), gameID)
 	if err != nil {
@@ -81,7 +88,14 @@ func (h Handler) GamePlayers(c *gin.Context) {
 }
 
 func (h Handler) GameLogs(c *gin.Context) {
+	userID := reqctx.GetUserID(c)
+	eventID := reqctx.GetEventID(c)
 	gameID := reqctx.GetGameID(c)
+
+	if err := h.canWatchGame(c.Request.Context(), eventID, userID, gameID); err != nil {
+		httperr.Error(c, err)
+		return
+	}
 
 	logs, err := h.game.Logs(c.Request.Context(), gameID)
 	if err != nil {
@@ -90,6 +104,22 @@ func (h Handler) GameLogs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, logs)
+}
+
+// canWatchGame checks the capability the game page needs: watch_live while the
+// game hasn't ended, watch_results once it has ended or been aborted.
+func (h Handler) canWatchGame(ctx context.Context, eventID, userID, gameID int) error {
+	status, err := h.game.Status(ctx, gameID)
+	if err != nil {
+		return err
+	}
+
+	capability := models.CapWatchResults
+	if status == models.GameCreated || status == models.GameLive {
+		capability = models.CapWatchLive
+	}
+
+	return h.event.HasCapability(ctx, eventID, userID, gameID, capability)
 }
 
 func (h Handler) GameHUD(c *gin.Context) {
@@ -120,6 +150,8 @@ func (h Handler) GameHUD(c *gin.Context) {
 	c.JSON(http.StatusOK, hud)
 }
 
+// GameStatus is open to anyone who can open the event: the frontend needs it to
+// pick the game page before it knows what the caller may watch.
 func (h Handler) GameStatus(c *gin.Context) {
 	gameID := reqctx.GetGameID(c)
 
