@@ -6,7 +6,10 @@ import {
   PreparedGameRoundLogs,
   PreparedRoundLog,
 } from '../../models/GameResult';
-import { useFetchGameLogsData } from '../../providers/game/gameDataApi';
+import {
+  GameLogsState,
+  useFetchGameLogsData,
+} from '../../providers/game/gameDataApi';
 import GameChart from './GameChart';
 import { SignIcon } from '../Icons/SignIcon';
 import { WarningIcon } from '../Icons/WarningIcon';
@@ -17,16 +20,18 @@ export default function GameLogs({
   isLogVisible = false,
   gameId,
   eventId,
+  logs,
 }: {
   isChartVisible: boolean;
   isLogVisible: boolean;
   gameId: number | null;
   eventId?: number;
+  // logs, when given, is the log loaded by the caller (who needs it too, e.g.
+  // undo sends its size); otherwise GameLogs loads it itself.
+  logs?: GameLogsState;
 }) {
-  const { data, isError, isLoading, fetchData } = useFetchGameLogsData(
-    gameId,
-    eventId
-  );
+  const ownLogs = useFetchGameLogsData(logs ? null : gameId, eventId);
+  const { data, isError, isLoading, fetchData } = logs ?? ownLogs;
 
   function getFinalScores() {
     if (!preparedData || !preparedData.rounds.length) {

@@ -27,9 +27,12 @@ var (
 
 	ErrJWTKeyEmpty = errors.New("jwt key is empty")
 
-	// ErrRoundAlreadyEntered means the entry was made from an outdated table:
-	// someone else has entered a round or a penalty since.
-	ErrRoundAlreadyEntered = errors.New("the table has changed: this round has already been entered")
+	// ErrLogChanged means a round entry or an undo was made from an outdated
+	// table or log: someone else has entered or undone an entry since.
+	ErrLogChanged = errors.New("the game has changed since you opened it, check the log and try again")
+	// ErrUndoFinalRound means the final round can't be undone because the
+	// game can't become live again (a player has started another game).
+	ErrUndoFinalRound = errors.New("cannot undo the final round")
 
 	ErrValidatePlayers = errors.New("validate game players")
 
@@ -89,8 +92,26 @@ var Errors = map[error]int{
 
 	// 409
 	ErrPlayerExists:         http.StatusConflict,
-	ErrRoundAlreadyEntered:  http.StatusConflict,
+	ErrLogChanged:           http.StatusConflict,
+	ErrUndoFinalRound:       http.StatusConflict,
 	ErrMemberInCurrentGame:  http.StatusConflict,
 	ErrEventAlreadyFinished: http.StatusConflict,
 	ErrEventHasOngoingGames: http.StatusConflict,
+}
+
+// PlayerInAnotherGameError is returned when the final round can't be undone
+// because one of the game's players has started another game. It is
+// ErrUndoFinalRound for errors.Is (and so a 409), and its text names the
+// player, for the client to show as is.
+type PlayerInAnotherGameError struct {
+	Name string
+}
+
+func (e PlayerInAnotherGameError) Error() string {
+	return e.Name + " has already started another game"
+}
+
+// Is reports whether target is ErrUndoFinalRound.
+func (e PlayerInAnotherGameError) Is(target error) bool {
+	return target == ErrUndoFinalRound
 }

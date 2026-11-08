@@ -84,7 +84,7 @@ func TestSaveRoundOutcome(t *testing.T) {
 			},
 			expectedErr: assert.NoError,
 			twiceErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 		"penalty twice from the same log": {
@@ -107,7 +107,7 @@ func TestSaveRoundOutcome(t *testing.T) {
 			},
 			expectedErr: assert.NoError,
 			twiceErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 		"stale log size": {
@@ -125,7 +125,7 @@ func TestSaveRoundOutcome(t *testing.T) {
 				LogSize: 1,
 			},
 			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+				return assert.ErrorIs(t, err, models.ErrLogChanged)
 			},
 		},
 	}
@@ -208,13 +208,12 @@ func TestSaveRoundOutcome_ConcurrentPenalties(t *testing.T) {
 		}
 		createTestGame(t, conn, 1)
 		createTestGamePlayers(t, conn, 1, [4]int{1, 2, 3, 4})
-		// SaveRoundOutcome holds two pool connections at once (its own and
-		// one for Players), so free this one and keep the attempts few.
+		// Free this connection: each attempt takes its own.
 		conn.Release()
 
 		data := models.RoundData{Round: 1, Outcome: models.Penalty, LoserID: 2, Value: 10, SouthStartScore: -10}
 
-		const attempts = 2
+		const attempts = 5
 		errs := make(chan error, attempts)
 		var wg sync.WaitGroup
 		for range attempts {
@@ -229,7 +228,7 @@ func TestSaveRoundOutcome_ConcurrentPenalties(t *testing.T) {
 				saved++
 				continue
 			}
-			assert.ErrorIs(t, err, models.ErrRoundAlreadyEntered)
+			assert.ErrorIs(t, err, models.ErrLogChanged)
 		}
 		assert.Equal(t, 1, saved)
 	})

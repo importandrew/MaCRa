@@ -5,6 +5,8 @@ import { showToast } from './Toast';
 export type FetchResponse<T> = {
   data: T | null;
   status: number;
+  // error is the server's message for an error response.
+  error?: string;
 };
 
 type FetchOptions = {
@@ -113,7 +115,7 @@ async function fetchWithStatus<T>(
           variant: 'danger',
         });
       }
-      return { data: null, status: response.status };
+      return { data: null, status: response.status, error: data.error };
     }
 
     const data = JSON.parse((await response.text()) || '{}');

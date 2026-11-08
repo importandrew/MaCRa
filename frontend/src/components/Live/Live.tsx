@@ -9,6 +9,7 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from '../CurrentGame/AnimatedScore';
 import '../CurrentGame/CurrentGame.css';
 import LiveMenu from './Menu/LiveMenu';
+import { useTableLogs } from '../CurrentGame/useTableLogs';
 
 export default function Live() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function Live() {
   const gameId = gameIdParam ? parseInt(gameIdParam, 10) : 0;
   const { data, playersList, isLoading, isError, isForbidden, refetch } =
     useFetchLiveGameData(eventId, gameId);
+  const logs = useTableLogs(data, refetch, eventId);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [rotationOffset, setRotationOffset] = useState(0);
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
@@ -207,6 +209,8 @@ export default function Live() {
                   gameId={data.id}
                   eventId={eventId}
                   onUndoSuccess={refetch}
+                  logs={logs}
+                  logSize={data.log_size}
                 />
               </ContextMenu>
             </div>
