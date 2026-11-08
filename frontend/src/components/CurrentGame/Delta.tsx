@@ -405,25 +405,33 @@ function computeEmpty() {
   };
 }
 
-// This example is deliberately independent of live scores and screen measurements.
+// The example is static relative to live play, but its thresholds use the real
+// MCR calculation. Scores sum to zero, as they must in an MCR game.
 const EXAMPLE_PLAYERS: DeltaPlayer[] = [
-  { id: 101, name: 'North', wind: '北', score: 42, position: 'top' },
-  { id: 102, name: 'West', wind: '西', score: 31, position: 'left' },
-  { id: 103, name: 'South', wind: '南', score: 27, position: 'right' },
-  { id: 104, name: 'You', wind: '東', score: 35, position: 'bottom' },
+  { id: 101, name: 'North', wind: '北', score: -40, position: 'top' },
+  { id: 102, name: 'West', wind: '西', score: 25, position: 'left' },
+  { id: 103, name: 'South', wind: '南', score: 40, position: 'right' },
+  { id: 104, name: 'You', wind: '東', score: -25, position: 'bottom' },
 ];
-const EXAMPLE_SELF: PlaceTarget[] = [
-  { place: 1, handValue: 12, tiedThrough: 1 },
-];
-const EXAMPLE_DIRECT: PlaceTarget[] = [
-  { place: 1, handValue: 8, tiedThrough: 1 },
-  { place: 2, handValue: 11, tiedThrough: 2 },
-];
-const EXAMPLE_LOSS: LossTarget[] = [
-  { placesLost: 1, finalPlace: 3, handValue: 9, tiedThrough: 3 },
-  { placesLost: 2, finalPlace: 4, handValue: 12, tiedThrough: 4 },
-];
-const EXAMPLE_TIE: PlaceTarget[] = [{ place: 2, handValue: 9, tiedThrough: 3 }];
+const EXAMPLE_SELECTED_ID = 104;
+const EXAMPLE_SELECTED = EXAMPLE_PLAYERS[3];
+const EXAMPLE_RANK = currentRank(EXAMPLE_PLAYERS, EXAMPLE_SELECTED_ID);
+const EXAMPLE_SELF = getGainTargets(
+  EXAMPLE_PLAYERS,
+  EXAMPLE_SELECTED_ID,
+  'self'
+);
+const EXAMPLE_WEST_WIN = getGainTargets(
+  EXAMPLE_PLAYERS,
+  EXAMPLE_SELECTED_ID,
+  'direct',
+  102
+);
+const EXAMPLE_SOUTH_LOSS = getDiscardTargets(
+  EXAMPLE_PLAYERS,
+  EXAMPLE_SELECTED_ID,
+  103
+);
 
 function HelpExample({
   isOpen,
@@ -460,70 +468,72 @@ function HelpExample({
           </Modal.Header>
           <Modal.Body className="delta-help-body">
             <p className="delta-help-intro">
-              Example scores and thresholds. Numbers before the arrow are hand
-              fan values; circles show the resulting place. An equals sign means
-              a tie.
+              Example scores and representative thresholds. Numbers before the
+              arrow are hand fan values; circles show the resulting place. An
+              equals sign means a tie.
             </p>
             <div className="delta-help-illustration">
-              <div className="delta-help-mini-table">
-                <OpponentCard
-                  player={EXAMPLE_PLAYERS[0]}
-                  selectedScore={35}
-                  directTargets={EXAMPLE_TIE}
-                  discardTargets={[]}
-                  area="top"
-                />
-                <OpponentCard
-                  player={EXAMPLE_PLAYERS[1]}
-                  selectedScore={35}
-                  directTargets={EXAMPLE_DIRECT}
-                  discardTargets={[]}
-                  area="left"
-                />
-                <OpponentCard
-                  player={EXAMPLE_PLAYERS[2]}
-                  selectedScore={35}
-                  directTargets={[]}
-                  discardTargets={EXAMPLE_LOSS}
-                  area="right"
-                />
-                <SelectedCard
-                  player={EXAMPLE_PLAYERS[3]}
-                  rank={{ first: 2, last: 2 }}
-                  selfTargets={EXAMPLE_SELF}
-                  area="bottom"
-                />
+              <div className="delta-help-canvas">
+                <div className="delta-help-mini-table">
+                  <OpponentCard
+                    player={EXAMPLE_PLAYERS[0]}
+                    selectedScore={EXAMPLE_SELECTED.score}
+                    directTargets={[]}
+                    discardTargets={[]}
+                    area="top"
+                  />
+                  <OpponentCard
+                    player={EXAMPLE_PLAYERS[1]}
+                    selectedScore={EXAMPLE_SELECTED.score}
+                    directTargets={EXAMPLE_WEST_WIN}
+                    discardTargets={[]}
+                    area="left"
+                  />
+                  <OpponentCard
+                    player={EXAMPLE_PLAYERS[2]}
+                    selectedScore={EXAMPLE_SELECTED.score}
+                    directTargets={[]}
+                    discardTargets={EXAMPLE_SOUTH_LOSS}
+                    area="right"
+                  />
+                  <SelectedCard
+                    player={EXAMPLE_SELECTED}
+                    rank={EXAMPLE_RANK}
+                    selfTargets={EXAMPLE_SELF}
+                    area="bottom"
+                  />
+                </div>
+                <svg
+                  className="delta-help-leaders"
+                  viewBox="0 0 320 410"
+                  aria-hidden="true"
+                >
+                  <path d="M78 29 L118 55 L137 72" />
+                  <path d="M246 29 L206 57 L160 76" />
+                  <path d="M49 193 L73 193 L89 201" />
+                  <path d="M270 193 L248 193 L229 201" />
+                  <path d="M73 384 L112 346 L139 332" />
+                  <path d="M251 384 L216 346 L180 332" />
+                </svg>
+                <span className="delta-help-label delta-help-label--one">
+                  Wind, name, score
+                </span>
+                <span className="delta-help-label delta-help-label--two">
+                  Score difference
+                </span>
+                <span className="delta-help-label delta-help-label--three">
+                  Win
+                </span>
+                <span className="delta-help-label delta-help-label--four">
+                  Deal in
+                </span>
+                <span className="delta-help-label delta-help-label--five">
+                  Selected player
+                </span>
+                <span className="delta-help-label delta-help-label--six">
+                  Self-draw
+                </span>
               </div>
-              <svg
-                className="delta-help-leaders"
-                viewBox="0 0 320 410"
-                aria-hidden="true"
-              >
-                <path d="M78 29 L118 55 L137 72" />
-                <path d="M246 29 L206 57 L183 80" />
-                <path d="M49 193 L73 193 L89 201" />
-                <path d="M270 193 L248 193 L229 201" />
-                <path d="M73 384 L112 346 L139 332" />
-                <path d="M251 384 L216 346 L180 332" />
-              </svg>
-              <span className="delta-help-label delta-help-label--one">
-                Wind, name, score
-              </span>
-              <span className="delta-help-label delta-help-label--two">
-                Score difference
-              </span>
-              <span className="delta-help-label delta-help-label--three">
-                Win
-              </span>
-              <span className="delta-help-label delta-help-label--four">
-                Deal in
-              </span>
-              <span className="delta-help-label delta-help-label--five">
-                Selected player
-              </span>
-              <span className="delta-help-label delta-help-label--six">
-                Self-draw
-              </span>
             </div>
             <div className="delta-help-explanation">
               <p>
