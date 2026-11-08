@@ -1,6 +1,5 @@
 import { Button, useOverlayState } from '@heroui/react';
 import { DeleteRequest, authFetch, eventGamePath } from '../../Request';
-import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import { WarningIcon } from '../../Icons/WarningIcon';
@@ -9,9 +8,13 @@ import { showToast } from '../../Toast';
 
 export default function AbortMenu({
   gameId,
+  eventId,
   canAbort = false,
 }: {
   gameId: number | null;
+  // eventId is the event of the shown game: the URL's on the live view, the
+  // selected one at the table.
+  eventId: number | null;
   canAbort?: boolean;
 }) {
   const navigate = useNavigate();
@@ -23,10 +26,7 @@ export default function AbortMenu({
   }
 
   const handleAbort = async () => {
-    if (!gameId) return;
-
-    const eventId = getStoredEventId();
-    if (!eventId) return;
+    if (!gameId || !eventId) return;
 
     const abortRequest = DeleteRequest(
       eventGamePath(eventId, gameId, '/abort')
@@ -48,7 +48,7 @@ export default function AbortMenu({
       <Button
         variant="danger"
         onPress={onOpen}
-        isDisabled={!gameId || isAborting}
+        isDisabled={!gameId || !eventId || isAborting}
         className="w-1/2"
       >
         <WarningIcon className="text-white" />

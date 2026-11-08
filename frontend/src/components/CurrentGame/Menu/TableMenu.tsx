@@ -26,11 +26,16 @@ export default function TableMenu({
   logs: GameLogsState;
   logSize: number;
 }) {
-  const { selectedEventId } = useEvent();
+  const { selectedEventId, selectedEvent } = useEvent();
   const { data: eventMe } = useFetchEventMe(selectedEventId);
 
   const canAbort = eventMe?.capabilities.includes('abort_game') ?? false;
   const canUndo = eventMe?.capabilities.includes('undo_round') ?? false;
+  // The event-level finish_game is computed without a game, so it leaves out
+  // seated players. At the table the user is always seated, and a seated
+  // player may finish in a regular event (as on the backend). TODO 25 replaces
+  // this with game-level capabilities.
+  const canFinish = selectedEvent?.type === 'regular';
 
   return (
     <>
@@ -67,8 +72,16 @@ export default function TableMenu({
         />
 
         <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
-          <FinishMenu gameId={gameId} canFinish />
-          <AbortMenu gameId={gameId} canAbort={canAbort} />
+          <FinishMenu
+            gameId={gameId}
+            eventId={selectedEventId}
+            canFinish={canFinish}
+          />
+          <AbortMenu
+            gameId={gameId}
+            eventId={selectedEventId}
+            canAbort={canAbort}
+          />
         </div>
       </Drawer.Body>
     </>

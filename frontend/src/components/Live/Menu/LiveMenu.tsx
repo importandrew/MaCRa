@@ -64,8 +64,16 @@ export default function LiveMenu({
         />
 
         <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
-          <FinishMenu gameId={gameId} canFinish={canFinish} />
-          <AbortMenu gameId={gameId} canAbort={canAbort} />
+          <FinishMenu
+            gameId={gameId}
+            eventId={eventId ?? null}
+            canFinish={canFinish}
+          />
+          <AbortMenu
+            gameId={gameId}
+            eventId={eventId ?? null}
+            canAbort={canAbort}
+          />
         </div>
       </Drawer.Body>
     </>

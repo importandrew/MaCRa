@@ -1,6 +1,5 @@
 import { Button, useOverlayState } from '@heroui/react';
 import { PostRequest, authFetch, eventGamePath } from '../../Request';
-import { getStoredEventId } from '../../../providers/event/eventConstants';
 import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import { WarningIcon } from '../../Icons/WarningIcon';
@@ -9,9 +8,13 @@ import { showToast } from '../../Toast';
 
 export default function FinishMenu({
   gameId,
+  eventId,
   canFinish = false,
 }: {
   gameId: number | null;
+  // eventId is the event of the shown game: the URL's on the live view, the
+  // selected one at the table.
+  eventId: number | null;
   canFinish?: boolean;
 }) {
   const navigate = useNavigate();
@@ -19,10 +22,7 @@ export default function FinishMenu({
   const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
   const handleFinish = async () => {
-    if (!gameId) return;
-
-    const eventId = getStoredEventId();
-    if (!eventId) return;
+    if (!gameId || !eventId) return;
 
     const finishRequest = PostRequest(
       eventGamePath(eventId, gameId, '/finish')
@@ -48,7 +48,7 @@ export default function FinishMenu({
       <Button
         variant="primary"
         onPress={onOpen}
-        isDisabled={!gameId || isFinishing}
+        isDisabled={!gameId || !eventId || isFinishing}
         className="w-1/2"
       >
         <WarningIcon className="text-white" />
