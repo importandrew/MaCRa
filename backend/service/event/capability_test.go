@@ -263,6 +263,38 @@ func TestHasCapability_finishGameSeatedOrReferee(t *testing.T) {
 	assert.True(t, referee.hasCapability(models.CapFinishGame))
 }
 
+func TestHasCapability_seatedPlayerWatchesOwnGame(t *testing.T) {
+	event := testEvent(models.EventTournament)
+	event.GamesReach = models.ContentReachStaff
+
+	seated := EventAuthContext{
+		Event:          event,
+		CallerID:       5,
+		Roles:          []models.EventRole{models.EventPlayer},
+		IsMember:       true,
+		IsSeatedInGame: true,
+	}
+	assert.True(t, seated.hasCapability(models.CapWatchLive))
+	assert.True(t, seated.hasCapability(models.CapWatchResults))
+
+	notSeated := seated
+	notSeated.IsSeatedInGame = false
+	assert.False(t, notSeated.hasCapability(models.CapWatchLive))
+	assert.False(t, notSeated.hasCapability(models.CapWatchResults))
+}
+
+func TestHasCapability_seatedPlayerWithoutEventAccess(t *testing.T) {
+	// A removed member of a private event loses the game too.
+	authCtx := EventAuthContext{
+		Event:          testEvent(models.EventRegular),
+		CallerID:       5,
+		IsSeatedInGame: true,
+	}
+
+	assert.False(t, authCtx.hasCapability(models.CapWatchLive))
+	assert.False(t, authCtx.hasCapability(models.CapWatchResults))
+}
+
 func TestCanViewContent_publicReachLoggedInNonMemberOnPublicEvent(t *testing.T) {
 	event := testEvent(models.EventRegular)
 	event.Visibility = models.EventVisibilityPublic
