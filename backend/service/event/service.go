@@ -20,7 +20,6 @@ type EventRepo interface {
 	List(ctx context.Context) ([]models.Event, error)
 	Update(ctx context.Context, event models.Event) error
 	Finish(ctx context.Context, eventID int) error
-	ListGames(ctx context.Context, eventID int) ([]models.Game, error)
 	AddMemberRoles(ctx context.Context, eventID int, userID int, roles []models.EventRole) error
 	RemoveMembers(ctx context.Context, eventID int, userIDs []int) error
 	GetMemberRoles(ctx context.Context, eventID int, userID int) ([]models.EventRole, error)

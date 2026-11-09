@@ -20,3 +20,9 @@ func (s *Service) LastGameResult(ctx context.Context, playerID, eventID int) (mo
 
 	return res, nil
 }
+
+// LastGameID returns the ID of the player's last ended game in the event, or
+// models.ErrGameNotFound if there is none.
+func (s *Service) LastGameID(ctx context.Context, playerID, eventID int) (int, error) {
+	return s.gameRepo.LastGame(ctx, playerID, eventID)
+}

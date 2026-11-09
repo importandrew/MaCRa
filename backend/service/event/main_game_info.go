@@ -2,18 +2,37 @@ package event
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/importandrew/MaCRa/models"
 )
 
 func (s *Service) MainGameInfo(ctx context.Context, eventID, userID int) (models.MainGameInfo, error) {
-	last, _ := s.gameService.LastGameResult(ctx, userID, eventID)
-	now, _ := s.gameService.Now(ctx, userID, eventID)
-
-	mainInfo := models.MainGameInfo{
-		HasLast:    last.ID > 0,
-		HasCurrent: now.ID > 0,
+	_, err := s.gameService.LastGameID(ctx, userID, eventID)
+	hasLast, err := gameFound(err)
+	if err != nil {
+		return models.MainGameInfo{}, fmt.Errorf("last game: %w", err)
 	}
 
-	return mainInfo, nil
+	_, err = s.gameService.CurrentGameID(ctx, userID, eventID)
+	hasCurrent, err := gameFound(err)
+	if err != nil {
+		return models.MainGameInfo{}, fmt.Errorf("current game: %w", err)
+	}
+
+	return models.MainGameInfo{HasLast: hasLast, HasCurrent: hasCurrent}, nil
+}
+
+// gameFound turns the error of a game lookup into whether the game exists:
+// models.ErrGameNotFound means it doesn't, any other error is passed on.
+func gameFound(err error) (bool, error) {
+	switch {
+	case err == nil:
+		return true, nil
+	case errors.Is(err, models.ErrGameNotFound):
+		return false, nil
+	default:
+		return false, err
+	}
 }

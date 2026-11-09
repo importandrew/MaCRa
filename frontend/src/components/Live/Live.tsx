@@ -11,7 +11,9 @@ import '../CurrentGame/CurrentGame.css';
 import LiveMenu from './Menu/LiveMenu';
 import { useTableLogs } from '../CurrentGame/useTableLogs';
 
-export default function Live() {
+// onGameEnded is called once this user has ended the game (Finish): the game
+// page reloads its status and shows the result.
+export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
   const navigate = useNavigate();
   const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
     eventId: string;
@@ -211,6 +213,7 @@ export default function Live() {
                   onUndoSuccess={refetch}
                   logs={logs}
                   logSize={data.log_size}
+                  onGameEnded={onGameEnded}
                 />
               </ContextMenu>
             </div>

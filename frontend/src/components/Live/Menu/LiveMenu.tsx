@@ -1,4 +1,5 @@
 import { Drawer } from '@heroui/react';
+import { useNavigate } from 'react-router-dom';
 import LazyAccordion from '../../LazyAccordion';
 import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
 import { BookIcon } from '../../Icons/BookIcon';
@@ -15,6 +16,7 @@ export default function LiveMenu({
   onUndoSuccess,
   logs,
   logSize,
+  onGameEnded,
 }: {
   gameId: number | null;
   eventId?: number;
@@ -24,7 +26,10 @@ export default function LiveMenu({
   // logs and logSize are the screen's, see useTableLogs.
   logs: GameLogsState;
   logSize: number;
+  // onGameEnded reloads the game page, which then shows the result.
+  onGameEnded: () => void;
 }) {
+  const navigate = useNavigate();
   const { hasCapability } = useEventCapabilities(eventId ?? null);
   const canUndoLastRound = hasCapability('undo_round');
   const canAbort = hasCapability('abort_game');
@@ -64,8 +69,20 @@ export default function LiveMenu({
         />
 
         <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
-          <FinishMenu gameId={gameId} canFinish={canFinish} />
-          <AbortMenu gameId={gameId} canAbort={canAbort} />
+          <FinishMenu
+            gameId={gameId}
+            eventId={eventId ?? null}
+            canFinish={canFinish}
+            onFinished={onGameEnded}
+          />
+          <AbortMenu
+            gameId={gameId}
+            eventId={eventId ?? null}
+            canAbort={canAbort}
+            onAborted={() =>
+              navigate(eventId ? `/event/${eventId}/games/live` : '/')
+            }
+          />
         </div>
       </Drawer.Body>
     </>
