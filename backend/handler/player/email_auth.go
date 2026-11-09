@@ -18,7 +18,7 @@ type VerifyEmailRequest struct {
 
 func (h Handler) VerifyEmail(c *gin.Context) {
 	var req VerifyEmailRequest
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
@@ -38,7 +38,7 @@ type ResendVerificationRequest struct {
 
 func (h Handler) ResendVerification(c *gin.Context) {
 	var req ResendVerificationRequest
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
@@ -64,7 +64,7 @@ type ForgotPasswordRequest struct {
 
 func (h Handler) ForgotPassword(c *gin.Context) {
 	var req ForgotPasswordRequest
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}
@@ -90,7 +90,7 @@ type ResetPasswordRequest struct {
 
 func (h Handler) ResetPassword(c *gin.Context) {
 	var req ResetPasswordRequest
-	if err := c.BindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
 		return
 	}

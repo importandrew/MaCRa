@@ -69,7 +69,11 @@ func main() {
 	h.RegisterRoutes(router)
 
 	if cfg.CertFile != "" {
-		router.RunTLS(cfg.Addr, cfg.CertFile, cfg.KeyFile)
+		err = router.RunTLS(cfg.Addr, cfg.CertFile, cfg.KeyFile)
+	} else {
+		err = router.Run(cfg.Addr)
 	}
-	router.Run(cfg.Addr)
+	if err != nil {
+		logger.Fatalf("run server: %v\n", err)
+	}
 }

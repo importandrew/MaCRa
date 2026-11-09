@@ -109,4 +109,19 @@ func TestHandler_ListGames(t *testing.T) {
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 	})
+
+	for _, query := range []string{"status=live&limit=ten", "status=live&offset=x"} {
+		t.Run("bad paging "+query, func(t *testing.T) {
+			eventSvc := NewMockEventService(t)
+			eventSvc.EXPECT().
+				HasCapability(mock.Anything, 1, 5, 0, models.CapWatchLive).
+				Return(nil)
+
+			handler := NewHandler(eventSvc, NewMockGameService(t))
+			c, w := newListGamesContext(5, 1, query)
+			handler.ListGames(c)
+
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+		})
+	}
 }

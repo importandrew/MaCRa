@@ -168,3 +168,29 @@ func TestNewGameAlreadyInGame(t *testing.T) {
 		}
 	})
 }
+
+func TestNewGame_finishedEvent(t *testing.T) {
+	db, err := database.NewTestDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	db.Test(t, "finished event", func(t *testing.T) {
+		ctx := context.Background()
+		conn, err := db.Acquire(ctx)
+		require.NoError(t, err)
+		defer conn.Release()
+
+		for _, id := range []int{1, 2, 3, 4} {
+			createTestUser(t, conn, id)
+		}
+		createTestEvent(t, conn)
+		_, err = conn.Exec(ctx, `UPDATE events SET finished_at = now() WHERE id = $1`, testEventID)
+		require.NoError(t, err)
+
+		_, err = NewRepo(db).NewGame(ctx, [4]int{1, 2, 3, 4}, testEventID)
+
+		assert.ErrorIs(t, err, models.ErrEventAlreadyFinished)
+	})
+}

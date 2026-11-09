@@ -89,6 +89,19 @@ func TestUndoLastRound(t *testing.T) {
 			expectedStatus:  models.GameEnded,
 			expectedRounds:  16,
 		},
+		"ended game in a finished event": {
+			rounds:  16,
+			logSize: 16,
+			setup: func(t *testing.T, repo *Repo, conn *pgxpool.Conn) {
+				finalize(t, repo, 1)
+				_, err := conn.Exec(context.Background(),
+					`UPDATE events SET finished_at = now() WHERE id = $1`, testEventID)
+				require.NoError(t, err)
+			},
+			expectedErr:    models.ErrEventAlreadyFinished,
+			expectedStatus: models.GameEnded,
+			expectedRounds: 16,
+		},
 		"aborted game": {
 			rounds:  3,
 			logSize: 3,

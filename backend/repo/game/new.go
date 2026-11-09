@@ -40,6 +40,10 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 	}
 	defer tx.Rollback(ctx)
 
+	if err := lockOpenEvent(ctx, tx, eventID); err != nil {
+		return 0, err
+	}
+
 	if err := lockPlayersInEvent(ctx, tx, seating, eventID); err != nil {
 		return 0, err
 	}
@@ -103,6 +107,31 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 	}
 
 	return gameID, nil
+}
+
+// lockOpenEvent locks the event row FOR SHARE until tx ends and returns
+// models.ErrEventAlreadyFinished if the event is finished.
+//
+// The event repo's Finish locks the same row FOR UPDATE before it checks for
+// live games, so a game can't become live in an event that is being finished:
+// whichever transaction comes second waits for the first and sees its result.
+func lockOpenEvent(ctx context.Context, tx pgx.Tx, eventID int) error {
+	rows, err := tx.Query(ctx, `SELECT finished_at FROM events WHERE id = $1 FOR SHARE`, eventID)
+	if err != nil {
+		return fmt.Errorf("lock event: %w", err)
+	}
+
+	finishedAt, err := pgx.CollectOneRow(rows, pgx.RowTo[*time.Time])
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return models.ErrEventNotFound
+	case err != nil:
+		return fmt.Errorf("lock event: %w", err)
+	case finishedAt != nil:
+		return models.ErrEventAlreadyFinished
+	}
+
+	return nil
 }
 
 // lockPlayersInEvent takes pg_advisory_xact_lock(eventID, playerID) for each

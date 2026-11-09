@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -31,8 +32,17 @@ func (h Handler) ListGames(c *gin.Context) {
 		return
 	}
 
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
-	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "50"))
+	if err != nil {
+		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("limit: %w", err))
+		return
+	}
+
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil {
+		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("offset: %w", err))
+		return
+	}
 
 	result, err := h.event.ListGamesByStatus(c.Request.Context(), eventID, status, limit, offset)
 	if err != nil {
