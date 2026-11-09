@@ -18,10 +18,19 @@ func NewMockPlayerRepo(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockPlayerRepo {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockPlayerRepo{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,7 +84,7 @@ type MockPlayerRepo_Add_Call struct {
 //   - email string
 //   - name string
 //   - hash string
-func (_e *MockPlayerRepo_Expecter) Add(ctx interface{}, email interface{}, name interface{}, hash interface{}) *MockPlayerRepo_Add_Call {
+func (_e *MockPlayerRepo_Expecter) Add(ctx any, email any, name any, hash any) *MockPlayerRepo_Add_Call {
 	return &MockPlayerRepo_Add_Call{Call: _e.mock.On("Add", ctx, email, name, hash)}
 }
 
@@ -117,81 +126,6 @@ func (_c *MockPlayerRepo_Add_Call) RunAndReturn(run func(ctx context.Context, em
 	return _c
 }
 
-// CreateAuthToken provides a mock function for the type MockPlayerRepo
-func (_mock *MockPlayerRepo) CreateAuthToken(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time) error {
-	ret := _mock.Called(ctx, userID, purpose, tokenHash, expiresAt)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CreateAuthToken")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.AuthPurpose, string, time.Time) error); ok {
-		r0 = returnFunc(ctx, userID, purpose, tokenHash, expiresAt)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockPlayerRepo_CreateAuthToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateAuthToken'
-type MockPlayerRepo_CreateAuthToken_Call struct {
-	*mock.Call
-}
-
-// CreateAuthToken is a helper method to define mock.On call
-//   - ctx context.Context
-//   - userID int
-//   - purpose models.AuthPurpose
-//   - tokenHash string
-//   - expiresAt time.Time
-func (_e *MockPlayerRepo_Expecter) CreateAuthToken(ctx interface{}, userID interface{}, purpose interface{}, tokenHash interface{}, expiresAt interface{}) *MockPlayerRepo_CreateAuthToken_Call {
-	return &MockPlayerRepo_CreateAuthToken_Call{Call: _e.mock.On("CreateAuthToken", ctx, userID, purpose, tokenHash, expiresAt)}
-}
-
-func (_c *MockPlayerRepo_CreateAuthToken_Call) Run(run func(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time)) *MockPlayerRepo_CreateAuthToken_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 int
-		if args[1] != nil {
-			arg1 = args[1].(int)
-		}
-		var arg2 models.AuthPurpose
-		if args[2] != nil {
-			arg2 = args[2].(models.AuthPurpose)
-		}
-		var arg3 string
-		if args[3] != nil {
-			arg3 = args[3].(string)
-		}
-		var arg4 time.Time
-		if args[4] != nil {
-			arg4 = args[4].(time.Time)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-			arg3,
-			arg4,
-		)
-	})
-	return _c
-}
-
-func (_c *MockPlayerRepo_CreateAuthToken_Call) Return(err error) *MockPlayerRepo_CreateAuthToken_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockPlayerRepo_CreateAuthToken_Call) RunAndReturn(run func(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time) error) *MockPlayerRepo_CreateAuthToken_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // Get provides a mock function for the type MockPlayerRepo
 func (_mock *MockPlayerRepo) Get(ctx context.Context, id int) (models.Player, error) {
 	ret := _mock.Called(ctx, id)
@@ -226,7 +160,7 @@ type MockPlayerRepo_Get_Call struct {
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id int
-func (_e *MockPlayerRepo_Expecter) Get(ctx interface{}, id interface{}) *MockPlayerRepo_Get_Call {
+func (_e *MockPlayerRepo_Expecter) Get(ctx any, id any) *MockPlayerRepo_Get_Call {
 	return &MockPlayerRepo_Get_Call{Call: _e.mock.On("Get", ctx, id)}
 }
 
@@ -292,7 +226,7 @@ type MockPlayerRepo_GetAuthTokenByHash_Call struct {
 // GetAuthTokenByHash is a helper method to define mock.On call
 //   - ctx context.Context
 //   - tokenHash string
-func (_e *MockPlayerRepo_Expecter) GetAuthTokenByHash(ctx interface{}, tokenHash interface{}) *MockPlayerRepo_GetAuthTokenByHash_Call {
+func (_e *MockPlayerRepo_Expecter) GetAuthTokenByHash(ctx any, tokenHash any) *MockPlayerRepo_GetAuthTokenByHash_Call {
 	return &MockPlayerRepo_GetAuthTokenByHash_Call{Call: _e.mock.On("GetAuthTokenByHash", ctx, tokenHash)}
 }
 
@@ -358,7 +292,7 @@ type MockPlayerRepo_GetByEmail_Call struct {
 // GetByEmail is a helper method to define mock.On call
 //   - ctx context.Context
 //   - email string
-func (_e *MockPlayerRepo_Expecter) GetByEmail(ctx interface{}, email interface{}) *MockPlayerRepo_GetByEmail_Call {
+func (_e *MockPlayerRepo_Expecter) GetByEmail(ctx any, email any) *MockPlayerRepo_GetByEmail_Call {
 	return &MockPlayerRepo_GetByEmail_Call{Call: _e.mock.On("GetByEmail", ctx, email)}
 }
 
@@ -424,7 +358,7 @@ type MockPlayerRepo_GetPassByEmail_Call struct {
 // GetPassByEmail is a helper method to define mock.On call
 //   - ctx context.Context
 //   - email string
-func (_e *MockPlayerRepo_Expecter) GetPassByEmail(ctx interface{}, email interface{}) *MockPlayerRepo_GetPassByEmail_Call {
+func (_e *MockPlayerRepo_Expecter) GetPassByEmail(ctx any, email any) *MockPlayerRepo_GetPassByEmail_Call {
 	return &MockPlayerRepo_GetPassByEmail_Call{Call: _e.mock.On("GetPassByEmail", ctx, email)}
 }
 
@@ -482,7 +416,7 @@ type MockPlayerRepo_InvalidateAuthTokens_Call struct {
 //   - ctx context.Context
 //   - userID int
 //   - purpose models.AuthPurpose
-func (_e *MockPlayerRepo_Expecter) InvalidateAuthTokens(ctx interface{}, userID interface{}, purpose interface{}) *MockPlayerRepo_InvalidateAuthTokens_Call {
+func (_e *MockPlayerRepo_Expecter) InvalidateAuthTokens(ctx any, userID any, purpose any) *MockPlayerRepo_InvalidateAuthTokens_Call {
 	return &MockPlayerRepo_InvalidateAuthTokens_Call{Call: _e.mock.On("InvalidateAuthTokens", ctx, userID, purpose)}
 }
 
@@ -553,7 +487,7 @@ type MockPlayerRepo_IsEmailVerified_Call struct {
 // IsEmailVerified is a helper method to define mock.On call
 //   - ctx context.Context
 //   - userID int
-func (_e *MockPlayerRepo_Expecter) IsEmailVerified(ctx interface{}, userID interface{}) *MockPlayerRepo_IsEmailVerified_Call {
+func (_e *MockPlayerRepo_Expecter) IsEmailVerified(ctx any, userID any) *MockPlayerRepo_IsEmailVerified_Call {
 	return &MockPlayerRepo_IsEmailVerified_Call{Call: _e.mock.On("IsEmailVerified", ctx, userID)}
 }
 
@@ -581,6 +515,87 @@ func (_c *MockPlayerRepo_IsEmailVerified_Call) Return(b bool, err error) *MockPl
 }
 
 func (_c *MockPlayerRepo_IsEmailVerified_Call) RunAndReturn(run func(ctx context.Context, userID int) (bool, error)) *MockPlayerRepo_IsEmailVerified_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IssueAuthToken provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) IssueAuthToken(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time, limits []models.AuthMailWindow) error {
+	ret := _mock.Called(ctx, userID, purpose, tokenHash, expiresAt, limits)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IssueAuthToken")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.AuthPurpose, string, time.Time, []models.AuthMailWindow) error); ok {
+		r0 = returnFunc(ctx, userID, purpose, tokenHash, expiresAt, limits)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockPlayerRepo_IssueAuthToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IssueAuthToken'
+type MockPlayerRepo_IssueAuthToken_Call struct {
+	*mock.Call
+}
+
+// IssueAuthToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int
+//   - purpose models.AuthPurpose
+//   - tokenHash string
+//   - expiresAt time.Time
+//   - limits []models.AuthMailWindow
+func (_e *MockPlayerRepo_Expecter) IssueAuthToken(ctx any, userID any, purpose any, tokenHash any, expiresAt any, limits any) *MockPlayerRepo_IssueAuthToken_Call {
+	return &MockPlayerRepo_IssueAuthToken_Call{Call: _e.mock.On("IssueAuthToken", ctx, userID, purpose, tokenHash, expiresAt, limits)}
+}
+
+func (_c *MockPlayerRepo_IssueAuthToken_Call) Run(run func(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time, limits []models.AuthMailWindow)) *MockPlayerRepo_IssueAuthToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.AuthPurpose
+		if args[2] != nil {
+			arg2 = args[2].(models.AuthPurpose)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 time.Time
+		if args[4] != nil {
+			arg4 = args[4].(time.Time)
+		}
+		var arg5 []models.AuthMailWindow
+		if args[5] != nil {
+			arg5 = args[5].([]models.AuthMailWindow)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_IssueAuthToken_Call) Return(err error) *MockPlayerRepo_IssueAuthToken_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_IssueAuthToken_Call) RunAndReturn(run func(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time, limits []models.AuthMailWindow) error) *MockPlayerRepo_IssueAuthToken_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -622,7 +637,7 @@ type MockPlayerRepo_ListByNameLimit_Call struct {
 //   - ctx context.Context
 //   - name string
 //   - limit int
-func (_e *MockPlayerRepo_Expecter) ListByNameLimit(ctx interface{}, name interface{}, limit interface{}) *MockPlayerRepo_ListByNameLimit_Call {
+func (_e *MockPlayerRepo_Expecter) ListByNameLimit(ctx any, name any, limit any) *MockPlayerRepo_ListByNameLimit_Call {
 	return &MockPlayerRepo_ListByNameLimit_Call{Call: _e.mock.On("ListByNameLimit", ctx, name, limit)}
 }
 
@@ -684,7 +699,7 @@ type MockPlayerRepo_MarkAuthTokenUsed_Call struct {
 // MarkAuthTokenUsed is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id int
-func (_e *MockPlayerRepo_Expecter) MarkAuthTokenUsed(ctx interface{}, id interface{}) *MockPlayerRepo_MarkAuthTokenUsed_Call {
+func (_e *MockPlayerRepo_Expecter) MarkAuthTokenUsed(ctx any, id any) *MockPlayerRepo_MarkAuthTokenUsed_Call {
 	return &MockPlayerRepo_MarkAuthTokenUsed_Call{Call: _e.mock.On("MarkAuthTokenUsed", ctx, id)}
 }
 
@@ -741,7 +756,7 @@ type MockPlayerRepo_SetEmailVerified_Call struct {
 // SetEmailVerified is a helper method to define mock.On call
 //   - ctx context.Context
 //   - userID int
-func (_e *MockPlayerRepo_Expecter) SetEmailVerified(ctx interface{}, userID interface{}) *MockPlayerRepo_SetEmailVerified_Call {
+func (_e *MockPlayerRepo_Expecter) SetEmailVerified(ctx any, userID any) *MockPlayerRepo_SetEmailVerified_Call {
 	return &MockPlayerRepo_SetEmailVerified_Call{Call: _e.mock.On("SetEmailVerified", ctx, userID)}
 }
 
@@ -799,7 +814,7 @@ type MockPlayerRepo_Update_Call struct {
 //   - ctx context.Context
 //   - id int
 //   - name string
-func (_e *MockPlayerRepo_Expecter) Update(ctx interface{}, id interface{}, name interface{}) *MockPlayerRepo_Update_Call {
+func (_e *MockPlayerRepo_Expecter) Update(ctx any, id any, name any) *MockPlayerRepo_Update_Call {
 	return &MockPlayerRepo_Update_Call{Call: _e.mock.On("Update", ctx, id, name)}
 }
 
@@ -862,7 +877,7 @@ type MockPlayerRepo_UpdatePassword_Call struct {
 //   - ctx context.Context
 //   - userID int
 //   - hash string
-func (_e *MockPlayerRepo_Expecter) UpdatePassword(ctx interface{}, userID interface{}, hash interface{}) *MockPlayerRepo_UpdatePassword_Call {
+func (_e *MockPlayerRepo_Expecter) UpdatePassword(ctx any, userID any, hash any) *MockPlayerRepo_UpdatePassword_Call {
 	return &MockPlayerRepo_UpdatePassword_Call{Call: _e.mock.On("UpdatePassword", ctx, userID, hash)}
 }
 

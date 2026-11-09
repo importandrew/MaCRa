@@ -27,8 +27,12 @@ var (
 	ErrEmailNotVerified = errors.New("email not verified")
 	ErrInvalidOrigin    = errors.New("invalid origin")
 	ErrInvalidAuthToken = errors.New("invalid or expired token")
-	ErrSessionExpired   = errors.New("session expired, please log in again")
-	ErrMailFromEmpty    = errors.New("mail_from is empty")
+	// ErrAuthMailLimit means an auth email wasn't sent because the address has
+	// had too many lately (models.AuthMailLimits). Never shown to the client:
+	// the response says "sent" anyway.
+	ErrAuthMailLimit  = errors.New("too many auth emails to this address")
+	ErrSessionExpired = errors.New("session expired, please log in again")
+	ErrMailFromEmpty  = errors.New("mail_from is empty")
 
 	ErrJWTKeyEmpty = errors.New("jwt key is empty")
 

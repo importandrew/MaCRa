@@ -18,7 +18,7 @@ type PlayerRepo interface {
 	SetEmailVerified(ctx context.Context, userID int) error
 	UpdatePassword(ctx context.Context, userID int, hash string) error
 	InvalidateAuthTokens(ctx context.Context, userID int, purpose models.AuthPurpose) error
-	CreateAuthToken(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time) error
+	IssueAuthToken(ctx context.Context, userID int, purpose models.AuthPurpose, tokenHash string, expiresAt time.Time, limits []models.AuthMailWindow) error
 	GetAuthTokenByHash(ctx context.Context, tokenHash string) (models.AuthToken, error)
 	MarkAuthTokenUsed(ctx context.Context, id int) error
 }
@@ -26,6 +26,7 @@ type PlayerRepo interface {
 type Mailer interface {
 	SendVerification(to, origin, token string) error
 	SendPasswordReset(to, origin, token string) error
+	SendAccountExists(to, origin, token string) error
 }
 
 type Service struct {

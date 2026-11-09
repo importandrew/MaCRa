@@ -43,6 +43,21 @@ func (m *Mailer) SendPasswordReset(to, origin, token string) error {
 	return m.send(to, "Reset your MaCRa password", body)
 }
 
+// SendAccountExists answers a sign-up with an address that already has an
+// account: it says so and offers a password reset, instead of the sign-up
+// telling a stranger the address is registered.
+func (m *Mailer) SendAccountExists(to, origin, token string) error {
+	link := origin + "/reset-password?token=" + url.QueryEscape(token)
+
+	body := fmt.Sprintf("Someone tried to sign up for MaCRa with this email, but it already has an account.\n\n"+
+		"If it was you, sign in with your password, or set a new one by opening this link:\n\n%s\n\n"+
+		"This link expires in %s.\nIf it wasn't you, ignore this email: nothing has changed.\n",
+		link, models.PasswordResetTTL.String(),
+	)
+
+	return m.send(to, "You already have a MaCRa account", body)
+}
+
 func (m *Mailer) send(to, subject, body string) error {
 	msg := strings.Join([]string{
 		"From: " + m.from,
