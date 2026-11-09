@@ -1,4 +1,5 @@
 import { Drawer } from '@heroui/react';
+import { useNavigate } from 'react-router-dom';
 import LazyAccordion from '../../LazyAccordion';
 import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
 import { BookIcon } from '../../Icons/BookIcon';
@@ -28,6 +29,7 @@ export default function LiveMenu({
   // onGameEnded reloads the game page, which then shows the result.
   onGameEnded: () => void;
 }) {
+  const navigate = useNavigate();
   const { hasCapability } = useEventCapabilities(eventId ?? null);
   const canUndoLastRound = hasCapability('undo_round');
   const canAbort = hasCapability('abort_game');
@@ -77,6 +79,9 @@ export default function LiveMenu({
             gameId={gameId}
             eventId={eventId ?? null}
             canAbort={canAbort}
+            onAborted={() =>
+              navigate(eventId ? `/event/${eventId}/games/live` : '/')
+            }
           />
         </div>
       </Drawer.Body>

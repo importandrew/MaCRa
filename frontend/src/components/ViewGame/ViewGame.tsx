@@ -23,6 +23,10 @@ export default function ViewGame() {
 
   if (!isLoading && !isError && !isForbidden) {
     if (status === 'live') {
+      // After Finish the page reloads the status instead of navigating: the
+      // result lives at this same URL, and navigating to the current URL
+      // neither remounts this page nor refetches the status (it depends only
+      // on eventId and gameId), so the live view would stay on screen.
       return <Live onGameEnded={onRefresh} />;
     }
     if (status === 'ended') {

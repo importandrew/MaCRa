@@ -35,8 +35,8 @@ export default function TableMenu({
   const canUndo = eventMe?.capabilities.includes('undo_round') ?? false;
   // The event-level finish_game is computed without a game, so it leaves out
   // seated players. At the table the user is always seated, and a seated
-  // player may finish in a regular event (as on the backend). TODO 25 replaces
-  // this with game-level capabilities.
+  // player may finish in a regular event (as on the backend). Capabilities
+  // computed for a given game should replace this check.
   const canFinish = selectedEvent?.type === 'regular';
 
   return (
@@ -84,6 +84,7 @@ export default function TableMenu({
             gameId={gameId}
             eventId={selectedEventId}
             canAbort={canAbort}
+            onAborted={() => navigate('/')}
           />
         </div>
       </Drawer.Body>
