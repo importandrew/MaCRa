@@ -17,10 +17,19 @@ func NewMockPlayerService(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockPlayerService {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockPlayerService{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,7 +73,7 @@ type MockPlayerService_ForgotPassword_Call struct {
 //   - ctx context.Context
 //   - email string
 //   - origin string
-func (_e *MockPlayerService_Expecter) ForgotPassword(ctx interface{}, email interface{}, origin interface{}) *MockPlayerService_ForgotPassword_Call {
+func (_e *MockPlayerService_Expecter) ForgotPassword(ctx any, email any, origin any) *MockPlayerService_ForgotPassword_Call {
 	return &MockPlayerService_ForgotPassword_Call{Call: _e.mock.On("ForgotPassword", ctx, email, origin)}
 }
 
@@ -135,7 +144,7 @@ type MockPlayerService_Get_Call struct {
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id int
-func (_e *MockPlayerService_Expecter) Get(ctx interface{}, id interface{}) *MockPlayerService_Get_Call {
+func (_e *MockPlayerService_Expecter) Get(ctx any, id any) *MockPlayerService_Get_Call {
 	return &MockPlayerService_Get_Call{Call: _e.mock.On("Get", ctx, id)}
 }
 
@@ -204,7 +213,7 @@ type MockPlayerService_ListByNameLimit_Call struct {
 //   - ctx context.Context
 //   - name string
 //   - limit int
-func (_e *MockPlayerService_Expecter) ListByNameLimit(ctx interface{}, name interface{}, limit interface{}) *MockPlayerService_ListByNameLimit_Call {
+func (_e *MockPlayerService_Expecter) ListByNameLimit(ctx any, name any, limit any) *MockPlayerService_ListByNameLimit_Call {
 	return &MockPlayerService_ListByNameLimit_Call{Call: _e.mock.On("ListByNameLimit", ctx, name, limit)}
 }
 
@@ -276,7 +285,7 @@ type MockPlayerService_Login_Call struct {
 //   - ctx context.Context
 //   - email string
 //   - password string
-func (_e *MockPlayerService_Expecter) Login(ctx interface{}, email interface{}, password interface{}) *MockPlayerService_Login_Call {
+func (_e *MockPlayerService_Expecter) Login(ctx any, email any, password any) *MockPlayerService_Login_Call {
 	return &MockPlayerService_Login_Call{Call: _e.mock.On("Login", ctx, email, password)}
 }
 
@@ -339,7 +348,7 @@ type MockPlayerService_ResendVerification_Call struct {
 //   - ctx context.Context
 //   - email string
 //   - origin string
-func (_e *MockPlayerService_Expecter) ResendVerification(ctx interface{}, email interface{}, origin interface{}) *MockPlayerService_ResendVerification_Call {
+func (_e *MockPlayerService_Expecter) ResendVerification(ctx any, email any, origin any) *MockPlayerService_ResendVerification_Call {
 	return &MockPlayerService_ResendVerification_Call{Call: _e.mock.On("ResendVerification", ctx, email, origin)}
 }
 
@@ -402,7 +411,7 @@ type MockPlayerService_ResetPassword_Call struct {
 //   - ctx context.Context
 //   - token string
 //   - password string
-func (_e *MockPlayerService_Expecter) ResetPassword(ctx interface{}, token interface{}, password interface{}) *MockPlayerService_ResetPassword_Call {
+func (_e *MockPlayerService_Expecter) ResetPassword(ctx any, token any, password any) *MockPlayerService_ResetPassword_Call {
 	return &MockPlayerService_ResetPassword_Call{Call: _e.mock.On("ResetPassword", ctx, token, password)}
 }
 
@@ -467,7 +476,7 @@ type MockPlayerService_SignUp_Call struct {
 //   - name string
 //   - password string
 //   - origin string
-func (_e *MockPlayerService_Expecter) SignUp(ctx interface{}, email interface{}, name interface{}, password interface{}, origin interface{}) *MockPlayerService_SignUp_Call {
+func (_e *MockPlayerService_Expecter) SignUp(ctx any, email any, name any, password any, origin any) *MockPlayerService_SignUp_Call {
 	return &MockPlayerService_SignUp_Call{Call: _e.mock.On("SignUp", ctx, email, name, password, origin)}
 }
 
@@ -540,7 +549,7 @@ type MockPlayerService_Update_Call struct {
 //   - ctx context.Context
 //   - id int
 //   - name string
-func (_e *MockPlayerService_Expecter) Update(ctx interface{}, id interface{}, name interface{}) *MockPlayerService_Update_Call {
+func (_e *MockPlayerService_Expecter) Update(ctx any, id any, name any) *MockPlayerService_Update_Call {
 	return &MockPlayerService_Update_Call{Call: _e.mock.On("Update", ctx, id, name)}
 }
 
@@ -602,7 +611,7 @@ type MockPlayerService_VerifyEmail_Call struct {
 // VerifyEmail is a helper method to define mock.On call
 //   - ctx context.Context
 //   - token string
-func (_e *MockPlayerService_Expecter) VerifyEmail(ctx interface{}, token interface{}) *MockPlayerService_VerifyEmail_Call {
+func (_e *MockPlayerService_Expecter) VerifyEmail(ctx any, token any) *MockPlayerService_VerifyEmail_Call {
 	return &MockPlayerService_VerifyEmail_Call{Call: _e.mock.On("VerifyEmail", ctx, token)}
 }
 

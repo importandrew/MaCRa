@@ -4,7 +4,7 @@
 
 - Run: `go run ./cmd/main.go [-c path/to/backend_config.json]`. The default config path is `/opt/macra/backend_config.json`; see `config/backend_config.json.example`.
 - Config: `jwt_key` and `mail_from` are required (`Validate` fails otherwise). If `db_url` is empty, the `PSQL_MACRA` env var is used. Mail is sent via SMTP on `127.0.0.1:25` without auth.
-- Regenerate mocks with `mockery`. It reads `.mockery.yml` and writes `mocks_test.go` next to each listed interface, so add new interfaces there.
+- Regenerate mocks with `mockery` **v3.8.1**, the official release binary (the dev image has it in `/usr/local/bin`; never `go install` it). It reads `.mockery.yml` and writes `mocks_test.go` next to each listed interface, so add new interfaces there. Another version rewrites every mock in its own style; CI regenerates the mocks with v3.8.1 and fails if anything differs, so commit regenerated mocks with every interface change.
 - Repo tests (`repo/...`) need a real PostgreSQL in `PSQL_MACRA_TEST`. `database.DB.Test` runs migrations **up before and down after** each test, so the test DB is wiped. Never point it at real data. Service and handler tests use mocks and need no DB.
 - Use `go test -count=1 ./...` to bypass the test cache when DB state matters.
 

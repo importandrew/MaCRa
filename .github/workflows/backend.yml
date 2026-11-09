@@ -29,6 +29,45 @@ jobs:
           version: v2.15.0
           working-directory: backend
 
+  mocks:
+    name: Check mocks are up to date
+    runs-on: ubuntu-latest
+
+    env:
+      # Keep in sync with backend/.mockery.yml and the dev image.
+      MOCKERY_VERSION: 3.8.1
+      MOCKERY_SHA256: 953c7d38b58dd6398b1c595f27caf8bbf27e9b733b49c404d2e124e86d2ae72a
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Install mockery
+        run: |
+          curl -sSfL -o /tmp/mockery.tar.gz \
+            "https://github.com/vektra/mockery/releases/download/v${MOCKERY_VERSION}/mockery_${MOCKERY_VERSION}_Linux_x86_64.tar.gz"
+          echo "${MOCKERY_SHA256}  /tmp/mockery.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/mockery.tar.gz -C /tmp mockery
+
+      - name: Regenerate mocks
+        working-directory: backend
+        run: /tmp/mockery
+
+      - name: Fail if the mocks differ
+        run: |
+          if [ -n "$(git status --porcelain -- backend)" ]; then
+            echo "Mocks are out of date: run mockery v${MOCKERY_VERSION} in backend/ and commit the result."
+            git status --short -- backend
+            git diff -- backend
+            exit 1
+          fi
+
   test:
     name: Run Tests
     runs-on: ubuntu-latest
