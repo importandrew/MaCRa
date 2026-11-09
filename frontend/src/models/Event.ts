@@ -18,6 +18,9 @@ export type Event = {
   is_participating?: boolean;
   is_owner?: boolean;
   roles?: EventRole[];
+  // player_count comes only with GET /api/event/:id (the overview): non-members
+  // don't get the member list, so the overview can't count it.
+  player_count?: number;
 };
 
 export const CONTENT_REACH_OPTIONS: { value: ContentReach; label: string }[] = [

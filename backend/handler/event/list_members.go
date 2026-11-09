@@ -10,9 +10,10 @@ import (
 )
 
 func (h Handler) ListMembers(c *gin.Context) {
+	userID := reqctx.GetUserID(c)
 	eventID := reqctx.GetEventID(c)
 
-	members, err := h.event.ListMembers(c.Request.Context(), eventID)
+	members, err := h.event.ListMembers(c.Request.Context(), eventID, userID)
 	if err != nil {
 		httperr.Error(c, err)
 		return

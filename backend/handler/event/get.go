@@ -12,7 +12,7 @@ import (
 func (h Handler) Get(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
 
-	event, err := h.event.Get(c.Request.Context(), eventID)
+	event, err := h.event.Details(c.Request.Context(), eventID)
 	if err != nil {
 		httperr.Error(c, err)
 		return
