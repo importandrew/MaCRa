@@ -1,3 +1,7 @@
+# mockery v3.8.1, the official release binary (as in the dev image). Other
+# versions write the mocks differently; CI regenerates them with this version
+# and fails on any difference. Change the version here, in
+# .github/workflows/backend.yml and in the image together.
 all: false
 dir: '{{.InterfaceDir}}'
 filename: mocks_test.go
