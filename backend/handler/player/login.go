@@ -8,6 +8,7 @@ import (
 
 	"github.com/importandrew/MaCRa/handler/authcookie"
 	"github.com/importandrew/MaCRa/handler/httperr"
+	"github.com/importandrew/MaCRa/handler/reqctx"
 	"github.com/importandrew/MaCRa/handler/token"
 )
 
@@ -43,6 +44,9 @@ func (h Handler) Login(c *gin.Context) {
 	}
 
 	authcookie.Set(c, h.domain, tkn)
+	// The /auth routes run without SetUserID; set it here so the request log
+	// shows who signed in.
+	c.Set(reqctx.UserIDKey, player.ID)
 
 	c.JSON(http.StatusOK, LoginResponse{
 		ID:   player.ID,
