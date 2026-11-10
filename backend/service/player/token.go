@@ -25,15 +25,15 @@ func hashAuthToken(token string) string {
 	return hex.EncodeToString(sum[:])
 }
 
+// issueToken creates a token for the user and purpose, replacing the unused
+// ones of that purpose. It returns models.ErrAuthMailLimit if the user's
+// address has had too many auth emails lately (models.AuthMailLimits).
 func (s *Service) issueToken(ctx context.Context, userID int, purpose models.AuthPurpose, ttl time.Duration) (string, error) {
 	token := generateAuthToken()
 	hash := hashAuthToken(token)
 
-	if err := s.repo.InvalidateAuthTokens(ctx, userID, purpose); err != nil {
-		return "", err
-	}
-
-	if err := s.repo.CreateAuthToken(ctx, userID, purpose, hash, time.Now().Add(ttl)); err != nil {
+	err := s.repo.IssueAuthToken(ctx, userID, purpose, hash, time.Now().Add(ttl), models.AuthMailLimits)
+	if err != nil {
 		return "", err
 	}
 

@@ -52,7 +52,10 @@ export default function CheckEmailPage() {
             <Card.Content className="gap-3 py-6">
               <h1 className="text-xl font-semibold">Check your email</h1>
               <p className="text-base text-muted">
-                We sent a verification link
+                {/* Neutral on purpose: after a sign-up with a registered email
+                the mail offers a password reset, not a verification link, and
+                the page must not tell the two cases apart. */}
+                We sent an email
                 {email ? (
                   <>
                     {' '}
@@ -60,7 +63,7 @@ export default function CheckEmailPage() {
                     <span className="font-medium text-foreground">{email}</span>
                   </>
                 ) : null}
-                . Open it to activate your account before signing in.
+                . Open the link in it to continue.
               </p>
               {!stateEmail && (
                 <>
