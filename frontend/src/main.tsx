@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import HawkCatcher from '@hawk.so/javascript';
 import App from './App.tsx';
 import './index.css';
+import './i18n';
 import { AuthProvider } from './providers/auth/AuthContext.tsx';
 import { EventProvider } from './providers/event/EventContext.tsx';
 
