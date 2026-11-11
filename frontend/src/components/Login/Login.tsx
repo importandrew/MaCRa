@@ -85,7 +85,6 @@ export default function LoginPage() {
         email,
         password,
         name,
-        origin: window.location.origin,
       })
     );
 

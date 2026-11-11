@@ -173,8 +173,10 @@ async function globalBatchFetch<T>(
   return results.map((result) => result.data);
 }
 
+// The API is on the page's own origin (/api/..., /auth/...): nginx forwards it
+// to the backend on prod, vite's dev server does in development.
 function PostRequest(url: string, body: unknown = {}): Request {
-  return new Request(import.meta.env.VITE_API_ADDR + url, {
+  return new Request(url, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -183,13 +185,13 @@ function PostRequest(url: string, body: unknown = {}): Request {
 }
 
 function GetRequest(url: string): Request {
-  return new Request(import.meta.env.VITE_API_ADDR + url, {
+  return new Request(url, {
     credentials: 'include',
   });
 }
 
 function PutRequest(url: string, body: unknown = {}): Request {
-  return new Request(import.meta.env.VITE_API_ADDR + url, {
+  return new Request(url, {
     method: 'PUT',
     credentials: 'include',
     body: JSON.stringify(body),
@@ -197,7 +199,7 @@ function PutRequest(url: string, body: unknown = {}): Request {
 }
 
 function PatchRequest(url: string, body: unknown = {}): Request {
-  return new Request(import.meta.env.VITE_API_ADDR + url, {
+  return new Request(url, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -206,7 +208,7 @@ function PatchRequest(url: string, body: unknown = {}): Request {
 }
 
 function DeleteRequest(url: string): Request {
-  return new Request(import.meta.env.VITE_API_ADDR + url, {
+  return new Request(url, {
     method: 'DELETE',
     credentials: 'include',
   });

@@ -1,7 +1,6 @@
 {
-    "addr": "0.0.0.0:3001",
-    "cookie_domain": "",
-    "allow_origins": ["https://my.domain.dev"],
+    "addr": "127.0.0.1:3001",
+    "site_url": "http://localhost:3000",
     "db_url": "postgresql://user:pass@host/db?sslmode=disable",
     "jwt_key": "somekey",
     "mail_from": "noreply@macra.pro"

@@ -1,69 +1,93 @@
 package authcookie
 
 import (
+	"crypto/tls"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestCookieAttrs(t *testing.T) {
-	t.Parallel()
+func TestSet(t *testing.T) {
+	gin.SetMode(gin.TestMode)
 
-	tests := map[string]struct {
-		configured     string
-		requestHost    string
+	testData := map[string]struct {
+		remoteAddr     string
 		forwardedProto string
 		tls            bool
-		wantDomain     string
-		wantSecure     bool
+		expectedSecure bool
 	}{
-		"http lan mismatched localhost config": {
-			configured:  "localhost",
-			requestHost: "mj.home:3001",
-			wantDomain:  "",
-			wantSecure:  false,
+		"through nginx over https": {
+			remoteAddr: "127.0.0.1:40000", forwardedProto: "https", expectedSecure: true,
 		},
-		"http lan matching host with http prefix": {
-			configured:  "http://mj.home",
-			requestHost: "mj.home:3001",
-			wantDomain:  "mj.home",
-			wantSecure:  false,
+		"through nginx over IPv6 loopback": {
+			remoteAddr: "[::1]:40000", forwardedProto: "https", expectedSecure: true,
 		},
-		"https matching domain": {
-			configured:  "https://macra.pro",
-			requestHost: "macra.pro",
-			tls:         true,
-			wantDomain:  "macra.pro",
-			wantSecure:  true,
+		"through nginx over http": {
+			remoteAddr: "127.0.0.1:40000", forwardedProto: "http", expectedSecure: false,
 		},
-		"empty config on https uses host-only": {
-			configured:     "",
-			requestHost:    "dev.macra.pro",
-			forwardedProto: "https",
-			wantDomain:     "",
-			wantSecure:     true,
+		"direct TLS": {
+			remoteAddr: "198.51.100.2:5000", tls: true, expectedSecure: true,
 		},
-		"empty config on http uses host-only": {
-			configured:  "",
-			requestHost: "mj.home:3001",
-			wantDomain:  "",
-			wantSecure:  false,
+		"direct http faking the header": {
+			remoteAddr: "198.51.100.2:5000", forwardedProto: "https", expectedSecure: false,
 		},
-		"bare domain on https request": {
-			configured:  "example.com",
-			requestHost: "example.com",
-			tls:         true,
-			wantDomain:  "example.com",
-			wantSecure:  true,
+		"local development over http": {
+			remoteAddr: "127.0.0.1:40000", expectedSecure: false,
 		},
 	}
 
-	for name, tc := range tests {
+	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			domain, secure := cookieAttrs(tc.configured, tc.requestHost, tc.forwardedProto, tc.tls)
-			assert.Equal(t, tc.wantDomain, domain)
-			assert.Equal(t, tc.wantSecure, secure)
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request = httptest.NewRequest(http.MethodPost, "/auth/login", nil)
+			c.Request.Host = "macra.pro"
+			c.Request.RemoteAddr = testCase.remoteAddr
+			if testCase.forwardedProto != "" {
+				c.Request.Header.Set("X-Forwarded-Proto", testCase.forwardedProto)
+			}
+			if testCase.tls {
+				c.Request.TLS = &tls.ConnectionState{}
+			}
+
+			Set(c, "jwt")
+
+			cookies := w.Result().Cookies()
+			require.Len(t, cookies, 2)
+
+			auth := cookies[0]
+			assert.Equal(t, Name, auth.Name)
+			assert.Equal(t, "jwt", auth.Value)
+			assert.Equal(t, MaxAge, auth.MaxAge)
+			assert.Empty(t, auth.Domain, "host-only: subdomains don't share it")
+			assert.Equal(t, testCase.expectedSecure, auth.Secure)
+			assert.True(t, auth.HttpOnly)
+			assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)
+
+			legacy := cookies[1]
+			assert.Equal(t, Name, legacy.Name)
+			assert.Equal(t, -1, legacy.MaxAge)
+			assert.Equal(t, legacyDomain, legacy.Domain)
 		})
 	}
+}
+
+func TestClear(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodPost, "/auth/logout", nil)
+
+	Clear(c)
+
+	cookies := w.Result().Cookies()
+	require.Len(t, cookies, 2)
+	assert.Empty(t, cookies[0].Value)
+	assert.Equal(t, -1, cookies[0].MaxAge)
+	assert.Empty(t, cookies[0].Domain)
 }

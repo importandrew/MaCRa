@@ -19,8 +19,6 @@ import (
 func TestHandler_SignUp(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	const origin = "https://macra.pro"
-
 	testData := map[string]struct {
 		requestBody  any
 		mockSetup    func(*MockPlayerService)
@@ -32,7 +30,6 @@ func TestHandler_SignUp(t *testing.T) {
 				Email:    "test@example.com",
 				Name:     "Test User",
 				Password: "password123",
-				Origin:   origin,
 			},
 			mockSetup: func(m *MockPlayerService) {
 				m.EXPECT().SignUp(
@@ -40,28 +37,11 @@ func TestHandler_SignUp(t *testing.T) {
 					"test@example.com",
 					"Test User",
 					"password123",
-					origin,
 				).Return(nil)
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
 				assert.Empty(t, w.Body.String())
-			},
-		},
-		"invalid origin": {
-			requestBody: SignupRequest{
-				Email:    "test@example.com",
-				Name:     "Test User",
-				Password: "password123",
-				Origin:   "https://evil.example",
-			},
-			mockSetup:    func(m *MockPlayerService) {},
-			expectedCode: http.StatusBadRequest,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				assert.NoError(t, err)
-				assert.Equal(t, models.ErrInvalidOrigin.Error(), response["error"])
 			},
 		},
 		"invalid json": {
@@ -91,7 +71,6 @@ func TestHandler_SignUp(t *testing.T) {
 				Email:    "test@example.com",
 				Name:     "Test User",
 				Password: "password123",
-				Origin:   origin,
 			},
 			mockSetup: func(m *MockPlayerService) {
 				m.EXPECT().SignUp(
@@ -99,7 +78,6 @@ func TestHandler_SignUp(t *testing.T) {
 					"test@example.com",
 					"Test User",
 					"password123",
-					origin,
 				).Return(errors.New("database error"))
 			},
 			expectedCode: http.StatusInternalServerError,
@@ -116,7 +94,6 @@ func TestHandler_SignUp(t *testing.T) {
 				Email:    "existing@example.com",
 				Name:     "Existing User",
 				Password: "password123",
-				Origin:   origin,
 			},
 			mockSetup: func(m *MockPlayerService) {
 				m.EXPECT().SignUp(
@@ -124,7 +101,6 @@ func TestHandler_SignUp(t *testing.T) {
 					"existing@example.com",
 					"Existing User",
 					"password123",
-					origin,
 				).Return(models.ErrPlayerExists)
 			},
 			expectedCode: http.StatusConflict,

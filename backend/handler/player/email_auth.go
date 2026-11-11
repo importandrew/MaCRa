@@ -2,14 +2,10 @@ package player
 
 import (
 	"net/http"
-	"net/url"
-	"slices"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/importandrew/MaCRa/handler/httperr"
-	"github.com/importandrew/MaCRa/models"
 )
 
 type VerifyEmailRequest struct {
@@ -32,8 +28,7 @@ func (h Handler) VerifyEmail(c *gin.Context) {
 }
 
 type ResendVerificationRequest struct {
-	Email  string `json:"email"`
-	Origin string `json:"origin"`
+	Email string `json:"email"`
 }
 
 func (h Handler) ResendVerification(c *gin.Context) {
@@ -43,13 +38,7 @@ func (h Handler) ResendVerification(c *gin.Context) {
 		return
 	}
 
-	origin, err := normalizeOrigin(req.Origin, h.allowOrigins)
-	if err != nil {
-		httperr.Error(c, err)
-		return
-	}
-
-	if err := h.player.ResendVerification(c.Request.Context(), req.Email, origin); err != nil {
+	if err := h.player.ResendVerification(c.Request.Context(), req.Email); err != nil {
 		httperr.Error(c, err)
 		return
 	}
@@ -58,8 +47,7 @@ func (h Handler) ResendVerification(c *gin.Context) {
 }
 
 type ForgotPasswordRequest struct {
-	Email  string `json:"email"`
-	Origin string `json:"origin"`
+	Email string `json:"email"`
 }
 
 func (h Handler) ForgotPassword(c *gin.Context) {
@@ -69,13 +57,7 @@ func (h Handler) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	origin, err := normalizeOrigin(req.Origin, h.allowOrigins)
-	if err != nil {
-		httperr.Error(c, err)
-		return
-	}
-
-	if err := h.player.ForgotPassword(c.Request.Context(), req.Email, origin); err != nil {
+	if err := h.player.ForgotPassword(c.Request.Context(), req.Email); err != nil {
 		httperr.Error(c, err)
 		return
 	}
@@ -101,29 +83,4 @@ func (h Handler) ResetPassword(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-}
-
-// normalizeOrigin validates origin and returns scheme://host (no trailing slash/path).
-// Like CORS in server.NewServer, it always accepts the default domains; allowOrigins adds extra ones.
-func normalizeOrigin(origin string, allowOrigins []string) (string, error) {
-	u, err := url.Parse(origin)
-	if err != nil || u.Scheme == "" || u.Host == "" {
-		return "", models.ErrInvalidOrigin
-	}
-
-	if !slices.Contains([]string{"http", "https"}, u.Scheme) {
-		return "", models.ErrInvalidOrigin
-	}
-
-	origin = strings.TrimRight(strings.TrimSpace(u.Scheme+"://"+u.Host), "/")
-
-	allowed := slices.Concat(
-		[]string{"https://" + models.DefaultDomain, "https://" + models.DevDomain},
-		allowOrigins,
-	)
-	if !slices.Contains(allowed, origin) {
-		return "", models.ErrInvalidOrigin
-	}
-
-	return origin, nil
 }

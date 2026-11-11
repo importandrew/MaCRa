@@ -14,12 +14,11 @@ import (
 )
 
 type Auth struct {
-	jwt          []byte
-	cookieDomain string
+	jwt []byte
 }
 
-func NewAuth(jwt []byte, cookieDomain string) Auth {
-	return Auth{jwt: jwt, cookieDomain: cookieDomain}
+func NewAuth(jwt []byte) Auth {
+	return Auth{jwt: jwt}
 }
 
 // SetUserID identifies the caller by the auth cookie. Without a cookie the caller is anonymous.
@@ -35,7 +34,7 @@ func (a Auth) SetUserID(c *gin.Context) {
 		if err != nil {
 			// The client only needs to know the session is gone; parser details stay in the log.
 			logger.Warn(fmt.Errorf("identify user: %w", err))
-			authcookie.Clear(c, a.cookieDomain)
+			authcookie.Clear(c)
 			httperr.Error(c, models.ErrSessionExpired)
 			return
 		}
@@ -62,5 +61,5 @@ func (a Auth) refresh(c *gin.Context, userID int) {
 		return
 	}
 
-	authcookie.Set(c, a.cookieDomain, tkn)
+	authcookie.Set(c, tkn)
 }

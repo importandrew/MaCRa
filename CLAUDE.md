@@ -35,7 +35,7 @@ The rules above still apply in full. Put personal overrides in `.claude/settings
 
 ## Backend ↔ frontend contracts
 
-- The frontend reaches the API at `VITE_API_ADDR` from `frontend/.env.<mode>`. For local dev, the backend's `allow_origins` and `cookie_domain` in `backend_config.json` must match the frontend origin, or auth cookies and CORS break.
+- The frontend and the API share one origin: the frontend calls relative `/api/...` and `/auth/...`, which nginx forwards to the backend on prod and vite's dev server does locally (`frontend/vite.config.ts`, target `MACRA_API_PROXY`, default `http://127.0.0.1:3001`). So there is no CORS, and the auth cookie is host-only (each site its own session). The backend's `site_url` in `backend_config.json` is the site's own address; links in auth emails point to it.
 - `frontend/src/models/` mirrors the backend JSON shapes. Change both sides together.
 - The UI is gated by per-event capabilities from `GET /api/event/:id/me` (`useEventCapabilities`). Adding a capability on the backend means handling it on the frontend.
 - `deploy*` targets in the Makefiles copy builds to the production/dev server over SSH (`MACRA_SSHKEY`/`MACRA_HOST`) and restart systemd services. Never run them unprompted.

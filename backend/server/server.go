@@ -5,11 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/importandrew/MaCRa/handler/reqctx"
-	"github.com/importandrew/MaCRa/models"
 )
 
 // trustedProxies are the only peers whose X-Forwarded-For the server believes:
@@ -17,7 +15,11 @@ import (
 // can't fake its IP; a direct connection keeps its own address.
 var trustedProxies = []string{"127.0.0.1", "::1"}
 
-func NewServer(origins ...string) *gin.Engine {
+// NewServer returns the gin engine. There is no CORS: the frontend and the API
+// share one origin (nginx on prod, vite's proxy in development), so browsers
+// never make cross-origin requests to it, and other sites' pages can't read
+// its responses.
+func NewServer() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(gin.LoggerWithFormatter(logFormatter), gin.Recovery())
@@ -28,14 +30,6 @@ func NewServer(origins ...string) *gin.Engine {
 		panic(err)
 	}
 	router.RemoteIPHeaders = []string{"X-Forwarded-For"}
-
-	corsCfg := cors.DefaultConfig()
-	corsCfg.AllowOrigins = append(corsCfg.AllowOrigins, "https://"+models.DefaultDomain)
-	corsCfg.AllowOrigins = append(corsCfg.AllowOrigins, "https://"+models.DevDomain)
-	corsCfg.AllowOrigins = append(corsCfg.AllowOrigins, origins...)
-	corsCfg.AllowCredentials = true
-
-	router.Use(cors.New(corsCfg))
 
 	return router
 }

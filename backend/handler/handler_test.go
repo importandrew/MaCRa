@@ -19,7 +19,7 @@ import (
 func TestRegisterRoutes_AnonymousNeedsLogin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	h := New(event.Handler{}, player.Handler{}, []byte("test-key"), "")
+	h := New(event.Handler{}, player.Handler{}, []byte("test-key"))
 	h.RegisterRoutes(router)
 
 	params := strings.NewReplacer(":eventId", "1", ":gameId", "2", ":playerId", "3")

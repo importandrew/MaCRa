@@ -21,12 +21,12 @@ func (m *fakeMailer) record(kind, to string) error {
 	return nil
 }
 
-func (m *fakeMailer) SendVerification(to, _, _ string) error  { return m.record("verify", to) }
-func (m *fakeMailer) SendPasswordReset(to, _, _ string) error { return m.record("reset", to) }
-func (m *fakeMailer) SendAccountExists(to, _, _ string) error { return m.record("exists", to) }
+func (m *fakeMailer) SendVerification(to, _ string) error  { return m.record("verify", to) }
+func (m *fakeMailer) SendPasswordReset(to, _ string) error { return m.record("reset", to) }
+func (m *fakeMailer) SendAccountExists(to, _ string) error { return m.record("exists", to) }
 
 func TestSignUp(t *testing.T) {
-	const email, origin = "alice@example.com", "https://macra.test"
+	const email = "alice@example.com"
 
 	testData := map[string]struct {
 		mockSetup    func(*MockPlayerRepo)
@@ -70,7 +70,7 @@ func TestSignUp(t *testing.T) {
 			testCase.mockSetup(repo)
 			mail := &fakeMailer{}
 
-			err := NewService(repo, mail).SignUp(context.Background(), email, "Alice", "secret", origin)
+			err := NewService(repo, mail).SignUp(context.Background(), email, "Alice", "secret")
 
 			assert.ErrorIs(t, err, testCase.expectedErr)
 			assert.Equal(t, testCase.expectedSent, mail.sent)
@@ -85,7 +85,7 @@ func TestForgotPassword_overLimit(t *testing.T) {
 		Return(models.ErrAuthMailLimit)
 	mail := &fakeMailer{}
 
-	err := NewService(repo, mail).ForgotPassword(context.Background(), "a@example.com", "https://macra.test")
+	err := NewService(repo, mail).ForgotPassword(context.Background(), "a@example.com")
 
 	assert.NoError(t, err, "the response says sent either way")
 	assert.Empty(t, mail.sent)
