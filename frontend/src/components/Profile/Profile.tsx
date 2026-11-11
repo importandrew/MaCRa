@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Card,
@@ -25,6 +26,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const { isPending: isSaving, run } = useSubmitOnce();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -67,15 +69,15 @@ export default function ProfilePage() {
     setUserData(updatedData);
 
     showToast({
-      title: 'Profile updated successfully',
+      title: t('profile.updated'),
       variant: 'success',
     });
-  }, [name]);
+  }, [name, t]);
 
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-screen md:w-[600px] my-auto justify-center items-center">
-        <LoadingSpinner label="Loading..." />
+        <LoadingSpinner label={t('common.loading')} />
       </div>
     );
   }
@@ -85,7 +87,7 @@ export default function ProfilePage() {
       <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
         <Card className="w-full mx-5">
           <Card.Header className="items-center rounded-xl bg-accent py-2 text-accent-foreground">
-            <Card.Title>Profile</Card.Title>
+            <Card.Title>{t('profile.title')}</Card.Title>
           </Card.Header>
           <Separator />
           <Card.Content className="gap-4 text-start">
@@ -94,16 +96,16 @@ export default function ProfilePage() {
               fullWidth
               value={userData?.id.toString() || ''}
             >
-              <Label>User ID</Label>
+              <Label>{t('profile.userId')}</Label>
               <Input />
             </TextField>
             <TextField fullWidth value={name} onChange={setName}>
-              <Label>Name</Label>
-              <Input placeholder="Enter your name" />
+              <Label>{t('auth.name')}</Label>
+              <Input placeholder={t('profile.namePlaceholder')} />
             </TextField>
             <div className="flex justify-center mt-3 gap-3">
               <Button variant="ghost" onPress={() => navigate('/')}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <PendingButton
                 variant="primary"
@@ -111,7 +113,7 @@ export default function ProfilePage() {
                 isPending={isSaving}
                 isDisabled={!name.trim() || name.trim() === userData?.name}
               >
-                Save
+                {t('common.save')}
               </PendingButton>
             </div>
           </Card.Content>

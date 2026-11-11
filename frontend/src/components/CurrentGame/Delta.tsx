@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { Button, Card, Modal } from '@heroui/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './Delta.css';
@@ -221,10 +222,13 @@ function PlaceBadge({
   place: number;
   tied?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <span
       className="delta-place-badge"
-      aria-label={tied ? `Tied place ${place}` : `Place ${place}`}
+      aria-label={
+        tied ? t('delta.tiedPlace', { place }) : t('delta.place', { place })
+      }
     >
       {tied ? '=' : ''}
       {place}
@@ -258,12 +262,15 @@ function PlayerIdentity({
   rank?: Rank;
   selected?: boolean;
 }) {
+  const { t } = useTranslation();
   const gap = selectedScore === undefined ? null : selectedScore - player.score;
   return (
     <div className="delta-identity">
       <span
         className="delta-wind"
-        aria-label={player.wind ? `Wind ${player.wind}` : undefined}
+        aria-label={
+          player.wind ? t('delta.wind', { wind: player.wind }) : undefined
+        }
       >
         {player.wind}
       </span>
@@ -283,7 +290,7 @@ function PlayerIdentity({
           {gap !== null && (
             <span
               className={`delta-score-gap ${gap > 0 ? 'delta-score-gap--ahead' : gap < 0 ? 'delta-score-gap--behind' : ''}`}
-              aria-label={`Score difference: ${gap}`}
+              aria-label={t('delta.scoreDifferenceValue', { gap })}
             >
               Δ {gap > 0 ? '+' : ''}
               {gap.toLocaleString('en-US')}
@@ -311,6 +318,7 @@ function OpponentCard({
   area,
   onSelect,
 }: OpponentCardProps) {
+  const { t } = useTranslation();
   const losses = discardTargets.map(
     ({ finalPlace, tiedThrough, handValue }) => ({
       place: finalPlace,
@@ -326,7 +334,7 @@ function OpponentCard({
         <button
           type="button"
           className="delta-card-hitarea"
-          aria-label={`View position thresholds for ${player.name}`}
+          aria-label={t('delta.showFor', { name: player.name })}
           onClick={() => onSelect(player.id)}
         />
       )}
@@ -337,7 +345,7 @@ function OpponentCard({
         {directTargets.length > 0 && (
           <div
             className="delta-action delta-action--direct"
-            aria-label="Win on this player's discard"
+            aria-label={t('delta.winOnDiscard')}
           >
             <TargetList targets={directTargets} />
           </div>
@@ -345,7 +353,7 @@ function OpponentCard({
         {losses.length > 0 && (
           <div
             className="delta-action delta-action--loss"
-            aria-label="Deal into this player's win"
+            aria-label={t('delta.dealIntoWin')}
           >
             <TargetList targets={losses} />
           </div>
@@ -366,6 +374,7 @@ function SelectedCard({
   selfTargets: PlaceTarget[];
   area: OpponentArea;
 }) {
+  const { t } = useTranslation();
   return (
     <Card
       className={`delta-player-card delta-selected delta-seat--${area} rounded-lg p-2 gap-1.5`}
@@ -377,12 +386,12 @@ function SelectedCard({
         {selfTargets.length > 0 ? (
           <div
             className="delta-action delta-action--self"
-            aria-label="Self-draw thresholds"
+            aria-label={t('delta.selfDrawThresholds')}
           >
             <TargetList targets={selfTargets} />
           </div>
         ) : (
-          <div className="delta-no-targets">No higher place by self-draw</div>
+          <div className="delta-no-targets">{t('delta.noHigherPlace')}</div>
         )}
       </Card.Content>
     </Card>
@@ -406,7 +415,8 @@ function computeEmpty() {
 }
 
 // The example is static relative to live play, but its thresholds use the real
-// MCR calculation. Scores sum to zero, as they must in an MCR game.
+// MCR calculation. Scores sum to zero, as they must in an MCR game. The names
+// are placeholders: HelpExample shows them in the app's language.
 const EXAMPLE_PLAYERS: DeltaPlayer[] = [
   { id: 101, name: 'North', wind: '北', score: -40, position: 'top' },
   { id: 102, name: 'West', wind: '西', score: 25, position: 'left' },
@@ -440,6 +450,17 @@ function HelpExample({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
+  const names = [
+    t('winds.north'),
+    t('winds.west'),
+    t('winds.south'),
+    t('delta.you'),
+  ];
+  const [north, west, south, you] = EXAMPLE_PLAYERS.map((player, index) => ({
+    ...player,
+    name: names[index],
+  }));
   return (
     <Modal.Backdrop
       isOpen={isOpen}
@@ -454,50 +475,46 @@ function HelpExample({
         className="delta-help-modal"
       >
         <Modal.Dialog
-          aria-label="How to read Delta"
+          aria-label={t('delta.helpTitle')}
           className="bg-surface text-foreground"
         >
           <Modal.Header className="delta-modal__header border-b border-border">
-            <span>How to read Delta</span>
+            <span>{t('delta.helpTitle')}</span>
             <Modal.CloseTrigger
-              aria-label="Close help"
+              aria-label={t('delta.closeHelp')}
               className="delta-help-close-trigger"
             >
               ×
             </Modal.CloseTrigger>
           </Modal.Header>
           <Modal.Body className="delta-help-body">
-            <p className="delta-help-intro">
-              Example scores and representative thresholds. Numbers before the
-              arrow are hand fan values; circles show the resulting place. An
-              equals sign means a tie.
-            </p>
+            <p className="delta-help-intro">{t('delta.helpIntro')}</p>
             <div className="delta-help-illustration">
               <div className="delta-help-canvas">
                 <div className="delta-help-mini-table">
                   <OpponentCard
-                    player={EXAMPLE_PLAYERS[0]}
+                    player={north}
                     selectedScore={EXAMPLE_SELECTED.score}
                     directTargets={[]}
                     discardTargets={[]}
                     area="top"
                   />
                   <OpponentCard
-                    player={EXAMPLE_PLAYERS[1]}
+                    player={west}
                     selectedScore={EXAMPLE_SELECTED.score}
                     directTargets={EXAMPLE_WEST_WIN}
                     discardTargets={[]}
                     area="left"
                   />
                   <OpponentCard
-                    player={EXAMPLE_PLAYERS[2]}
+                    player={south}
                     selectedScore={EXAMPLE_SELECTED.score}
                     directTargets={[]}
                     discardTargets={EXAMPLE_SOUTH_LOSS}
                     area="right"
                   />
                   <SelectedCard
-                    player={EXAMPLE_SELECTED}
+                    player={you}
                     rank={EXAMPLE_RANK}
                     selfTargets={EXAMPLE_SELF}
                     area="bottom"
@@ -516,49 +533,45 @@ function HelpExample({
                   <path d="M251 384 L216 346 L180 332" />
                 </svg>
                 <span className="delta-help-label delta-help-label--one">
-                  Wind, name, score
+                  {t('delta.labelIdentity')}
                 </span>
                 <span className="delta-help-label delta-help-label--two">
-                  Score difference
+                  {t('delta.scoreDifference')}
                 </span>
                 <span className="delta-help-label delta-help-label--three">
-                  Win
+                  {t('delta.win')}
                 </span>
                 <span className="delta-help-label delta-help-label--four">
-                  Deal in
+                  {t('delta.dealIn')}
                 </span>
                 <span className="delta-help-label delta-help-label--five">
-                  Selected player
+                  {t('delta.selectedPlayer')}
                 </span>
                 <span className="delta-help-label delta-help-label--six">
-                  Self-draw
+                  {t('delta.selfDraw')}
                 </span>
               </div>
             </div>
             <div className="delta-help-explanation">
-              <p>
-                <strong>Self:</strong> minimum fan to reach a higher place by
-                self-draw.
-              </p>
-              <p>
-                <strong>Win:</strong> minimum fan to reach a place by winning on
-                that opponent&apos;s discard.
-              </p>
-              <p>
-                <strong>Deal in:</strong> hand fan at which discarding into this
-                opponent&apos;s win causes a drop in place.
-              </p>
-              <p>
-                <strong>Δ:</strong> selected player&apos;s score minus the
-                opponent&apos;s score. Positive means ahead.
-              </p>
-              <p>
-                Each attainable place appears once. A sole place is preferred
-                over a tie, even when it requires a higher-value hand.
-              </p>
+              {(
+                [
+                  'helpSelf',
+                  'helpWin',
+                  'helpDealIn',
+                  'helpDelta',
+                  'helpPlaces',
+                ] as const
+              ).map((key) => (
+                <p key={key}>
+                  <Trans
+                    i18nKey={`delta.${key}`}
+                    components={{ b: <strong /> }}
+                  />
+                </p>
+              ))}
             </div>
             <Button variant="secondary" onPress={onClose}>
-              Back to Delta
+              {t('delta.backToDelta')}
             </Button>
           </Modal.Body>
         </Modal.Dialog>
@@ -574,6 +587,7 @@ export default function Delta({
   onSelectPlayer,
   players,
 }: DeltaProps) {
+  const { t } = useTranslation();
   const [helpOpen, setHelpOpen] = useState(false);
   useEffect(() => {
     if (!isOpen) setHelpOpen(false);
@@ -635,12 +649,12 @@ export default function Delta({
         className="delta-modal"
       >
         <Modal.Dialog
-          aria-label="Position thresholds"
+          aria-label={t('delta.title')}
           className="bg-surface text-foreground"
         >
           <Modal.Header className="delta-modal__header relative border-b border-border pr-14">
             <div className="flex flex-col gap-1">
-              <span>Position thresholds</span>
+              <span>{t('delta.title')}</span>
               {selectedPlayer && (
                 <span className="delta-header-subtitle">
                   {selectedPlayer.name} ·{' '}
@@ -653,7 +667,7 @@ export default function Delta({
             </div>
             <Modal.CloseTrigger
               className="absolute right-3 top-1/2 z-20 -translate-y-1/2"
-              aria-label="Close position thresholds"
+              aria-label={t('delta.close')}
             >
               ×
             </Modal.CloseTrigger>
@@ -661,7 +675,7 @@ export default function Delta({
           <Modal.Body className="delta-modal__body">
             {!selectedPlayer ? (
               <div className="flex min-h-48 items-center justify-center text-muted">
-                Player not found
+                {t('delta.playerNotFound')}
               </div>
             ) : (
               <div className="delta-layout">
@@ -699,24 +713,24 @@ export default function Delta({
                 })}
                 <div className="delta-center">
                   <Button variant="secondary" size="sm" onPress={onClose}>
-                    Back to table
+                    {t('delta.backToTable')}
                   </Button>
                   <Button
                     variant="tertiary"
                     size="sm"
                     onPress={() => setHelpOpen(true)}
                   >
-                    How to read
+                    {t('delta.howToRead')}
                   </Button>
                   <div className="delta-help-swatches" aria-hidden="true">
                     <span className="delta-legend__item delta-action--self">
-                      Self
+                      {t('delta.self')}
                     </span>
                     <span className="delta-legend__item delta-action--direct">
-                      Win
+                      {t('delta.win')}
                     </span>
                     <span className="delta-legend__item delta-action--loss">
-                      Deal in
+                      {t('delta.dealIn')}
                     </span>
                   </div>
                 </div>

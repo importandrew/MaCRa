@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@heroui/react';
 import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -88,19 +90,19 @@ function transformGameDataForChart(input: PreparedGameRoundLogs): ChartPoint[] {
   return points;
 }
 
-function describePoint(point: ChartPoint): string {
-  if (point.round === 0) return 'Start';
+function describePoint(point: ChartPoint, t: TFunction): string {
+  if (point.round === 0) return t('chart.start');
   const nth =
     point.sameKindCount > 1
-      ? ` ${point.sameKindNumber} of ${point.sameKindCount}`
+      ? t('chart.nth', { n: point.sameKindNumber, total: point.sameKindCount })
       : '';
   if (point.outcome === Outcome.Penalty)
-    return `Round ${point.round}, penalty${nth}`;
+    return t('chart.penalty', { round: point.round, nth });
   if (point.outcome === Outcome.FalseMahjong)
-    return `Round ${point.round}, false mahjong${nth}`;
+    return t('chart.falseMahjong', { round: point.round, nth });
   return point.isLastInRound
-    ? `After round ${point.round}`
-    : `Round ${point.round}`;
+    ? t('chart.afterRound', { round: point.round })
+    : t('chart.round', { round: point.round });
 }
 
 // The labeled rounds: every round, or every 2nd, 5th or 10th one, whichever
@@ -136,6 +138,7 @@ export default function GameChart({
 }: {
   preparedData: PreparedGameRoundLogs;
 }) {
+  const { t } = useTranslation();
   const chartData = transformGameDataForChart(preparedData);
   const last = chartData[chartData.length - 1];
   const [chartWidth, setChartWidth] = useState(0);
@@ -189,9 +192,9 @@ export default function GameChart({
   return (
     <Card className="mb-3">
       <Card.Header className="flex-row items-baseline justify-between gap-3">
-        <Card.Title>Score by round</Card.Title>
+        <Card.Title>{t('chart.title')}</Card.Title>
         <span className="text-sm text-muted">
-          {isFinal ? 'Final' : describePoint(shown)}
+          {isFinal ? t('chart.final') : describePoint(shown, t)}
         </span>
       </Card.Header>
       <Card.Content className="gap-3">
@@ -220,11 +223,11 @@ export default function GameChart({
           // A slider over the chart's points: the ARIA pattern for picking one
           // of an ordered set with the arrow keys, Home and End.
           role="slider"
-          aria-label="Score by round"
+          aria-label={t('chart.title')}
           aria-valuemin={0}
           aria-valuemax={chartData.length - 1}
           aria-valuenow={chartData.indexOf(shown)}
-          aria-valuetext={`${isFinal ? 'Final' : describePoint(shown)}: ${preparedData.players.map((player, index) => `${player.name} ${shown.scores[index]}`).join(', ')}`}
+          aria-valuetext={`${isFinal ? t('chart.final') : describePoint(shown, t)}: ${preparedData.players.map((player, index) => `${player.name} ${shown.scores[index]}`).join(', ')}`}
           onClick={onClick}
           onKeyDown={onKeyDown}
           className="h-60 sm:h-72 -mx-2 rounded-md select-none touch-pan-y outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-(--focus) [&_:focus]:outline-none"

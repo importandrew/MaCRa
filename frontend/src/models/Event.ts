@@ -23,8 +23,5 @@ export type Event = {
   player_count?: number;
 };
 
-export const CONTENT_REACH_OPTIONS: { value: ContentReach; label: string }[] = [
-  { value: 'public', label: 'Everyone' },
-  { value: 'members', label: 'Participants only' },
-  { value: 'staff', label: 'Staff only' },
-];
+// CONTENT_REACHES in the order the pickers show them (labels: reach.* texts).
+export const CONTENT_REACHES: ContentReach[] = ['public', 'members', 'staff'];

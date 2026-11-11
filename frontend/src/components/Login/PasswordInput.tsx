@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   FieldError,
@@ -19,6 +20,7 @@ export default function PasswordInput({
   onChange,
   autoComplete,
 }: InputArgs & { autoComplete: 'current-password' | 'new-password' }) {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
 
   return (
@@ -27,7 +29,7 @@ export default function PasswordInput({
       autoComplete={autoComplete}
       validate={(value: string) => {
         if (!value.length) {
-          return 'Password is required';
+          return t('auth.passwordRequired');
         }
         // bcrypt on the backend takes at most 72 bytes; only a new password
         // is checked, so an existing one is never refused here.
@@ -35,13 +37,13 @@ export default function PasswordInput({
           autoComplete === 'new-password' &&
           new TextEncoder().encode(value).length > maxPasswordBytes
         ) {
-          return 'Password is too long';
+          return t('auth.passwordTooLong');
         }
         return null;
       }}
       onChange={onChange}
     >
-      <Label>Password</Label>
+      <Label>{t('auth.password')}</Label>
       <InputGroup>
         <InputGroup.Input type={isVisible ? 'text' : 'password'} />
         <InputGroup.Suffix className="pe-0">
@@ -49,7 +51,9 @@ export default function PasswordInput({
             isIconOnly
             size="sm"
             variant="ghost"
-            aria-label={isVisible ? 'Hide password' : 'Show password'}
+            aria-label={
+              isVisible ? t('auth.hidePassword') : t('auth.showPassword')
+            }
             onPress={() => setIsVisible((prev) => !prev)}
           >
             {isVisible ? (

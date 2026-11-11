@@ -1,3 +1,4 @@
+import i18n from '../../i18n';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
@@ -130,7 +131,7 @@ export function useRoundEntry(
       if (!fresh) return;
       showToast({
         title: staleTitle(table, fresh),
-        description: 'Check the refreshed table and enter again if needed.',
+        description: i18n.t('game.checkTableAndRetry'),
         variant: 'warning',
       });
       return;
@@ -144,7 +145,7 @@ export function useRoundEntry(
     }
 
     if (isPenalty) {
-      showToast({ title: 'Penalty added', variant: 'warning' });
+      showToast({ title: i18n.t('game.penaltyAdded'), variant: 'warning' });
     }
     reset();
     onSubmitted(data);
@@ -184,13 +185,13 @@ export type RoundEntry = ReturnType<typeof useRoundEntry>;
 // table now: a round entered, a penalty entered, or an entry undone.
 function staleTitle(seen: GameData, now: GameData): string {
   if (now.round.num > seen.round.num) {
-    return `Round ${seen.round.kanji} has already been entered`;
+    return i18n.t('game.roundAlreadyEntered', { round: seen.round.kanji });
   }
   if (now.round.num < seen.round.num) {
-    return 'The last round has been undone';
+    return i18n.t('game.lastRoundUndone');
   }
   if (now.log_size > seen.log_size) {
-    return 'A penalty has just been entered';
+    return i18n.t('game.penaltyJustEntered');
   }
-  return 'The last entry has been undone';
+  return i18n.t('game.lastEntryUndone');
 }

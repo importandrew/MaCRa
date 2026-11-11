@@ -1,3 +1,4 @@
+import i18n from '../../i18n';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameStatusResponse } from '../../providers/game/gameDataApi';
@@ -19,16 +20,16 @@ export function useShowGameGone() {
       );
 
       if (data?.status === 'ended') {
-        showToast({ title: 'The game has ended', variant: 'warning' });
+        showToast({ title: i18n.t('game.ended'), variant: 'warning' });
         navigate('/last');
         return;
       }
       if (data?.status === 'aborted') {
-        showToast({ title: 'The game was aborted', variant: 'warning' });
+        showToast({ title: i18n.t('game.wasAborted'), variant: 'warning' });
         navigate('/');
         return;
       }
-      showToast({ title: 'Error: game not found', variant: 'danger' });
+      showToast({ title: i18n.t('game.notFound'), variant: 'danger' });
     },
     [navigate]
   );

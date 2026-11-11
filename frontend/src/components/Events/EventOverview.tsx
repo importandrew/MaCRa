@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Chip, Separator } from '@heroui/react';
 import { type ReactNode, useMemo } from 'react';
 import type { EventMember } from '../../models/EventRole';
@@ -53,6 +54,7 @@ function DetailRow({
 }
 
 export default function EventOverview() {
+  const { t } = useTranslation();
   const { eventId, event } = useEventLayout();
   const { data: members } = useFetchEventMembers(eventId);
 
@@ -71,7 +73,7 @@ export default function EventOverview() {
   if (!event) return null;
 
   const isFinished = Boolean(event.finished_at);
-  const typeLabel = event.type === 'tournament' ? 'Tournament' : 'Regular';
+  const typeLabel = t(`eventType.${event.type}`);
 
   return (
     <div className="flex flex-col w-full max-w-[600px] mx-auto px-3 py-6 gap-4 min-w-0">
@@ -95,7 +97,7 @@ export default function EventOverview() {
           {isFinished && (
             <Chip size="sm" variant="soft">
               <CheckInCircleIcon className={iconClass} />
-              Finished
+              {t('events.finished')}
             </Chip>
           )}
         </div>
@@ -108,31 +110,40 @@ export default function EventOverview() {
       <Separator />
 
       <dl className="flex flex-col gap-3 text-muted">
-        <DetailRow icon={<CrownIcon className={iconClass} />} label="Owner">
-          {ownerName ?? `User #${event.owner_user_id}`}
+        <DetailRow
+          icon={<CrownIcon className={iconClass} />}
+          label={t('roles.owner')}
+        >
+          {ownerName ?? t('events.userNumber', { id: event.owner_user_id })}
         </DetailRow>
         <DetailRow
           icon={<MahjongTileIcon className={iconClass} />}
-          label="Players"
+          label={t('events.players')}
         >
           {event.player_count ?? '—'}
         </DetailRow>
-        <DetailRow icon={<ScalesIcon className={iconClass} />} label="Referees">
+        <DetailRow
+          icon={<ScalesIcon className={iconClass} />}
+          label={t('events.referees')}
+        >
           {referees.length > 0 ? referees.join(', ') : '—'}
         </DetailRow>
-        <DetailRow icon={<EyeIcon className={iconClass} />} label="Observers">
+        <DetailRow
+          icon={<EyeIcon className={iconClass} />}
+          label={t('events.observers')}
+        >
           {observers.length > 0 ? observers.join(', ') : '—'}
         </DetailRow>
         <DetailRow
           icon={<CalendarIcon className={iconClass} />}
-          label="Created"
+          label={t('events.createdAt')}
         >
           {getDateTimeFormatted(event.created_at)}
         </DetailRow>
         {event.finished_at && (
           <DetailRow
             icon={<CheckInCircleIcon className={iconClass} />}
-            label="Finished"
+            label={t('events.finished')}
           >
             {getDateTimeFormatted(event.finished_at)}
           </DetailRow>

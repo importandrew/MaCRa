@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   CloseButton,
   ComboBox,
@@ -30,6 +31,7 @@ export default function PlayerAutocomplete({
   onSelectionChange,
   disabledKeys = [],
 }: PlayerAutocompleteProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSelectionChange = (key: Key | null) => {
@@ -58,7 +60,7 @@ export default function PlayerAutocomplete({
         />
         {selectedKey != null && (
           <CloseButton
-            aria-label={`Clear ${label}`}
+            aria-label={t('common.clearField', { field: label })}
             onPress={() => handleSelectionChange(null)}
             className="absolute end-7 top-1/2 z-10 -translate-y-1/2"
           />

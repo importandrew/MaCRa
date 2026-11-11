@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ReactNode } from 'react';
 import ContextMenuButton from './ContextMenuButton';
 import SideMenu from './SideMenu';
@@ -17,10 +18,11 @@ export default function ContextMenu({
   onClose: () => void;
   buttonClassName?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <>
       <ContextMenuButton
-        ariaLabel="Open menu"
+        ariaLabel={t('common.openMenu')}
         onPress={onOpen}
         className={buttonClassName}
       />

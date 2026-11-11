@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Card } from '@heroui/react';
 import { LinkButton } from '../LinkButton';
 import { useEffect, useRef, useState } from 'react';
@@ -6,6 +7,7 @@ import { globalFetch, PostRequest } from '../Request';
 import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function VerifyEmailPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
@@ -38,21 +40,21 @@ export default function VerifyEmailPage() {
         <Card className="w-full mx-5">
           <Card.Content className="gap-3 py-8">
             {status === 'loading' && (
-              <LoadingSpinner label="Verifying email..." />
+              <LoadingSpinner label={t('auth.verifyingEmail')} />
             )}
             {status === 'ok' && (
               <>
-                <p>Email verified. You can sign in now.</p>
+                <p>{t('auth.emailVerified')}</p>
                 <LinkButton variant="primary" to="/login">
-                  Go to login
+                  {t('auth.goToLogin')}
                 </LinkButton>
               </>
             )}
             {status === 'error' && (
               <>
-                <p>This verification link is invalid or expired.</p>
+                <p>{t('auth.verificationLinkInvalid')}</p>
                 <LinkButton variant="outline" to="/login">
-                  Back to login
+                  {t('auth.backToLogin')}
                 </LinkButton>
               </>
             )}

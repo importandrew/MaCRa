@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, useOverlayState } from '@heroui/react';
 import { DeleteRequest, authFetch, eventGamePath } from '../../Request';
 import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
@@ -20,6 +21,7 @@ export default function AbortMenu({
   // table, the event's live games on the live view.
   onAborted: () => void;
 }) {
+  const { t } = useTranslation();
   const { isPending: isAborting, run } = useSubmitOnce();
   const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
@@ -38,7 +40,7 @@ export default function AbortMenu({
     if (!data) return;
 
     showToast({
-      title: 'Game aborted',
+      title: t('game.aborted'),
       variant: 'warning',
     });
 
@@ -54,7 +56,7 @@ export default function AbortMenu({
         className="w-1/2"
       >
         <WarningIcon className="text-white" />
-        {isAborting ? 'Aborting...' : 'Abort Game'}
+        {isAborting ? t('game.aborting') : t('game.abort')}
       </Button>
       <Confirm
         onClose={onClose}
@@ -63,10 +65,10 @@ export default function AbortMenu({
           void run(handleAbort);
         }}
         isOpen={isOpen}
-        headerText="Confirm abort game"
-        cancelText="Cancel"
-        confirmText="Abort Game"
-        prompt="Are you sure you want to abort this game? Game will NOT be counted. This action cannot be undone."
+        headerText={t('game.abortConfirmTitle')}
+        cancelText={t('common.cancel')}
+        confirmText={t('game.abort')}
+        prompt={t('game.abortConfirmPrompt')}
         confirmVariant="danger"
       />
     </>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Drawer } from '@heroui/react';
 import { cardVariants } from '@heroui/styles';
 import { type ReactNode, useContext, useState } from 'react';
@@ -20,22 +21,13 @@ const cardStyles = cardVariants();
 
 const ROLE_ORDER: EventRole[] = ['player', 'referee', 'observer'];
 
-const ROLE_META: Record<
+const ROLE_ICONS: Record<
   EventRole,
-  { label: string; icon: (props: { className?: string }) => ReactNode }
+  (props: { className?: string }) => ReactNode
 > = {
-  player: {
-    label: 'Player',
-    icon: (props) => <MahjongTileIcon {...props} />,
-  },
-  referee: {
-    label: 'Referee',
-    icon: (props) => <ScalesIcon {...props} />,
-  },
-  observer: {
-    label: 'Observer',
-    icon: (props) => <EyeIcon {...props} />,
-  },
+  player: (props) => <MahjongTileIcon {...props} />,
+  referee: (props) => <ScalesIcon {...props} />,
+  observer: (props) => <EyeIcon {...props} />,
 };
 
 function MetaItem({ icon, label }: { icon: ReactNode; label: string }) {
@@ -52,6 +44,7 @@ function MetaItem({ icon, label }: { icon: ReactNode; label: string }) {
 }
 
 function EventCardMeta({ event }: { event: Event }) {
+  const { t } = useTranslation();
   const isFinished = Boolean(event.finished_at);
   const roles = event.roles ?? [];
   const orderedRoles = ROLE_ORDER.filter((role) => roles.includes(role));
@@ -66,7 +59,7 @@ function EventCardMeta({ event }: { event: Event }) {
       {isFinished && (
         <MetaItem
           icon={<CheckInCircleIcon className={iconClass} />}
-          label="Finished"
+          label={t('events.finished')}
         />
       )}
       <MetaItem
@@ -77,26 +70,27 @@ function EventCardMeta({ event }: { event: Event }) {
             <UsersIcon className={iconClass} />
           )
         }
-        label={event.type === 'tournament' ? 'Tournament' : 'Regular'}
+        label={t(`eventType.${event.type}`)}
       />
       {event.is_owner && (
-        <MetaItem icon={<CrownIcon className={iconClass} />} label="Owner" />
+        <MetaItem
+          icon={<CrownIcon className={iconClass} />}
+          label={t('roles.owner')}
+        />
       )}
-      {orderedRoles.map((role) => {
-        const meta = ROLE_META[role];
-        return (
-          <MetaItem
-            key={role}
-            icon={meta.icon({ className: iconClass })}
-            label={meta.label}
-          />
-        );
-      })}
+      {orderedRoles.map((role) => (
+        <MetaItem
+          key={role}
+          icon={ROLE_ICONS[role]({ className: iconClass })}
+          label={t(`roles.${role}`)}
+        />
+      ))}
     </div>
   );
 }
 
 export default function EventsList() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
   const { data, isLoading, isError, refetch } = useFetchVisibleEvents();
@@ -128,20 +122,20 @@ export default function EventsList() {
             buttonClassName="fixed bottom-4 right-4 z-10"
           >
             <Drawer.Header>
-              <Drawer.Heading>Events</Drawer.Heading>
+              <Drawer.Heading>{t('events.title')}</Drawer.Heading>
             </Drawer.Header>
             <Drawer.Body className="flex flex-col gap-3">
               <Button variant="primary" fullWidth onPress={handleCreate}>
-                New event
+                {t('events.newEvent')}
               </Button>
             </Drawer.Body>
           </ContextMenu>
 
-          <h1 className="text-2xl font-semibold">Events</h1>
+          <h1 className="text-2xl font-semibold">{t('events.title')}</h1>
 
           {!data?.length ? (
             <p className="text-center text-muted text-xl py-8">
-              No events available.
+              {t('events.noEvents')}
             </p>
           ) : (
             data.map((event) => {

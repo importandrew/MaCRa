@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Drawer } from '@heroui/react';
 import { ReactNode } from 'react';
 
@@ -14,6 +15,7 @@ export default function SideMenu({
   onClose: () => void;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <Drawer.Backdrop
       isOpen={isOpen}
@@ -23,10 +25,10 @@ export default function SideMenu({
     >
       <Drawer.Content placement="right">
         <Drawer.Dialog
-          aria-label="Menu"
+          aria-label={t('common.menu')}
           className="w-full max-w-full sm:w-full sm:max-w-3xl"
         >
-          <Drawer.CloseTrigger aria-label="Close menu" />
+          <Drawer.CloseTrigger aria-label={t('common.closeMenu')} />
           {children}
         </Drawer.Dialog>
       </Drawer.Content>

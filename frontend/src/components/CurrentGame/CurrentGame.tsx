@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GameData } from '../../models/GameData';
@@ -16,6 +17,7 @@ import { getStoredEventId } from '../../providers/event/eventConstants';
 import './CurrentGame.css';
 
 export default function CurrentGame() {
+  const { t } = useTranslation();
   const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -154,7 +156,9 @@ export default function CurrentGame() {
                 className={
                   isEntryOpen ? 'h-11 px-3 text-3xl' : 'p-4 h-16 text-5xl'
                 }
-                aria-label={`Enter result of round ${roundData.round.kanji}`}
+                aria-label={t('game.enterRound', {
+                  round: roundData.round.kanji,
+                })}
                 aria-expanded={isEntryOpen}
                 onPress={() => setIsEntryOpen(!isEntryOpen)}
               >

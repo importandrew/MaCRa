@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Card,
@@ -11,7 +12,7 @@ import { FormEvent, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import {
-  CONTENT_REACH_OPTIONS,
+  CONTENT_REACHES,
   ContentReach,
   EventVisibility,
 } from '../../models/Event';
@@ -20,21 +21,10 @@ import { showToast } from '../Toast';
 import SegmentedPicker from '../SegmentedPicker';
 import PendingButton from '../PendingButton';
 
-const VISIBILITY_OPTIONS: { value: EventVisibility; label: string }[] = [
-  { value: 'private', label: 'Private' },
-  { value: 'public', label: 'Public' },
-];
-
-const TYPE_OPTIONS: {
-  value: 'regular' | 'tournament';
-  label: string;
-  isDisabled: boolean;
-}[] = [
-  { value: 'regular', label: 'Regular', isDisabled: false },
-  { value: 'tournament', label: 'Tournament', isDisabled: true },
-];
+const VISIBILITIES: EventVisibility[] = ['private', 'public'];
 
 export default function EventCreate() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -73,7 +63,7 @@ export default function EventCreate() {
     if (!id) return;
 
     showToast({
-      title: 'Event created',
+      title: t('events.created'),
       variant: 'success',
     });
     navigate(`/event/${id}`);
@@ -81,53 +71,66 @@ export default function EventCreate() {
 
   return (
     <div className="flex flex-col w-full max-w-[600px] mx-auto px-3 py-6 gap-4 min-w-0">
-      <h1 className="text-2xl font-semibold">Create event</h1>
+      <h1 className="text-2xl font-semibold">{t('events.createTitle')}</h1>
 
       <Card>
         <Card.Content className="gap-2">
-          <p className="text-muted">General</p>
+          <p className="text-muted">{t('events.general')}</p>
           <Form
             id="create-event-form"
             onSubmit={onSubmit}
             className="flex flex-col gap-3"
           >
             <TextField fullWidth isRequired value={name} onChange={setName}>
-              <Label>Name</Label>
+              <Label>{t('events.name')}</Label>
               <Input />
             </TextField>
             <TextField fullWidth value={description} onChange={setDescription}>
-              <Label>Description</Label>
+              <Label>{t('events.description')}</Label>
               <TextArea />
             </TextField>
             <div className="w-full flex flex-col gap-2">
-              <p className="text-muted">Type</p>
+              <p className="text-muted">{t('events.type')}</p>
               <SegmentedPicker
-                ariaLabel="Event type"
-                options={TYPE_OPTIONS}
+                ariaLabel={t('events.type')}
+                options={[
+                  { value: 'regular', label: t('eventType.regular') },
+                  {
+                    value: 'tournament',
+                    label: t('eventType.tournament'),
+                    isDisabled: true,
+                  },
+                ]}
                 selectedKey={type}
                 onSelectionChange={setType}
               />
-              <p className="text-muted">Visibility</p>
+              <p className="text-muted">{t('events.visibility')}</p>
               <SegmentedPicker
-                label="General"
-                ariaLabel="Event visibility"
-                options={VISIBILITY_OPTIONS}
+                label={t('events.general')}
+                options={VISIBILITIES.map((value) => ({
+                  value,
+                  label: t(`visibility.${value}`),
+                }))}
                 selectedKey={visibility}
                 onSelectionChange={applyVisibilityPreset}
               />
               <div className="flex flex-col gap-5">
                 <SegmentedPicker
-                  label="Ratings"
-                  ariaLabel="Ratings visibility"
-                  options={CONTENT_REACH_OPTIONS}
+                  label={t('events.ratingsReach')}
+                  options={CONTENT_REACHES.map((value) => ({
+                    value,
+                    label: t(`reach.${value}`),
+                  }))}
                   selectedKey={ratingsReach}
                   onSelectionChange={setRatingsReach}
                   isOptionDisabled={isReachOptionDisabled}
                 />
                 <SegmentedPicker
-                  label="Live games & results"
-                  ariaLabel="Live games and results visibility"
-                  options={CONTENT_REACH_OPTIONS}
+                  label={t('events.gamesReach')}
+                  options={CONTENT_REACHES.map((value) => ({
+                    value,
+                    label: t(`reach.${value}`),
+                  }))}
                   selectedKey={gamesReach}
                   onSelectionChange={setGamesReach}
                   isOptionDisabled={isReachOptionDisabled}
@@ -145,7 +148,7 @@ export default function EventCreate() {
           className="flex-1"
           onPress={() => navigate('/events')}
         >
-          Cancel
+          {t('common.cancel')}
         </Button>
         <PendingButton
           type="submit"
@@ -155,7 +158,7 @@ export default function EventCreate() {
           isDisabled={!name.trim()}
           className="flex-1"
         >
-          Create
+          {t('events.create')}
         </PendingButton>
       </div>
     </div>

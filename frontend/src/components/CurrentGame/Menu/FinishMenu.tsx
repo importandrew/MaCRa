@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, useOverlayState } from '@heroui/react';
 import { PostRequest, authFetch, eventGamePath } from '../../Request';
 import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
@@ -21,6 +22,7 @@ export default function FinishMenu({
   // user may be a referee who didn't play it.
   onFinished: () => void;
 }) {
+  const { t } = useTranslation();
   const { isPending: isFinishing, run } = useSubmitOnce();
   const { isOpen, open: onOpen, close: onClose } = useOverlayState();
 
@@ -35,7 +37,7 @@ export default function FinishMenu({
     if (!data) return;
 
     showToast({
-      title: 'Game finished',
+      title: t('game.finished'),
       variant: 'warning',
     });
 
@@ -55,7 +57,7 @@ export default function FinishMenu({
         className="w-1/2"
       >
         <WarningIcon className="text-white" />
-        {isFinishing ? 'Finishing...' : 'Finish Game'}
+        {isFinishing ? t('game.finishing') : t('game.finish')}
       </Button>
       <Confirm
         onClose={onClose}
@@ -64,10 +66,10 @@ export default function FinishMenu({
           void run(handleFinish);
         }}
         isOpen={isOpen}
-        headerText="Confirm finish game"
-        cancelText="Cancel"
-        confirmText="Finish Game"
-        prompt="Are you sure you want to finish this game? Game will be counted. This action will finalize the result."
+        headerText={t('game.finishConfirmTitle')}
+        cancelText={t('common.cancel')}
+        confirmText={t('game.finish')}
+        prompt={t('game.finishConfirmPrompt')}
         confirmVariant="primary"
       />
     </>

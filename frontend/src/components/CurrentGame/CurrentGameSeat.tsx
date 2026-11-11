@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import type { ComponentProps } from 'react';
 import type { GameData } from '../../models/GameData';
@@ -27,6 +28,7 @@ export default function CurrentGameSeat({
   currentScores,
   onOpenDelta,
 }: CurrentGameSeatProps) {
+  const { t } = useTranslation();
   return (
     <>
       {isEntryOpen && (
@@ -52,7 +54,7 @@ export default function CurrentGameSeat({
             isIconOnly
             variant="tertiary"
             size="sm"
-            aria-label={`Show position thresholds for ${player.name}`}
+            aria-label={t('delta.showFor', { name: player.name })}
             onPress={() => onOpenDelta(player.id)}
             className="shrink-0"
           >

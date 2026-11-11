@@ -1,13 +1,18 @@
+import { currentLanguage } from '../i18n';
+
+// getDateTimeFormatted formats a date and time in the app's language, so the
+// month name matches the rest of the screen.
 export const getDateTimeFormatted = (dateISO: string): string => {
   if (!dateISO) return '—';
 
+  const locale = currentLanguage();
   const dateObj = new Date(dateISO);
-  const date = dateObj.toLocaleDateString(undefined, {
+  const date = dateObj.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   });
-  const time = dateObj.toLocaleTimeString(undefined, {
+  const time = dateObj.toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,

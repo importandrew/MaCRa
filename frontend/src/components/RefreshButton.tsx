@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { RefreshIcon } from './Icons/RefreshIcon';
 import PendingButton from './PendingButton';
@@ -11,6 +12,7 @@ export default function RefreshButton({
   onRefresh: () => Promise<unknown> | void;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const refresh = async () => {
@@ -27,7 +29,7 @@ export default function RefreshButton({
       variant="ghost"
       size="lg"
       isIconOnly
-      aria-label="Refresh"
+      aria-label={t('common.refresh')}
       isPending={isRefreshing}
       onPress={refresh}
       className={`rounded-full ${className}`}

@@ -1,7 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { Link, Table } from '@heroui/react';
 import { FANS } from './fans';
 
+// FansMenu is the fan table. Fan names and descriptions are English in every
+// language for now (fans.ts): they wait for an agreed translation.
 export function FansMenu() {
+  const { t } = useTranslation();
   return (
     <div
       className={
@@ -14,12 +18,12 @@ export function FansMenu() {
     >
       <Table className="sm:w-fit self-center">
         <Table.ScrollContainer>
-          <Table.Content aria-label="Fans list" selectionMode="single">
+          <Table.Content aria-label={t('fans.table')} selectionMode="single">
             <Table.Header>
-              <Table.Column isRowHeader>No.</Table.Column>
-              <Table.Column>Fan name</Table.Column>
-              <Table.Column>Description</Table.Column>
-              <Table.Column>Pts.</Table.Column>
+              <Table.Column isRowHeader>{t('fans.no')}</Table.Column>
+              <Table.Column>{t('fans.name')}</Table.Column>
+              <Table.Column>{t('fans.description')}</Table.Column>
+              <Table.Column>{t('fans.points')}</Table.Column>
             </Table.Header>
             <Table.Body>
               {FANS.map((fan) => (
@@ -45,7 +49,7 @@ export function FansMenu() {
           rel="noopener noreferrer"
           className="text-sm text-foreground"
         >
-          Same, but cooler.jpg
+          {t('fans.image')}
           <Link.Icon />
         </Link>
       </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Card,
@@ -36,6 +37,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const { isPending: isLoading, run } = useSubmitOnce();
+  const { t } = useTranslation();
 
   const { signIn } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -98,20 +100,20 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       {isLoading ? (
-        <LoadingSpinner label="Loading..." />
+        <LoadingSpinner label={t('common.loading')} />
       ) : (
         <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
           <Card className="w-full mx-5">
             <Card.Content>
               <Tabs selectedKey={tab} onSelectionChange={handleTabChange}>
                 <Tabs.ListContainer>
-                  <Tabs.List aria-label="Authentication" className="w-full">
+                  <Tabs.List aria-label={t('auth.tabs')} className="w-full">
                     <Tabs.Tab id="login" className="flex-1">
-                      Login
+                      {t('auth.logIn')}
                       <Tabs.Indicator />
                     </Tabs.Tab>
                     <Tabs.Tab id="signup" className="flex-1">
-                      Sign Up
+                      {t('auth.signUp')}
                       <Tabs.Indicator />
                     </Tabs.Tab>
                   </Tabs.List>
@@ -129,13 +131,13 @@ export default function LoginPage() {
                         isDisabled={!email || !password}
                         onPress={() => run(handleLogin)}
                       >
-                        Sign In
+                        {t('auth.signIn')}
                       </Button>
                       <Link
                         to="/forgot-password"
                         className="text-sm text-accent underline"
                       >
-                        Forgot password?
+                        {t('auth.forgotPasswordLink')}
                       </Link>
                     </div>
                   </div>
@@ -148,17 +150,17 @@ export default function LoginPage() {
                       autoComplete="name"
                       validate={(value: string) => {
                         if (!value.length) {
-                          return 'Name is required';
+                          return t('auth.nameRequired');
                         }
                         if (value.length > 50) {
-                          return 'Name is too long';
+                          return t('auth.nameTooLong');
                         }
                         return null;
                       }}
                       onChange={setName}
                     >
-                      <Label>Name</Label>
-                      <Input placeholder="John Mah" />
+                      <Label>{t('auth.name')}</Label>
+                      <Input placeholder={t('auth.namePlaceholder')} />
                       <FieldError />
                     </TextField>
                     <PasswordInput
@@ -172,7 +174,7 @@ export default function LoginPage() {
                         className="mt-3"
                         onPress={() => run(handleSignup)}
                       >
-                        Sign Up
+                        {t('auth.signUp')}
                       </Button>
                     </div>
                   </div>

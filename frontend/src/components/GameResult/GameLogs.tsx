@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Popover, Table } from '@heroui/react';
 import { useCallback } from 'react';
 import { Outcome } from '../../models/GameData';
@@ -30,6 +31,7 @@ export default function GameLogs({
   // undo sends its size); otherwise GameLogs loads it itself.
   logs?: GameLogsState;
 }) {
+  const { t } = useTranslation();
   const ownLogs = useFetchGameLogsData(logs ? null : gameId, eventId);
   const { data, isError, isLoading, fetchData } = logs ?? ownLogs;
 
@@ -155,19 +157,19 @@ export default function GameLogs({
     return (
       <legend>
         <div>
-          <span className="text-success">#: {Outcome.Self}</span>
+          <span className="text-success">#: {t('roundEntry.self')}</span>
         </div>
         <div>
-          <span className="text-danger">#: {Outcome.Deal}</span>
+          <span className="text-danger">#: {t('roundEntry.dealIn')}</span>
         </div>
         <div>
           <span>
-            <SignIcon sign="minus" className="inline" />: {Outcome.Draw}
+            <SignIcon sign="minus" className="inline" />: {t('roundEntry.draw')}
           </span>
         </div>
         <div>
           <span className="text-warning">
-            <WarningIcon className="inline" />: {Outcome.Penalty}
+            <WarningIcon className="inline" />: {t('roundEntry.penalty')}
           </span>
         </div>
       </legend>
@@ -183,7 +185,7 @@ export default function GameLogs({
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-full my-auto justify-center items-center">
-        <LoadingSpinner label="Loading..." />
+        <LoadingSpinner label={t('common.loading')} />
       </div>
     );
   }
@@ -192,7 +194,7 @@ export default function GameLogs({
     return (
       <div className="flex w-full h-full justify-center items-center">
         <Button type="button" onPress={onRefresh}>
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
     );
@@ -201,9 +203,9 @@ export default function GameLogs({
   if (!data || !preparedData) {
     return (
       <div className="flex flex-col h-full w-full justify-center items-center gap-3">
-        <p className="mb-4 text-center text-3xl">No data available</p>
+        <p className="mb-4 text-center text-3xl">{t('logs.noData')}</p>
         <Button type="button" onPress={onRefresh}>
-          Refresh
+          {t('common.refresh')}
         </Button>
       </div>
     );
@@ -225,7 +227,7 @@ export default function GameLogs({
         >
           <Table className="w-full self-center z-10">
             <Table.ScrollContainer>
-              <Table.Content aria-label="Game logs">
+              <Table.Content aria-label={t('game.logs')}>
                 <Table.Header>
                   <Table.Column
                     id="round"
@@ -255,7 +257,7 @@ export default function GameLogs({
                         size="sm"
                         variant="ghost"
                         isIconOnly
-                        aria-label="Legend"
+                        aria-label={t('logs.legend')}
                       >
                         Δ
                       </Button>

@@ -1,3 +1,4 @@
+import i18n from '../../i18n';
 import { showToast } from '../../components/Toast';
 import { GetRequest, PostRequest, PutRequest } from '../../components/Request';
 import { authFetch } from '../../components/Request';
@@ -11,7 +12,7 @@ export async function fetchLogoutApi(): Promise<boolean> {
     return response.ok;
   } catch (error) {
     showToast({
-      title: `Network error during logout: ${error}`,
+      title: i18n.t('errors.logoutNetwork', { error: String(error) }),
       variant: 'danger',
     });
     return false;

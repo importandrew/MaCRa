@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Drawer, useOverlayState } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
@@ -21,6 +22,7 @@ import PendingButton from '../PendingButton';
 export default function EventLayout() {
   const { eventId: eventIdParam } = useParams();
   const eventId = eventIdParam ? parseInt(eventIdParam, 10) : null;
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { isPending: isFinishing, run } = useSubmitOnce();
@@ -94,11 +96,15 @@ export default function EventLayout() {
   const closeDrawer = () => setIsDrawerOpen(false);
 
   const menuItems = [
-    { label: 'Manage', path: '/manage', isAllowed: canManage },
-    { label: 'Rating', path: '/rating', isAllowed: canRating },
-    { label: 'Live games', path: '/games/live', isAllowed: canLiveGames },
+    { label: t('events.manage'), path: '/manage', isAllowed: canManage },
+    { label: t('events.rating'), path: '/rating', isAllowed: canRating },
     {
-      label: 'Finished games',
+      label: t('events.liveGames'),
+      path: '/games/live',
+      isAllowed: canLiveGames,
+    },
+    {
+      label: t('events.finishedGames'),
       path: '/games/finished',
       isAllowed: canFinishedGames,
     },
@@ -117,7 +123,7 @@ export default function EventLayout() {
     if (!ok) return;
 
     showToast({
-      title: 'Event finished',
+      title: t('events.finishedToast'),
       variant: 'warning',
     });
     refetch();
@@ -146,7 +152,7 @@ export default function EventLayout() {
           >
             <Drawer.Header>
               <Drawer.Heading className="break-words">
-                {event?.name ?? 'Event'}
+                {event?.name ?? t('events.event')}
               </Drawer.Heading>
             </Drawer.Header>
             <Drawer.Body className="flex flex-col gap-2 flex-1">
@@ -172,7 +178,7 @@ export default function EventLayout() {
                   isPending={isFinishing}
                   onPress={onFinishConfirmOpen}
                 >
-                  Finish event
+                  {t('events.finishEvent')}
                 </PendingButton>
               )}
             </Drawer.Body>
@@ -184,10 +190,10 @@ export default function EventLayout() {
               onFinishConfirmClose();
               void run(handleFinishEvent);
             }}
-            headerText="Confirm finish event"
-            cancelText="Cancel"
-            confirmText="Finish event"
-            prompt="Are you sure you want to finish this event? This action cannot be undone."
+            headerText={t('events.finishConfirmTitle')}
+            cancelText={t('common.cancel')}
+            confirmText={t('events.finishEvent')}
+            prompt={t('events.finishConfirmPrompt')}
             confirmVariant="danger"
           />
           <Outlet />
