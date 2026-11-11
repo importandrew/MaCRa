@@ -99,7 +99,7 @@ func TestRatings(t *testing.T) {
 			repo := NewMockEventRepo(t)
 			testCase.mockSetup(repo)
 
-			service := NewService(repo, nil, nil)
+			service := NewService(repo, nil)
 			got, err := service.Ratings(context.Background(), eventID)
 
 			testCase.expectedErr(t, err)

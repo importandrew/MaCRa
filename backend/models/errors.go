@@ -45,20 +45,16 @@ var (
 
 	ErrValidatePlayers = errors.New("validate game players")
 
-	ErrEventNotFound         = errors.New("event not found")
-	ErrEmptyEvent            = errors.New("empty event")
-	ErrEventForbidden        = errors.New("forbidden event")
-	ErrImmutableEvent        = errors.New("event cannot be modified")
-	ErrEventAlreadyFinished  = errors.New("event already finished")
-	ErrEventHasOngoingGames  = errors.New("event has ongoing games")
-	ErrEventMembersForbidden = errors.New("only the event owner can manage members")
-	ErrMemberInCurrentGame   = errors.New("cannot remove member who plays game right now")
-	ErrMissingPlayerRole     = errors.New("missing 'player' role")
-	ErrPlayerNotInEvent      = errors.New("player not in event")
-	ErrGameNotInEvent        = errors.New("game not in event")
-	ErrInvalidEventType      = errors.New("invalid event type")
-	ErrInvalidContentReach   = errors.New("invalid content reach")
-	ErrInvalidGameStatus     = errors.New("invalid game status")
+	ErrEventNotFound        = errors.New("event not found")
+	ErrEventForbidden       = errors.New("forbidden event")
+	ErrEventAlreadyFinished = errors.New("event already finished")
+	ErrEventHasOngoingGames = errors.New("event has ongoing games")
+	ErrMemberInCurrentGame  = errors.New("cannot remove member who plays game right now")
+	ErrMissingPlayerRole    = errors.New("missing 'player' role")
+	ErrGameNotInEvent       = errors.New("game not in event")
+	ErrInvalidEventType     = errors.New("invalid event type")
+	ErrInvalidContentReach  = errors.New("invalid content reach")
+	ErrInvalidGameStatus    = errors.New("invalid game status")
 
 	ErrNoRounds = errors.New("no rounds to undo")
 	ErrTooLate  = errors.New("too late to undo")
@@ -81,7 +77,6 @@ var Errors = map[error]int{
 	ErrEmptyPassword:            http.StatusBadRequest,
 	ErrLongPassword:             http.StatusBadRequest,
 	ErrMissingPlayerRole:        http.StatusBadRequest,
-	ErrPlayerNotInEvent:         http.StatusBadRequest,
 	ErrGameNotInEvent:           http.StatusBadRequest,
 	ErrInvalidEventType:         http.StatusBadRequest,
 	ErrInvalidContentReach:      http.StatusBadRequest,
@@ -98,10 +93,8 @@ var Errors = map[error]int{
 	ErrEventNotFound:  http.StatusNotFound,
 
 	// 403
-	ErrEventForbidden:        http.StatusForbidden,
-	ErrEventMembersForbidden: http.StatusForbidden,
-	ErrImmutableEvent:        http.StatusForbidden,
-	ErrEmailNotVerified:      http.StatusForbidden,
+	ErrEventForbidden:   http.StatusForbidden,
+	ErrEmailNotVerified: http.StatusForbidden,
 
 	// 409
 	ErrPlayerExists:         http.StatusConflict,
