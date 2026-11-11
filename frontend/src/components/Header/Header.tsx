@@ -1,13 +1,16 @@
 import { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { CalendarIcon } from '../Icons/CalendarIcon';
-import { LinkButton } from '../LinkButton';
 import UserMenu from './UserMenu';
+import VisitorMenu from './VisitorMenu';
+import { LinkButton } from '../LinkButton';
 
 // Header is the sticky top bar (HeroUI v3 has no Navbar): logo, Events and
-// the user menu or a login button.
+// the user menu (a visitor's one with Log in and Settings when not signed in).
 export default function Header() {
+  const { t } = useTranslation();
   const { isAuthenticated, signOut } = useContext(AuthContext);
 
   return (
@@ -29,17 +32,11 @@ export default function Header() {
         <div className="flex min-w-0 grow items-center gap-2">
           <LinkButton to="/events" variant="ghost">
             <CalendarIcon className="w-6 h-6 shrink-0" />
-            Events
+            {t('header.events')}
           </LinkButton>
         </div>
         <div className="flex min-w-0 items-center gap-2">
-          {isAuthenticated ? (
-            <UserMenu signOut={signOut} />
-          ) : (
-            <LinkButton to="/login" variant="primary">
-              Login
-            </LinkButton>
-          )}
+          {isAuthenticated ? <UserMenu signOut={signOut} /> : <VisitorMenu />}
         </div>
       </nav>
     </header>

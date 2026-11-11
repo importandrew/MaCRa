@@ -1,5 +1,6 @@
 import { useOverlayState } from '@heroui/react';
 import { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { useEvent } from '../../providers/event/eventConstants';
@@ -16,6 +17,7 @@ import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 const iconClass = 'w-6 h-6 text-muted';
 
 export default function Landing() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useContext(AuthContext);
   const {
     selectedEvent,
@@ -61,7 +63,7 @@ export default function Landing() {
                   to={`${eventBase}/rating`}
                   isIconOnly
                   variant="ghost"
-                  aria-label="Rating"
+                  aria-label={t('landing.rating')}
                 >
                   <RankingIcon className={iconClass} />
                 </LinkButton>
@@ -71,7 +73,7 @@ export default function Landing() {
                   to={`${eventBase}/games/live`}
                   isIconOnly
                   variant="ghost"
-                  aria-label="Live games"
+                  aria-label={t('landing.liveGames')}
                 >
                   <EyeIcon className={iconClass} />
                 </LinkButton>
@@ -81,7 +83,7 @@ export default function Landing() {
                   to={`${eventBase}/games/finished`}
                   isIconOnly
                   variant="ghost"
-                  aria-label="Finished games"
+                  aria-label={t('landing.finishedGames')}
                 >
                   <CheckInCircleIcon className={iconClass} />
                 </LinkButton>
@@ -91,34 +93,40 @@ export default function Landing() {
       </div>
 
       <div className="flex flex-col-reverse w-screen px-6 mb-6 gap-3">
-        {!isAuthenticated && <MainButton text="Login to play" link="/login" />}
+        {!isAuthenticated && (
+          <MainButton text={t('landing.loginToPlay')} link="/login" />
+        )}
 
         {isAuthenticated && !selectedEventId && !eventLoading && (
-          <MainButton text="Select event to play" onPress={onOpen} />
+          <MainButton text={t('landing.selectEventToPlay')} onPress={onOpen} />
         )}
 
         {isAuthenticated &&
           selectedEventId &&
           (eventLoading || isLoading || capsLoading) && (
             <div className="flex justify-center">
-              <LoadingSpinner label="Loading..." />
+              <LoadingSpinner label={t('landing.loading')} />
             </div>
           )}
 
         {showAssistantShortcuts && (
           <>
             {data?.has_current && (
-              <MainButton text="Current game" link="/now" />
+              <MainButton text={t('landing.currentGame')} link="/now" />
             )}
             {!data?.has_current && canCreateGame && (
-              <MainButton text="New game" link="/new" />
-            )}
-            {data?.has_last && (
-              <MainButton text="Last game" variant="secondary" link="/last" />
+              <MainButton text={t('landing.newGame')} link="/new" />
             )}
             {data?.has_last && (
               <MainButton
-                text="Played games"
+                text={t('landing.lastGame')}
+                variant="secondary"
+                link="/last"
+              />
+            )}
+            {data?.has_last && (
+              <MainButton
+                text={t('landing.playedGames')}
                 variant="tertiary"
                 link="/history"
               />

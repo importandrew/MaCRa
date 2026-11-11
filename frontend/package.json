@@ -16,8 +16,10 @@
     "@hawk.so/javascript": "^3.3.5",
     "@heroui/react": "^3.2.7",
     "@heroui/styles": "^3.2.7",
+    "i18next": "^26.5.11",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-i18next": "^17.1.9",
     "react-router-dom": "^7.18.5",
     "recharts": "^3.10.1",
     "tailwindcss": "^4.3.4"

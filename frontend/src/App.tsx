@@ -1,4 +1,5 @@
-import { RouterProvider, Toast } from '@heroui/react';
+import { I18nProvider, RouterProvider, Toast } from '@heroui/react';
+import { useTranslation } from 'react-i18next';
 import {
   Navigate,
   Route,
@@ -28,6 +29,7 @@ import ResetPasswordPage from './components/Login/ResetPassword';
 import VerifyEmailPage from './components/Login/VerifyEmail';
 import Landing from './components/Main/Landing';
 import ProfilePage from './components/Profile/Profile';
+import SettingsPage from './components/Settings/Settings';
 import ViewGame from './components/ViewGame/ViewGame';
 import AssistantLayout from './layouts/AssistantLayout';
 import EventPagesLayout from './layouts/EventPagesLayout';
@@ -36,63 +38,71 @@ import NavigateSetter from './providers/auth/NavigateSetter';
 
 function App() {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
 
   return (
-    // RouterProvider lets HeroUI links and menu items with href navigate
-    // through react-router instead of reloading the page.
-    <RouterProvider navigate={navigate} useHref={useHref}>
-      <Toast.Provider
-        placement="bottom start"
-        width="min(460px, calc(100vw - 2rem))"
-      />
-      <NavigateSetter />
-      <Routes>
-        <Route element={<RootLayout />}>
-          <Route element={<AssistantLayout />}>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/signup"
-              element={<Navigate to="/login?tab=signup" replace />}
-            />
-            <Route path="/check-email" element={<CheckEmailPage />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
+    // I18nProvider gives HeroUI's own texts and formats (close buttons, dates)
+    // the app's language. RouterProvider lets HeroUI links and menu items with
+    // href navigate through react-router instead of reloading the page.
+    <I18nProvider locale={i18n.language}>
+      <RouterProvider navigate={navigate} useHref={useHref}>
+        <Toast.Provider
+          placement="bottom start"
+          width="min(460px, calc(100vw - 2rem))"
+        />
+        <NavigateSetter />
+        <Routes>
+          <Route element={<RootLayout />}>
+            <Route element={<AssistantLayout />}>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/signup"
+                element={<Navigate to="/login?tab=signup" replace />}
+              />
+              <Route path="/check-email" element={<CheckEmailPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
 
-            <Route element={<RequireAuth />}>
-              <Route path="/profile" element={<ProfilePage />} />
-
-              <Route element={<RequireEvent />}>
-                <Route path="/now" element={<CurrentGame />} />
-                <Route path="/last" element={<GameResult />} />
-                <Route path="/new" element={<Draft />} />
-                <Route path="/history" element={<History />} />
-              </Route>
-            </Route>
-
-            <Route path="/event/:eventId/game/:gameId" element={<ViewGame />} />
-          </Route>
-
-          <Route element={<EventPagesLayout />}>
-            <Route path="/events">
-              <Route index element={<EventsList />} />
               <Route element={<RequireAuth />}>
-                <Route path="new" element={<EventCreate />} />
+                <Route path="/profile" element={<ProfilePage />} />
+
+                <Route element={<RequireEvent />}>
+                  <Route path="/now" element={<CurrentGame />} />
+                  <Route path="/last" element={<GameResult />} />
+                  <Route path="/new" element={<Draft />} />
+                  <Route path="/history" element={<History />} />
+                </Route>
               </Route>
+
+              <Route
+                path="/event/:eventId/game/:gameId"
+                element={<ViewGame />}
+              />
             </Route>
 
-            <Route path="/event/:eventId" element={<EventLayout />}>
-              <Route index element={<EventOverview />} />
-              <Route path="manage" element={<EventManage />} />
-              <Route path="rating" element={<EventRating />} />
-              <Route path="games/live" element={<LiveGames />} />
-              <Route path="games/finished" element={<FinishedGames />} />
+            <Route element={<EventPagesLayout />}>
+              <Route path="/events">
+                <Route index element={<EventsList />} />
+                <Route element={<RequireAuth />}>
+                  <Route path="new" element={<EventCreate />} />
+                </Route>
+              </Route>
+
+              <Route path="/event/:eventId" element={<EventLayout />}>
+                <Route index element={<EventOverview />} />
+                <Route path="manage" element={<EventManage />} />
+                <Route path="rating" element={<EventRating />} />
+                <Route path="games/live" element={<LiveGames />} />
+                <Route path="games/finished" element={<FinishedGames />} />
+              </Route>
             </Route>
           </Route>
-        </Route>
-      </Routes>
-    </RouterProvider>
+        </Routes>
+      </RouterProvider>
+    </I18nProvider>
   );
 }
 
