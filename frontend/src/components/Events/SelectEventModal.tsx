@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Modal } from '@heroui/react';
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +15,7 @@ export default function SelectEventModal({
   isOpen,
   onClose,
 }: SelectEventModalProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { selectedEventId, selectEvent } = useEvent();
   const { data, isLoading, isError, refetch } = useFetchVisibleEvents();
@@ -44,24 +46,24 @@ export default function SelectEventModal({
     >
       <Modal.Container placement="center" size="lg" scroll="inside">
         <Modal.Dialog>
-          <Modal.CloseTrigger />
+          <Modal.CloseTrigger aria-label={t('common.close')} />
           <Modal.Header>
-            <Modal.Heading>Select event</Modal.Heading>
+            <Modal.Heading>{t('events.selectEvent')}</Modal.Heading>
           </Modal.Header>
           <Modal.Body className="flex flex-col gap-3 pb-6">
             {isLoading && (
               <div className="flex justify-center py-8">
-                <LoadingSpinner label="Loading events..." size="md" />
+                <LoadingSpinner label={t('events.loadingEvents')} size="md" />
               </div>
             )}
             {!isLoading && isError && (
               <p className="text-center text-danger py-6">
-                Failed to load events.
+                {t('events.loadFailed')}
               </p>
             )}
             {!isLoading && !isError && participatingEvents.length === 0 && (
               <p className="text-center text-muted py-6">
-                You are not participating in any events.
+                {t('events.notParticipating')}
               </p>
             )}
             {!isLoading &&

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Card } from '@heroui/react';
 import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
@@ -9,6 +10,7 @@ import PasswordInput from './PasswordInput';
 import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = useCallback(async () => {
     if (!token) {
-      showToast({ title: 'Missing reset token', variant: 'danger' });
+      showToast({ title: t('auth.resetTokenMissing'), variant: 'danger' });
       return;
     }
 
@@ -32,28 +34,30 @@ export default function ResetPasswordPage() {
     }
 
     showToast({
-      title: 'Password updated. Please sign in.',
+      title: t('auth.passwordUpdated'),
       variant: 'success',
     });
     navigate('/login', { replace: true });
-  }, [token, password, navigate]);
+  }, [token, password, navigate, t]);
 
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       {isLoading ? (
-        <LoadingSpinner label="Loading..." />
+        <LoadingSpinner label={t('common.loading')} />
       ) : (
         <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
           <Card className="w-full mx-5">
             <Card.Content className="gap-3 py-6">
-              <h1 className="text-xl font-semibold">Reset password</h1>
+              <h1 className="text-xl font-semibold">
+                {t('auth.resetPasswordTitle')}
+              </h1>
               {!token ? (
                 <>
                   <p className="text-base text-muted">
-                    This reset link is missing a token.
+                    {t('auth.resetLinkNoToken')}
                   </p>
                   <LinkButton variant="primary" to="/forgot-password">
-                    Request a new link
+                    {t('auth.requestNewLink')}
                   </LinkButton>
                 </>
               ) : (
@@ -68,10 +72,10 @@ export default function ResetPasswordPage() {
                       isDisabled={!password}
                       onPress={() => run(handleSubmit)}
                     >
-                      Update password
+                      {t('auth.updatePassword')}
                     </Button>
                     <LinkButton variant="outline" to="/login">
-                      Cancel
+                      {t('common.cancel')}
                     </LinkButton>
                   </div>
                 </>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { SortDescriptor, Table } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +29,7 @@ function compareRatings(
 }
 
 export default function EventRating() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     eventId,
@@ -82,15 +84,15 @@ export default function EventRating() {
         <div className="flex flex-col w-full max-w-[600px] mx-auto px-3 md:px-0 md:my-3 gap-4 min-w-0">
           <h1
             className="text-2xl font-semibold truncate min-w-0"
-            title={`Rating — ${event.name}`}
+            title={t('events.ratingTitle', { name: event.name })}
           >
-            Rating — {event.name}
+            {t('events.ratingTitle', { name: event.name })}
           </h1>
 
           <Table className="z-0">
             <Table.ScrollContainer>
               <Table.Content
-                aria-label="Event rating"
+                aria-label={t('events.rating')}
                 sortDescriptor={sortDescriptor}
                 onSortChange={setSortDescriptor}
               >
@@ -114,7 +116,7 @@ export default function EventRating() {
                   >
                     {({ sortDirection }) => (
                       <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        Player
+                        {t('rating.player')}
                       </Table.SortableColumnHeader>
                     )}
                   </Table.Column>
@@ -125,7 +127,7 @@ export default function EventRating() {
                   >
                     {({ sortDirection }) => (
                       <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        Games
+                        {t('rating.games')}
                       </Table.SortableColumnHeader>
                     )}
                   </Table.Column>
@@ -136,7 +138,7 @@ export default function EventRating() {
                   >
                     {({ sortDirection }) => (
                       <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        TP
+                        {t('rating.tp')}
                       </Table.SortableColumnHeader>
                     )}
                   </Table.Column>
@@ -147,7 +149,7 @@ export default function EventRating() {
                   >
                     {({ sortDirection }) => (
                       <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        GP
+                        {t('rating.gp')}
                       </Table.SortableColumnHeader>
                     )}
                   </Table.Column>
@@ -156,7 +158,7 @@ export default function EventRating() {
                   items={sortedRatings}
                   renderEmptyState={() => (
                     <p className="py-6 text-center text-muted">
-                      No games played yet
+                      {t('rating.noGames')}
                     </p>
                   )}
                 >

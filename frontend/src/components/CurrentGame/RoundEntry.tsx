@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Separator,
   Switch,
@@ -5,21 +6,21 @@ import {
   ToggleButtonGroup,
 } from '@heroui/react';
 import { Outcome, PlayerScore } from '../../models/GameData';
-import { OUTCOME_LABELS } from '../../utils/constants';
+
 import { SignIcon } from '../Icons/SignIcon';
 import PendingButton from '../PendingButton';
 import SegmentedPicker from '../SegmentedPicker';
 import ValueStepper from '../ValueStepper';
 import { EntryOutcome, MIN_FINE, MIN_HAND, RoundEntry } from './useRoundEntry';
 
-const OUTCOME_OPTIONS = [
-  ...[Outcome.Draw, Outcome.Self, Outcome.Deal].map((value, index) => ({
-    value,
-    // Non-breaking hyphen: "Deal-in" must not wrap in the narrow center.
-    label: OUTCOME_LABELS[index].replace('-', '‑'),
-  })),
-  { value: Outcome.Penalty, label: 'Penalty' },
-] as { value: EntryOutcome; label: string }[];
+// OUTCOMES are the outcome buttons with their texts. The texts must not wrap
+// in the narrow center of the table: non-breaking hyphens and spaces there.
+const OUTCOMES = [
+  { value: Outcome.Draw, labelKey: 'roundEntry.draw' },
+  { value: Outcome.Self, labelKey: 'roundEntry.self' },
+  { value: Outcome.Deal, labelKey: 'roundEntry.dealIn' },
+  { value: Outcome.Penalty, labelKey: 'roundEntry.penalty' },
+] as const satisfies readonly { value: EntryOutcome; labelKey: string }[];
 
 // ToggleButton has no bordered variant, so ghost plus a border: an outline
 // that fills (and turns the border accent) when picked. Larger from md up,
@@ -49,13 +50,14 @@ export function SeatMarks({
   // with the seat it would look like a vertical bar ("I").
   isSideSeat?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     // Fixed height: the line keeps its size whatever the outcome shows.
     <span className="mb-2 flex h-10 md:h-12 items-center justify-center gap-2">
       {entry.isWin && (
         <SeatMark
           sign="plus"
-          label={`${player.name} won`}
+          label={t('roundEntry.won', { name: player.name })}
           isSelected={entry.winner === player.id}
           onChange={() => entry.pickWinner(player.id)}
         />
@@ -63,7 +65,11 @@ export function SeatMarks({
       {entry.showLose && (
         <SeatMark
           sign="minus"
-          label={`${player.name} ${entry.isPenalty ? 'fined' : 'dealt in'}`}
+          label={
+            entry.isPenalty
+              ? t('roundEntry.fined', { name: player.name })
+              : t('roundEntry.dealtIn', { name: player.name })
+          }
           isSelected={entry.loser === player.id}
           onChange={() => entry.pickLoser(player.id)}
           iconClassName={isSideSeat ? 'rotate-90' : undefined}
@@ -107,12 +113,13 @@ function SeatMark({
 // (SeatMarks), so no names are picked from a list. The round kanji above it
 // closes it, so there's no Cancel.
 export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
+  const { t } = useTranslation();
   return (
     <div className="flex w-full flex-col items-stretch gap-2 text-base">
       {/* 2×2 instead of one row: four options don't fit the center of a
           phone in one line. */}
       <ToggleButtonGroup
-        aria-label="Outcome"
+        aria-label={t('roundEntry.outcome')}
         selectionMode="single"
         disallowEmptySelection
         isDetached
@@ -123,14 +130,14 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
           if (key != null) entry.setOutcome(String(key) as EntryOutcome);
         }}
       >
-        {OUTCOME_OPTIONS.map((opt) => (
+        {OUTCOMES.map((opt) => (
           <ToggleButton
             key={opt.value}
             id={opt.value}
             size="sm"
             className={`w-full min-w-0 not-data-selected:text-foreground ${DESKTOP_BUTTON_CLASS}`}
           >
-            {opt.label}
+            {t(opt.labelKey)}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
@@ -141,16 +148,19 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
 
       {entry.isPenalty && (
         <SegmentedPicker
-          ariaLabel="Penalty type"
+          ariaLabel={t('roundEntry.penaltyType')}
           // "False mahjong" must fit the center of a 320px phone: smaller
           // text, less padding, and options sized by their text (flex-auto)
           // rather than equal halves. Desktop keeps the usual size.
           optionClassName="flex-auto px-2 text-xs md:px-4 md:text-sm"
           options={[
-            { value: Outcome.Penalty, label: 'Penalty' },
-            // Non-breaking space: on two lines it makes the Penalty
-            // form too tall for the center of a phone.
-            { value: Outcome.FalseMahjong, label: 'False\u00a0mahjong' },
+            { value: Outcome.Penalty, label: t('roundEntry.penalty') },
+            // The text has a non-breaking space: on two lines it makes the
+            // Penalty form too tall for the center of a phone.
+            {
+              value: Outcome.FalseMahjong,
+              label: t('roundEntry.falseMahjong'),
+            },
           ]}
           selectedKey={entry.penaltyType}
           onSelectionChange={entry.setPenaltyType}
@@ -159,7 +169,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
 
       {entry.isWin && (
         <ValueStepper
-          label="Hand value"
+          label={t('roundEntry.handValue')}
           value={entry.hand}
           min={MIN_HAND}
           onChange={entry.setHand}
@@ -168,7 +178,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
 
       {entry.isPenalty && !entry.isFalseMahjong && (
         <ValueStepper
-          label="Fine"
+          label={t('roundEntry.fine')}
           value={entry.fine}
           min={MIN_FINE}
           onChange={entry.setFine}
@@ -177,7 +187,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
 
       {entry.isFalseMahjong && (
         <SegmentedPicker
-          ariaLabel="Fine"
+          ariaLabel={t('roundEntry.fine')}
           options={[
             { value: '30', label: '30' },
             { value: '60', label: '60' },
@@ -202,7 +212,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
             <Switch.Control>
               <Switch.Thumb />
             </Switch.Control>
-            Force next round
+            {t('roundEntry.forceNextRound')}
           </Switch.Content>
         </Switch>
       )}
@@ -216,7 +226,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
           isPending={entry.isPending}
           onPress={entry.submit}
         >
-          OK
+          {t('roundEntry.ok')}
         </PendingButton>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useState } from 'react';
 import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
 import GameLogs from '../../GameResult/GameLogs';
@@ -36,6 +38,7 @@ export default function LogsMenu({
   // has changed.
   onStale?: () => Promise<unknown>;
 }) {
+  const { t } = useTranslation();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { isPending: undoLoading, run } = useSubmitOnce();
   const ownLogs = useFetchGameLogsData(tableLogs ? null : gameId, eventId);
@@ -56,7 +59,10 @@ export default function LogsMenu({
       setConfirmOpen(false);
       const { status, error } = await undoLastRound(gameId, logSize, eventId);
       if (status === 200) {
-        showToast({ title: 'Last round undone', variant: 'warning' });
+        showToast({
+          title: t('game.lastRoundUndoneToast'),
+          variant: 'warning',
+        });
         // A table screen reloads its log with the table.
         if (!tableLogs) void logs.fetchData();
         onUndoSuccess?.();
@@ -75,14 +81,14 @@ export default function LogsMenu({
           lastEntryId(fresh) !== seenLastId);
       if (fresh && isChanged) {
         showToast({
-          title: changeTitle(fresh, logSize),
-          description: 'Check the log and undo again if needed.',
+          title: changeTitle(fresh, logSize, t),
+          description: t('game.checkLogAndRetry'),
           variant: 'warning',
         });
         return;
       }
       showToast({
-        title: 'Cannot undo the final round',
+        title: t('game.cannotUndoFinal'),
         description: error,
         variant: 'warning',
       });
@@ -109,16 +115,16 @@ export default function LogsMenu({
 
             icon={<UndoIcon />}
           >
-            Undo last round
+            {t('game.undoLastRound')}
           </PendingButton>
           <Confirm
             isOpen={confirmOpen}
             onClose={() => setConfirmOpen(false)}
             onConfirm={handleUndoConfirm}
-            prompt="Do you want to undo the last round? This cannot be undone."
-            headerText="Undo last round"
-            cancelText="Cancel"
-            confirmText="Undo"
+            prompt={t('game.undoConfirmPrompt')}
+            headerText={t('game.undoLastRound')}
+            cancelText={t('common.cancel')}
+            confirmText={t('game.undo')}
             confirmVariant="danger"
           />
         </>
@@ -129,17 +135,19 @@ export default function LogsMenu({
 
 // changeTitle says what changed in the log since the referee saw logSize
 // entries, in the words the round entry uses.
-function changeTitle(fresh: GameRoundLogs, logSize: number): string {
+function changeTitle(
+  fresh: GameRoundLogs,
+  logSize: number,
+  t: TFunction
+): string {
   const entries = fresh.round_logs;
   if (entries.length < logSize) {
-    return 'The last entry has already been undone';
+    return t('game.lastEntryAlreadyUndone');
   }
   const last = entries[entries.length - 1];
   const isPenalty =
     last.outcome === Outcome.Penalty || last.outcome === Outcome.FalseMahjong;
-  return isPenalty
-    ? 'A penalty has just been entered'
-    : 'A round has just been entered';
+  return isPenalty ? t('game.penaltyJustEntered') : t('game.roundJustEntered');
 }
 
 function lastEntryId(log: GameRoundLogs | null): number | undefined {

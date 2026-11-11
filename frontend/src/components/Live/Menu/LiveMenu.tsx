@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Drawer } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import LazyAccordion from '../../LazyAccordion';
@@ -29,6 +30,7 @@ export default function LiveMenu({
   // onGameEnded reloads the game page, which then shows the result.
   onGameEnded: () => void;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { hasCapability } = useEventCapabilities(eventId ?? null);
   const canUndoLastRound = hasCapability('undo_round');
@@ -38,14 +40,14 @@ export default function LiveMenu({
   return (
     <>
       <Drawer.Header>
-        <Drawer.Heading>Table menu</Drawer.Heading>
+        <Drawer.Heading>{t('game.tableMenu')}</Drawer.Heading>
       </Drawer.Header>
       <Drawer.Body className="flex flex-col">
         <LazyAccordion
           sections={[
             {
               id: 'logs',
-              title: 'Logs',
+              title: t('game.logs'),
               icon: <ListIcon />,
               content: () => (
                 <LogsMenu
@@ -61,7 +63,7 @@ export default function LiveMenu({
             },
             {
               id: 'fans',
-              title: 'Fans',
+              title: t('game.fans'),
               icon: <BookIcon />,
               content: () => <FansMenu />,
             },

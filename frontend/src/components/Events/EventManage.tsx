@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Card,
@@ -20,7 +21,7 @@ import { EventRole } from '../../models/EventRole';
 import {
   EventVisibility,
   ContentReach,
-  CONTENT_REACH_OPTIONS,
+  CONTENT_REACHES,
 } from '../../models/Event';
 import {
   addEventMember,
@@ -41,31 +42,24 @@ import PendingButton from '../PendingButton';
 
 const ALL_ROLES: EventRole[] = ['player', 'referee', 'observer'];
 
-const ROLE_META: Record<
+const ROLE_ICONS: Record<
   EventRole,
-  { label: string; icon: (props: { className?: string }) => ReactNode }
+  (props: { className?: string }) => ReactNode
 > = {
-  player: {
-    label: 'Player',
-    icon: (props) => <MahjongTileIcon {...props} />,
-  },
-  referee: {
-    label: 'Referee',
-    icon: (props) => <ScalesIcon {...props} />,
-  },
-  observer: {
-    label: 'Observer',
-    icon: (props) => <EyeIcon {...props} />,
-  },
+  player: (props) => <MahjongTileIcon {...props} />,
+  referee: (props) => <ScalesIcon {...props} />,
+  observer: (props) => <EyeIcon {...props} />,
 };
 
-const VISIBILITY_OPTIONS: { value: EventVisibility; label: string }[] = [
-  { value: 'private', label: 'Private' },
-  { value: 'public', label: 'Public' },
-];
+const VISIBILITIES: EventVisibility[] = ['private', 'public'];
 
 export default function EventManage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const reachOptions = CONTENT_REACHES.map((value) => ({
+    value,
+    label: t(`reach.${value}`),
+  }));
   const { eventId, event, hasCapability, refetch, isForbidden } =
     useEventLayout();
 
@@ -139,7 +133,7 @@ export default function EventManage() {
       });
 
       if (ok) {
-        showToast({ title: 'Event updated', variant: 'success' });
+        showToast({ title: t('events.updated'), variant: 'success' });
         refetch();
       }
     });
@@ -157,7 +151,7 @@ export default function EventManage() {
       );
 
       if (ok) {
-        showToast({ title: 'Member added', variant: 'success' });
+        showToast({ title: t('members.added'), variant: 'success' });
         setSelectedUserId('');
         setSelectedRoles([]);
         refetchMembers();
@@ -171,7 +165,7 @@ export default function EventManage() {
     runRemoveMember(async () => {
       const ok = await removeEventMember(eventId, userId);
       if (ok) {
-        showToast({ title: 'Member removed', variant: 'success' });
+        showToast({ title: t('members.removed'), variant: 'success' });
         refetchMembers();
         refetch();
       }
@@ -197,17 +191,17 @@ export default function EventManage() {
     <div className="flex flex-col w-full max-w-[600px] mx-auto px-3 md:px-0 md:my-3 gap-4 min-w-0">
       <h1
         className="text-2xl font-semibold truncate min-w-0"
-        title={`Manage — ${event.name}`}
+        title={t('events.manageTitle', { name: event.name })}
       >
-        Manage — {event.name}
+        {t('events.manageTitle', { name: event.name })}
       </h1>
 
       {hasMultipleManagingCapabilities && (
         <SegmentedPicker
-          ariaLabel="Manage event sections"
+          ariaLabel={t('events.manageSections')}
           options={[
-            { value: 'overview', label: 'Overview' },
-            { value: 'members', label: 'Members' },
+            { value: 'overview', label: t('events.overview') },
+            { value: 'members', label: t('members.title') },
           ]}
           selectedKey={activeTab}
           onSelectionChange={setActiveTab}
@@ -218,7 +212,7 @@ export default function EventManage() {
         <>
           <Card>
             <Card.Content className="gap-2">
-              <p className="text-muted">General</p>
+              <p className="text-muted">{t('events.general')}</p>
               <Form
                 id="edit-event-form"
                 onSubmit={handleSave}
@@ -230,7 +224,7 @@ export default function EventManage() {
                   value={editName}
                   onChange={setEditName}
                 >
-                  <Label>Name</Label>
+                  <Label>{t('events.name')}</Label>
                   <Input />
                 </TextField>
                 <TextField
@@ -238,15 +232,17 @@ export default function EventManage() {
                   value={editDescription}
                   onChange={setEditDescription}
                 >
-                  <Label>Description</Label>
+                  <Label>{t('events.description')}</Label>
                   <TextArea />
                 </TextField>
                 <div className="w-full flex flex-col gap-2">
-                  <p className="text-muted">Visibility</p>
+                  <p className="text-muted">{t('events.visibility')}</p>
                   <SegmentedPicker
-                    label="General"
-                    ariaLabel="Event visibility"
-                    options={VISIBILITY_OPTIONS}
+                    label={t('events.general')}
+                    options={VISIBILITIES.map((value) => ({
+                      value,
+                      label: t(`visibility.${value}`),
+                    }))}
                     selectedKey={editVisibility}
                     onSelectionChange={(value) => {
                       setEditVisibility(value);
@@ -255,17 +251,15 @@ export default function EventManage() {
                   />
                   <div className="flex flex-col gap-5">
                     <SegmentedPicker
-                      label="Ratings"
-                      ariaLabel="Ratings visibility"
-                      options={CONTENT_REACH_OPTIONS}
+                      label={t('events.ratingsReach')}
+                      options={reachOptions}
                       selectedKey={editRatingsReach}
                       onSelectionChange={setEditRatingsReach}
                       isOptionDisabled={isReachOptionDisabled}
                     />
                     <SegmentedPicker
-                      label="Live games & results"
-                      ariaLabel="Live games and results visibility"
-                      options={CONTENT_REACH_OPTIONS}
+                      label={t('events.gamesReach')}
+                      options={reachOptions}
                       selectedKey={editGamesReach}
                       onSelectionChange={setEditGamesReach}
                       isOptionDisabled={isReachOptionDisabled}
@@ -283,7 +277,7 @@ export default function EventManage() {
             isDisabled={!editName.trim()}
             className="w-3/4 self-center"
           >
-            Save changes
+            {t('events.saveChanges')}
           </PendingButton>
         </>
       )}
@@ -294,18 +288,18 @@ export default function EventManage() {
           sections={[
             {
               id: 'add',
-              title: 'Add members',
+              title: t('members.addTitle'),
               content: () => (
                 <>
                   <p className="text-sm text-muted mb-3">
-                    All 4 players need the player role to start a game.
+                    {t('members.playerRoleHint')}
                   </p>
                   <Form
                     onSubmit={handleAddMember}
                     className="flex flex-col gap-4"
                   >
                     <PlayerAutocomplete
-                      label="User"
+                      label={t('members.user')}
                       items={players}
                       selectedKey={selectedUserId || null}
                       onSelectionChange={(id) =>
@@ -316,23 +310,22 @@ export default function EventManage() {
                       value={selectedRoles}
                       onChange={(v) => setSelectedRoles(v as EventRole[])}
                     >
-                      <Label>Roles</Label>
-                      {ALL_ROLES.map((role) => {
-                        const meta = ROLE_META[role];
-                        return (
-                          <Checkbox key={role} value={role}>
-                            <Checkbox.Content>
-                              <Checkbox.Control>
-                                <Checkbox.Indicator />
-                              </Checkbox.Control>
-                              <span className="flex items-center gap-2 leading-none">
-                                {meta.icon({ className: 'w-6 h-6 shrink-0' })}
-                                {meta.label}
-                              </span>
-                            </Checkbox.Content>
-                          </Checkbox>
-                        );
-                      })}
+                      <Label>{t('members.roles')}</Label>
+                      {ALL_ROLES.map((role) => (
+                        <Checkbox key={role} value={role}>
+                          <Checkbox.Content>
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            <span className="flex items-center gap-2 leading-none">
+                              {ROLE_ICONS[role]({
+                                className: 'w-6 h-6 shrink-0',
+                              })}
+                              {t(`roles.${role}`)}
+                            </span>
+                          </Checkbox.Content>
+                        </Checkbox>
+                      ))}
                     </CheckboxGroup>
                     <PendingButton
                       type="submit"
@@ -341,7 +334,7 @@ export default function EventManage() {
                       isDisabled={!selectedUserId || !selectedRoles.length}
                       className="w-3/4 self-center"
                     >
-                      Add member
+                      {t('members.add')}
                     </PendingButton>
                   </Form>
                 </>
@@ -349,19 +342,21 @@ export default function EventManage() {
             },
             {
               id: 'members',
-              title: `Members [${members?.length ?? 0}]`,
+              title: t('members.titleWithCount', {
+                n: members?.length ?? 0,
+              }),
               content: () =>
                 membersLoading ? (
                   <Spinner size="sm" />
                 ) : !members?.length ? (
-                  <p className="text-sm text-muted">No members yet</p>
+                  <p className="text-sm text-muted">{t('members.none')}</p>
                 ) : (
                   // One grid for all rows (rows use subgrid), like the v2 table:
                   // name + roles in the first column, the action in the second,
                   // so the action column lines up and names use all the room
                   // their roles leave.
                   <ul
-                    aria-label="Event members"
+                    aria-label={t('members.title')}
                     className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3"
                   >
                     {members.map((member) => {
@@ -379,28 +374,25 @@ export default function EventManage() {
                             <div className="flex shrink-0 items-center gap-2 text-muted">
                               {ALL_ROLES.filter((role) =>
                                 member.roles.includes(role)
-                              ).map((role) => {
-                                const meta = ROLE_META[role];
-                                return (
-                                  <span
-                                    key={role}
-                                    className="inline-flex shrink-0"
-                                    title={meta.label}
-                                    aria-label={meta.label}
-                                    role="img"
-                                  >
-                                    {meta.icon({ className: 'w-6 h-6' })}
-                                  </span>
-                                );
-                              })}
+                              ).map((role) => (
+                                <span
+                                  key={role}
+                                  className="inline-flex shrink-0"
+                                  title={t(`roles.${role}`)}
+                                  aria-label={t(`roles.${role}`)}
+                                  role="img"
+                                >
+                                  {ROLE_ICONS[role]({ className: 'w-6 h-6' })}
+                                </span>
+                              ))}
                             </div>
                           </div>
                           <div className="flex justify-center whitespace-nowrap">
                             {isOwner ? (
                               <span
                                 className="flex justify-center text-muted"
-                                title="Owner"
-                                aria-label="Owner"
+                                title={t('roles.owner')}
+                                aria-label={t('roles.owner')}
                                 role="img"
                               >
                                 <CrownIcon className="w-6 h-6" />
@@ -413,7 +405,7 @@ export default function EventManage() {
                                   handleRemoveMember(member.user_id)
                                 }
                               >
-                                Remove
+                                {t('members.remove')}
                               </Button>
                             )}
                           </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFetchGameStatus } from '../../providers/game/gameDataApi';
@@ -6,6 +7,7 @@ import Live from '../Live/Live';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 
 export default function ViewGame() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
     eventId: string;
@@ -43,10 +45,8 @@ export default function ViewGame() {
       onGoHome={() => navigate('/')}
     >
       <div className="flex flex-col h-full w-auto my-auto justify-center items-center gap-3 px-3">
-        <p className="text-center text-3xl">Game not available</p>
-        <p className="text-center text-muted">
-          This game is not live or finished.
-        </p>
+        <p className="text-center text-3xl">{t('game.notAvailable')}</p>
+        <p className="text-center text-muted">{t('game.notLiveOrFinished')}</p>
       </div>
     </LoadingTemplate>
   );

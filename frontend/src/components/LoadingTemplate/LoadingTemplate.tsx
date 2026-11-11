@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import ForbiddenState from './ForbiddenState';
 import LoadingSpinner from './LoadingSpinner';
@@ -12,13 +13,14 @@ interface LoadingTemplateProps {
 }
 
 const LoadingTemplate = (props: LoadingTemplateProps) => {
+  const { t } = useTranslation();
   const { isLoading, isError, isForbidden, onRefresh, onGoHome, children } =
     props;
 
   if (isLoading) {
     return (
       <div className="flex flex-col h-full w-auto my-auto justify-center items-center">
-        <LoadingSpinner label="Loading..." />
+        <LoadingSpinner label={t('common.loading')} />
       </div>
     );
   }
@@ -30,9 +32,9 @@ const LoadingTemplate = (props: LoadingTemplateProps) => {
   if (isError) {
     return (
       <div className="flex flex-col h-full w-auto my-auto justify-center items-center">
-        <p className="mb-4 text-center text-3xl">Error</p>
+        <p className="mb-4 text-center text-3xl">{t('common.error')}</p>
         <Button type="button" onPress={onRefresh}>
-          Try again
+          {t('common.tryAgain')}
         </Button>
       </div>
     );

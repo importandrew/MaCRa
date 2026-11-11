@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Drawer } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import { useFetchEventMe } from '../../../providers/event/eventApi';
@@ -27,6 +28,7 @@ export default function TableMenu({
   logs: GameLogsState;
   logSize: number;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { selectedEventId, selectedEvent } = useEvent();
   const { data: eventMe } = useFetchEventMe(selectedEventId);
@@ -42,14 +44,14 @@ export default function TableMenu({
   return (
     <>
       <Drawer.Header>
-        <Drawer.Heading>Table menu</Drawer.Heading>
+        <Drawer.Heading>{t('game.tableMenu')}</Drawer.Heading>
       </Drawer.Header>
       <Drawer.Body className="flex flex-col">
         <LazyAccordion
           sections={[
             {
               id: 'logs',
-              title: 'Logs',
+              title: t('game.logs'),
               icon: <ListIcon />,
               content: () => (
                 <div className="flex flex-col gap-2">
@@ -66,7 +68,7 @@ export default function TableMenu({
             },
             {
               id: 'fans',
-              title: 'Fans',
+              title: t('game.fans'),
               icon: <BookIcon />,
               content: () => <FansMenu />,
             },

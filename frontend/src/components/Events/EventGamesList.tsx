@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { ProgressCircle } from '@heroui/react';
 import {
   EventGameListItem,
@@ -19,21 +21,27 @@ type EventGamesListProps = {
 
 const TOTAL_ROUNDS = 16;
 
-function roundProgress(game: EventGameListItem, mode: 'live' | 'finished') {
+function roundProgress(
+  game: EventGameListItem,
+  mode: 'live' | 'finished',
+  t: TFunction
+) {
   if (mode === 'finished' || game.status === 'ended' || !game.round) {
-    return { value: 100, label: '✓', ariaLabel: 'Game ended' };
+    return { value: 100, label: '✓', ariaLabel: t('games.ended') };
   }
 
   return {
     value: ((game.round.num - 1) / TOTAL_ROUNDS) * 100,
     label: game.round.kanji,
-    ariaLabel: `Round ${game.round.kanji}`,
+    ariaLabel: t('games.round', { round: game.round.kanji }),
   };
 }
 
-function gameTextValue(game: EventGameListItem) {
+function gameTextValue(game: EventGameListItem, t: TFunction) {
   const players = game.players.map((p) => p.name).join(', ');
-  return players ? `Game #${game.id}: ${players}` : `Game #${game.id}`;
+  return players
+    ? t('games.gameWithPlayers', { id: game.id, players })
+    : t('games.gameNumber', { id: game.id });
 }
 
 function PlayerRow({ player }: { player: EventGameListPlayer }) {
@@ -63,7 +71,8 @@ function GameListItemContent({
   game: EventGameListItem;
   mode: 'live' | 'finished';
 }) {
-  const { value, label, ariaLabel } = roundProgress(game, mode);
+  const { t } = useTranslation();
+  const { value, label, ariaLabel } = roundProgress(game, mode, t);
 
   return (
     <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 min-w-0 w-full items-center">
@@ -91,7 +100,9 @@ function GameListItemContent({
             <PlayerRow key={player.id} player={player} />
           ))
         ) : (
-          <span className="text-sm text-muted leading-5">No players</span>
+          <span className="text-sm text-muted leading-5">
+            {t('games.noPlayers')}
+          </span>
         )}
       </div>
     </div>
@@ -108,6 +119,7 @@ export function EventGamesList({
   isLoadingMore,
   onLoadMore,
 }: EventGamesListProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col w-full gap-3">
       <NavList
@@ -116,7 +128,7 @@ export function EventGamesList({
         items={games.map((game) => ({
           id: String(game.id),
           href: gameHref(game.id),
-          textValue: gameTextValue(game),
+          textValue: gameTextValue(game, t),
           content: <GameListItemContent game={game} mode={mode} />,
         }))}
       />
@@ -127,7 +139,7 @@ export function EventGamesList({
           onPress={onLoadMore}
           className="self-center"
         >
-          Load more
+          {t('games.loadMore')}
         </PendingButton>
       )}
     </div>

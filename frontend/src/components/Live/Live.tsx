@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import UserAvatar from '../UserAvatar';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -14,6 +15,7 @@ import { useTableLogs } from '../CurrentGame/useTableLogs';
 // onGameEnded is called once this user has ended the game (Finish): the game
 // page reloads its status and shows the result.
 export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
     eventId: string;
@@ -143,7 +145,7 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
                     size="sm"
                     variant="tertiary"
                     type="button"
-                    aria-label="Rotate clockwise"
+                    aria-label={t('game.rotateClockwise')}
                     onPress={rotateClockwise}
                     className="text-xl"
                   >
@@ -153,7 +155,7 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
                     size="sm"
                     variant="tertiary"
                     type="button"
-                    aria-label="Rotate counterclockwise"
+                    aria-label={t('game.rotateCounterclockwise')}
                     onPress={rotateCounterClockwise}
                     className="text-xl"
                   >

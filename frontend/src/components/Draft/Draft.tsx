@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Form } from '@heroui/react';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
@@ -10,12 +11,13 @@ import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import { useFetchEventMembers } from '../../providers/event/eventApi';
 import { getStoredEventId } from '../../providers/event/eventConstants';
 import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
-import { WIND_LABELS, WIND_SYMBOLS } from '../../utils/constants';
+import { WINDS, WIND_SYMBOLS } from '../../utils/constants';
 import { shuffleArray } from '../../utils/shuffleArray';
 import { authFetch, PostRequest, eventPath } from '../Request';
 import PlayerSelector from './PlayerSelector';
 
 export default function Draft() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   // One slot per seat from the start: Shuffle only moves slots that exist,
@@ -57,12 +59,12 @@ export default function Draft() {
     if (capsLoading || capsError) return;
     if (capsForbidden || !canCreateGame) {
       showToast({
-        title: 'You cannot start a game in this event',
+        title: t('draft.cannotStart'),
         variant: 'warning',
       });
       navigate('/');
     }
-  }, [capsLoading, capsError, capsForbidden, canCreateGame, navigate]);
+  }, [capsLoading, capsError, capsForbidden, canCreateGame, navigate, t]);
 
   // Derived state for selectedKeys
   const selectedKeys = useMemo(
@@ -113,7 +115,7 @@ export default function Draft() {
 
     if (!players.includes(currentPlayerId)) {
       showToast({
-        title: 'You should also pick youself to start the game',
+        title: t('draft.pickYourself'),
         variant: 'warning',
       });
       return;
@@ -122,8 +124,8 @@ export default function Draft() {
     const eventId = getStoredEventId();
     if (!eventId) {
       showToast({
-        title: 'No event selected',
-        description: 'Please select an event first',
+        title: t('header.noEventSelected'),
+        description: t('events.selectFirst'),
         variant: 'warning',
       });
       return;
@@ -155,10 +157,10 @@ export default function Draft() {
             className="flex flex-col items-center"
           >
             <div className="flex w-full flex-col gap-3 p-3 md:w-auto">
-              {WIND_LABELS.map((wind: string, index: number) => (
+              {WINDS.map((wind, index) => (
                 <PlayerSelector
                   key={wind}
-                  wind={`${WIND_SYMBOLS[index]} ${wind}`}
+                  wind={`${WIND_SYMBOLS[index]} ${t(`winds.${wind}`)}`}
                   index={index}
                   players={players}
                   suggestions={suggestions}
@@ -169,10 +171,10 @@ export default function Draft() {
 
               <div className="flex justify-center gap-3">
                 <Button variant="tertiary" type="button" onPress={onClear}>
-                  Clear
+                  {t('draft.clear')}
                 </Button>
                 <Button variant="secondary" type="button" onPress={onShuffle}>
-                  Shuffle
+                  {t('draft.shuffle')}
                 </Button>
                 <PendingButton
                   variant="primary"
@@ -182,7 +184,7 @@ export default function Draft() {
                     players.length !== 4 || selectedKeys.some((key) => !key)
                   }
                 >
-                  Play
+                  {t('draft.play')}
                 </PendingButton>
               </div>
             </div>

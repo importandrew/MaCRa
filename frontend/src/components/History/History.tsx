@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCallback, useMemo } from 'react';
 import { HistoryProps } from '../../models/GameData';
 import { UserData } from '../../models/UserData';
@@ -15,6 +16,7 @@ const History = (props: HistoryProps) => {
   const currentPlayer = JSON.parse(
     localStorage.getItem(AUTH_USER_DATA) || '{}'
   ) as UserData;
+  const { t } = useTranslation();
   const { playerId = currentPlayer.id } = props;
   const { data, isLoading, isError, refetch } =
     useFetchPlayerGamesHistory(playerId);
@@ -49,12 +51,12 @@ const History = (props: HistoryProps) => {
         const playerResult = getPlayerResult(id);
         const result = resultsMap?.[id];
         const label = playerResult
-          ? `TP: ${playerResult.tp}, GP: ${playerResult.gp}`
+          ? t('history.result', { tp: playerResult.tp, gp: playerResult.gp })
           : resultsLoading
-            ? 'Loading...'
+            ? t('common.loading')
             : resultsError
-              ? 'Error loading results'
-              : 'No result data';
+              ? t('history.loadFailed')
+              : t('history.noResult');
 
         return {
           key: id,
@@ -72,9 +74,9 @@ const History = (props: HistoryProps) => {
     >
       <div className="flex flex-col h-full w-screen md:w-[600px] justify-start items-center md:my-3 px-3 md:px-0">
         <NavList
-          ariaLabel="Played games history"
+          ariaLabel={t('landing.playedGames')}
           emptyContent={
-            <p className="text-center text-3xl">No games played yet</p>
+            <p className="text-center text-3xl">{t('rating.noGames')}</p>
           }
           items={items.map((item) => ({
             id: String(item.key),

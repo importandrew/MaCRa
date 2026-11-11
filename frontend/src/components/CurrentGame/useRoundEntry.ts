@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
@@ -25,6 +27,7 @@ export function useRoundEntry(
   onSubmitted: (data: GameData) => void,
   onStale: () => Promise<GameData | null>
 ) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [outcome, setOutcome] = useState<EntryOutcome | null>(null);
@@ -129,8 +132,8 @@ export function useRoundEntry(
       const fresh = await onStale();
       if (!fresh) return;
       showToast({
-        title: staleTitle(table, fresh),
-        description: 'Check the refreshed table and enter again if needed.',
+        title: staleTitle(table, fresh, t),
+        description: t('game.checkTableAndRetry'),
         variant: 'warning',
       });
       return;
@@ -144,7 +147,7 @@ export function useRoundEntry(
     }
 
     if (isPenalty) {
-      showToast({ title: 'Penalty added', variant: 'warning' });
+      showToast({ title: t('game.penaltyAdded'), variant: 'warning' });
     }
     reset();
     onSubmitted(data);
@@ -182,15 +185,15 @@ export type RoundEntry = ReturnType<typeof useRoundEntry>;
 
 // staleTitle says what changed between the table the player saw and the
 // table now: a round entered, a penalty entered, or an entry undone.
-function staleTitle(seen: GameData, now: GameData): string {
+function staleTitle(seen: GameData, now: GameData, t: TFunction): string {
   if (now.round.num > seen.round.num) {
-    return `Round ${seen.round.kanji} has already been entered`;
+    return t('game.roundAlreadyEntered', { round: seen.round.kanji });
   }
   if (now.round.num < seen.round.num) {
-    return 'The last round has been undone';
+    return t('game.lastRoundUndone');
   }
   if (now.log_size > seen.log_size) {
-    return 'A penalty has just been entered';
+    return t('game.penaltyJustEntered');
   }
-  return 'The last entry has been undone';
+  return t('game.lastEntryUndone');
 }

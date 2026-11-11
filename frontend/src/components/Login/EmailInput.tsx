@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FieldError, Input, Label, TextField } from '@heroui/react';
 import { InputArgs } from '../../models/Input';
 
@@ -5,6 +6,7 @@ import { InputArgs } from '../../models/Input';
 const maxEmailLength = 50;
 
 export default function EmailInput({ onChange }: InputArgs) {
+  const { t } = useTranslation();
   return (
     <TextField
       type="email"
@@ -12,16 +14,16 @@ export default function EmailInput({ onChange }: InputArgs) {
       autoComplete="email"
       validate={(value: string) => {
         if (!value.length) {
-          return 'Email is required';
+          return t('auth.emailRequired');
         }
         if ([...value].length > maxEmailLength) {
-          return 'Email is too long';
+          return t('auth.emailTooLong');
         }
         return null;
       }}
       onChange={onChange}
     >
-      <Label>Email</Label>
+      <Label>{t('auth.email')}</Label>
       <Input />
       <FieldError />
     </TextField>

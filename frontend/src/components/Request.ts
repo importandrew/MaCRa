@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { fetchLogoutApi } from '../providers/auth/authApi';
 import { AUTH_USER_DATA } from '../providers/auth/authConstants';
 import { showToast } from './Toast';
@@ -38,13 +39,13 @@ function handleSessionExpired(wasSignedIn: boolean) {
   showToast(
     wasSignedIn
       ? {
-          title: 'Session expired',
-          description: 'Please log in again.',
+          title: i18n.t('errors.sessionExpired'),
+          description: i18n.t('errors.logInAgain'),
           variant: 'danger',
         }
       : {
-          title: 'Login required',
-          description: 'Please log in to continue.',
+          title: i18n.t('errors.loginRequired'),
+          description: i18n.t('errors.logInToContinue'),
           variant: 'warning',
         }
   );
@@ -104,14 +105,14 @@ async function fetchWithStatus<T>(
     if (!response.ok) {
       const data = await response
         .json()
-        .catch(() => ({ error: 'Unknown error' }));
+        .catch(() => ({ error: i18n.t('errors.unknown') }));
       if (
         isToastEnabled &&
         response.status !== 403 &&
         !quietStatuses.includes(response.status)
       ) {
         showToast({
-          title: `Error: ${data.error}`,
+          title: i18n.t('errors.withMessage', { message: data.error }),
           variant: 'danger',
         });
       }
@@ -123,7 +124,7 @@ async function fetchWithStatus<T>(
   } catch (error) {
     if (isToastEnabled) {
       showToast({
-        title: `Error: ${error}`,
+        title: i18n.t('errors.withMessage', { message: String(error) }),
         variant: 'danger',
       });
     }
@@ -165,7 +166,7 @@ async function globalBatchFetch<T>(
 
   if (results.some((result) => result.status === 0)) {
     if (isToastEnabled) {
-      showToast({ title: 'Error: network request failed', variant: 'danger' });
+      showToast({ title: i18n.t('errors.network'), variant: 'danger' });
     }
     return null;
   }

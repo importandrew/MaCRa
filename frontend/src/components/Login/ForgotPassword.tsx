@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, Card } from '@heroui/react';
 import { LinkButton } from '../LinkButton';
 import { useCallback, useState } from 'react';
@@ -8,6 +9,7 @@ import EmailInput from './EmailInput';
 import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const { isPending: isLoading, run } = useSubmitOnce();
   const [sent, setSent] = useState(false);
@@ -26,27 +28,29 @@ export default function ForgotPasswordPage() {
 
     setSent(true);
     showToast({
-      title: 'If that email exists, a reset link was sent',
+      title: t('auth.resetLinkSent'),
       variant: 'success',
     });
-  }, [email]);
+  }, [email, t]);
 
   return (
     <div className="flex flex-col h-full w-screen md:w-[600px] my-auto">
       {isLoading ? (
-        <LoadingSpinner label="Loading..." />
+        <LoadingSpinner label={t('common.loading')} />
       ) : (
         <div className="flex flex-col max-w-screen h-full text-2xl text-center justify-center items-center mx-5">
           <Card className="w-full mx-5">
             <Card.Content className="gap-3 py-6">
-              <h1 className="text-xl font-semibold">Forgot password</h1>
+              <h1 className="text-xl font-semibold">
+                {t('auth.forgotPasswordTitle')}
+              </h1>
               {sent ? (
                 <>
                   <p className="text-base text-muted">
-                    Check your email for a reset link.
+                    {t('auth.checkEmailForReset')}
                   </p>
                   <LinkButton variant="primary" to="/login">
-                    Back to login
+                    {t('auth.backToLogin')}
                   </LinkButton>
                 </>
               ) : (
@@ -58,10 +62,10 @@ export default function ForgotPasswordPage() {
                       isDisabled={!email}
                       onPress={() => run(handleSubmit)}
                     >
-                      Send reset link
+                      {t('auth.sendResetLink')}
                     </Button>
                     <LinkButton variant="outline" to="/login">
-                      Cancel
+                      {t('common.cancel')}
                     </LinkButton>
                   </div>
                 </>

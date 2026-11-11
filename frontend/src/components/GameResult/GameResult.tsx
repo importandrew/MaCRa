@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import { useCallback, useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -11,6 +12,7 @@ import GameLogs from './GameLogs';
 import GameResultTable from './GameResultTable';
 
 export default function GameResult() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
   const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
@@ -73,7 +75,7 @@ export default function GameResult() {
               variant="tertiary"
               fullWidth
             >
-              {isChartVisible ? 'Hide chart' : 'Show chart'}
+              {isChartVisible ? t('result.hideChart') : t('result.showChart')}
             </Button>
             <Button
               type="button"
@@ -81,7 +83,7 @@ export default function GameResult() {
               variant="tertiary"
               fullWidth
             >
-              {isLogsVisible ? 'Hide logs' : 'Show logs'}
+              {isLogsVisible ? t('result.hideLogs') : t('result.showLogs')}
             </Button>
             {!isEventGameRoute && isAuthenticated && canCreateGame && (
               <Button
@@ -90,7 +92,7 @@ export default function GameResult() {
                 variant="primary"
                 fullWidth
               >
-                Play Again
+                {t('result.playAgain')}
               </Button>
             )}
           </div>

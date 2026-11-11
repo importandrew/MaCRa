@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button, FieldError, Input, TextField } from '@heroui/react';
 import { useState } from 'react';
 
@@ -23,6 +24,7 @@ export default function ValueStepper({
   // draft is the field's text: it may be empty while typing, which value
   // (a number) can't show. It follows value when that changes from outside
   // (the buttons, a reset).
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(String(value));
   const [shownValue, setShownValue] = useState(value);
   const [isFocused, setIsFocused] = useState(false);
@@ -65,7 +67,7 @@ export default function ValueStepper({
           className="h-9 w-24 text-center text-2xl font-semibold tabular-nums"
         />
         <FieldError className="text-center">
-          {`${label} should be ${min} or higher`}
+          {t('common.atLeast', { field: label, min })}
         </FieldError>
       </TextField>
       <div className="flex items-center justify-center gap-1">

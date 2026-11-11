@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameStatusResponse } from '../../providers/game/gameDataApi';
@@ -9,6 +10,7 @@ import { showToast } from '../Toast';
 // round, finished or aborted it. An ended game opens its result, an aborted
 // one the home page.
 export function useShowGameGone() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return useCallback(
@@ -19,17 +21,17 @@ export function useShowGameGone() {
       );
 
       if (data?.status === 'ended') {
-        showToast({ title: 'The game has ended', variant: 'warning' });
+        showToast({ title: t('game.ended'), variant: 'warning' });
         navigate('/last');
         return;
       }
       if (data?.status === 'aborted') {
-        showToast({ title: 'The game was aborted', variant: 'warning' });
+        showToast({ title: t('game.wasAborted'), variant: 'warning' });
         navigate('/');
         return;
       }
-      showToast({ title: 'Error: game not found', variant: 'danger' });
+      showToast({ title: t('game.notFound'), variant: 'danger' });
     },
-    [navigate]
+    [navigate, t]
   );
 }
