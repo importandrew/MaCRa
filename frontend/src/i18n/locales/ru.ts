@@ -188,8 +188,8 @@ const ru: Messages = {
   rating: {
     player: 'Игрок',
     games: 'Игры',
-    tp: 'TP',
-    gp: 'GP',
+    tp: 'ТО',
+    gp: 'ИО',
     noGames: 'Игр пока нет',
   },
   games: {
@@ -201,7 +201,7 @@ const ru: Messages = {
     loadMore: 'Показать ещё',
   },
   history: {
-    result: 'TP: {{tp}}, GP: {{gp}}',
+    result: 'ТО: {{tp}}, ИО: {{gp}}',
     loadFailed: 'Не удалось загрузить результаты',
     noResult: 'Нет результата',
   },
@@ -221,7 +221,7 @@ const ru: Messages = {
   roundEntry: {
     outcome: 'Итог',
     draw: 'Ничья',
-    self: 'Самотяг',
+    self: 'Со\u00a0стены',
     dealIn: 'Наброс',
     penalty: 'Штраф',
     penaltyType: 'Вид штрафа',
@@ -290,7 +290,7 @@ const ru: Messages = {
     backToTable: 'К столу',
     backToDelta: 'К дельте',
     howToRead: 'Как читать',
-    self: 'Самотяг',
+    self: 'Со\u00a0стены',
     win: 'Со сброса',
     dealIn: 'Наброс',
     place: '{{place}} место',
@@ -299,8 +299,8 @@ const ru: Messages = {
     scoreDifferenceValue: 'Разница в очках: {{gap}}',
     winOnDiscard: 'Выигрыш со сброса этого игрока',
     dealIntoWin: 'Наброс в руку этого игрока',
-    selfDrawThresholds: 'Пороги для самотяга',
-    noHigherPlace: 'Самотягом место не поднять',
+    selfDrawThresholds: 'Пороги для выигрыша со стены',
+    noHigherPlace: 'Со стены место не поднять',
     you: 'Вы',
     helpTitle: 'Как читать дельту',
     closeHelp: 'Закрыть справку',
@@ -309,9 +309,9 @@ const ru: Messages = {
     labelIdentity: 'Ветер, имя, счёт',
     scoreDifference: 'Разница в очках',
     selectedPlayer: 'Выбранный игрок',
-    selfDraw: 'Самотяг',
+    selfDraw: 'Со стены',
     helpSelf:
-      '<b>Самотяг:</b> сколько фанов нужно, чтобы подняться выше самотягом.',
+      '<b>Со стены:</b> сколько фанов нужно, чтобы подняться выше, выиграв со стены.',
     helpWin:
       '<b>Со сброса:</b> сколько фанов нужно, чтобы занять место, выиграв со сброса этого соперника.',
     helpDealIn:
