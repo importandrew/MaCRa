@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import i18n from '../../../i18n';
+import type { TFunction } from 'i18next';
 import { useState } from 'react';
 import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
 import GameLogs from '../../GameResult/GameLogs';
@@ -81,7 +81,7 @@ export default function LogsMenu({
           lastEntryId(fresh) !== seenLastId);
       if (fresh && isChanged) {
         showToast({
-          title: changeTitle(fresh, logSize),
+          title: changeTitle(fresh, logSize, t),
           description: t('game.checkLogAndRetry'),
           variant: 'warning',
         });
@@ -135,17 +135,19 @@ export default function LogsMenu({
 
 // changeTitle says what changed in the log since the referee saw logSize
 // entries, in the words the round entry uses.
-function changeTitle(fresh: GameRoundLogs, logSize: number): string {
+function changeTitle(
+  fresh: GameRoundLogs,
+  logSize: number,
+  t: TFunction
+): string {
   const entries = fresh.round_logs;
   if (entries.length < logSize) {
-    return i18n.t('game.lastEntryAlreadyUndone');
+    return t('game.lastEntryAlreadyUndone');
   }
   const last = entries[entries.length - 1];
   const isPenalty =
     last.outcome === Outcome.Penalty || last.outcome === Outcome.FalseMahjong;
-  return isPenalty
-    ? i18n.t('game.penaltyJustEntered')
-    : i18n.t('game.roundJustEntered');
+  return isPenalty ? t('game.penaltyJustEntered') : t('game.roundJustEntered');
 }
 
 function lastEntryId(log: GameRoundLogs | null): number | undefined {

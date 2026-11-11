@@ -1,4 +1,5 @@
-import i18n from '../../i18n';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
@@ -26,6 +27,7 @@ export function useRoundEntry(
   onSubmitted: (data: GameData) => void,
   onStale: () => Promise<GameData | null>
 ) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [outcome, setOutcome] = useState<EntryOutcome | null>(null);
@@ -130,8 +132,8 @@ export function useRoundEntry(
       const fresh = await onStale();
       if (!fresh) return;
       showToast({
-        title: staleTitle(table, fresh),
-        description: i18n.t('game.checkTableAndRetry'),
+        title: staleTitle(table, fresh, t),
+        description: t('game.checkTableAndRetry'),
         variant: 'warning',
       });
       return;
@@ -145,7 +147,7 @@ export function useRoundEntry(
     }
 
     if (isPenalty) {
-      showToast({ title: i18n.t('game.penaltyAdded'), variant: 'warning' });
+      showToast({ title: t('game.penaltyAdded'), variant: 'warning' });
     }
     reset();
     onSubmitted(data);
@@ -183,15 +185,15 @@ export type RoundEntry = ReturnType<typeof useRoundEntry>;
 
 // staleTitle says what changed between the table the player saw and the
 // table now: a round entered, a penalty entered, or an entry undone.
-function staleTitle(seen: GameData, now: GameData): string {
+function staleTitle(seen: GameData, now: GameData, t: TFunction): string {
   if (now.round.num > seen.round.num) {
-    return i18n.t('game.roundAlreadyEntered', { round: seen.round.kanji });
+    return t('game.roundAlreadyEntered', { round: seen.round.kanji });
   }
   if (now.round.num < seen.round.num) {
-    return i18n.t('game.lastRoundUndone');
+    return t('game.lastRoundUndone');
   }
   if (now.log_size > seen.log_size) {
-    return i18n.t('game.penaltyJustEntered');
+    return t('game.penaltyJustEntered');
   }
-  return i18n.t('game.lastEntryUndone');
+  return t('game.lastEntryUndone');
 }
