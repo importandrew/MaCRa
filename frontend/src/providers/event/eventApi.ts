@@ -12,7 +12,6 @@ import { useLoadingState } from '../useLoadingState';
 import { Event, EventVisibility, ContentReach } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
 import { EventMember, EventRole } from '../../models/EventRole';
-import { GamesHistoryData } from '../../models/GameData';
 import { EventRatingsData } from '../../models/EventRating';
 import {
   EventGameListStatus,
@@ -231,43 +230,6 @@ export const useFetchVisibleEvents = () => {
     setData(result.data);
     finishLoading(true);
   }, [startLoading, finishLoading]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return { data, isError, isLoading, refetch: fetchData };
-};
-
-export const useFetchEventGameHistory = (eventId: number | null) => {
-  const [data, setData] = useState<GamesHistoryData | null>(null);
-  const [isError, setIsError] = useState(false);
-  const { isLoading, startLoading, finishLoading } = useLoadingState(
-    eventId,
-    eventId != null
-  );
-
-  const fetchData = useCallback(async () => {
-    if (eventId == null) {
-      setData(null);
-      return;
-    }
-
-    startLoading();
-    setIsError(false);
-
-    const request = GetRequest(eventPath(eventId, '/game-history'));
-    const result = await authFetch<GamesHistoryData>(request);
-
-    if (!result) {
-      setIsError(true);
-      finishLoading(false);
-      return;
-    }
-
-    setData(result);
-    finishLoading(true);
-  }, [eventId, startLoading, finishLoading]);
 
   useEffect(() => {
     fetchData();

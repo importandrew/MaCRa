@@ -21,24 +21,11 @@ func (s *Service) NewGame(ctx context.Context, playerIDs []int, eventID int) (in
 		return 0, err
 	}
 
-	// gameCfg := game.Config{
-	// 	ID:      gameID,
-	// 	Players: game.Seating(playerIDs),
-	// 	Rules:   game.Rules{},
-	// }
-
-	// g := game.NewGame(gameCfg)
-
-	// _, ok := s.liveGames[eventID]
-	// if !ok {
-	// 	s.liveGames[eventID] = make(map[int]GameEngine)
-	// }
-	// s.liveGames[eventID][gameID] = g
-
 	return gameID, nil
 }
 
-// currentGameID should be nil unless it's game reload (otherwise interferes with itself).
+// validatePlayers checks the seating: four distinct players, none of them in a
+// live game in the event.
 func (s *Service) validatePlayers(ctx context.Context, playerIDs []int, eventID int) error {
 	// len = 4
 	if len(playerIDs) != 4 {

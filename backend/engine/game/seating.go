@@ -50,18 +50,6 @@ func (g *Game) StartWind(id int) models.Wind {
 	return g.startSeating.Wind(id)
 }
 
-func (g *Game) RoundStartWind(id int) models.Wind {
-	return g.roundSeating.Wind(id)
-}
-
-func (g *Game) PlayerByStartingSeat(seat models.Wind) int {
-	return g.startSeating[seat]
-}
-
 func (g *Game) PlayerBySeatInRound(round int, seat models.Wind) int {
 	return g.startSeating.Player(models.RoundSeats[round][seat])
-}
-
-func (g *Game) PlayerByWindInRound(round int, wind models.Wind) int {
-	return g.startSeating.Player(models.RoundWinds[round][wind])
 }

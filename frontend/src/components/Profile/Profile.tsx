@@ -55,11 +55,6 @@ export default function ProfilePage() {
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
-      showToast({
-        title: 'Error',
-        description: 'Name cannot be empty',
-        variant: 'danger',
-      });
       return;
     }
 

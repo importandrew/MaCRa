@@ -8,10 +8,6 @@ var (
 	EventObserver EventRole = "observer"
 )
 
-var CanPlayInEvent = []EventRole{EventPlayer}
-var CanAbortGame = []EventRole{EventReferee}
-var CanUndoLastRound = []EventRole{EventReferee}
-
 type EventMember struct {
 	UserID int         `json:"user_id" db:"user_id"`
 	Name   string      `json:"name" db:"name"`

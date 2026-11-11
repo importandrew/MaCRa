@@ -47,14 +47,10 @@ type GameEngine interface {
 
 	StartWind(id int) models.Wind
 	CurrentWind(id int) models.Wind
-	RoundStartWind(id int) models.Wind
 
 	Players() [4]int
-	RoundStartPlayers() [4]int
 
 	PlayerBySeatInRound(round int, seat models.Wind) int
-	PlayerByStartingSeat(seat models.Wind) int
-	PlayerByWindInRound(round int, wind models.Wind) int
 }
 
 type Service struct {
