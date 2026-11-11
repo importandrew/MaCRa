@@ -5,13 +5,11 @@ import (
 
 	"github.com/importandrew/MaCRa/models"
 	"github.com/importandrew/MaCRa/service/game"
-	"github.com/importandrew/MaCRa/service/player"
 )
 
 type Service struct {
-	repo          EventRepo
-	gameService   *game.Service
-	playerService *player.Service
+	repo        EventRepo
+	gameService *game.Service
 }
 
 type EventRepo interface {
@@ -31,10 +29,9 @@ type EventRepo interface {
 	ListEndedPlayerResults(ctx context.Context, eventID int) ([]models.EventPlayerResultRow, error)
 }
 
-func NewService(repo EventRepo, gameService *game.Service, playerService *player.Service) *Service {
+func NewService(repo EventRepo, gameService *game.Service) *Service {
 	return &Service{
-		repo:          repo,
-		gameService:   gameService,
-		playerService: playerService,
+		repo:        repo,
+		gameService: gameService,
 	}
 }

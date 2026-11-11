@@ -15,13 +15,13 @@ func TestListGamesByStatus(t *testing.T) {
 	const eventID = 7
 
 	t.Run("reject aborted", func(t *testing.T) {
-		svc := NewService(NewMockEventRepo(t), nil, nil)
+		svc := NewService(NewMockEventRepo(t), nil)
 		_, err := svc.ListGamesByStatus(context.Background(), eventID, models.GameAborted, 50, 0)
 		assert.Error(t, err)
 	})
 
 	t.Run("reject created", func(t *testing.T) {
-		svc := NewService(NewMockEventRepo(t), nil, nil)
+		svc := NewService(NewMockEventRepo(t), nil)
 		_, err := svc.ListGamesByStatus(context.Background(), eventID, models.GameCreated, 50, 0)
 		assert.Error(t, err)
 	})
@@ -31,7 +31,7 @@ func TestListGamesByStatus(t *testing.T) {
 		repo.EXPECT().ListGamesByStatus(mock.Anything, eventID, models.GameLive, 51, 0).
 			Return(nil, nil)
 
-		svc := NewService(repo, nil, nil)
+		svc := NewService(repo, nil)
 		got, err := svc.ListGamesByStatus(context.Background(), eventID, models.GameLive, 50, 0)
 		require.NoError(t, err)
 		assert.Empty(t, got.Games)
@@ -43,7 +43,7 @@ func TestListGamesByStatus(t *testing.T) {
 		repo.EXPECT().ListGamesByStatus(mock.Anything, eventID, models.GameEnded, 51, 0).
 			Return(nil, nil)
 
-		svc := NewService(repo, nil, nil)
+		svc := NewService(repo, nil)
 		got, err := svc.ListGamesByStatus(context.Background(), eventID, models.GameEnded, 50, 0)
 		require.NoError(t, err)
 		assert.Empty(t, got.Games)
