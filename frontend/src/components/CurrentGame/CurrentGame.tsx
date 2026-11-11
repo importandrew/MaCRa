@@ -115,7 +115,11 @@ export default function CurrentGame() {
       onRefresh={onRefresh}
     >
       {roundData ? (
-        <div className="flex justify-center h-full w-screen">
+        // overflow-x-clip: while a round is entered, a side seat (rotated,
+        // with its +/− marks) is 88px across in a 80px column and sticks out
+        // 4px on a 320px phone; clipping the avatar's edge beats a page that
+        // scrolls sideways. Moving the seat inward would hit the entry panel.
+        <div className="flex justify-center h-full w-screen overflow-x-clip">
           <div className="grid w-screen grid-cols-[25%_50%_25%] grid-rows-[20%_60%_20%] text-center">
             <div></div>
             <div className="relative self-center h-full w-full">
