@@ -107,7 +107,7 @@ func TestAuth_SetUserID(t *testing.T) {
 			gotUserID := -1
 
 			router := gin.New()
-			router.GET("/api", NewAuth(testKey, "").SetUserID, func(c *gin.Context) {
+			router.GET("/api", NewAuth(testKey).SetUserID, func(c *gin.Context) {
 				gotUserID = reqctx.GetUserID(c)
 				c.Status(http.StatusOK)
 			})

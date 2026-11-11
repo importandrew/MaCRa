@@ -43,7 +43,7 @@ func (h Handler) Login(c *gin.Context) {
 		return
 	}
 
-	authcookie.Set(c, h.domain, tkn)
+	authcookie.Set(c, tkn)
 	// The /auth routes run without SetUserID; set it here so the request log
 	// shows who signed in.
 	c.Set(reqctx.UserIDKey, player.ID)

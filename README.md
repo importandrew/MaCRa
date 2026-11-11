@@ -6,19 +6,8 @@
 ### Backend: 
 - PostgreSQL - 15+
 - Go - 1.22+
-- `/opt/macra/backend_config.json` present. Config structure:
-```
-type Config struct {
-	Addr         string   `json:"addr"`          // Backend API listen address.
-	CertFile     string   `json:"cert_file"`     // Path to cert file for https. If not empty, server will run in TLS mode.
-	KeyFile      string   `json:"key_file"`      // Path to key file for https.
-	DBURL        string   `json:"db_url"`        // Database URL.
-	CookieDomain string   `json:"cookie_domain"` // Domain for cookie. Protocol defines secure or not. Default: macra.pro.
-	AllowOrigins []string `json:"allow_origins"` // List of origins allowed to API.
-	DBLog        bool     `json:"db_log"`        // Whether to log DB actions for debugging.
-	JWTKey       string   `json:"jwt_key"`       // Key to generate/parse JWT tokens.
-}
-```
+- `/opt/macra/backend_config.json` present: see `backend/config/backend_config.json.example`; every field is described in `backend/config/config.go`.
+
 If `db_url` is missing, server will look for DB URL in `PSQL_MACRA` env variable. Testing depends on `PSQL_MACRA_TEST` env variable set, that contains DB URL to testing DB.
 
 ### Frontend:
@@ -36,8 +25,6 @@ or
 `$ cd backend && make build && ./dist/macra-backend`
 
 ### Frontend
-Dev: `$ cd frontend && npm run dev` (*backend_config.json* should have relevant settings for `cookie_domain` and `allow_origins`)
+Dev: `$ cd frontend && npm run dev`. The dev server forwards `/api` and `/auth` to the backend at `http://127.0.0.1:3001` (set `MACRA_API_PROXY` to change it), so open the app on the dev server's port only; the backend's `site_url` should be that address (e.g. `http://localhost:3000`).
 
-Prod: `$ cd frontend && npm run build`
-
-Backend API address should match `VITE_API_ADDR` parameter in corresponding mode `.env` file.
+Prod: `$ cd frontend && npm run build`. The app calls the API on its own origin, so the web server must forward `/api` and `/auth` to the backend.

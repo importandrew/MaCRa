@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/importandrew/MaCRa/handler/token"
-	"github.com/importandrew/MaCRa/models"
 )
 
 const (
@@ -19,73 +18,42 @@ const (
 	// MaxAge is the auth cookie lifetime in seconds. It is derived from token.Lifetime, so the
 	// cookie and the token it carries always expire together.
 	MaxAge = int(token.Lifetime / time.Second)
+
+	// legacyDomain is the parent domain an old version issued a shared cookie for. Every write
+	// clears that cookie too, so an old token can't shadow the current one on any subdomain.
+	legacyDomain = "macra.pro"
 )
 
-// cookieAttrs returns the Set-Cookie Domain and Secure flag, derived from config and the request.
-// Secure follows the actual connection (TLS or X-Forwarded-Proto), not a hardcoded true.
-// Empty config → host-only cookie (not shared with sibling subdomains).
-// If configured domain host does not match the request host, Domain is left empty (host-only)
-// so LAN misconfigs like cookie_domain=localhost against mj.home still work.
-func cookieAttrs(configured, requestHost, forwardedProto string, tls bool) (string, bool) {
-	secure := tls || strings.EqualFold(forwardedProto, "https")
-	if strings.HasPrefix(strings.ToLower(configured), "http://") {
-		secure = false
-	} else if strings.HasPrefix(strings.ToLower(configured), "https://") {
-		secure = true
-	}
-
-	if configured == "" {
-		return "", secure
-	}
-
-	host := stripCookieHost(configured)
-	reqHost := stripCookieHost(requestHost)
-	if host != "" && !strings.EqualFold(host, reqHost) {
-		return "", secure
-	}
-	return host, secure
-}
-
-func stripCookieHost(raw string) string {
-	host := raw
-	host = strings.TrimPrefix(host, "https://")
-	host = strings.TrimPrefix(host, "http://")
-	if h, _, err := net.SplitHostPort(host); err == nil {
-		return h
-	}
-	// Trailing slash or path from misconfigured URL values.
-	if i := strings.IndexAny(host, "/"); i >= 0 {
-		host = host[:i]
-	}
-	return host
-}
-
 // Set stores the token in the auth cookie for MaxAge.
-func Set(c *gin.Context, configuredDomain, token string) {
-	write(c, configuredDomain, token, MaxAge)
+func Set(c *gin.Context, token string) {
+	write(c, token, MaxAge)
 }
 
 // Clear removes the auth cookie.
-func Clear(c *gin.Context, configuredDomain string) {
-	write(c, configuredDomain, "", -1)
+func Clear(c *gin.Context) {
+	write(c, "", -1)
 }
 
-// write sets or clears the auth cookie for this instance only.
-// A legacy parent-domain cookie is also cleared so old shared tokens stop leaking.
-func write(c *gin.Context, configuredDomain, value string, maxAge int) {
-	cookieDomain, secure := cookieAttrs(
-		configuredDomain,
-		c.Request.Host,
-		c.GetHeader("X-Forwarded-Proto"),
-		c.Request.TLS != nil,
-	)
-
+// write sets or clears the auth cookie. The cookie is host-only (no Domain attribute): it
+// belongs to the site's own address, so macra.pro and dev.macra.pro never see each other's
+// sessions. It is Secure when the client's connection is https.
+func write(c *gin.Context, value string, maxAge int) {
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(Name, value, maxAge, "/", cookieDomain, secure, true)
+	c.SetCookie(Name, value, maxAge, "/", "", isHTTPS(c), true)
 
-	if cookieDomain != models.DefaultDomain {
-		// Match how the legacy shared cookie was issued (Secure + SameSite=None).
-		c.SetSameSite(http.SameSiteNoneMode)
-		c.SetCookie(Name, "", -1, "/", models.DefaultDomain, true, true)
+	// Match how the legacy shared cookie was issued (Secure + SameSite=None).
+	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetCookie(Name, "", -1, "/", legacyDomain, true, true)
+}
+
+// isHTTPS reports whether the client reached the site over https: directly over TLS, or
+// through nginx on the same machine, which says so in X-Forwarded-Proto. The header is
+// ignored from anyone else.
+func isHTTPS(c *gin.Context) bool {
+	if c.Request.TLS != nil {
+		return true
 	}
+
+	ip := net.ParseIP(c.RemoteIP())
+	return ip != nil && ip.IsLoopback() && strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
 }

@@ -55,17 +55,17 @@ func main() {
 
 	// service
 	gameService := gsvc.NewService(gameRepo, playerRepo)
-	mail := mailer.New(cfg.MailFrom)
+	mail := mailer.New(cfg.MailFrom, cfg.SiteURL)
 	playerService := psvc.NewService(playerRepo, mail)
 	eventService := esvc.NewService(eventRepo, gameService, playerService)
 
 	// handler
 	eventHandler := ehndl.NewHandler(eventService, gameService)
 	playerHandler := phndl.NewHandler(playerService, cfg)
-	h := handler.New(eventHandler, playerHandler, []byte(cfg.JWTKey), cfg.CookieDomain)
+	h := handler.New(eventHandler, playerHandler, []byte(cfg.JWTKey))
 
 	// server
-	router := server.NewServer(cfg.AllowOrigins...)
+	router := server.NewServer()
 	h.RegisterRoutes(router)
 
 	if cfg.CertFile != "" {

@@ -24,9 +24,9 @@ type PlayerRepo interface {
 }
 
 type Mailer interface {
-	SendVerification(to, origin, token string) error
-	SendPasswordReset(to, origin, token string) error
-	SendAccountExists(to, origin, token string) error
+	SendVerification(to, token string) error
+	SendPasswordReset(to, token string) error
+	SendAccountExists(to, token string) error
 }
 
 type Service struct {

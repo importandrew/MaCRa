@@ -9,6 +9,6 @@ import (
 )
 
 func (h Handler) Logout(c *gin.Context) {
-	authcookie.Clear(c, h.domain)
+	authcookie.Clear(c)
 	c.Status(http.StatusOK)
 }

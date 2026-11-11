@@ -16,7 +16,6 @@ export default function ForgotPasswordPage() {
     const data = await globalFetch<object>(
       PostRequest('/auth/forgot-password', {
         email,
-        origin: window.location.origin,
       }),
       { redirectOn401: false }
     );

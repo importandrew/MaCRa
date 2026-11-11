@@ -12,7 +12,6 @@ type SignupRequest struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
-	Origin   string `json:"origin"`
 }
 
 func (h Handler) SignUp(c *gin.Context) {
@@ -22,14 +21,7 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	origin, err := normalizeOrigin(req.Origin, h.allowOrigins)
-	if err != nil {
-		httperr.Error(c, err)
-		return
-	}
-
-	err = h.player.SignUp(c.Request.Context(), req.Email, req.Name, req.Password, origin)
-	if err != nil {
+	if err := h.player.SignUp(c.Request.Context(), req.Email, req.Name, req.Password); err != nil {
 		httperr.Error(c, err)
 		return
 	}

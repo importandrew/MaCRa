@@ -27,7 +27,6 @@ export default function CheckEmailPage() {
     const data = await globalFetch<object>(
       PostRequest('/auth/resend-verification', {
         email,
-        origin: window.location.origin,
       }),
       { redirectOn401: false }
     );

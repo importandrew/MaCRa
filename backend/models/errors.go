@@ -25,7 +25,6 @@ var (
 	ErrEmptyPassword    = errors.New("password cannot be empty")
 	ErrLongPassword     = errors.New("password cannot exceed 72 bytes")
 	ErrEmailNotVerified = errors.New("email not verified")
-	ErrInvalidOrigin    = errors.New("invalid origin")
 	ErrInvalidAuthToken = errors.New("invalid or expired token")
 	// ErrAuthMailLimit means an auth email wasn't sent because the address has
 	// had too many lately (models.AuthMailLimits). Never shown to the client:
@@ -34,7 +33,8 @@ var (
 	ErrSessionExpired = errors.New("session expired, please log in again")
 	ErrMailFromEmpty  = errors.New("mail_from is empty")
 
-	ErrJWTKeyEmpty = errors.New("jwt key is empty")
+	ErrJWTKeyEmpty    = errors.New("jwt key is empty")
+	ErrSiteURLInvalid = errors.New("site_url must be like https://macra.pro (scheme and host, no path)")
 
 	// ErrLogChanged means a round entry or an undo was made from an outdated
 	// table or log: someone else has entered or undone an entry since.
@@ -86,7 +86,6 @@ var Errors = map[error]int{
 	ErrInvalidEventType:         http.StatusBadRequest,
 	ErrInvalidContentReach:      http.StatusBadRequest,
 	ErrInvalidGameStatus:        http.StatusBadRequest,
-	ErrInvalidOrigin:            http.StatusBadRequest,
 	ErrInvalidAuthToken:         http.StatusBadRequest,
 
 	// 401

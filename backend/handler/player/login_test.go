@@ -23,18 +23,18 @@ func TestHandler_Login(t *testing.T) {
 
 	testData := map[string]struct {
 		requestBody  any
-		domain       string
+		viaNginx     bool // over https, through nginx on the same machine
 		mockSetup    func(*MockPlayerService)
 		expectedCode int
 		expectedBody func(*testing.T, *httptest.ResponseRecorder)
 		checkCookie  func(*testing.T, *httptest.ResponseRecorder)
 	}{
-		"ok with domain": {
+		"ok over https through nginx": {
 			requestBody: LoginRequest{
 				Email:    "test@example.com",
 				Password: "password123",
 			},
-			domain: "example.com",
+			viaNginx: true,
 			mockSetup: func(m *MockPlayerService) {
 				m.EXPECT().Login(
 					mock.Anything,
@@ -58,7 +58,7 @@ func TestHandler_Login(t *testing.T) {
 				auth := cookies[0]
 				assert.Equal(t, "token", auth.Name)
 				assert.NotEmpty(t, auth.Value)
-				assert.Equal(t, "example.com", auth.Domain)
+				assert.Empty(t, auth.Domain, "host-only")
 				assert.True(t, auth.Secure)
 				assert.True(t, auth.HttpOnly)
 				assert.Equal(t, http.SameSiteLaxMode, auth.SameSite)
@@ -67,15 +67,14 @@ func TestHandler_Login(t *testing.T) {
 				assert.Equal(t, "token", legacy.Name)
 				assert.Empty(t, legacy.Value)
 				assert.Equal(t, -1, legacy.MaxAge)
-				assert.Equal(t, models.DefaultDomain, legacy.Domain)
+				assert.Equal(t, "macra.pro", legacy.Domain)
 			},
 		},
-		"ok without domain http": {
+		"ok over plain http": {
 			requestBody: LoginRequest{
 				Email:    "test@example.com",
 				Password: "password123",
 			},
-			domain: "",
 			mockSetup: func(m *MockPlayerService) {
 				m.EXPECT().Login(
 					mock.Anything,
@@ -107,34 +106,11 @@ func TestHandler_Login(t *testing.T) {
 				legacy := cookies[1]
 				assert.Equal(t, "token", legacy.Name)
 				assert.Empty(t, legacy.Value)
-				assert.Equal(t, models.DefaultDomain, legacy.Domain)
-			},
-		},
-		"ok http lan mismatched cookie domain": {
-			requestBody: LoginRequest{
-				Email:    "test@example.com",
-				Password: "password123",
-			},
-			domain: "localhost",
-			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().Login(
-					mock.Anything,
-					"test@example.com",
-					"password123",
-				).Return(models.Player{ID: 3, Name: "LAN User"}, nil)
-			},
-			expectedCode: http.StatusOK,
-			checkCookie: func(t *testing.T, w *httptest.ResponseRecorder) {
-				cookies := w.Result().Cookies()
-				assert.Len(t, cookies, 2)
-				assert.Empty(t, cookies[0].Domain)
-				assert.False(t, cookies[0].Secure)
-				assert.Equal(t, models.DefaultDomain, cookies[1].Domain)
+				assert.Equal(t, "macra.pro", legacy.Domain)
 			},
 		},
 		"invalid json": {
 			requestBody:  "invalid json string",
-			domain:       "",
 			mockSetup:    func(m *MockPlayerService) {},
 			expectedCode: http.StatusBadRequest,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -146,7 +122,6 @@ func TestHandler_Login(t *testing.T) {
 		},
 		"empty body": {
 			requestBody:  nil,
-			domain:       "",
 			mockSetup:    func(m *MockPlayerService) {},
 			expectedCode: http.StatusBadRequest,
 			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
@@ -161,7 +136,6 @@ func TestHandler_Login(t *testing.T) {
 				Email:    "test@example.com",
 				Password: "wrongpassword",
 			},
-			domain: "",
 			mockSetup: func(m *MockPlayerService) {
 				m.EXPECT().Login(
 					mock.Anything,
@@ -183,7 +157,6 @@ func TestHandler_Login(t *testing.T) {
 				Email:    "nonexistent@example.com",
 				Password: "password123",
 			},
-			domain: "",
 			mockSetup: func(m *MockPlayerService) {
 				m.EXPECT().Login(
 					mock.Anything,
@@ -207,7 +180,7 @@ func TestHandler_Login(t *testing.T) {
 			mockPlayerService := NewMockPlayerService(t)
 			testCase.mockSetup(mockPlayerService)
 
-			handler := NewHandler(mockPlayerService, config.Config{CookieDomain: testCase.domain, JWTKey: string(testJWT)})
+			handler := NewHandler(mockPlayerService, config.Config{JWTKey: string(testJWT)})
 
 			var bodyBytes []byte
 			var err error
@@ -218,14 +191,10 @@ func TestHandler_Login(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBuffer(bodyBytes))
 			req.Header.Set("Content-Type", "application/json")
-			switch testCase.domain {
-			case "example.com":
-				req.Host = "example.com"
+			req.Host = "macra.pro"
+			if testCase.viaNginx {
+				req.RemoteAddr = "127.0.0.1:40000"
 				req.Header.Set("X-Forwarded-Proto", "https")
-			case "localhost":
-				req.Host = "mj.home:3001"
-			default:
-				req.Host = "mj.home:3001"
 			}
 
 			w := httptest.NewRecorder()
