@@ -6,7 +6,6 @@ import {
   useHref,
   useNavigate,
 } from 'react-router-dom';
-import './App.css';
 import RequireAuth from './components/Auth/RequireAuth';
 import RequireEvent from './components/Auth/RequireEvent';
 import CurrentGame from './components/CurrentGame/CurrentGame';

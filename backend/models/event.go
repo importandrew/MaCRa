@@ -4,10 +4,6 @@ import (
 	"time"
 )
 
-const (
-	EventIDLockedDefault = 0
-)
-
 type EventType string
 
 var (

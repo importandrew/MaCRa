@@ -9,7 +9,7 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// SetStatus sets game status.
+// Status returns the game's status, or models.ErrGameNotFound.
 func (r *Repo) Status(ctx context.Context, gameID int) (models.GameStatus, error) {
 	conn, err := r.db.Acquire(ctx)
 	if err != nil {

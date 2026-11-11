@@ -62,25 +62,6 @@ type GameView struct {
 	PlayerScores []PlayerWindScore `json:"player_scores"`
 }
 
-type PlayerHistory struct {
-	ID      int   `json:"id"`
-	GameIDs []int `json:"game_ids"`
-}
-
-type EventGame struct {
-	GameID  int `db:"id"`
-	EventID int `db:"event_id"`
-}
-
-// Game is a row from the games table.
-type Game struct {
-	ID         int        `db:"id" json:"id"`
-	Status     GameStatus `db:"status" json:"status"`
-	CreatedAt  time.Time  `db:"created_at" json:"created_at"`
-	FinishedAt *time.Time `db:"finished_at" json:"finished_at"`
-	EventID    int        `db:"event_id" json:"event_id"`
-}
-
 type MainGameInfo struct {
 	HasLast    bool `json:"has_last"`
 	HasCurrent bool `json:"has_current"`

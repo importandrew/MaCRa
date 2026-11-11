@@ -28,7 +28,3 @@ export const CONTENT_REACH_OPTIONS: { value: ContentReach; label: string }[] = [
   { value: 'members', label: 'Participants only' },
   { value: 'staff', label: 'Staff only' },
 ];
-
-export function reachLabel(reach: ContentReach): string {
-  return CONTENT_REACH_OPTIONS.find((o) => o.value === reach)?.label ?? reach;
-}
