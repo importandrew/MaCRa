@@ -100,7 +100,7 @@ export default function LogsMenu({
       {canUndoLastRound && (
         <>
           <PendingButton
-            className="w-1/2 self-center"
+            className="min-w-1/2 self-center"
             variant="tertiary"
             size="sm"
             onPress={() => setConfirmOpen(true)}

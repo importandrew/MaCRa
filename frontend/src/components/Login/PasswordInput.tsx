@@ -43,7 +43,12 @@ export default function PasswordInput({
     >
       <Label>Password</Label>
       <InputGroup>
-        <InputGroup.Input type={isVisible ? 'text' : 'password'} />
+        <InputGroup.Input
+          type={isVisible ? 'text' : 'password'}
+          // min-w-0: an input keeps its intrinsic width in the flex row, which
+          // pushes the eye button out of the field on a 320px phone.
+          className="min-w-0"
+        />
         <InputGroup.Suffix className="pe-0">
           <Button
             isIconOnly
