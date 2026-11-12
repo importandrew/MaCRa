@@ -69,7 +69,10 @@ var (
 	ErrInvalidGameStatus   = errors.New("invalid game status")
 
 	ErrNoRounds = errors.New("no rounds to undo")
-	ErrTooLate  = errors.New("too late to undo")
+	// ErrGameHasRounds means a seated player can't abort the game any more: a
+	// round has been entered (referees still can).
+	ErrGameHasRounds = errors.New("game has rounds")
+	ErrTooLate       = errors.New("too late to undo")
 )
 
 // APIError is how a public error reaches the client: the HTTP status and a
@@ -129,6 +132,7 @@ var Errors = map[error]APIError{
 	ErrMemberInCurrentGame:  {http.StatusConflict, "member_in_current_game"},
 	ErrEventAlreadyFinished: {http.StatusConflict, "event_already_finished"},
 	ErrEventHasOngoingGames: {http.StatusConflict, "event_has_ongoing_games"},
+	ErrGameHasRounds:        {http.StatusConflict, "game_has_rounds"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

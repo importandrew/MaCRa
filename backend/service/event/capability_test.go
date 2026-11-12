@@ -33,7 +33,8 @@ func TestHasCapability_staffBypassRatings(t *testing.T) {
 	assert.True(t, authCtx.hasCapability(models.CapViewRatings))
 }
 
-func TestHasCapability_ownerNoStaffBypassWithoutRefereeRole(t *testing.T) {
+// The owner sees everything in their event, as staff, without any role.
+func TestHasCapability_ownerSeesStaffOnlyRatings(t *testing.T) {
 	event := testEvent(models.EventTournament)
 	event.RatingsReach = models.ContentReachStaff
 
@@ -44,7 +45,7 @@ func TestHasCapability_ownerNoStaffBypassWithoutRefereeRole(t *testing.T) {
 		IsMember: true,
 	}
 
-	assert.False(t, authCtx.hasCapability(models.CapViewRatings))
+	assert.True(t, authCtx.hasCapability(models.CapViewRatings))
 }
 
 func TestHasCapability_playerHiddenRatings(t *testing.T) {
@@ -205,6 +206,7 @@ func TestHasCapability_regularOwnerWithDBRoles(t *testing.T) {
 		IsOwner:  true,
 		IsMember: true,
 		Roles:    []models.EventRole{models.EventPlayer, models.EventReferee},
+		Game:     &models.GameSummary{Status: models.GameLive, LogSize: 3},
 	}
 
 	assert.True(t, owner.hasCapability(models.CapCreateGame))
@@ -251,6 +253,7 @@ func TestHasCapability_finishGameSeatedOrReferee(t *testing.T) {
 		Roles:          []models.EventRole{models.EventPlayer},
 		IsMember:       true,
 		IsSeatedInGame: true,
+		Game:           &models.GameSummary{Status: models.GameLive},
 	}
 	assert.True(t, player.hasCapability(models.CapFinishGame))
 
@@ -259,6 +262,7 @@ func TestHasCapability_finishGameSeatedOrReferee(t *testing.T) {
 		CallerID: 6,
 		Roles:    []models.EventRole{models.EventReferee},
 		IsMember: true,
+		Game:     &models.GameSummary{Status: models.GameLive},
 	}
 	assert.True(t, referee.hasCapability(models.CapFinishGame))
 }

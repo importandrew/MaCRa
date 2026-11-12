@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Drawer } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
 import LazyAccordion from '../../LazyAccordion';
-import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
+import { useGameCapabilities } from '../../../providers/game/useGameCapabilities';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
 import LogsMenu from '../../GameMenu/LogsMenu';
@@ -33,7 +33,7 @@ export default function LiveMenu({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { hasCapability } = useEventCapabilities(eventId);
+  const { hasCapability } = useGameCapabilities(eventId, gameId);
   const canUndoLastRound = hasCapability('undo_round');
   const canAbort = hasCapability('abort_game');
   const canFinish = hasCapability('finish_game');

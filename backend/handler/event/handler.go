@@ -13,6 +13,7 @@ type EventService interface {
 	Details(ctx context.Context, eventID int) (models.EventDetails, error)
 	ListVisible(ctx context.Context, userID int) ([]models.EventListItem, error)
 	GetMe(ctx context.Context, eventID, userID int) (models.EventMe, error)
+	MyGameCapabilities(ctx context.Context, eventID, callerID, gameID int) (models.GameMe, error)
 	CanAccess(ctx context.Context, eventID, userID int) error
 	HasCapability(ctx context.Context, eventID, userID, gameID int, capability models.Capability) error
 	AddMemberRoles(ctx context.Context, eventID, targetUserID int, roles []models.EventRole) error
@@ -25,7 +26,7 @@ type EventService interface {
 
 	NewGame(ctx context.Context, eventID int, playerIDs []int) (int, error)
 	MainGameInfo(ctx context.Context, eventID, userID int) (models.MainGameInfo, error)
-	AbortGame(ctx context.Context, gameID int) error
+	AbortGame(ctx context.Context, eventID, callerID, gameID int) error
 	UndoLastRound(ctx context.Context, gameID, logSize int) error
 }
 

@@ -108,6 +108,8 @@ const en = {
     member_in_current_game:
       '{{name}} is playing a game right now. Remove them after it ends.',
     event_already_finished: 'The event has already finished',
+    game_has_rounds:
+      'A round has been entered: only a referee can abort the game now.',
     event_has_ongoing_games:
       'The event has games in progress. Finish or abort them first.',
   },

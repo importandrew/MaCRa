@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Drawer } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
-import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
+import { useGameCapabilities } from '../../../providers/game/useGameCapabilities';
 import { useEvent } from '../../../providers/event/eventConstants';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
@@ -31,16 +31,12 @@ export default function TableMenu({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { selectedEventId, selectedEvent } = useEvent();
-  const { hasCapability } = useEventCapabilities(selectedEventId);
+  const { selectedEventId } = useEvent();
+  const { hasCapability } = useGameCapabilities(selectedEventId, gameId);
 
   const canAbort = hasCapability('abort_game');
   const canUndo = hasCapability('undo_round');
-  // The event-level finish_game is computed without a game, so it leaves out
-  // seated players. At the table the user is always seated, and a seated
-  // player may finish in a regular event (as on the backend). Capabilities
-  // computed for a given game should replace this check.
-  const canFinish = selectedEvent?.type === 'regular';
+  const canFinish = hasCapability('finish_game');
 
   return (
     <>

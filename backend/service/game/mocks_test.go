@@ -48,6 +48,69 @@ func (_m *MockGameRepo) EXPECT() *MockGameRepo_Expecter {
 	return &MockGameRepo_Expecter{mock: &_m.Mock}
 }
 
+// Abort provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) Abort(ctx context.Context, gameID int, onlyWithoutRounds bool) error {
+	ret := _mock.Called(ctx, gameID, onlyWithoutRounds)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Abort")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, bool) error); ok {
+		r0 = returnFunc(ctx, gameID, onlyWithoutRounds)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockGameRepo_Abort_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Abort'
+type MockGameRepo_Abort_Call struct {
+	*mock.Call
+}
+
+// Abort is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+//   - onlyWithoutRounds bool
+func (_e *MockGameRepo_Expecter) Abort(ctx any, gameID any, onlyWithoutRounds any) *MockGameRepo_Abort_Call {
+	return &MockGameRepo_Abort_Call{Call: _e.mock.On("Abort", ctx, gameID, onlyWithoutRounds)}
+}
+
+func (_c *MockGameRepo_Abort_Call) Run(run func(ctx context.Context, gameID int, onlyWithoutRounds bool)) *MockGameRepo_Abort_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 bool
+		if args[2] != nil {
+			arg2 = args[2].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_Abort_Call) Return(err error) *MockGameRepo_Abort_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockGameRepo_Abort_Call) RunAndReturn(run func(ctx context.Context, gameID int, onlyWithoutRounds bool) error) *MockGameRepo_Abort_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CurrentGame provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) CurrentGame(ctx context.Context, playerID int, eventID int) (int, error) {
 	ret := _mock.Called(ctx, playerID, eventID)
@@ -790,69 +853,6 @@ func (_c *MockGameRepo_SaveRoundOutcome_Call) RunAndReturn(run func(ctx context.
 	return _c
 }
 
-// SetStatus provides a mock function for the type MockGameRepo
-func (_mock *MockGameRepo) SetStatus(ctx context.Context, gameID int, status models.GameStatus) error {
-	ret := _mock.Called(ctx, gameID, status)
-
-	if len(ret) == 0 {
-		panic("no return value specified for SetStatus")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameStatus) error); ok {
-		r0 = returnFunc(ctx, gameID, status)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockGameRepo_SetStatus_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetStatus'
-type MockGameRepo_SetStatus_Call struct {
-	*mock.Call
-}
-
-// SetStatus is a helper method to define mock.On call
-//   - ctx context.Context
-//   - gameID int
-//   - status models.GameStatus
-func (_e *MockGameRepo_Expecter) SetStatus(ctx any, gameID any, status any) *MockGameRepo_SetStatus_Call {
-	return &MockGameRepo_SetStatus_Call{Call: _e.mock.On("SetStatus", ctx, gameID, status)}
-}
-
-func (_c *MockGameRepo_SetStatus_Call) Run(run func(ctx context.Context, gameID int, status models.GameStatus)) *MockGameRepo_SetStatus_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 int
-		if args[1] != nil {
-			arg1 = args[1].(int)
-		}
-		var arg2 models.GameStatus
-		if args[2] != nil {
-			arg2 = args[2].(models.GameStatus)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-		)
-	})
-	return _c
-}
-
-func (_c *MockGameRepo_SetStatus_Call) Return(err error) *MockGameRepo_SetStatus_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockGameRepo_SetStatus_Call) RunAndReturn(run func(ctx context.Context, gameID int, status models.GameStatus) error) *MockGameRepo_SetStatus_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // Status provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) Status(ctx context.Context, gameID int) (models.GameStatus, error) {
 	ret := _mock.Called(ctx, gameID)
@@ -915,6 +915,72 @@ func (_c *MockGameRepo_Status_Call) Return(gameStatus models.GameStatus, err err
 }
 
 func (_c *MockGameRepo_Status_Call) RunAndReturn(run func(ctx context.Context, gameID int) (models.GameStatus, error)) *MockGameRepo_Status_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Summary provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) Summary(ctx context.Context, gameID int) (models.GameSummary, error) {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Summary")
+	}
+
+	var r0 models.GameSummary
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.GameSummary, error)); ok {
+		return returnFunc(ctx, gameID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.GameSummary); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Get(0).(models.GameSummary)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, gameID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_Summary_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Summary'
+type MockGameRepo_Summary_Call struct {
+	*mock.Call
+}
+
+// Summary is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) Summary(ctx any, gameID any) *MockGameRepo_Summary_Call {
+	return &MockGameRepo_Summary_Call{Call: _e.mock.On("Summary", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_Summary_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_Summary_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_Summary_Call) Return(gameSummary models.GameSummary, err error) *MockGameRepo_Summary_Call {
+	_c.Call.Return(gameSummary, err)
+	return _c
+}
+
+func (_c *MockGameRepo_Summary_Call) RunAndReturn(run func(ctx context.Context, gameID int) (models.GameSummary, error)) *MockGameRepo_Summary_Call {
 	_c.Call.Return(run)
 	return _c
 }

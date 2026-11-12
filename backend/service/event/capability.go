@@ -25,41 +25,49 @@ func (s *Service) HasCapability(ctx context.Context, eventID, callerID, gameID i
 	return nil
 }
 
-func (s *Service) MyCapabilities(ctx context.Context, eventID, callerID, gameID int) (models.EventMe, error) {
+// MyCapabilities returns the caller's event-level capabilities
+// (models.EventCapabilities) and roles.
+func (s *Service) MyCapabilities(ctx context.Context, eventID, callerID int) (models.EventMe, error) {
 	event, err := s.repo.Get(ctx, eventID)
 	if err != nil {
 		return models.EventMe{}, err
 	}
 
-	authCtx, err := s.buildAuthContext(ctx, event, callerID, gameID)
+	authCtx, err := s.buildAuthContext(ctx, event, callerID, 0)
 	if err != nil {
 		return models.EventMe{}, err
 	}
 
-	allCaps := []models.Capability{
-		models.CapManageEvent,
-		models.CapManageMembers,
-		models.CapCreateGame,
-		models.CapAbortGame,
-		models.CapFinishGame,
-		models.CapUndoRound,
-		models.CapWatchLive,
-		models.CapWatchResults,
-		models.CapViewRatings,
-	}
-
-	caps := make([]models.Capability, 0, len(allCaps))
-	for _, capability := range allCaps {
-		if authCtx.hasCapability(capability) {
-			caps = append(caps, capability)
-		}
-	}
-
-	me := models.EventMe{
+	return models.EventMe{
 		IsOwner:      authCtx.IsOwner,
 		Roles:        authCtx.Roles,
-		Capabilities: caps,
+		Capabilities: authCtx.allowed(models.EventCapabilities),
+	}, nil
+}
+
+// MyGameCapabilities returns the caller's capabilities for one game
+// (models.GameCapabilities).
+func (s *Service) MyGameCapabilities(ctx context.Context, eventID, callerID, gameID int) (models.GameMe, error) {
+	event, err := s.repo.Get(ctx, eventID)
+	if err != nil {
+		return models.GameMe{}, err
 	}
 
-	return me, nil
+	authCtx, err := s.buildAuthContext(ctx, event, callerID, gameID)
+	if err != nil {
+		return models.GameMe{}, err
+	}
+
+	return models.GameMe{Capabilities: authCtx.allowed(models.GameCapabilities)}, nil
+}
+
+// allowed returns the capabilities of caps the caller has.
+func (authCtx EventAuthContext) allowed(caps []models.Capability) []models.Capability {
+	out := make([]models.Capability, 0, len(caps))
+	for _, capability := range caps {
+		if authCtx.hasCapability(capability) {
+			out = append(out, capability)
+		}
+	}
+	return out
 }

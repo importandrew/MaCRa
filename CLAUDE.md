@@ -29,7 +29,7 @@ The rules above still apply in full. Put personal overrides in `.claude/settings
 
 - Mobile first (most users are on phones); supported from 320 px wide. Game screens avoid the keyboard: steppers and toggles, players picked by seat.
 - At the table, scores change only when the player taps Refresh or enters a round; elsewhere auto-refresh is an opt-in switch.
-- The event owner always has staff rights; a player always sees their own games while they can open the event; without access to an event, nothing in it is visible.
+- The event owner sees everything in their event and manages it; acting as a referee (undo, abort) takes the referee role, also for the owner. A player always sees their own games while they can open the event; without access to an event, nothing in it is visible.
 - An event's game rules freeze after its first game, and each game is replayed with the rules it started with; permissions can change at any time.
 - Players' privacy: emails are never shown to other users; non-members get staff names and a player count, not the member list (ratings and games show names only as their reach allows).
 
@@ -37,5 +37,5 @@ The rules above still apply in full. Put personal overrides in `.claude/settings
 
 - The frontend and the API share one origin: the frontend calls relative `/api/...` and `/auth/...`, which nginx forwards to the backend on prod and vite's dev server does locally (`frontend/vite.config.ts`, target `MACRA_API_PROXY`, default `http://127.0.0.1:3001`). So there is no CORS, and the auth cookie is host-only (each site its own session). The backend's `site_url` in `backend_config.json` is the site's own address; links in auth emails point to it.
 - `frontend/src/models/` mirrors the backend JSON shapes. Change both sides together.
-- The UI is gated by per-event capabilities from `GET /api/event/:id/me` (`useEventCapabilities`). Adding a capability on the backend means handling it on the frontend.
+- The UI is gated by capabilities: per event from `GET /api/event/:id/me` (`useEventCapabilities`), per game from `GET /api/event/:id/game/:gameId/me` (`useGameCapabilities`: enter rounds, undo, abort, finish). Adding a capability on the backend means handling it on the frontend.
 - `deploy*` targets in the Makefiles copy builds to the production/dev server over SSH (`MACRA_SSHKEY`/`MACRA_HOST`) and restart systemd services. Never run them unprompted.

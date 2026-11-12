@@ -2,24 +2,11 @@ package game
 
 import (
 	"context"
-
-	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) Abort(ctx context.Context, gameID int) error {
-	status, err := s.gameRepo.Status(ctx, gameID)
-	if err != nil {
-		return err
-	}
-
-	if status != models.GameLive {
-		return models.ErrGameNotLive
-	}
-
-	err = s.gameRepo.SetStatus(ctx, gameID, models.GameAborted)
-	if err != nil {
-		return err
-	}
-
-	return nil
+// Abort makes a live game aborted: it won't count. With onlyWithoutRounds
+// (a seated player, not a referee) only while no round has been entered,
+// else models.ErrGameHasRounds; checked by the repo in the same statement.
+func (s *Service) Abort(ctx context.Context, gameID int, onlyWithoutRounds bool) error {
+	return s.gameRepo.Abort(ctx, gameID, onlyWithoutRounds)
 }

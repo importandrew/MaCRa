@@ -12,4 +12,22 @@ const (
 	CapWatchLive     Capability = "watch_live"
 	CapWatchResults  Capability = "watch_results"
 	CapViewRatings   Capability = "view_ratings"
+
+	// Game level (GET /event/:id/game/:gameId/me): what the caller may do with
+	// one game.
+	CapViewGame   Capability = "view_game"
+	CapEnterRound Capability = "enter_round"
 )
+
+// EventCapabilities are the capabilities that don't depend on a game, the ones
+// GET /event/:id/me lists.
+var EventCapabilities = []Capability{
+	CapManageEvent, CapManageMembers, CapCreateGame,
+	CapWatchLive, CapWatchResults, CapViewRatings,
+}
+
+// GameCapabilities are the capabilities about one game, the ones
+// GET /event/:id/game/:gameId/me lists.
+var GameCapabilities = []Capability{
+	CapViewGame, CapEnterRound, CapUndoRound, CapAbortGame, CapFinishGame,
+}

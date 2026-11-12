@@ -6,6 +6,7 @@ import { useRouteIds } from '../../hooks/useRouteIds';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { useEvent } from '../../providers/event/eventConstants';
 import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
+import { useGameCapabilities } from '../../providers/game/useGameCapabilities';
 import {
   useFetchGameLogsData,
   useFetchGameResultData,
@@ -34,8 +35,9 @@ export default function GameResult() {
         ? { eventId: route.eventId, gameId: route.gameId }
         : undefined
     );
-  const canUndoLastRound =
-    hasCapability('undo_round') && Boolean(data?.can_undo_last_round);
+  // undo_round of the game shown: a referee, within an hour of its end.
+  const gameCaps = useGameCapabilities(eventId, data?.id ?? null);
+  const canUndoLastRound = gameCaps.hasCapability('undo_round');
   const [isChartVisible, setIsChartVisible] = useState(false);
   const [isLogsVisible, setIsLogsVisible] = useState(false);
   // The log is loaded once, when the chart or the log is first shown, and

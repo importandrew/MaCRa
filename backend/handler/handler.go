@@ -59,6 +59,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 				eventGame.GET("/logs", h.event.GameLogs)
 				eventGame.GET("/hud", h.event.GameHUD)
 				eventGame.GET("/status", h.event.GameStatus)
+				eventGame.GET("/me", h.event.GameMe)
 			}
 		}
 
