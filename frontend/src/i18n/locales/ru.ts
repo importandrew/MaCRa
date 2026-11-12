@@ -91,7 +91,6 @@ const ru: Messages = {
     game_not_live: 'Игра не идёт',
     game_not_ended: 'Игра ещё не завершена',
     event_not_found: 'Событие не найдено',
-    player_exists: 'Игрок с такой почтой уже есть',
     log_changed:
       'Игра изменилась, пока вы её смотрели. Проверьте лог и попробуйте снова.',
     player_in_another_game:

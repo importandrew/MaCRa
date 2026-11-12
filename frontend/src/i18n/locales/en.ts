@@ -94,7 +94,6 @@ const en = {
     game_not_live: 'The game is not live',
     game_not_ended: 'The game has not ended yet',
     event_not_found: 'Event not found',
-    player_exists: 'A player with this email already exists',
     log_changed:
       'The game has changed since you opened it. Check the log and try again.',
     player_in_another_game:

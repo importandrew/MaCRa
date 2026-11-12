@@ -21,6 +21,9 @@ var (
 	ErrPlayerNotFound   = errors.New("player not found")
 	ErrBadCredentials   = errors.New("email or password is incorrect")
 	ErrUserNotInPlayers = errors.New("cannot create game without yourself")
+	// ErrPlayerExists means the email already has an account. Never shown to
+	// the client: SignUp answers as for a new email, so the response doesn't
+	// reveal which emails are registered.
 	ErrPlayerExists     = errors.New("player with this email already exists")
 	ErrEmptyName        = errors.New("name cannot be empty")
 	ErrLongName         = errors.New("name cannot exceed 50 characters")
@@ -121,7 +124,6 @@ var Errors = map[error]APIError{
 	ErrEventNotFound:  {http.StatusNotFound, "event_not_found"},
 
 	// 409
-	ErrPlayerExists:         {http.StatusConflict, "player_exists"},
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},
 	ErrPlayerInAnotherGame:  {http.StatusConflict, "player_in_another_game"},
 	ErrMemberInCurrentGame:  {http.StatusConflict, "member_in_current_game"},
