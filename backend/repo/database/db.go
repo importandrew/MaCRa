@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	pgxlogrus "github.com/jackc/pgx-logrus"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/tracelog"
 
@@ -40,6 +42,16 @@ func NewDB(ctx context.Context, dbURL string, dbLog bool) (DB, error) {
 	dbConf, err := pgxpool.ParseConfig(dbURL)
 	if err != nil {
 		return DB{}, fmt.Errorf("cannot parse db config url: %w", err)
+	}
+
+	// Read timestamptz values in UTC, whatever the server's local time zone.
+	dbConf.AfterConnect = func(_ context.Context, conn *pgx.Conn) error {
+		conn.TypeMap().RegisterType(&pgtype.Type{
+			Name:  "timestamptz",
+			OID:   pgtype.TimestamptzOID,
+			Codec: &pgtype.TimestamptzCodec{ScanLocation: time.UTC},
+		})
+		return nil
 	}
 
 	if dbLog {

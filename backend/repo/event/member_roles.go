@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 
@@ -10,12 +11,13 @@ import (
 
 func (r *Repo) AddMemberRoles(ctx context.Context, eventID, userID int, roles []models.EventRole) error {
 	return r.InTx(ctx, func(tx *Repo) error {
+		now := time.Now().UTC()
 		for _, role := range roles {
 			_, err := tx.db.Exec(ctx, `
-				INSERT INTO event_user_roles (event_id, user_id, role)
-				VALUES ($1, $2, $3)
+				INSERT INTO event_user_roles (event_id, user_id, role, created_at)
+				VALUES ($1, $2, $3, $4)
 				ON CONFLICT DO NOTHING`,
-				eventID, userID, role,
+				eventID, userID, role, now,
 			)
 			if err != nil {
 				return err

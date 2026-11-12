@@ -49,8 +49,8 @@ func createTestEvent(t *testing.T, conn *pgxpool.Conn) {
 	ctx := context.Background()
 	createTestUser(t, conn, 1)
 	_, err := conn.Exec(ctx, `
-		INSERT INTO events(id, type, name, owner_user_id, visibility, ratings_reach, games_reach)
-		VALUES($1, 'regular', $2, 1, 'public', 'public', 'public')
+		INSERT INTO events(id, type, name, owner_user_id, visibility, ratings_reach, games_reach, created_at)
+		VALUES($1, 'regular', $2, 1, 'public', 'public', 'public', now())
 		ON CONFLICT (id) DO NOTHING`,
 		testEventID, "Test Event",
 	)
@@ -63,8 +63,8 @@ func createTestUser(t *testing.T, conn *pgxpool.Conn, id int) {
 	t.Helper()
 	ctx := context.Background()
 	_, err := conn.Exec(ctx, `
-		INSERT INTO users(id, name, email, password)
-		VALUES($1, $2, $3, $4)
+		INSERT INTO users(id, name, email, password, created_at)
+		VALUES($1, $2, $3, $4, now())
 		ON CONFLICT (id) DO UPDATE SET
 			name = EXCLUDED.name,
 			email = EXCLUDED.email,

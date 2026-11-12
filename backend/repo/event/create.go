@@ -12,6 +12,7 @@ import (
 func (r *Repo) Create(ctx context.Context, event models.Event) (int, error) {
 	var id int
 	err := r.InTx(ctx, func(tx *Repo) error {
+		now := time.Now().UTC()
 		args := pgx.NamedArgs{
 			"owner_id":      event.OwnerUserID,
 			"type":          event.Type,
@@ -20,7 +21,7 @@ func (r *Repo) Create(ctx context.Context, event models.Event) (int, error) {
 			"visibility":    event.Visibility,
 			"ratings_reach": event.RatingsReach,
 			"games_reach":   event.GamesReach,
-			"now":           time.Now().UTC(),
+			"now":           now,
 		}
 
 		rows, err := tx.db.Query(ctx, `
@@ -48,9 +49,9 @@ func (r *Repo) Create(ctx context.Context, event models.Event) (int, error) {
 			ownerDefaultRoles := []models.EventRole{models.EventPlayer, models.EventReferee}
 			for _, role := range ownerDefaultRoles {
 				_, err = tx.db.Exec(ctx, `
-					INSERT INTO event_user_roles (event_id, user_id, role)
-					VALUES ($1, $2, $3)`,
-					id, event.OwnerUserID, role,
+					INSERT INTO event_user_roles (event_id, user_id, role, created_at)
+					VALUES ($1, $2, $3, $4)`,
+					id, event.OwnerUserID, role, now,
 				)
 				if err != nil {
 					return err
