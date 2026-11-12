@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Button, useOverlayState } from '@heroui/react';
-import { PostRequest, authFetch, eventGamePath } from '../../Request';
-import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
-import { WarningIcon } from '../../Icons/WarningIcon';
-import Confirm from '../../Confirm';
-import { showToast } from '../../Toast';
+import { PostRequest, authFetch, eventGamePath } from '../Request';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
+import { WarningIcon } from '../Icons/WarningIcon';
+import Confirm from '../Confirm';
+import { showToast } from '../Toast';
 
 export default function FinishMenu({
   gameId,

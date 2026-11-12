@@ -5,11 +5,11 @@ import LazyAccordion from '../../LazyAccordion';
 import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
-import LogsMenu from '../../CurrentGame/Menu/LogsMenu';
+import LogsMenu from '../../GameMenu/LogsMenu';
 import { GameRoundLogs } from '../../../models/GameResult';
-import AbortMenu from '../../CurrentGame/Menu/AbortMenu';
-import FinishMenu from '../../CurrentGame/Menu/FinishMenu';
-import { FansMenu } from '../../CurrentGame/Menu/FansMenu';
+import AbortMenu from '../../GameMenu/AbortMenu';
+import FinishMenu from '../../GameMenu/FinishMenu';
+import { FansMenu } from '../../GameMenu/FansMenu';
 
 export default function LiveMenu({
   gameId = null,

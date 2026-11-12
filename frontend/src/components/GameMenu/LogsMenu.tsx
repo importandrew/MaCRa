@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useState } from 'react';
-import { useSubmitOnce } from '../../../hooks/useSubmitOnce';
-import GameLogs, { LogsState } from '../../GameResult/GameLogs';
-import Confirm from '../../Confirm';
-import { showToast } from '../../Toast';
-import { UndoIcon } from '../../Icons/UndoIcon';
-import { undoLastRound } from '../../../providers/game/gameDataApi';
-import PendingButton from '../../PendingButton';
-import { Outcome } from '../../../models/GameData';
-import { apiErrorText } from '../../apiErrorText';
-import { GameRoundLogs } from '../../../models/GameResult';
+import { useSubmitOnce } from '../../hooks/useSubmitOnce';
+import GameLogs, { LogsState } from '../GameResult/GameLogs';
+import Confirm from '../Confirm';
+import { showToast } from '../Toast';
+import { UndoIcon } from '../Icons/UndoIcon';
+import { undoLastRound } from '../../providers/game/gameDataApi';
+import PendingButton from '../PendingButton';
+import { Outcome } from '../../models/GameData';
+import { apiErrorText } from '../apiErrorText';
+import { GameRoundLogs } from '../../models/GameResult';
 
 // LogsMenu shows a game's round log with the Undo button. The caller passes
 // the log: a table screen the one from its table response, so the menu shows

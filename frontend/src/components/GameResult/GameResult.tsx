@@ -10,7 +10,7 @@ import {
   useFetchGameResultData,
 } from '../../providers/game/gameDataApi';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
-import LogsMenu from '../CurrentGame/Menu/LogsMenu';
+import LogsMenu from '../GameMenu/LogsMenu';
 import GameLogs from './GameLogs';
 import GameResultTable from './GameResultTable';
 

@@ -5,10 +5,10 @@ import { useFetchEventMe } from '../../../providers/event/eventApi';
 import { useEvent } from '../../../providers/event/eventConstants';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
-import LogsMenu from './LogsMenu';
-import AbortMenu from './AbortMenu';
-import FinishMenu from './FinishMenu';
-import { FansMenu } from './FansMenu';
+import LogsMenu from '../../GameMenu/LogsMenu';
+import AbortMenu from '../../GameMenu/AbortMenu';
+import FinishMenu from '../../GameMenu/FinishMenu';
+import { FansMenu } from '../../GameMenu/FansMenu';
 import LazyAccordion from '../../LazyAccordion';
 import { GameRoundLogs } from '../../../models/GameResult';
 
