@@ -13,6 +13,7 @@ import {
 } from '../../../providers/game/gameDataApi';
 import PendingButton from '../../PendingButton';
 import { Outcome } from '../../../models/GameData';
+import { apiErrorText } from '../../apiErrorText';
 import { GameRoundLogs } from '../../../models/GameResult';
 
 // LogsMenu shows a game's round log with the Undo button. A table screen
@@ -50,7 +51,7 @@ export default function LogsMenu({
   // (onStale) and the log then reload, and the message says what changed, as
   // for a round entry.
   // A 409 with the log unchanged means the final round can't be undone: a
-  // player has started another game (the server's message names them). A
+  // player has started another game (the error names them). A
   // second tap is ignored.
   const handleUndoConfirm = () =>
     run(async () => {
@@ -89,7 +90,7 @@ export default function LogsMenu({
       }
       showToast({
         title: t('game.cannotUndoFinal'),
-        description: error,
+        description: apiErrorText(error, t),
         variant: 'warning',
       });
     });

@@ -34,13 +34,13 @@ func (h Handler) ListGames(c *gin.Context) {
 
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "50"))
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("limit: %w", err))
+		httperr.InvalidRequest(c, fmt.Errorf("limit: %w", err))
 		return
 	}
 
 	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
 	if err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("offset: %w", err))
+		httperr.InvalidRequest(c, fmt.Errorf("offset: %w", err))
 		return
 	}
 

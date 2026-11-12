@@ -57,7 +57,7 @@ func main() {
 	gameService := gsvc.NewService(gameRepo, playerRepo)
 	mail := mailer.New(cfg.MailFrom, cfg.SiteURL)
 	playerService := psvc.NewService(playerRepo, mail)
-	eventService := esvc.NewService(eventRepo, gameService)
+	eventService := esvc.NewService(eventRepo, playerRepo, gameService)
 
 	// handler
 	eventHandler := ehndl.NewHandler(eventService, gameService)

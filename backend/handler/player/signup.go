@@ -17,7 +17,7 @@ type SignupRequest struct {
 func (h Handler) SignUp(c *gin.Context) {
 	var req SignupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

@@ -30,10 +30,10 @@ func TestUndoLastRound(t *testing.T) {
 		setup   func(t *testing.T, repo *Repo, conn *pgxpool.Conn)
 		logSize int
 
-		expectedErr     error
-		expectedErrText string
-		expectedStatus  models.GameStatus
-		expectedRounds  int
+		expectedErr    error
+		expectedName   string
+		expectedStatus models.GameStatus
+		expectedRounds int
 	}{
 		"live game": {
 			rounds:         3,
@@ -85,10 +85,10 @@ func TestUndoLastRound(t *testing.T) {
 				createTestGame(t, conn, 2)
 				createTestGamePlayers(t, conn, 2, [4]int{5, 2, 6, 7})
 			},
-			expectedErr:     models.ErrUndoFinalRound,
-			expectedErrText: "2 has already started another game",
-			expectedStatus:  models.GameEnded,
-			expectedRounds:  16,
+			expectedErr:    models.ErrPlayerInAnotherGame,
+			expectedName:   "2",
+			expectedStatus: models.GameEnded,
+			expectedRounds: 16,
 		},
 		"ended game in a finished event": {
 			rounds:  16,
@@ -140,8 +140,8 @@ func TestUndoLastRound(t *testing.T) {
 
 			if testCase.expectedErr != nil {
 				assert.ErrorIs(t, err, testCase.expectedErr)
-				if testCase.expectedErrText != "" {
-					assert.EqualError(t, err, testCase.expectedErrText)
+				if testCase.expectedName != "" {
+					assertErrorName(t, err, testCase.expectedName)
 				}
 			} else {
 				assert.NoError(t, err)

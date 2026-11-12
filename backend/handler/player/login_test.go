@@ -149,7 +149,7 @@ func TestHandler_Login(t *testing.T) {
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
 				assert.Contains(t, response, "error")
-				assert.Equal(t, "invalid credentials", response["error"])
+				assert.Equal(t, "internal", response["error"])
 			},
 		},
 		"player not found": {
@@ -170,7 +170,7 @@ func TestHandler_Login(t *testing.T) {
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
 				assert.Contains(t, response, "error")
-				assert.Equal(t, models.ErrPlayerNotFound.Error(), response["error"])
+				assert.Equal(t, "player_not_found", response["error"])
 			},
 		},
 	}

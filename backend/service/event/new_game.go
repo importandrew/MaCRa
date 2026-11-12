@@ -2,7 +2,6 @@ package event
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -21,7 +20,7 @@ func (s *Service) NewGame(ctx context.Context, eventID int, playerIDs []int) (in
 
 	for _, playerID := range playerIDs {
 		if err := s.checkPlayerRole(ctx, eventID, playerID); err != nil {
-			return 0, fmt.Errorf("player ID %d: %w", playerID, err)
+			return 0, err
 		}
 	}
 

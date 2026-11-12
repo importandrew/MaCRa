@@ -27,7 +27,7 @@ type LoginResponse struct {
 func (h Handler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

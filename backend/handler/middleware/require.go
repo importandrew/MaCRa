@@ -2,17 +2,17 @@ package middleware
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/importandrew/MaCRa/handler/httperr"
 	"github.com/importandrew/MaCRa/handler/reqctx"
+	"github.com/importandrew/MaCRa/models"
 )
 
 func RequireUser(c *gin.Context) {
 	if reqctx.GetUserID(c) <= reqctx.ZeroUserID {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		httperr.Error(c, models.ErrLoginRequired)
 		return
 	}
 	c.Next()
@@ -20,7 +20,7 @@ func RequireUser(c *gin.Context) {
 
 func RequireEvent(c *gin.Context) {
 	if reqctx.GetEventID(c) <= 0 {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, errors.New("invalid event id"))
+		httperr.InvalidRequest(c, errors.New("invalid event id"))
 		return
 	}
 	c.Next()
@@ -28,7 +28,7 @@ func RequireEvent(c *gin.Context) {
 
 func RequireGame(c *gin.Context) {
 	if reqctx.GetGameID(c) <= 0 {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, errors.New("invalid game id"))
+		httperr.InvalidRequest(c, errors.New("invalid game id"))
 		return
 	}
 	c.Next()
@@ -36,7 +36,7 @@ func RequireGame(c *gin.Context) {
 
 func RequirePlayer(c *gin.Context) {
 	if reqctx.GetPlayerID(c) <= 0 {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, errors.New("invalid player id"))
+		httperr.InvalidRequest(c, errors.New("invalid player id"))
 		return
 	}
 	c.Next()

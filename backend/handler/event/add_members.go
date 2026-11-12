@@ -21,7 +21,7 @@ func (h Handler) AddMembers(c *gin.Context) {
 
 	var req addMembersRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

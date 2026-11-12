@@ -13,14 +13,13 @@ import (
 )
 
 // NewGame creates a live game in the event with the given seating
-// (east, south, west, north). It returns models.ErrValidatePlayers if any of
-// the players already has a live game in the event.
+// (east, south, west, north). It returns models.ErrPlayerInAnotherGame if
+// any of the players already has a live game in the event.
 //
-// The service checks this too, but two concurrent requests can both pass that
-// check. NewGame therefore takes a transaction-level advisory lock per
-// (event, player) and checks again inside the transaction, so a concurrent
-// creation for the same player waits until the first one commits and then
-// sees its game.
+// Two concurrent requests could both pass a check made before the insert.
+// NewGame therefore takes a transaction-level advisory lock per (event,
+// player) and checks inside the transaction, so a concurrent creation for the
+// same player waits until the first one commits and then sees its game.
 func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, error) {
 	var gameID int
 	err := r.InTx(ctx, func(tx *Repo) error {
@@ -32,31 +31,11 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 			return err
 		}
 
-		type liveGamePlayer struct {
-			PlayerID int `db:"player_id"`
-			GameID   int `db:"game_id"`
+		if err := tx.checkNoOtherLiveGame(ctx, seating, eventID, 0); err != nil {
+			return err
 		}
 
 		rows, err := tx.db.Query(ctx, `
-			SELECT gp.player_id, g.id AS game_id
-			FROM games g
-			JOIN game_players gp ON g.id = gp.game_id
-			WHERE gp.player_id = ANY($1) AND g.event_id = $2 AND g.status = $3
-			LIMIT 1`,
-			seating[:], eventID, models.GameLive)
-		if err != nil {
-			return fmt.Errorf("check live games: %w", err)
-		}
-		live, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[liveGamePlayer])
-		switch {
-		case err == nil:
-			return fmt.Errorf("%w: player (ID %v) already in game (ID %v)",
-				models.ErrValidatePlayers, live.PlayerID, live.GameID)
-		case !errors.Is(err, pgx.ErrNoRows):
-			return fmt.Errorf("check live games: %w", err)
-		}
-
-		rows, err = tx.db.Query(ctx, `
 			INSERT INTO games(created_at, status, event_id) 
 			VALUES($1, $2, $3)
 			RETURNING id`,
@@ -129,4 +108,40 @@ func (r *Repo) lockPlayersInEvent(ctx context.Context, seating [4]int, eventID i
 	}
 
 	return nil
+}
+
+// checkNoOtherLiveGame returns models.ErrPlayerInAnotherGame, with the
+// player's name for the client, if a player of the seating has a live game in
+// the event other than exceptGameID (0 for none). Call it on a Repo from InTx
+// after lockPlayersInEvent, so the answer holds until the transaction ends.
+func (r *Repo) checkNoOtherLiveGame(ctx context.Context, seating [4]int, eventID, exceptGameID int) error {
+	type liveGamePlayer struct {
+		PlayerID int    `db:"player_id"`
+		Name     string `db:"name"`
+		GameID   int    `db:"game_id"`
+	}
+
+	rows, err := r.db.Query(ctx, `
+		SELECT gp.player_id, u.name, g.id AS game_id
+		FROM games g
+		JOIN game_players gp ON gp.game_id = g.id
+		JOIN users u ON u.id = gp.player_id
+		WHERE gp.player_id = ANY($1) AND g.event_id = $2 AND g.status = $3 AND g.id <> $4
+		ORDER BY u.name
+		LIMIT 1`,
+		seating[:], eventID, models.GameLive, exceptGameID)
+	if err != nil {
+		return fmt.Errorf("check live games: %w", err)
+	}
+
+	live, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[liveGamePlayer])
+	switch {
+	case err == nil:
+		return fmt.Errorf("player %d in game %d: %w", live.PlayerID, live.GameID,
+			models.WithData(models.ErrPlayerInAnotherGame, models.ErrorData{"name": live.Name}))
+	case errors.Is(err, pgx.ErrNoRows):
+		return nil
+	default:
+		return fmt.Errorf("check live games: %w", err)
+	}
 }

@@ -51,7 +51,7 @@ func TestListMembers(t *testing.T) {
 			}
 			repo.EXPECT().ListMembers(mock.Anything, eventID).Return(all, nil)
 
-			members, err := NewService(repo, nil).ListMembers(context.Background(), eventID, testCase.callerID)
+			members, err := NewService(repo, nil, nil).ListMembers(context.Background(), eventID, testCase.callerID)
 
 			require.NoError(t, err)
 			assert.Equal(t, testCase.expected, members)
@@ -74,7 +74,7 @@ func TestDetails(t *testing.T) {
 	repo.EXPECT().Get(mock.Anything, 1).Return(models.Event{ID: 1, Name: "Club"}, nil)
 	repo.EXPECT().CountPlayers(mock.Anything, 1).Return(12, nil)
 
-	details, err := NewService(repo, nil).Details(context.Background(), 1)
+	details, err := NewService(repo, nil, nil).Details(context.Background(), 1)
 
 	require.NoError(t, err)
 	assert.Equal(t, models.EventDetails{ID: 1, Name: "Club", PlayerCount: 12}, details)

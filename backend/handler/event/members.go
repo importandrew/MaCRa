@@ -18,7 +18,7 @@ func (h Handler) RemoveMember(c *gin.Context) {
 		IDs []int `form:"ids"`
 	}
 	if err := c.ShouldBindQuery(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

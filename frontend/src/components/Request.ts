@@ -1,13 +1,16 @@
 import i18n from '../i18n';
 import { fetchLogoutApi } from '../providers/auth/authApi';
 import { AUTH_USER_DATA } from '../providers/auth/authConstants';
+import type { ApiError } from '../models/ApiError';
+import { apiErrorText } from './apiErrorText';
 import { showToast } from './Toast';
 
 export type FetchResponse<T> = {
   data: T | null;
   status: number;
-  // error is the server's message for an error response.
-  error?: string;
+  // error is the body of an error response: a code to word with
+  // apiErrorText, and its data.
+  error?: ApiError;
 };
 
 type FetchOptions = {
@@ -103,20 +106,19 @@ async function fetchWithStatus<T>(
     }
 
     if (!response.ok) {
-      const data = await response
-        .json()
-        .catch(() => ({ error: i18n.t('errors.unknown') }));
+      const error = (await response.json().catch(() => undefined)) as
+        ApiError | undefined;
       if (
         isToastEnabled &&
         response.status !== 403 &&
         !quietStatuses.includes(response.status)
       ) {
         showToast({
-          title: i18n.t('errors.withMessage', { message: data.error }),
+          title: apiErrorText(error, i18n.t),
           variant: 'danger',
         });
       }
-      return { data: null, status: response.status, error: data.error };
+      return { data: null, status: response.status, error };
     }
 
     const data = JSON.parse((await response.text()) || '{}');

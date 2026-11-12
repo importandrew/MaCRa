@@ -21,7 +21,7 @@ func (h Handler) NewGame(c *gin.Context) {
 
 	var req NewGameRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

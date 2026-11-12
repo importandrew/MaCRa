@@ -3,12 +3,15 @@ package game
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -307,4 +310,12 @@ func setGameFinishedAt(t *testing.T, conn *pgxpool.Conn, gameID int) {
 	if err != nil {
 		t.Fatalf("Failed to set finished_at: %v", err)
 	}
+}
+
+// assertErrorName checks the player's name that err carries for the client.
+func assertErrorName(t *testing.T, err error, name string) {
+	t.Helper()
+	dataErr, ok := errors.AsType[*models.DataError](err)
+	require.True(t, ok, "no data in %v", err)
+	assert.Equal(t, name, dataErr.Data["name"])
 }
