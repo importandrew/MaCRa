@@ -18,6 +18,7 @@ import {
   PlayerStatus,
 } from '../../models/GameResult';
 import { GameView } from '../../models/GameView';
+import type { NotFound } from '../../components/LoadingTemplate/NotFoundState';
 import { useEvent } from '../event/eventConstants';
 
 // undoLastRound undoes the last log entry of the game. logSize is the number
@@ -368,13 +369,16 @@ export const useFetchGameStatus = (
   );
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
+  // notFound: the URL's event or game doesn't exist (a bad id, or a 404 from
+  // the server, which says which); no toast, the page says so.
+  const [notFound, setNotFound] = useState<NotFound | null>(null);
   const { isLoading, startLoading, finishLoading } = useLoadingState(
     `${eventId}/${gameId}`
   );
 
   const fetchData = useCallback(async () => {
     if (!eventId || !gameId) {
-      setIsError(true);
+      setNotFound(eventId ? 'game' : 'event');
       setStatus(null);
       finishLoading(false);
       return;
@@ -383,9 +387,18 @@ export const useFetchGameStatus = (
     startLoading();
     setIsError(false);
     setIsForbidden(false);
+    setNotFound(null);
 
     const request = GetRequest(eventGamePath(eventId, gameId, '/status'));
-    const result = await publicFetch<GameStatusResponse>(request);
+    const result = await publicFetch<GameStatusResponse>(request, {
+      quietStatuses: [404],
+    });
+
+    if (result.status === 404) {
+      setNotFound(result.error?.error === 'event_not_found' ? 'event' : 'game');
+      finishLoading(false);
+      return;
+    }
 
     if (result.status === 403) {
       setIsForbidden(true);
@@ -412,6 +425,7 @@ export const useFetchGameStatus = (
     isLoading,
     isError,
     isForbidden,
+    notFound,
     refetch: fetchData,
   };
 };

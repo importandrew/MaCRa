@@ -12,14 +12,14 @@ export default function ViewGame() {
   const navigate = useNavigate();
   const { eventId, gameId } = useRouteIds();
 
-  const { status, isLoading, isError, isForbidden, refetch } =
+  const { status, isLoading, isError, isForbidden, notFound, refetch } =
     useFetchGameStatus(eventId, gameId);
 
   const onRefresh = useCallback(() => {
     refetch();
   }, [refetch]);
 
-  if (!isLoading && !isError && !isForbidden) {
+  if (!isLoading && !isError && !isForbidden && !notFound) {
     if (status === 'live') {
       // After Finish the page reloads the status instead of navigating: the
       // result lives at this same URL, and navigating to the current URL
@@ -37,6 +37,7 @@ export default function ViewGame() {
       isLoading={isLoading}
       isError={isError}
       isForbidden={isForbidden}
+      notFound={notFound}
       onRefresh={onRefresh}
       onGoHome={() => navigate('/')}
     >

@@ -10,7 +10,7 @@ export function hasCapability(
 }
 
 export function useEventCapabilities(eventId: number | null) {
-  const { data, isError, isForbidden, isLoading, refetch } =
+  const { data, isError, isForbidden, isNotFound, isLoading, refetch } =
     useFetchEventMe(eventId);
 
   const check = useCallback(
@@ -22,6 +22,7 @@ export function useEventCapabilities(eventId: number | null) {
     me: data,
     isError,
     isForbidden,
+    isNotFound,
     isLoading,
     refetch,
     hasCapability: check,

@@ -1,12 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import ForbiddenState from './ForbiddenState';
+import NotFoundState, { type NotFound } from './NotFoundState';
 import LoadingSpinner from './LoadingSpinner';
 
 interface LoadingTemplateProps {
   isLoading: boolean;
   isError: boolean;
   isForbidden?: boolean;
+  // notFound shows NotFoundState: the page's event or game doesn't exist.
+  notFound?: NotFound | null;
   onRefresh: () => void;
   onGoHome?: () => void;
   children: React.ReactNode;
@@ -14,8 +17,15 @@ interface LoadingTemplateProps {
 
 const LoadingTemplate = (props: LoadingTemplateProps) => {
   const { t } = useTranslation();
-  const { isLoading, isError, isForbidden, onRefresh, onGoHome, children } =
-    props;
+  const {
+    isLoading,
+    isError,
+    isForbidden,
+    notFound,
+    onRefresh,
+    onGoHome,
+    children,
+  } = props;
 
   if (isLoading) {
     return (
@@ -23,6 +33,10 @@ const LoadingTemplate = (props: LoadingTemplateProps) => {
         <LoadingSpinner label={t('common.loading')} />
       </div>
     );
+  }
+
+  if (notFound) {
+    return <NotFoundState what={notFound} onGoHome={onGoHome} />;
   }
 
   if (isForbidden) {

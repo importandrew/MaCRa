@@ -33,6 +33,7 @@ export default function EventLayout() {
     isLoading: eventLoading,
     isError: eventError,
     isForbidden: eventForbidden,
+    isNotFound: eventNotFound,
     refetch: refetchEvent,
   } = useFetchEvent(eventId);
   const {
@@ -40,6 +41,7 @@ export default function EventLayout() {
     isLoading: meLoading,
     isError: meError,
     isForbidden: meForbidden,
+    isNotFound: meNotFound,
     refetch: refetchMe,
     hasCapability,
   } = useEventCapabilities(eventId);
@@ -47,6 +49,8 @@ export default function EventLayout() {
   const isLoading = eventLoading || meLoading;
   const isError = eventError || meError;
   const isForbidden = eventForbidden || meForbidden;
+  // The server says the event doesn't exist (a bad id is handled below).
+  const isNotFound = eventNotFound || meNotFound;
 
   const refetch = useCallback(() => {
     refetchEvent();
@@ -121,8 +125,18 @@ export default function EventLayout() {
     closeDrawer();
   };
 
-  if (eventId == null || Number.isNaN(eventId)) {
-    return null;
+  if (eventId == null) {
+    return (
+      <LoadingTemplate
+        isLoading={false}
+        isError={false}
+        notFound="event"
+        onRefresh={refetch}
+        onGoHome={() => navigate('/events')}
+      >
+        {null}
+      </LoadingTemplate>
+    );
   }
 
   return (
@@ -131,6 +145,7 @@ export default function EventLayout() {
         isLoading={isLoading}
         isError={isError}
         isForbidden={isForbidden}
+        notFound={isNotFound ? 'event' : null}
         onRefresh={refetch}
         onGoHome={() => navigate('/events')}
       >
