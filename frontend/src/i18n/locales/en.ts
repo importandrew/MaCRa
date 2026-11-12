@@ -49,6 +49,12 @@ const en = {
     clearField: 'Clear {{field}}',
     atLeast: '{{field}} should be {{min}} or higher',
   },
+  // crash is the page shown after a render error.
+  crash: {
+    title: 'Something went wrong on this page',
+    hint: 'Reload the page or go home. If it happens again, send us the text below.',
+    reload: 'Reload',
+  },
   errors: {
     sessionExpired: 'Session expired',
     logInAgain: 'Please log in again.',
