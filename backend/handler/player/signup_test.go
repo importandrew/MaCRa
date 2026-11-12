@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/importandrew/MaCRa/config"
-	"github.com/importandrew/MaCRa/models"
 )
 
 func TestHandler_SignUp(t *testing.T) {
@@ -86,30 +85,7 @@ func TestHandler_SignUp(t *testing.T) {
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
 				assert.Contains(t, response, "error")
-				assert.Equal(t, "database error", response["error"])
-			},
-		},
-		"player already exists": {
-			requestBody: SignupRequest{
-				Email:    "existing@example.com",
-				Name:     "Existing User",
-				Password: "password123",
-			},
-			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().SignUp(
-					mock.Anything,
-					"existing@example.com",
-					"Existing User",
-					"password123",
-				).Return(models.ErrPlayerExists)
-			},
-			expectedCode: http.StatusConflict,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				assert.NoError(t, err)
-				assert.Contains(t, response, "error")
-				assert.Equal(t, models.ErrPlayerExists.Error(), response["error"])
+				assert.Equal(t, "internal", response["error"])
 			},
 		},
 	}

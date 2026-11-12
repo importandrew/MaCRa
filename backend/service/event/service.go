@@ -9,7 +9,13 @@ import (
 
 type Service struct {
 	repo        EventRepo
+	playerRepo  PlayerRepo
 	gameService *game.Service
+}
+
+// PlayerRepo gives players' names for error messages.
+type PlayerRepo interface {
+	Get(ctx context.Context, id int) (models.Player, error)
 }
 
 type EventRepo interface {
@@ -29,9 +35,10 @@ type EventRepo interface {
 	ListEndedPlayerResults(ctx context.Context, eventID int) ([]models.EventPlayerResultRow, error)
 }
 
-func NewService(repo EventRepo, gameService *game.Service) *Service {
+func NewService(repo EventRepo, playerRepo PlayerRepo, gameService *game.Service) *Service {
 	return &Service{
 		repo:        repo,
+		playerRepo:  playerRepo,
 		gameService: gameService,
 	}
 }

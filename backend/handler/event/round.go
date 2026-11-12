@@ -27,7 +27,7 @@ func (h Handler) EnterRoundResult(c *gin.Context) {
 
 	var req EnterRoundResultRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, fmt.Errorf("bind: %w", err))
+		httperr.InvalidRequest(c, fmt.Errorf("bind: %w", err))
 		return
 	}
 

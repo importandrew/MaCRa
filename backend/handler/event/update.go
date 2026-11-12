@@ -24,7 +24,7 @@ func (h Handler) Update(c *gin.Context) {
 
 	var req UpdateEventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

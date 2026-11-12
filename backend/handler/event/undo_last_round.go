@@ -26,7 +26,7 @@ func (h Handler) UndoLastRound(c *gin.Context) {
 	// is refused if the log has changed since (see repo UndoLastRound).
 	logSize, err := strconv.Atoi(c.Query("log_size"))
 	if err != nil || logSize < 0 {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, errors.New("log_size query parameter is required"))
+		httperr.InvalidRequest(c, errors.New("log_size query parameter is required"))
 		return
 	}
 

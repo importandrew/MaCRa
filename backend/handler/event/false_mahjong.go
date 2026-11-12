@@ -25,7 +25,7 @@ func (h Handler) FalseMahjong(c *gin.Context) {
 
 	var req FalseMahjongRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

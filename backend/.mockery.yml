@@ -28,6 +28,7 @@ packages:
   github.com/importandrew/MaCRa/service/event:
     interfaces:
       EventRepo: {}
+      PlayerRepo: {}
   github.com/importandrew/MaCRa/handler/player:
     interfaces:
       PlayerService: {}

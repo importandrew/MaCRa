@@ -113,7 +113,8 @@ func TestNewGameAlreadyInGame(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = repo.NewGame(ctx, [4]int{5, 6, 7, 4}, testEventID)
-		assert.ErrorIs(t, err, models.ErrValidatePlayers)
+		assert.ErrorIs(t, err, models.ErrPlayerInAnotherGame)
+		assertErrorName(t, err, "4")
 	})
 
 	db.Test(t, "concurrent creations", func(t *testing.T) {
@@ -157,7 +158,7 @@ func TestNewGameAlreadyInGame(t *testing.T) {
 					created++
 					continue
 				}
-				require.ErrorIs(t, err, models.ErrValidatePlayers)
+				require.ErrorIs(t, err, models.ErrPlayerInAnotherGame)
 			}
 			require.Equal(t, 1, created, "exactly one game must be created")
 

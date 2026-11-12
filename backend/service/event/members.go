@@ -17,7 +17,7 @@ func (s *Service) RemoveMembers(ctx context.Context, eventID int, targetUserIDs 
 			}
 			continue
 		}
-		return fmt.Errorf("user %d: %w", userID, models.ErrMemberInCurrentGame)
+		return s.withPlayerName(ctx, userID, models.ErrMemberInCurrentGame)
 	}
 
 	return s.repo.RemoveMembers(ctx, eventID, targetUserIDs)

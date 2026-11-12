@@ -142,7 +142,7 @@ func TestHandler_List(t *testing.T) {
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.NoError(t, err)
 				assert.Contains(t, response, "error")
-				assert.Equal(t, "database error", response["error"])
+				assert.Equal(t, "internal", response["error"])
 			},
 		},
 	}

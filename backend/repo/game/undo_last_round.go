@@ -22,8 +22,8 @@ import (
 // Undo at once remove one entry, not two.
 //
 // Reviving an ended game takes the same advisory locks as NewGame and refuses
-// with models.ErrUndoFinalRound if one of its players has started another
-// live game in the event: a player can't have two live games.
+// with models.ErrPlayerInAnotherGame if one of its players has started
+// another live game in the event: a player can't have two live games.
 func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfter time.Time) error {
 	return r.InTx(ctx, func(tx *Repo) error {
 		if err := tx.lockUnchangedLog(ctx, gameID, logSize); err != nil {
@@ -70,8 +70,8 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfte
 // reviveGame makes an ended game live again: it deletes the players' results
 // and clears finished_at. Like NewGame, it refuses with
 // models.ErrEventAlreadyFinished in a finished event, and with
-// models.ErrUndoFinalRound if one of the players already has another live game
-// in the event, checked under the same locks NewGame takes. Call it on a Repo
+// models.ErrPlayerInAnotherGame if one of the players already has another live
+// game in the event, checked under the same locks NewGame takes. Call it on a Repo
 // from InTx.
 func (r *Repo) reviveGame(ctx context.Context, gameID, eventID int, seating [4]int) error {
 	if err := r.lockOpenEvent(ctx, eventID); err != nil {
@@ -82,24 +82,8 @@ func (r *Repo) reviveGame(ctx context.Context, gameID, eventID int, seating [4]i
 		return err
 	}
 
-	rows, err := r.db.Query(ctx, `
-		SELECT u.name
-		FROM games g
-		JOIN game_players gp ON gp.game_id = g.id
-		JOIN users u ON u.id = gp.player_id
-		WHERE gp.player_id = ANY($1) AND g.event_id = $2 AND g.status = $3 AND g.id <> $4
-		ORDER BY u.name
-		LIMIT 1`,
-		seating[:], eventID, models.GameLive, gameID)
-	if err != nil {
-		return fmt.Errorf("check live games: %w", err)
-	}
-	name, err := pgx.CollectOneRow(rows, pgx.RowTo[string])
-	switch {
-	case err == nil:
-		return models.PlayerInAnotherGameError{Name: name}
-	case !errors.Is(err, pgx.ErrNoRows):
-		return fmt.Errorf("check live games: %w", err)
+	if err := r.checkNoOtherLiveGame(ctx, seating, eventID, gameID); err != nil {
+		return err
 	}
 
 	if _, err := r.db.Exec(ctx, `DELETE FROM player_results WHERE game_id = $1`, gameID); err != nil {

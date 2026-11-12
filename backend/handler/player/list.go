@@ -16,7 +16,7 @@ type ListNameLimit struct {
 func (h Handler) List(c *gin.Context) {
 	var req ListNameLimit
 	if err := c.ShouldBindQuery(&req); err != nil {
-		httperr.ErrorWithCode(c, http.StatusBadRequest, err)
+		httperr.InvalidRequest(c, err)
 		return
 	}
 

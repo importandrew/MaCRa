@@ -2,11 +2,16 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 )
 
-// public errors.
+// public errors. Their texts go to the server log; the client gets the code
+// from Errors and words the message itself.
 var (
+	ErrInvalidRequest = errors.New("invalid request")
+	ErrLoginRequired  = errors.New("login required")
+
 	ErrGameNotFound             = errors.New("game not found")
 	ErrGameNotLive              = errors.New("game is not live")
 	ErrGameNotEnded             = errors.New("game is not ended")
@@ -16,6 +21,9 @@ var (
 	ErrPlayerNotFound   = errors.New("player not found")
 	ErrBadCredentials   = errors.New("email or password is incorrect")
 	ErrUserNotInPlayers = errors.New("cannot create game without yourself")
+	// ErrPlayerExists means the email already has an account. Never shown to
+	// the client: SignUp answers as for a new email, so the response doesn't
+	// reveal which emails are registered.
 	ErrPlayerExists     = errors.New("player with this email already exists")
 	ErrEmptyName        = errors.New("name cannot be empty")
 	ErrLongName         = errors.New("name cannot exceed 50 characters")
@@ -39,85 +47,111 @@ var (
 	// ErrLogChanged means a round entry or an undo was made from an outdated
 	// table or log: someone else has entered or undone an entry since.
 	ErrLogChanged = errors.New("the game has changed since you opened it, check the log and try again")
-	// ErrUndoFinalRound means the final round can't be undone because the
-	// game can't become live again (a player has started another game).
-	ErrUndoFinalRound = errors.New("cannot undo the final round")
+	// ErrPlayerInAnotherGame means a game can't become live (a new game, or
+	// an ended one by undoing its final round) because one of its players
+	// already has a live game in the event. Sent with the player's name.
+	ErrPlayerInAnotherGame = errors.New("player is in another live game")
 
+	// ErrValidatePlayers means the seating isn't four distinct players.
 	ErrValidatePlayers = errors.New("validate game players")
 
 	ErrEventNotFound        = errors.New("event not found")
 	ErrEventForbidden       = errors.New("forbidden event")
 	ErrEventAlreadyFinished = errors.New("event already finished")
 	ErrEventHasOngoingGames = errors.New("event has ongoing games")
-	ErrMemberInCurrentGame  = errors.New("cannot remove member who plays game right now")
-	ErrMissingPlayerRole    = errors.New("missing 'player' role")
-	ErrGameNotInEvent       = errors.New("game not in event")
-	ErrInvalidEventType     = errors.New("invalid event type")
-	ErrInvalidContentReach  = errors.New("invalid content reach")
-	ErrInvalidGameStatus    = errors.New("invalid game status")
+	// ErrMemberInCurrentGame is sent with the member's name.
+	ErrMemberInCurrentGame = errors.New("cannot remove member who plays game right now")
+	// ErrMissingPlayerRole is sent with the player's name.
+	ErrMissingPlayerRole   = errors.New("missing 'player' role")
+	ErrGameNotInEvent      = errors.New("game not in event")
+	ErrInvalidEventType    = errors.New("invalid event type")
+	ErrInvalidContentReach = errors.New("invalid content reach")
+	ErrInvalidGameStatus   = errors.New("invalid game status")
 
 	ErrNoRounds = errors.New("no rounds to undo")
 	ErrTooLate  = errors.New("too late to undo")
 )
 
-var Errors = map[error]int{
+// APIError is how a public error reaches the client: the HTTP status and a
+// stable code, sent as {"error": "<code>"} along with the error's data
+// (WithData). The frontend maps codes to texts.
+type APIError struct {
+	Status int
+	Code   string
+}
+
+// ErrInternal is the APIError for any error not in Errors. Its text stays in
+// the server log.
+var ErrInternal = APIError{Status: http.StatusInternalServerError, Code: "internal"}
+
+var Errors = map[error]APIError{
 	// 400
-	ErrBadCredentials:           http.StatusBadRequest,
-	ErrUserNotInPlayers:         http.StatusBadRequest,
-	ErrValidateEnterRoundResult: http.StatusBadRequest,
-	ErrValidatePenalty:          http.StatusBadRequest,
-	ErrValidatePlayers:          http.StatusBadRequest,
-	ErrNoRounds:                 http.StatusBadRequest,
-	ErrTooLate:                  http.StatusBadRequest,
-	ErrEmptyName:                http.StatusBadRequest,
-	ErrLongName:                 http.StatusBadRequest,
-	ErrEmptyEmail:               http.StatusBadRequest,
-	ErrLongEmail:                http.StatusBadRequest,
-	ErrInvalidEmail:             http.StatusBadRequest,
-	ErrEmptyPassword:            http.StatusBadRequest,
-	ErrLongPassword:             http.StatusBadRequest,
-	ErrMissingPlayerRole:        http.StatusBadRequest,
-	ErrGameNotInEvent:           http.StatusBadRequest,
-	ErrInvalidEventType:         http.StatusBadRequest,
-	ErrInvalidContentReach:      http.StatusBadRequest,
-	ErrInvalidGameStatus:        http.StatusBadRequest,
-	ErrInvalidAuthToken:         http.StatusBadRequest,
+	ErrInvalidRequest:           {http.StatusBadRequest, "invalid_request"},
+	ErrBadCredentials:           {http.StatusBadRequest, "bad_credentials"},
+	ErrUserNotInPlayers:         {http.StatusBadRequest, "user_not_in_players"},
+	ErrValidateEnterRoundResult: {http.StatusBadRequest, "invalid_round"},
+	ErrValidatePenalty:          {http.StatusBadRequest, "invalid_penalty"},
+	ErrValidatePlayers:          {http.StatusBadRequest, "invalid_players"},
+	ErrNoRounds:                 {http.StatusBadRequest, "no_rounds"},
+	ErrTooLate:                  {http.StatusBadRequest, "too_late"},
+	ErrEmptyName:                {http.StatusBadRequest, "empty_name"},
+	ErrLongName:                 {http.StatusBadRequest, "long_name"},
+	ErrEmptyEmail:               {http.StatusBadRequest, "empty_email"},
+	ErrLongEmail:                {http.StatusBadRequest, "long_email"},
+	ErrInvalidEmail:             {http.StatusBadRequest, "invalid_email"},
+	ErrEmptyPassword:            {http.StatusBadRequest, "empty_password"},
+	ErrLongPassword:             {http.StatusBadRequest, "long_password"},
+	ErrMissingPlayerRole:        {http.StatusBadRequest, "missing_player_role"},
+	ErrGameNotInEvent:           {http.StatusBadRequest, "game_not_in_event"},
+	ErrInvalidEventType:         {http.StatusBadRequest, "invalid_event_type"},
+	ErrInvalidContentReach:      {http.StatusBadRequest, "invalid_content_reach"},
+	ErrInvalidGameStatus:        {http.StatusBadRequest, "invalid_game_status"},
+	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
 
 	// 401
-	ErrSessionExpired: http.StatusUnauthorized,
-	// 404
-	ErrGameNotFound:   http.StatusNotFound,
-	ErrPlayerNotFound: http.StatusNotFound,
-	ErrGameNotLive:    http.StatusNotFound,
-	ErrGameNotEnded:   http.StatusNotFound,
-	ErrEventNotFound:  http.StatusNotFound,
+	ErrSessionExpired: {http.StatusUnauthorized, "session_expired"},
+	ErrLoginRequired:  {http.StatusUnauthorized, "login_required"},
 
 	// 403
-	ErrEventForbidden:   http.StatusForbidden,
-	ErrEmailNotVerified: http.StatusForbidden,
+	ErrEventForbidden:   {http.StatusForbidden, "event_forbidden"},
+	ErrEmailNotVerified: {http.StatusForbidden, "email_not_verified"},
+
+	// 404
+	ErrGameNotFound:   {http.StatusNotFound, "game_not_found"},
+	ErrPlayerNotFound: {http.StatusNotFound, "player_not_found"},
+	ErrGameNotLive:    {http.StatusNotFound, "game_not_live"},
+	ErrGameNotEnded:   {http.StatusNotFound, "game_not_ended"},
+	ErrEventNotFound:  {http.StatusNotFound, "event_not_found"},
 
 	// 409
-	ErrPlayerExists:         http.StatusConflict,
-	ErrLogChanged:           http.StatusConflict,
-	ErrUndoFinalRound:       http.StatusConflict,
-	ErrMemberInCurrentGame:  http.StatusConflict,
-	ErrEventAlreadyFinished: http.StatusConflict,
-	ErrEventHasOngoingGames: http.StatusConflict,
+	ErrLogChanged:           {http.StatusConflict, "log_changed"},
+	ErrPlayerInAnotherGame:  {http.StatusConflict, "player_in_another_game"},
+	ErrMemberInCurrentGame:  {http.StatusConflict, "member_in_current_game"},
+	ErrEventAlreadyFinished: {http.StatusConflict, "event_already_finished"},
+	ErrEventHasOngoingGames: {http.StatusConflict, "event_has_ongoing_games"},
 }
 
-// PlayerInAnotherGameError is returned when the final round can't be undone
-// because one of the game's players has started another game. It is
-// ErrUndoFinalRound for errors.Is (and so a 409), and its text names the
-// player, for the client to show as is.
-type PlayerInAnotherGameError struct {
-	Name string
+// ErrorData is sent to the client next to an error's code, e.g. a player's
+// name for the message.
+type ErrorData map[string]any
+
+// DataError is an error with data for the client. errors.Is and errors.As see
+// the error it wraps.
+type DataError struct {
+	Err  error
+	Data ErrorData
 }
 
-func (e PlayerInAnotherGameError) Error() string {
-	return e.Name + " has already started another game"
+// WithData returns err with data for the client, e.g.
+// WithData(ErrPlayerInAnotherGame, ErrorData{"name": name}).
+func WithData(err error, data ErrorData) error {
+	return &DataError{Err: err, Data: data}
 }
 
-// Is reports whether target is ErrUndoFinalRound.
-func (e PlayerInAnotherGameError) Is(target error) bool {
-	return target == ErrUndoFinalRound
+func (e *DataError) Error() string {
+	return fmt.Sprintf("%v %v", e.Err, map[string]any(e.Data))
+}
+
+func (e *DataError) Unwrap() error {
+	return e.Err
 }

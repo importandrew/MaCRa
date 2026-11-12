@@ -33,9 +33,8 @@ func (a Auth) SetUserID(c *gin.Context) {
 		identity, err := token.IdentifyUser(cookie, a.jwt)
 		if err != nil {
 			// The client only needs to know the session is gone; parser details stay in the log.
-			logger.Warn(fmt.Errorf("identify user: %w", err))
 			authcookie.Clear(c)
-			httperr.Error(c, models.ErrSessionExpired)
+			httperr.Error(c, fmt.Errorf("identify user: %w: %w", models.ErrSessionExpired, err))
 			return
 		}
 
