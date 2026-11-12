@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import { useCallback, useContext, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useRouteIds } from '../../hooks/useRouteIds';
 import { AuthContext } from '../../providers/auth/authConstants';
-import { getStoredEventId } from '../../providers/event/eventConstants';
+import { useEvent } from '../../providers/event/eventConstants';
 import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
 import {
   useFetchGameLogsData,
@@ -18,22 +19,20 @@ export default function GameResult() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
-  const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
-    eventId?: string;
-    gameId?: string;
-  }>();
-
-  const isEventGameRoute = Boolean(eventIdParam && gameIdParam);
-  const eventId = eventIdParam ? parseInt(eventIdParam, 10) : undefined;
-  const gameId = gameIdParam ? parseInt(gameIdParam, 10) : undefined;
-  const storedEventId = getStoredEventId();
-  const resolvedEventId = eventId ?? storedEventId;
-  const { hasCapability } = useEventCapabilities(resolvedEventId);
+  // The result of a game in the URL (/event/N/game/M), or of the user's last
+  // game in the selected event (/last).
+  const route = useRouteIds();
+  const { selectedEventId } = useEvent();
+  const isEventGameRoute = route.eventId != null && route.gameId != null;
+  const eventId = isEventGameRoute ? route.eventId : selectedEventId;
+  const { hasCapability } = useEventCapabilities(eventId);
   const canCreateGame = hasCapability('create_game');
 
   const { data, isError, isForbidden, isLoading, fetchData } =
     useFetchGameResultData(
-      isEventGameRoute && eventId && gameId ? { eventId, gameId } : undefined
+      isEventGameRoute && route.eventId && route.gameId
+        ? { eventId: route.eventId, gameId: route.gameId }
+        : undefined
     );
   const canUndoLastRound =
     hasCapability('undo_round') && Boolean(data?.can_undo_last_round);
@@ -45,7 +44,7 @@ export default function GameResult() {
   const [isLogWanted, setIsLogWanted] = useState(false);
   const logs = useFetchGameLogsData(
     isLogWanted && data ? data.id : null,
-    resolvedEventId ?? undefined
+    eventId
   );
 
   const showChart = () => {
@@ -112,7 +111,7 @@ export default function GameResult() {
           {isLogsVisible && (
             <LogsMenu
               gameId={data.id}
-              eventId={resolvedEventId ?? undefined}
+              eventId={eventId}
               canUndoLastRound={canUndoLastRound}
               onUndoSuccess={() => {
                 navigate('/now');

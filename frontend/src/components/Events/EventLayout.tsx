@@ -2,13 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { Button, Drawer, useOverlayState } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { hasCapability as checkCapability } from '../../providers/event/useEventCapabilities';
-import {
-  finishEvent,
-  useFetchEvent,
-  useFetchEventMe,
-} from '../../providers/event/eventApi';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useRouteIds } from '../../hooks/useRouteIds';
+import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
+import { finishEvent, useFetchEvent } from '../../providers/event/eventApi';
 import {
   EventLayoutContext,
   EventLayoutContextValue,
@@ -20,8 +17,7 @@ import { showToast } from '../Toast';
 import PendingButton from '../PendingButton';
 
 export default function EventLayout() {
-  const { eventId: eventIdParam } = useParams();
-  const eventId = eventIdParam ? parseInt(eventIdParam, 10) : null;
+  const { eventId } = useRouteIds();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -37,30 +33,29 @@ export default function EventLayout() {
     isLoading: eventLoading,
     isError: eventError,
     isForbidden: eventForbidden,
+    isNotFound: eventNotFound,
     refetch: refetchEvent,
   } = useFetchEvent(eventId);
   const {
-    data: me,
+    me,
     isLoading: meLoading,
     isError: meError,
     isForbidden: meForbidden,
+    isNotFound: meNotFound,
     refetch: refetchMe,
-  } = useFetchEventMe(eventId);
+    hasCapability,
+  } = useEventCapabilities(eventId);
 
   const isLoading = eventLoading || meLoading;
   const isError = eventError || meError;
   const isForbidden = eventForbidden || meForbidden;
+  // The server says the event doesn't exist (a bad id is handled below).
+  const isNotFound = eventNotFound || meNotFound;
 
   const refetch = useCallback(() => {
     refetchEvent();
     refetchMe();
   }, [refetchEvent, refetchMe]);
-
-  const hasCapability = useCallback(
-    (cap: Parameters<EventLayoutContextValue['hasCapability']>[0]) =>
-      checkCapability(me, cap),
-    [me]
-  );
 
   const contextValue = useMemo<EventLayoutContextValue | null>(() => {
     if (eventId == null) return null;
@@ -130,8 +125,18 @@ export default function EventLayout() {
     closeDrawer();
   };
 
-  if (eventId == null || Number.isNaN(eventId)) {
-    return null;
+  if (eventId == null) {
+    return (
+      <LoadingTemplate
+        isLoading={false}
+        isError={false}
+        notFound="event"
+        onRefresh={refetch}
+        onGoHome={() => navigate('/events')}
+      >
+        {null}
+      </LoadingTemplate>
+    );
   }
 
   return (
@@ -140,6 +145,7 @@ export default function EventLayout() {
         isLoading={isLoading}
         isError={isError}
         isForbidden={isForbidden}
+        notFound={isNotFound ? 'event' : null}
         onRefresh={refetch}
         onGoHome={() => navigate('/events')}
       >

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { GameData, Outcome } from '../../models/GameData';
-import { getStoredEventId } from '../../providers/event/eventConstants';
+import { useEvent } from '../../providers/event/eventConstants';
 import { fetchWithStatus, PostRequest, eventPath } from '../Request';
 import { showToast } from '../Toast';
 
@@ -29,6 +29,7 @@ export function useRoundEntry(
 ) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { selectedEventId: eventId } = useEvent();
 
   const [outcome, setOutcome] = useState<EntryOutcome | null>(null);
   const [winner, setWinner] = useState<number | null>(null);
@@ -94,7 +95,6 @@ export function useRoundEntry(
   const submit = () => run(send);
 
   const send = async () => {
-    const eventId = getStoredEventId();
     if (!eventId || !outcome || !table) return;
 
     const request = isPenalty

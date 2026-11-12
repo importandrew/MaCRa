@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useRouteIds } from '../../hooks/useRouteIds';
 import { useFetchGameStatus } from '../../providers/game/gameDataApi';
 import GameResult from '../GameResult/GameResult';
 import Live from '../Live/Live';
@@ -9,21 +10,16 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 export default function ViewGame() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
-    eventId: string;
-    gameId: string;
-  }>();
-  const eventId = eventIdParam ? parseInt(eventIdParam, 10) : 0;
-  const gameId = gameIdParam ? parseInt(gameIdParam, 10) : 0;
+  const { eventId, gameId } = useRouteIds();
 
-  const { status, isLoading, isError, isForbidden, refetch } =
+  const { status, isLoading, isError, isForbidden, notFound, refetch } =
     useFetchGameStatus(eventId, gameId);
 
   const onRefresh = useCallback(() => {
     refetch();
   }, [refetch]);
 
-  if (!isLoading && !isError && !isForbidden) {
+  if (!isLoading && !isError && !isForbidden && !notFound) {
     if (status === 'live') {
       // After Finish the page reloads the status instead of navigating: the
       // result lives at this same URL, and navigating to the current URL
@@ -41,6 +37,7 @@ export default function ViewGame() {
       isLoading={isLoading}
       isError={isError}
       isForbidden={isForbidden}
+      notFound={notFound}
       onRefresh={onRefresh}
       onGoHome={() => navigate('/')}
     >

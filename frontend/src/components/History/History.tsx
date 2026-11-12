@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { HistoryProps } from '../../models/GameData';
 import { UserData } from '../../models/UserData';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
-import { getStoredEventId } from '../../providers/event/eventConstants';
+import { useEvent } from '../../providers/event/eventConstants';
 import {
   useFetchBatchGameResults,
   useFetchPlayerGamesHistory,
@@ -21,7 +21,7 @@ const History = (props: HistoryProps) => {
   const { data, isLoading, isError, refetch } =
     useFetchPlayerGamesHistory(playerId);
 
-  const eventId = getStoredEventId() ?? 0;
+  const { selectedEventId: eventId } = useEvent();
   const gameIds = useMemo(() => data?.game_ids || [], [data?.game_ids]);
 
   const {

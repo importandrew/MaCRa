@@ -29,7 +29,7 @@ import {
   updateEvent,
   useFetchEventMembers,
 } from '../../providers/event/eventApi';
-import { useEventLayout } from '../../providers/event/eventLayoutContext';
+import { useEventPage } from '../../providers/event/eventLayoutContext';
 import { CrownIcon } from '../Icons/CrownIcon';
 import { EyeIcon } from '../Icons/EyeIcon';
 import { MahjongTileIcon } from '../Icons/MahjongTileIcon';
@@ -60,8 +60,10 @@ export default function EventManage() {
     value,
     label: t(`reach.${value}`),
   }));
-  const { eventId, event, hasCapability, refetch, isForbidden } =
-    useEventLayout();
+  const { eventId, event, hasCapability, refetch, canView } = useEventPage(
+    'manage_event',
+    'manage_members'
+  );
 
   const canManageEvent = hasCapability('manage_event');
   const canManageMembers = hasCapability('manage_members');
@@ -171,7 +173,7 @@ export default function EventManage() {
       }
     });
 
-  if (isForbidden || (!canManageEvent && !canManageMembers)) {
+  if (!canView) {
     return (
       <LoadingTemplate
         isLoading={false}

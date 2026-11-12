@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Drawer } from '@heroui/react';
 import { useNavigate } from 'react-router-dom';
-import { useFetchEventMe } from '../../../providers/event/eventApi';
+import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
 import { useEvent } from '../../../providers/event/eventConstants';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
@@ -32,10 +32,10 @@ export default function TableMenu({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { selectedEventId, selectedEvent } = useEvent();
-  const { data: eventMe } = useFetchEventMe(selectedEventId);
+  const { hasCapability } = useEventCapabilities(selectedEventId);
 
-  const canAbort = eventMe?.capabilities.includes('abort_game') ?? false;
-  const canUndo = eventMe?.capabilities.includes('undo_round') ?? false;
+  const canAbort = hasCapability('abort_game');
+  const canUndo = hasCapability('undo_round');
   // The event-level finish_game is computed without a game, so it leaves out
   // seated players. At the table the user is always seated, and a seated
   // player may finish in a regular event (as on the backend). Capabilities
@@ -58,6 +58,7 @@ export default function TableMenu({
                 <div className="flex flex-col gap-2">
                   <LogsMenu
                     gameId={gameId}
+                    eventId={selectedEventId}
                     canUndoLastRound={canUndo}
                     onUndoSuccess={onRefetchNow}
                     onStale={onStale}

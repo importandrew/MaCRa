@@ -39,6 +39,8 @@ export const useFetchEvent = (id: number | null) => {
   const [data, setData] = useState<Event | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
+  // isNotFound: the event doesn't exist (404); no toast, the page says so.
+  const [isNotFound, setIsNotFound] = useState(false);
   const { isLoading, startLoading, finishLoading } = useLoadingState(
     id,
     id != null
@@ -53,9 +55,18 @@ export const useFetchEvent = (id: number | null) => {
     startLoading();
     setIsError(false);
     setIsForbidden(false);
+    setIsNotFound(false);
 
     const request = GetRequest(`/api/event/${id}`);
-    const result = await publicFetch<Event>(request);
+    const result = await publicFetch<Event>(request, {
+      quietStatuses: [404],
+    });
+
+    if (result.status === 404) {
+      setIsNotFound(true);
+      finishLoading(false);
+      return;
+    }
 
     if (result.status === 403) {
       setIsForbidden(true);
@@ -77,13 +88,22 @@ export const useFetchEvent = (id: number | null) => {
     fetchData();
   }, [fetchData]);
 
-  return { data, isError, isForbidden, isLoading, refetch: fetchData };
+  return {
+    data,
+    isError,
+    isForbidden,
+    isNotFound,
+    isLoading,
+    refetch: fetchData,
+  };
 };
 
 export const useFetchEventMe = (eventId: number | null) => {
   const [data, setData] = useState<EventMe | null>(null);
   const [isError, setIsError] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
+  // isNotFound: the event doesn't exist (404); no toast, the page says so.
+  const [isNotFound, setIsNotFound] = useState(false);
   const { isLoading, startLoading, finishLoading } = useLoadingState(
     eventId,
     eventId != null
@@ -99,9 +119,18 @@ export const useFetchEventMe = (eventId: number | null) => {
     startLoading();
     setIsError(false);
     setIsForbidden(false);
+    setIsNotFound(false);
 
     const request = GetRequest(`/api/event/${eventId}/me`);
-    const result = await publicFetch<EventMe>(request);
+    const result = await publicFetch<EventMe>(request, {
+      quietStatuses: [404],
+    });
+
+    if (result.status === 404) {
+      setIsNotFound(true);
+      finishLoading(false);
+      return;
+    }
 
     if (result.status === 403) {
       setIsForbidden(true);
@@ -123,7 +152,14 @@ export const useFetchEventMe = (eventId: number | null) => {
     fetchData();
   }, [fetchData]);
 
-  return { data, isError, isForbidden, isLoading, refetch: fetchData };
+  return {
+    data,
+    isError,
+    isForbidden,
+    isNotFound,
+    isLoading,
+    refetch: fetchData,
+  };
 };
 
 export const useFetchEventMembers = (eventId: number | null) => {
