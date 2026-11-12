@@ -2,7 +2,6 @@ package game
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"time"
 
@@ -12,13 +11,7 @@ import (
 )
 
 func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return models.GameResult{}, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx,
+	rows, err := r.db.Query(ctx,
 		`SELECT finished_at FROM games WHERE id = $1`,
 		gameID,
 	)
@@ -26,7 +19,7 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 		return models.GameResult{}, err
 	}
 
-	finishedAt, err := pgx.CollectOneRow(rows, pgx.RowTo[sql.NullTime])
+	finishedAt, err := pgx.CollectOneRow(rows, pgx.RowTo[*time.Time])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return models.GameResult{}, models.ErrGameNotFound
@@ -34,7 +27,7 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 		return models.GameResult{}, err
 	}
 
-	rows, err = conn.Query(ctx, `
+	rows, err = r.db.Query(ctx, `
 		SELECT 
 			pr.tournament_points AS tp,
 			pr.game_points AS gp,
@@ -51,23 +44,13 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 
 	playerResults, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.PlayerResult])
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return models.GameResult{}, models.ErrGameNotFound
-		}
 		return models.GameResult{}, err
 	}
 
 	result := models.GameResult{
 		ID:            gameID,
 		PlayerResults: playerResults,
-	}
-
-	if finishedAt.Valid {
-		result.FinishedAt = &finishedAt.Time
-
-		if result.FinishedAt.Add(models.UndoFinalRoundTimeout).After(time.Now()) {
-			result.CanUndoLastRound = true
-		}
+		FinishedAt:    finishedAt,
 	}
 
 	return result, nil
@@ -82,8 +65,8 @@ type batchPlayerResultRow struct {
 }
 
 type batchFinishedAtRow struct {
-	GameID     int          `db:"id"`
-	FinishedAt sql.NullTime `db:"finished_at"`
+	GameID     int        `db:"id"`
+	FinishedAt *time.Time `db:"finished_at"`
 }
 
 func (r *Repo) GameResults(ctx context.Context, gameIDs []int) (map[int]models.GameResult, error) {
@@ -91,13 +74,7 @@ func (r *Repo) GameResults(ctx context.Context, gameIDs []int) (map[int]models.G
 		return map[int]models.GameResult{}, nil
 	}
 
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
-	finishedRows, err := conn.Query(ctx, `
+	finishedRows, err := r.db.Query(ctx, `
 		SELECT id, finished_at
 		FROM games
 		WHERE id = ANY($1)`,
@@ -118,14 +95,11 @@ func (r *Repo) GameResults(ctx context.Context, gameIDs []int) (map[int]models.G
 			ID:            row.GameID,
 			PlayerResults: []models.PlayerResult{},
 		}
-		if row.FinishedAt.Valid {
-			t := row.FinishedAt.Time
-			result.FinishedAt = &t
-		}
+		result.FinishedAt = row.FinishedAt
 		results[row.GameID] = result
 	}
 
-	playerRows, err := conn.Query(ctx, `
+	playerRows, err := r.db.Query(ctx, `
 		SELECT
 			pr.game_id,
 			pr.tournament_points AS tp,

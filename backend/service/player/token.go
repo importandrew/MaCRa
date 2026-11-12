@@ -46,7 +46,7 @@ func (s *Service) lookupToken(ctx context.Context, raw string, purpose models.Au
 		return models.AuthToken{}, err
 	}
 
-	if token.Purpose != purpose || token.UsedAt.Valid || time.Now().After(token.ExpiresAt) {
+	if token.Purpose != purpose || token.UsedAt != nil || time.Now().After(token.ExpiresAt) {
 		return models.AuthToken{}, models.ErrInvalidAuthToken
 	}
 

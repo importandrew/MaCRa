@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -135,7 +136,7 @@ func TestUndoLastRound(t *testing.T) {
 				testCase.setup(t, repo, conn)
 			}
 
-			err = repo.UndoLastRound(ctx, 1, testCase.logSize)
+			err = repo.UndoLastRound(ctx, 1, testCase.logSize, time.Now().Add(-models.UndoFinalRoundTimeout))
 
 			if testCase.expectedErr != nil {
 				assert.ErrorIs(t, err, testCase.expectedErr)
@@ -184,7 +185,7 @@ func TestUndoLastRound_Concurrent(t *testing.T) {
 		errs := make(chan error, attempts)
 		var wg sync.WaitGroup
 		for range attempts {
-			wg.Go(func() { errs <- repo.UndoLastRound(ctx, 1, 3) })
+			wg.Go(func() { errs <- repo.UndoLastRound(ctx, 1, 3, time.Now().Add(-models.UndoFinalRoundTimeout)) })
 		}
 		wg.Wait()
 		close(errs)

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -34,11 +33,11 @@ var AuthMailLimits = []AuthMailWindow{
 }
 
 type AuthToken struct {
-	ID        int          `db:"id"`
-	UserID    int          `db:"user_id"`
-	Purpose   AuthPurpose  `db:"purpose"`
-	TokenHash string       `db:"token_hash"`
-	ExpiresAt time.Time    `db:"expires_at"`
-	UsedAt    sql.NullTime `db:"used_at"`
-	CreatedAt time.Time    `db:"created_at"`
+	ID        int         `db:"id"`
+	UserID    int         `db:"user_id"`
+	Purpose   AuthPurpose `db:"purpose"`
+	TokenHash string      `db:"token_hash"`
+	ExpiresAt time.Time   `db:"expires_at"`
+	UsedAt    *time.Time  `db:"used_at"`
+	CreatedAt time.Time   `db:"created_at"`
 }

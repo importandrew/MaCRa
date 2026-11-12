@@ -2,7 +2,6 @@ package player
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"time"
 
@@ -12,13 +11,7 @@ import (
 )
 
 func (r *Repo) IsEmailVerified(ctx context.Context, userID int) (bool, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return false, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT email_verified_at
 		FROM users
 		WHERE id = $1`,
@@ -28,7 +21,7 @@ func (r *Repo) IsEmailVerified(ctx context.Context, userID int) (bool, error) {
 		return false, err
 	}
 
-	verifiedAt, err := pgx.CollectOneRow(rows, pgx.RowTo[sql.NullTime])
+	verifiedAt, err := pgx.CollectOneRow(rows, pgx.RowTo[*time.Time])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, models.ErrPlayerNotFound
@@ -36,17 +29,11 @@ func (r *Repo) IsEmailVerified(ctx context.Context, userID int) (bool, error) {
 		return false, err
 	}
 
-	return verifiedAt.Valid, nil
+	return verifiedAt != nil, nil
 }
 
 func (r *Repo) SetEmailVerified(ctx context.Context, userID int) error {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	tag, err := conn.Exec(ctx, `
+	tag, err := r.db.Exec(ctx, `
 		UPDATE users
 		SET email_verified_at = $1
 		WHERE id = $2
@@ -58,7 +45,7 @@ func (r *Repo) SetEmailVerified(ctx context.Context, userID int) error {
 	}
 
 	if tag.RowsAffected() == 0 {
-		rows, err := conn.Query(ctx, `
+		rows, err := r.db.Query(ctx, `
 			SELECT EXISTS(
 				SELECT 1
 				FROM users
@@ -83,13 +70,7 @@ func (r *Repo) SetEmailVerified(ctx context.Context, userID int) error {
 }
 
 func (r *Repo) UpdatePassword(ctx context.Context, userID int, hash string) error {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	tag, err := conn.Exec(ctx, `
+	tag, err := r.db.Exec(ctx, `
 		UPDATE users
 		SET password = $1
 		WHERE id = $2`,

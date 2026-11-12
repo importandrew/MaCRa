@@ -8,13 +8,7 @@ import (
 )
 
 func (r *Repo) Update(ctx context.Context, id int, name string) error {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	res, err := conn.Exec(ctx, "UPDATE users SET name = $1 WHERE id = $2", name, id)
+	res, err := r.db.Exec(ctx, "UPDATE users SET name = $1 WHERE id = $2", name, id)
 	if err != nil {
 		// Same mapping as Add: a name the column can't hold is a client error.
 		if repo.IsTargetErr(repo.SQLStateStringTooLong, err) {

@@ -13,8 +13,8 @@ func createTestUser(t *testing.T, conn *pgxpool.Conn, id int) {
 	t.Helper()
 	ctx := context.Background()
 	_, err := conn.Exec(ctx, `
-		INSERT INTO users(id, name, email, password)
-		VALUES($1, $2, $3, $4)
+		INSERT INTO users(id, name, email, password, created_at)
+		VALUES($1, $2, $3, $4, now())
 		ON CONFLICT (id) DO UPDATE SET
 			name = EXCLUDED.name,
 			email = EXCLUDED.email,
@@ -31,8 +31,8 @@ func createTestUserWithName(t *testing.T, conn *pgxpool.Conn, id int, name strin
 	ctx := context.Background()
 	var userID int
 	err := conn.QueryRow(ctx, `
-		INSERT INTO users(id, name, email, password)
-		VALUES($1, $2, $3, $4)
+		INSERT INTO users(id, name, email, password, created_at)
+		VALUES($1, $2, $3, $4, now())
 		ON CONFLICT (id) DO UPDATE SET
 			name = EXCLUDED.name,
 			email = EXCLUDED.email,

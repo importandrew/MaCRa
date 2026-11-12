@@ -2,6 +2,7 @@ package player
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 
@@ -10,18 +11,13 @@ import (
 )
 
 func (r *Repo) Add(ctx context.Context, email, name, hash string) (int, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return 0, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(
+	rows, err := r.db.Query(
 		ctx,
-		"INSERT INTO users (name, password, email) VALUES ($1, $2, $3) RETURNING id",
+		"INSERT INTO users (name, password, email, created_at) VALUES ($1, $2, $3, $4) RETURNING id",
 		name,
 		hash,
 		email,
+		time.Now().UTC(),
 	)
 	if err != nil {
 		return 0, err

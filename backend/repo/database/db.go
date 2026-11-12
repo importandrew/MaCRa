@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	pgxlogrus "github.com/jackc/pgx-logrus"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/tracelog"
 
@@ -40,6 +44,16 @@ func NewDB(ctx context.Context, dbURL string, dbLog bool) (DB, error) {
 		return DB{}, fmt.Errorf("cannot parse db config url: %w", err)
 	}
 
+	// Read timestamptz values in UTC, whatever the server's local time zone.
+	dbConf.AfterConnect = func(_ context.Context, conn *pgx.Conn) error {
+		conn.TypeMap().RegisterType(&pgtype.Type{
+			Name:  "timestamptz",
+			OID:   pgtype.TimestamptzOID,
+			Codec: &pgtype.TimestamptzCodec{ScanLocation: time.UTC},
+		})
+		return nil
+	}
+
 	if dbLog {
 		pgxlogger := pgxlogrus.NewLogger(logger.StandardLogger())
 		dbConf.ConnConfig.Tracer = &tracelog.TraceLog{
@@ -66,6 +80,35 @@ func (db *DB) Close() {
 }
 
 func (db *DB) Acquire(ctx context.Context) (*pgxpool.Conn, error) { return db.pool.Acquire(ctx) }
+
+// Querier runs SQL on the pool or inside a transaction: *pgxpool.Pool and
+// pgx.Tx both implement it. On the pool, each statement takes a connection
+// only until its rows are read. Begin inside a transaction starts a savepoint.
+type Querier interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+}
+
+// Querier returns the pool as a Querier, for repos to run their queries on.
+func (db *DB) Querier() Querier { return db.pool }
+
+// InTx begins a transaction on q (a savepoint if q is a transaction), calls
+// fn with it and commits it if fn returns nil. Otherwise the transaction is
+// rolled back and fn's error returned.
+func InTx(ctx context.Context, q Querier, fn func(tx pgx.Tx) error) error {
+	tx, err := q.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	if err := fn(tx); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
 
 // Test is wrapper for t.Run() which migrates db up before running the test
 // and down after it finishes.

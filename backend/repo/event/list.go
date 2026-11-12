@@ -9,13 +9,7 @@ import (
 )
 
 func (r *Repo) List(ctx context.Context) ([]models.Event, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT id, type, name, description, owner_user_id,
 			visibility, ratings_reach, games_reach,
 			created_at, finished_at

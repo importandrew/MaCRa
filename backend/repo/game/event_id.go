@@ -10,13 +10,7 @@ import (
 )
 
 func (r *Repo) EventID(ctx context.Context, gameID int) (int, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return 0, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `SELECT event_id FROM games WHERE id = $1`, gameID)
+	rows, err := r.db.Query(ctx, `SELECT event_id FROM games WHERE id = $1`, gameID)
 	if err != nil {
 		return 0, err
 	}

@@ -10,19 +10,13 @@ import (
 )
 
 func (r *Repo) LastGame(ctx context.Context, playerID, eventID int) (int, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return 0, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT g.id 
 		FROM games g
 		JOIN game_players gp ON g.id = gp.game_id
 		WHERE gp.player_id = $1 AND g.event_id = $2 AND g.status = $3
 		ORDER BY g.finished_at DESC NULLS LAST
-		FETCH FIRST 1 ROWS ONLY`,
+		LIMIT 1`,
 		playerID, eventID, models.GameEnded)
 	if err != nil {
 		return 0, err

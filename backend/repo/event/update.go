@@ -7,13 +7,7 @@ import (
 )
 
 func (r *Repo) Update(ctx context.Context, event models.Event) error {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	res, err := conn.Exec(ctx, `
+	res, err := r.db.Exec(ctx, `
 		UPDATE events
 		SET name = $2,
 			description = $3,
