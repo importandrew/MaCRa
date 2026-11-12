@@ -104,7 +104,7 @@ export default function ProfilePage() {
               <Input placeholder={t('profile.namePlaceholder')} />
             </TextField>
             <div className="flex justify-center mt-3 gap-3">
-              <Button variant="ghost" onPress={() => navigate('/')}>
+              <Button variant="tertiary" onPress={() => navigate('/')}>
                 {t('common.cancel')}
               </Button>
               <PendingButton

@@ -119,7 +119,7 @@ export default function EventLayout() {
 
     showToast({
       title: t('events.finishedToast'),
-      variant: 'warning',
+      variant: 'success',
     });
     refetch();
     closeDrawer();

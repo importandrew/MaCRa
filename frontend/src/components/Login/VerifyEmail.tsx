@@ -53,7 +53,7 @@ export default function VerifyEmailPage() {
             {status === 'error' && (
               <>
                 <p>{t('auth.verificationLinkInvalid')}</p>
-                <LinkButton variant="outline" to="/login">
+                <LinkButton variant="tertiary" to="/login">
                   {t('auth.backToLogin')}
                 </LinkButton>
               </>

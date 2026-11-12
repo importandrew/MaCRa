@@ -1,25 +1,25 @@
 import { useTranslation } from 'react-i18next';
 import { FieldError, Input, Label, TextField } from '@heroui/react';
 import { InputArgs } from '../../models/Input';
+import { emailProblem } from './validation';
 
-// maxEmailLength mirrors the backend limit (the users.email column).
-const maxEmailLength = 50;
-
-export default function EmailInput({ onChange }: InputArgs) {
+export default function EmailInput({ value, onChange }: InputArgs) {
   const { t } = useTranslation();
   return (
     <TextField
       type="email"
       name="email"
       autoComplete="email"
-      validate={(value: string) => {
-        if (!value.length) {
-          return t('auth.emailRequired');
+      value={value}
+      validate={(v: string) => {
+        switch (emailProblem(v)) {
+          case 'required':
+            return t('auth.emailRequired');
+          case 'tooLong':
+            return t('auth.emailTooLong');
+          default:
+            return null;
         }
-        if ([...value].length > maxEmailLength) {
-          return t('auth.emailTooLong');
-        }
-        return null;
       }}
       onChange={onChange}
     >

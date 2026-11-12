@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { useState } from 'react';
+import { useOverlayState } from '@heroui/react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import GameLogs, { LogsState } from '../GameResult/GameLogs';
 import Confirm from '../Confirm';
@@ -33,7 +33,7 @@ export default function LogsMenu({
   onStale: () => Promise<GameRoundLogs | null>;
 }) {
   const { t } = useTranslation();
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const confirm = useOverlayState();
   const { isPending: undoLoading, run } = useSubmitOnce();
   const logSize = logs.data?.round_logs.length;
 
@@ -45,12 +45,12 @@ export default function LogsMenu({
   const handleUndoConfirm = () =>
     run(async () => {
       if (eventId == null || gameId == null || logSize == null) return;
-      setConfirmOpen(false);
+      confirm.close();
       const { status, error } = await undoLastRound(eventId, gameId, logSize);
       if (status === 200) {
         showToast({
           title: t('game.lastRoundUndoneToast'),
-          variant: 'warning',
+          variant: 'success',
         });
         onUndoSuccess?.();
         return;
@@ -84,7 +84,7 @@ export default function LogsMenu({
             className="min-w-1/2 self-center"
             variant="tertiary"
             size="sm"
-            onPress={() => setConfirmOpen(true)}
+            onPress={confirm.open}
             isPending={undoLoading}
             isDisabled={gameId == null || !logSize}
 
@@ -93,8 +93,8 @@ export default function LogsMenu({
             {t('game.undoLastRound')}
           </PendingButton>
           <Confirm
-            isOpen={confirmOpen}
-            onClose={() => setConfirmOpen(false)}
+            isOpen={confirm.isOpen}
+            onClose={confirm.close}
             onConfirm={handleUndoConfirm}
             prompt={t('game.undoConfirmPrompt')}
             headerText={t('game.undoLastRound')}
