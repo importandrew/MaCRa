@@ -23,6 +23,14 @@ const (
 	EventVisibilityPublic  EventVisibility = "public"
 )
 
+var ValidEventVisibilities = []EventVisibility{EventVisibilityPrivate, EventVisibilityPublic}
+
+// Limits of an event's texts, in characters (the frontend mirrors them).
+const (
+	MaxEventNameLength        = 100
+	MaxEventDescriptionLength = 1000
+)
+
 type Event struct {
 	ID           int             `db:"id" json:"id"`
 	Type         EventType       `db:"type" json:"type"`

@@ -66,6 +66,9 @@ var (
 	ErrGameNotInEvent      = errors.New("game not in event")
 	ErrInvalidEventType    = errors.New("invalid event type")
 	ErrInvalidContentReach = errors.New("invalid content reach")
+	ErrInvalidVisibility   = errors.New("invalid event visibility")
+	ErrLongEventName       = errors.New("event name too long")
+	ErrLongDescription     = errors.New("event description too long")
 	ErrInvalidGameStatus   = errors.New("invalid game status")
 
 	ErrNoRounds = errors.New("no rounds to undo")
@@ -105,6 +108,9 @@ var Errors = map[error]APIError{
 	ErrGameNotInEvent:           {http.StatusBadRequest, "game_not_in_event"},
 	ErrInvalidEventType:         {http.StatusBadRequest, "invalid_event_type"},
 	ErrInvalidContentReach:      {http.StatusBadRequest, "invalid_content_reach"},
+	ErrInvalidVisibility:        {http.StatusBadRequest, "invalid_visibility"},
+	ErrLongEventName:            {http.StatusBadRequest, "long_event_name"},
+	ErrLongDescription:          {http.StatusBadRequest, "long_description"},
 	ErrInvalidGameStatus:        {http.StatusBadRequest, "invalid_game_status"},
 	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
 
