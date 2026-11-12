@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import { useCallback, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useRouteIds } from '../../hooks/useRouteIds';
 import { useFetchLiveGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import RefreshButton from '../RefreshButton';
@@ -17,12 +18,7 @@ import LiveMenu from './Menu/LiveMenu';
 export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
-    eventId: string;
-    gameId: string;
-  }>();
-  const eventId = eventIdParam ? parseInt(eventIdParam, 10) : 0;
-  const gameId = gameIdParam ? parseInt(gameIdParam, 10) : 0;
+  const { eventId, gameId } = useRouteIds();
   const { data, isLoading, isError, isForbidden, refetch } =
     useFetchLiveGameData(eventId, gameId);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -65,7 +61,7 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
       onRefresh={onRefresh}
       onGoHome={() => navigate('/')}
     >
-      {data && bot && right && top && left ? (
+      {data && eventId && bot && right && top && left ? (
         <TableLayout
           top={
             <>

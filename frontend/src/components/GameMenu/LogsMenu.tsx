@@ -24,7 +24,7 @@ export default function LogsMenu({
   onStale,
 }: {
   gameId: number | null;
-  eventId?: number;
+  eventId: number | null;
   canUndoLastRound?: boolean;
   onUndoSuccess?: () => void;
   logs: LogsState;
@@ -44,9 +44,9 @@ export default function LogsMenu({
   // player has started another game) is told as is. A second tap is ignored.
   const handleUndoConfirm = () =>
     run(async () => {
-      if (gameId == null || logSize == null) return;
+      if (eventId == null || gameId == null || logSize == null) return;
       setConfirmOpen(false);
-      const { status, error } = await undoLastRound(gameId, logSize, eventId);
+      const { status, error } = await undoLastRound(eventId, gameId, logSize);
       if (status === 200) {
         showToast({
           title: t('game.lastRoundUndoneToast'),

@@ -9,7 +9,7 @@ import { showToast } from '../Toast';
 import { Player } from '../../models/Player';
 import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
 import { useFetchEventMembers } from '../../providers/event/eventApi';
-import { getStoredEventId } from '../../providers/event/eventConstants';
+import { useEvent } from '../../providers/event/eventConstants';
 import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
 import { WINDS, WIND_SYMBOLS } from '../../utils/constants';
 import { shuffleArray } from '../../utils/shuffleArray';
@@ -28,7 +28,7 @@ export default function Draft() {
     undefined,
     undefined,
   ]);
-  const eventId = getStoredEventId();
+  const { selectedEventId: eventId } = useEvent();
   const { data: members, isLoading: membersLoading } =
     useFetchEventMembers(eventId);
   const {
@@ -121,7 +121,6 @@ export default function Draft() {
       return;
     }
 
-    const eventId = getStoredEventId();
     if (!eventId) {
       showToast({
         title: t('header.noEventSelected'),

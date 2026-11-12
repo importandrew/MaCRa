@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useRouteIds } from '../../hooks/useRouteIds';
 import { useFetchGameStatus } from '../../providers/game/gameDataApi';
 import GameResult from '../GameResult/GameResult';
 import Live from '../Live/Live';
@@ -9,12 +10,7 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 export default function ViewGame() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { eventId: eventIdParam, gameId: gameIdParam } = useParams<{
-    eventId: string;
-    gameId: string;
-  }>();
-  const eventId = eventIdParam ? parseInt(eventIdParam, 10) : 0;
-  const gameId = gameIdParam ? parseInt(gameIdParam, 10) : 0;
+  const { eventId, gameId } = useRouteIds();
 
   const { status, isLoading, isError, isForbidden, refetch } =
     useFetchGameStatus(eventId, gameId);

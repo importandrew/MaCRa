@@ -20,7 +20,7 @@ export default function LiveMenu({
   onGameEnded,
 }: {
   gameId: number | null;
-  eventId?: number;
+  eventId: number;
   // onUndoSuccess reloads the screen after an undo.
   onUndoSuccess?: () => unknown;
   // onStale reloads the screen after an undo refused because the log has
@@ -33,7 +33,7 @@ export default function LiveMenu({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { hasCapability } = useEventCapabilities(eventId ?? null);
+  const { hasCapability } = useEventCapabilities(eventId);
   const canUndoLastRound = hasCapability('undo_round');
   const canAbort = hasCapability('abort_game');
   const canFinish = hasCapability('finish_game');
@@ -73,17 +73,15 @@ export default function LiveMenu({
         <div className="mt-auto pt-4 flex justify-center gap-3 w-7/8 mx-auto">
           <FinishMenu
             gameId={gameId}
-            eventId={eventId ?? null}
+            eventId={eventId}
             canFinish={canFinish}
             onFinished={onGameEnded}
           />
           <AbortMenu
             gameId={gameId}
-            eventId={eventId ?? null}
+            eventId={eventId}
             canAbort={canAbort}
-            onAborted={() =>
-              navigate(eventId ? `/event/${eventId}/games/live` : '/')
-            }
+            onAborted={() => navigate(`/event/${eventId}/games/live`)}
           />
         </div>
       </Drawer.Body>

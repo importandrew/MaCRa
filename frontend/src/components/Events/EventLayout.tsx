@@ -2,13 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { Button, Drawer, useOverlayState } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { hasCapability as checkCapability } from '../../providers/event/useEventCapabilities';
-import {
-  finishEvent,
-  useFetchEvent,
-  useFetchEventMe,
-} from '../../providers/event/eventApi';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useRouteIds } from '../../hooks/useRouteIds';
+import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
+import { finishEvent, useFetchEvent } from '../../providers/event/eventApi';
 import {
   EventLayoutContext,
   EventLayoutContextValue,
@@ -20,8 +17,7 @@ import { showToast } from '../Toast';
 import PendingButton from '../PendingButton';
 
 export default function EventLayout() {
-  const { eventId: eventIdParam } = useParams();
-  const eventId = eventIdParam ? parseInt(eventIdParam, 10) : null;
+  const { eventId } = useRouteIds();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -40,12 +36,13 @@ export default function EventLayout() {
     refetch: refetchEvent,
   } = useFetchEvent(eventId);
   const {
-    data: me,
+    me,
     isLoading: meLoading,
     isError: meError,
     isForbidden: meForbidden,
     refetch: refetchMe,
-  } = useFetchEventMe(eventId);
+    hasCapability,
+  } = useEventCapabilities(eventId);
 
   const isLoading = eventLoading || meLoading;
   const isError = eventError || meError;
@@ -55,12 +52,6 @@ export default function EventLayout() {
     refetchEvent();
     refetchMe();
   }, [refetchEvent, refetchMe]);
-
-  const hasCapability = useCallback(
-    (cap: Parameters<EventLayoutContextValue['hasCapability']>[0]) =>
-      checkCapability(me, cap),
-    [me]
-  );
 
   const contextValue = useMemo<EventLayoutContextValue | null>(() => {
     if (eventId == null) return null;

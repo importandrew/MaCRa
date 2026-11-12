@@ -2,15 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFetchEventGames } from '../../providers/event/eventApi';
-import { useEventLayout } from '../../providers/event/eventLayoutContext';
+import { useEventPage } from '../../providers/event/eventLayoutContext';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import { EventGamesList } from './EventGamesList';
 
 export default function LiveGames() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { eventId, event, hasCapability, isForbidden } = useEventLayout();
-  const canView = hasCapability('watch_live');
+  const { eventId, event, canView } = useEventPage('watch_live');
   const {
     games,
     hasMore,
@@ -26,7 +25,7 @@ export default function LiveGames() {
     refetch();
   }, [refetch]);
 
-  const forbidden = isForbidden || listForbidden || (!canView && !isLoading);
+  const forbidden = !canView || listForbidden;
   const title = t('events.liveGamesTitle', {
     name: event?.name ?? t('events.event'),
   });

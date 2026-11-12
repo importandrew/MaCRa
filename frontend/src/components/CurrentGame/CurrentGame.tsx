@@ -12,7 +12,7 @@ import { RoundEntryPanel } from './RoundEntry';
 import CurrentGameSeat from './CurrentGameSeat';
 import { useRoundEntry } from './useRoundEntry';
 import { useShowGameGone } from './useShowGameGone';
-import { getStoredEventId } from '../../providers/event/eventConstants';
+import { useEvent } from '../../providers/event/eventConstants';
 import TableLayout from '../Table/TableLayout';
 import { useScoreAnimation } from '../Table/useScoreAnimation';
 
@@ -48,11 +48,11 @@ export default function CurrentGame() {
   // A 404 for a table on screen means its game has ended or been aborted:
   // open the result (or home) instead of a loading error.
   const showGameGone = useShowGameGone();
+  const { selectedEventId: eventId } = useEvent();
   const onRefresh = async () => {
     entry.reset();
     setIsEntryOpen(false);
     const { data: fresh, status } = await refetch();
-    const eventId = getStoredEventId();
     if (status === 404 && roundData && eventId) {
       await showGameGone(eventId, roundData.id);
     }

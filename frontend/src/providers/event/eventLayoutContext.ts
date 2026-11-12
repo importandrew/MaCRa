@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import { Event } from '../../models/Event';
-import { EventMe } from '../../models/EventMe';
+import { EventCapability, EventMe } from '../../models/EventMe';
 
 export type EventLayoutContextValue = {
   eventId: number;
@@ -10,9 +10,7 @@ export type EventLayoutContextValue = {
   isError: boolean;
   isForbidden: boolean;
   refetch: () => void;
-  hasCapability: (
-    cap: import('../../models/EventMe').EventCapability
-  ) => boolean;
+  hasCapability: (cap: EventCapability) => boolean;
 };
 
 export const EventLayoutContext = createContext<EventLayoutContextValue | null>(
@@ -25,4 +23,15 @@ export function useEventLayout() {
     throw new Error('useEventLayout must be used within EventLayout');
   }
   return ctx;
+}
+
+// useEventPage is useEventLayout for a page of the event that needs one of
+// caps: canView says whether the user has one. EventLayout shows its pages
+// only once the event and the capabilities have loaded and the event is
+// accessible, so a page is forbidden exactly when canView is false (or when
+// its own request answers 403).
+export function useEventPage(...caps: EventCapability[]) {
+  const layout = useEventLayout();
+  const canView = caps.some((cap) => layout.hasCapability(cap));
+  return { ...layout, canView };
 }

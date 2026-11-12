@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventRatingEntry } from '../../models/EventRating';
 import { useFetchEventRatings } from '../../providers/event/eventApi';
-import { useEventLayout } from '../../providers/event/eventLayoutContext';
+import { useEventPage } from '../../providers/event/eventLayoutContext';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 
 type RatingColumn = 'rank' | 'name' | 'games' | 'tp' | 'gp';
@@ -34,12 +34,10 @@ export default function EventRating() {
   const {
     eventId,
     event,
-    hasCapability,
     isLoading: layoutLoading,
-    isForbidden: layoutForbidden,
-  } = useEventLayout();
+    canView: canViewRatings,
+  } = useEventPage('view_ratings');
 
-  const canViewRatings = hasCapability('view_ratings');
   const {
     data,
     isLoading: ratingsLoading,
@@ -58,10 +56,7 @@ export default function EventRating() {
   }, [refetch]);
 
   const isLoading = layoutLoading || (!!canViewRatings && ratingsLoading);
-  const forbidden =
-    layoutForbidden ||
-    ratingsForbidden ||
-    (!layoutLoading && !!event && !canViewRatings);
+  const forbidden = !canViewRatings || ratingsForbidden;
 
   const sortedRatings = useMemo(() => {
     const ratings = data?.ratings ?? [];
