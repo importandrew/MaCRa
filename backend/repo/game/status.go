@@ -11,13 +11,7 @@ import (
 
 // Status returns the game's status, or models.ErrGameNotFound.
 func (r *Repo) Status(ctx context.Context, gameID int) (models.GameStatus, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return "", err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `SELECT status FROM games WHERE id = $1`, gameID)
+	rows, err := r.db.Query(ctx, `SELECT status FROM games WHERE id = $1`, gameID)
 	if err != nil {
 		return "", err
 	}
@@ -35,13 +29,7 @@ func (r *Repo) Status(ctx context.Context, gameID int) (models.GameStatus, error
 
 // SetStatus sets game status.
 func (r *Repo) SetStatus(ctx context.Context, gameID int, status models.GameStatus) error {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	res, err := conn.Exec(ctx, `UPDATE games SET status = $1 WHERE id = $2`, status, gameID)
+	res, err := r.db.Exec(ctx, `UPDATE games SET status = $1 WHERE id = $2`, status, gameID)
 	if err != nil {
 		return err
 	}

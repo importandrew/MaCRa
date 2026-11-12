@@ -2,7 +2,6 @@ package player
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -12,12 +11,6 @@ import (
 )
 
 func (r *Repo) ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
 	nameFilter := ""
 	if name != "" {
 		nameFilter = " WHERE name ILIKE '%' || @name || '%'"
@@ -28,7 +21,7 @@ func (r *Repo) ListByNameLimit(ctx context.Context, name string, limit int) ([]m
 		query += ` LIMIT @limit`
 	}
 
-	rows, err := conn.Query(ctx, query,
+	rows, err := r.db.Query(ctx, query,
 		pgx.NamedArgs{
 			"name":  strings.TrimSpace(name),
 			"limit": limit,
@@ -40,9 +33,6 @@ func (r *Repo) ListByNameLimit(ctx context.Context, name string, limit int) ([]m
 
 	players, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Player])
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
 		return nil, err
 	}
 

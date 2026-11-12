@@ -9,13 +9,7 @@ import (
 )
 
 func (r *Repo) ListEndedPlayerResults(ctx context.Context, eventID int) ([]models.EventPlayerResultRow, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT
 			pr.player_id,
 			u.name,

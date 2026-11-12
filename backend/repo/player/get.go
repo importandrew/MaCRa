@@ -10,13 +10,7 @@ import (
 )
 
 func (r *Repo) Get(ctx context.Context, id int) (models.Player, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return models.Player{}, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `SELECT id, name FROM users WHERE id = $1`, id)
+	rows, err := r.db.Query(ctx, `SELECT id, name FROM users WHERE id = $1`, id)
 	if err != nil {
 		return models.Player{}, err
 	}
@@ -33,13 +27,7 @@ func (r *Repo) Get(ctx context.Context, id int) (models.Player, error) {
 }
 
 func (r *Repo) GetByEmail(ctx context.Context, email string) (models.Player, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return models.Player{}, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx,
+	rows, err := r.db.Query(ctx,
 		`SELECT id, name FROM users WHERE email = $1`,
 		email,
 	)

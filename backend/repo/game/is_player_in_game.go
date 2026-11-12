@@ -7,13 +7,7 @@ import (
 )
 
 func (r *Repo) IsPlayerInGame(ctx context.Context, gameID, playerID int) (bool, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return false, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT EXISTS(
 			SELECT 1 FROM game_players
 			WHERE game_id = $1 AND player_id = $2

@@ -9,13 +9,7 @@ import (
 )
 
 func (r *Repo) ListMembers(ctx context.Context, eventID int) ([]models.EventMember, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT eur.user_id, u.name, array_agg(eur.role ORDER BY eur.role) AS roles
 		FROM event_user_roles eur
 		JOIN users u ON u.id = eur.user_id

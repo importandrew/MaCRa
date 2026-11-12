@@ -2,7 +2,6 @@ package event
 
 import (
 	"context"
-	"errors"
 
 	"github.com/jackc/pgx/v5"
 
@@ -10,13 +9,7 @@ import (
 )
 
 func (r *Repo) GameHistory(ctx context.Context, eventID int) ([]int, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT id
 		FROM games
 		WHERE status = $1
@@ -30,9 +23,6 @@ func (r *Repo) GameHistory(ctx context.Context, eventID int) ([]int, error) {
 
 	gameIDs, err := pgx.CollectRows(rows, pgx.RowTo[int])
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
@@ -40,13 +30,7 @@ func (r *Repo) GameHistory(ctx context.Context, eventID int) ([]int, error) {
 }
 
 func (r *Repo) PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error) {
-	conn, err := r.db.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
-	rows, err := conn.Query(ctx, `
+	rows, err := r.db.Query(ctx, `
 		SELECT g.id
 		FROM games AS g
 		JOIN game_players AS gp ON gp.game_id = g.id
@@ -62,9 +46,6 @@ func (r *Repo) PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]
 
 	gameIDs, err := pgx.CollectRows(rows, pgx.RowTo[int])
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
