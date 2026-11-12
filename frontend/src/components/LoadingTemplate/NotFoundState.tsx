@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 
-// NotFound says what a page found missing: its event or its game (a bad id
-// in the URL counts as missing).
-export type NotFound = 'event' | 'game';
+// PageSubject is what a page is about: an event or a game. For NotFoundState
+// it is what is missing (a bad id in the URL counts as missing).
+export type PageSubject = 'event' | 'game';
+export type NotFound = PageSubject;
 
 // NotFoundState is a page whose event or game doesn't exist. No retry: asking
 // again won't make it appear.

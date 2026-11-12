@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Button, useOverlayState } from '@heroui/react';
+import { useOverlayState } from '@heroui/react';
+import PendingButton from '../PendingButton';
 import { PostRequest, authFetch, eventGamePath } from '../Request';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { WarningIcon } from '../Icons/WarningIcon';
@@ -38,7 +39,7 @@ export default function FinishMenu({
 
     showToast({
       title: t('game.finished'),
-      variant: 'warning',
+      variant: 'success',
     });
 
     onFinished();
@@ -50,15 +51,16 @@ export default function FinishMenu({
 
   return (
     <>
-      <Button
+      <PendingButton
         variant="primary"
         onPress={onOpen}
-        isDisabled={!gameId || !eventId || isFinishing}
+        isPending={isFinishing}
+        isDisabled={!gameId || !eventId}
         className="w-1/2"
+        icon={<WarningIcon className="text-white" />}
       >
-        <WarningIcon className="text-white" />
-        {isFinishing ? t('game.finishing') : t('game.finish')}
-      </Button>
+        {t('game.finish')}
+      </PendingButton>
       <Confirm
         onClose={onClose}
         onConfirm={() => {

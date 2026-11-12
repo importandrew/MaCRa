@@ -147,7 +147,7 @@ export function useRoundEntry(
     }
 
     if (isPenalty) {
-      showToast({ title: t('game.penaltyAdded'), variant: 'warning' });
+      showToast({ title: t('game.penaltyAdded'), variant: 'success' });
     }
     reset();
     onSubmitted(data);

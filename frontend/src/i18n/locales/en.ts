@@ -38,6 +38,7 @@ const en = {
     tryAgain: 'Try again',
     forbidden: 'Forbidden',
     noAccessToEvent: 'You do not have access to this event.',
+    noAccessToGame: 'You do not have access to this game.',
     goHome: 'Go home',
     cancel: 'Cancel',
     save: 'Save',
@@ -297,13 +298,11 @@ const en = {
     rotateClockwise: 'Rotate clockwise',
     rotateCounterclockwise: 'Rotate counterclockwise',
     finish: 'Finish Game',
-    finishing: 'Finishing...',
     finished: 'Game finished',
     finishConfirmTitle: 'Confirm finish game',
     finishConfirmPrompt:
       'Are you sure you want to finish this game? Game will be counted. This action will finalize the result.',
     abort: 'Abort Game',
-    aborting: 'Aborting...',
     aborted: 'Game aborted',
     abortConfirmTitle: 'Confirm abort game',
     abortConfirmPrompt:

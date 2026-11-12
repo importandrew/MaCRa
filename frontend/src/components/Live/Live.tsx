@@ -58,6 +58,7 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
       isLoading={isLoading}
       isError={isError}
       isForbidden={isForbidden}
+      subject="game"
       onRefresh={onRefresh}
       onGoHome={() => navigate('/')}
     >

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Button, useOverlayState } from '@heroui/react';
+import { useOverlayState } from '@heroui/react';
+import PendingButton from '../PendingButton';
 import { DeleteRequest, authFetch, eventGamePath } from '../Request';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { WarningIcon } from '../Icons/WarningIcon';
@@ -41,7 +42,7 @@ export default function AbortMenu({
 
     showToast({
       title: t('game.aborted'),
-      variant: 'warning',
+      variant: 'success',
     });
 
     onAborted();
@@ -49,15 +50,16 @@ export default function AbortMenu({
 
   return (
     <>
-      <Button
+      <PendingButton
         variant="danger"
         onPress={onOpen}
-        isDisabled={!gameId || !eventId || isAborting}
+        isPending={isAborting}
+        isDisabled={!gameId || !eventId}
         className="w-1/2"
+        icon={<WarningIcon className="text-white" />}
       >
-        <WarningIcon className="text-white" />
-        {isAborting ? t('game.aborting') : t('game.abort')}
-      </Button>
+        {t('game.abort')}
+      </PendingButton>
       <Confirm
         onClose={onClose}
         onConfirm={() => {

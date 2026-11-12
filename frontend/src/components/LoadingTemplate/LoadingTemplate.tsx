@@ -1,13 +1,18 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import ForbiddenState from './ForbiddenState';
-import NotFoundState, { type NotFound } from './NotFoundState';
+import NotFoundState, {
+  type NotFound,
+  type PageSubject,
+} from './NotFoundState';
 import LoadingSpinner from './LoadingSpinner';
 
 interface LoadingTemplateProps {
   isLoading: boolean;
   isError: boolean;
   isForbidden?: boolean;
+  // subject is what the page shows (default an event), for the forbidden text.
+  subject?: PageSubject;
   // notFound shows NotFoundState: the page's event or game doesn't exist.
   notFound?: NotFound | null;
   onRefresh: () => void;
@@ -21,6 +26,7 @@ const LoadingTemplate = (props: LoadingTemplateProps) => {
     isLoading,
     isError,
     isForbidden,
+    subject,
     notFound,
     onRefresh,
     onGoHome,
@@ -40,7 +46,7 @@ const LoadingTemplate = (props: LoadingTemplateProps) => {
   }
 
   if (isForbidden) {
-    return <ForbiddenState onGoHome={onGoHome} />;
+    return <ForbiddenState subject={subject} onGoHome={onGoHome} />;
   }
 
   if (isError) {

@@ -37,6 +37,7 @@ export default function ViewGame() {
       isLoading={isLoading}
       isError={isError}
       isForbidden={isForbidden}
+      subject="game"
       notFound={notFound}
       onRefresh={onRefresh}
       onGoHome={() => navigate('/')}

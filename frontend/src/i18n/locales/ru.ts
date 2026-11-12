@@ -36,6 +36,7 @@ const ru: Messages = {
     tryAgain: 'Повторить',
     forbidden: 'Нет доступа',
     noAccessToEvent: 'У вас нет доступа к этому событию.',
+    noAccessToGame: 'У вас нет доступа к этой игре.',
     goHome: 'На главную',
     cancel: 'Отмена',
     save: 'Сохранить',
@@ -291,13 +292,11 @@ const ru: Messages = {
     rotateClockwise: 'Повернуть по часовой',
     rotateCounterclockwise: 'Повернуть против часовой',
     finish: 'Завершить',
-    finishing: 'Завершаем...',
     finished: 'Игра завершена',
     finishConfirmTitle: 'Завершить игру?',
     finishConfirmPrompt:
       'Вы уверены, что хотите завершить игру? Игра будет засчитана, результат станет окончательным.',
     abort: 'Прервать',
-    aborting: 'Прерываем...',
     aborted: 'Игра прервана',
     abortConfirmTitle: 'Прервать игру?',
     abortConfirmPrompt:
