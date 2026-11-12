@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNow, error) {
-	game, err := s.CurrentGame(ctx, playerID, eventID)
+	game, log, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}
@@ -47,6 +47,8 @@ func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNo
 
 	round := game.Round()
 
+	names := map[int]string{playerID: me.Name, leftID: left.Name, rightID: right.Name, oppID: opp.Name}
+
 	now := models.GameNow{
 		ID:      game.ID(),
 		Status:  game.Status(),
@@ -79,6 +81,7 @@ func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNo
 			Wind:  leftWind.Kanji(),
 			Score: leftScore,
 		},
+		Log: gameLog(game, log, names),
 	}
 
 	return now, nil

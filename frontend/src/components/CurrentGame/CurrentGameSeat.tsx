@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import type { ComponentProps } from 'react';
 import type { GameData } from '../../models/GameData';
-import AnimatedScore from './AnimatedScore';
-import UserAvatar from '../UserAvatar';
+import AnimatedScore from '../Table/AnimatedScore';
+import SeatName from '../Table/SeatName';
 import { SeatMarks } from './RoundEntry';
 
 type SeatPlayer = GameData['me'];
@@ -34,11 +34,7 @@ export default function CurrentGameSeat({
       {isEntryOpen && (
         <SeatMarks entry={entry} player={player} isSideSeat={isSideSeat} />
       )}
-      <span className="flex justify-center items-center gap-3 text-ellipsis overflow-hidden">
-        <span className="shrink-0">{player.wind}</span>
-        <UserAvatar name={player.name} className="shrink-0" />
-        <span className="min-w-0 truncate">{player.name}</span>
-      </span>
+      <SeatName player={player} />
       <div className="flex items-center justify-center gap-1">
         <span
           className={`text-ellipsis overflow-hidden ${isEntryOpen ? 'hidden' : ''}`}

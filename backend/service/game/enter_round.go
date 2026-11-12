@@ -14,7 +14,7 @@ func (s *Service) EnterRound(
 	eventID int,
 	seenLogSize int,
 ) (models.GameNow, error) {
-	game, err := s.CurrentGame(ctx, playerID, eventID)
+	game, _, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}

@@ -31,3 +31,20 @@ func (s *Service) Logs(ctx context.Context, id int) (models.GameLog, error) {
 
 	return gameLog, nil
 }
+
+// gameLog is the round log of game as the client gets it: the players in
+// starting seat order (east, south, west, north) with their names, and the
+// entries. names maps each player's ID to the name.
+func gameLog(game GameEngine, log []models.RoundLog, names map[int]string) models.GameLog {
+	seating := game.Players()
+	players := make([]models.PlayerHeader, 0, len(seating))
+	for _, id := range seating {
+		players = append(players, models.PlayerHeader{ID: id, Name: names[id]})
+	}
+
+	return models.GameLog{
+		ID:        game.ID(),
+		Players:   players,
+		RoundLogs: log,
+	}
+}

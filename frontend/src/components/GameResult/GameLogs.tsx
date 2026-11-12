@@ -7,33 +7,34 @@ import {
   PreparedGameRoundLogs,
   PreparedRoundLog,
 } from '../../models/GameResult';
-import {
-  GameLogsState,
-  useFetchGameLogsData,
-} from '../../providers/game/gameDataApi';
 import GameChart from './GameChart';
 import { SignIcon } from '../Icons/SignIcon';
 import { WarningIcon } from '../Icons/WarningIcon';
 import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 
+// LogsState is a round log as its owner has it: a table screen has it in its
+// table response; the result page loads it (and can show loading, an error
+// and a retry).
+export type LogsState = {
+  data: GameRoundLogs | null;
+  isLoading?: boolean;
+  isError?: boolean;
+  fetchData?: () => unknown;
+};
+
+// GameLogs shows a round log as a chart or a table. It loads nothing: the
+// caller passes the log it has.
 export default function GameLogs({
   isChartVisible = false,
   isLogVisible = false,
-  gameId,
-  eventId,
   logs,
 }: {
   isChartVisible: boolean;
   isLogVisible: boolean;
-  gameId: number | null;
-  eventId?: number;
-  // logs, when given, is the log loaded by the caller (who needs it too, e.g.
-  // undo sends its size); otherwise GameLogs loads it itself.
-  logs?: GameLogsState;
+  logs: LogsState;
 }) {
   const { t } = useTranslation();
-  const ownLogs = useFetchGameLogsData(logs ? null : gameId, eventId);
-  const { data, isError, isLoading, fetchData } = logs ?? ownLogs;
+  const { data, isError = false, isLoading = false, fetchData } = logs;
 
   function getFinalScores() {
     if (!preparedData || !preparedData.rounds.length) {
@@ -179,7 +180,7 @@ export default function GameLogs({
   const finalScores = getFinalScores();
 
   const onRefresh = useCallback(() => {
-    fetchData();
+    fetchData?.();
   }, [fetchData]);
 
   if (isLoading) {
@@ -193,9 +194,11 @@ export default function GameLogs({
   if (isError) {
     return (
       <div className="flex w-full h-full justify-center items-center">
-        <Button type="button" onPress={onRefresh}>
-          {t('common.refresh')}
-        </Button>
+        {fetchData && (
+          <Button type="button" onPress={onRefresh}>
+            {t('common.refresh')}
+          </Button>
+        )}
       </div>
     );
   }
@@ -204,9 +207,11 @@ export default function GameLogs({
     return (
       <div className="flex flex-col h-full w-full justify-center items-center gap-3">
         <p className="mb-4 text-center text-3xl">{t('logs.noData')}</p>
-        <Button type="button" onPress={onRefresh}>
-          {t('common.refresh')}
-        </Button>
+        {fetchData && (
+          <Button type="button" onPress={onRefresh}>
+            {t('common.refresh')}
+          </Button>
+        )}
       </div>
     );
   }

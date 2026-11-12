@@ -1,4 +1,4 @@
-export type GamePlayers = { id: number; players: PlayerOrder[] };
+import type { GameRoundLogs } from './GameResult';
 
 export interface GameData {
   id: number;
@@ -11,6 +11,8 @@ export interface GameData {
   // that the server refuses an entry made from an outdated table.
   log_size: number;
   status: 'created' | 'live' | 'ended' | 'aborted';
+  // log is the round log of the same state as the table.
+  log: GameRoundLogs;
 }
 
 export interface PlayerScore {
@@ -25,11 +27,6 @@ export interface RoundData {
   num: number;
   // Round wind and number, e.g. '東1'.
   kanji: string;
-}
-
-export interface PlayerOrder {
-  id: number;
-  name: string;
 }
 
 export enum Outcome {

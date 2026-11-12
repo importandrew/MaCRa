@@ -5,28 +5,29 @@ import LazyAccordion from '../../LazyAccordion';
 import { useEventCapabilities } from '../../../providers/event/useEventCapabilities';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
-import LogsMenu from '../../CurrentGame/Menu/LogsMenu';
-import { GameLogsState } from '../../../providers/game/gameDataApi';
-import AbortMenu from '../../CurrentGame/Menu/AbortMenu';
-import FinishMenu from '../../CurrentGame/Menu/FinishMenu';
-import { FansMenu } from '../../CurrentGame/Menu/FansMenu';
+import LogsMenu from '../../GameMenu/LogsMenu';
+import { GameRoundLogs } from '../../../models/GameResult';
+import AbortMenu from '../../GameMenu/AbortMenu';
+import FinishMenu from '../../GameMenu/FinishMenu';
+import { FansMenu } from '../../GameMenu/FansMenu';
 
 export default function LiveMenu({
   gameId = null,
   eventId,
   onUndoSuccess,
-  logs,
-  logSize,
+  onStale,
+  log,
   onGameEnded,
 }: {
   gameId: number | null;
   eventId?: number;
-  // onUndoSuccess reloads the screen; it is also called after an undo
-  // refused because the log has changed.
-  onUndoSuccess?: () => Promise<unknown>;
-  // logs and logSize are the screen's, see useTableLogs.
-  logs: GameLogsState;
-  logSize: number;
+  // onUndoSuccess reloads the screen after an undo.
+  onUndoSuccess?: () => unknown;
+  // onStale reloads the screen after an undo refused because the log has
+  // changed, and returns its fresh log.
+  onStale: () => Promise<GameRoundLogs | null>;
+  // log is the round log from the screen's table response.
+  log: GameRoundLogs;
   // onGameEnded reloads the game page, which then shows the result.
   onGameEnded: () => void;
 }) {
@@ -55,9 +56,8 @@ export default function LiveMenu({
                   eventId={eventId}
                   canUndoLastRound={canUndoLastRound}
                   onUndoSuccess={onUndoSuccess}
-                  onStale={onUndoSuccess}
-                  tableLogs={logs}
-                  tableLogSize={logSize}
+                  onStale={onStale}
+                  logs={{ data: log }}
                 />
               ),
             },

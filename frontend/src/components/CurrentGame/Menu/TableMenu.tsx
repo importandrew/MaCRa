@@ -5,28 +5,29 @@ import { useFetchEventMe } from '../../../providers/event/eventApi';
 import { useEvent } from '../../../providers/event/eventConstants';
 import { BookIcon } from '../../Icons/BookIcon';
 import { ListIcon } from '../../Icons/ListIcon';
-import LogsMenu from './LogsMenu';
-import AbortMenu from './AbortMenu';
-import FinishMenu from './FinishMenu';
-import { FansMenu } from './FansMenu';
+import LogsMenu from '../../GameMenu/LogsMenu';
+import AbortMenu from '../../GameMenu/AbortMenu';
+import FinishMenu from '../../GameMenu/FinishMenu';
+import { FansMenu } from '../../GameMenu/FansMenu';
 import LazyAccordion from '../../LazyAccordion';
-import { GameLogsState } from '../../../providers/game/gameDataApi';
+import { GameRoundLogs } from '../../../models/GameResult';
 
 // TableMenu is the ≡ menu of the game screen. Penalties are entered in the
 // round card (tap the round kanji), not here.
 export default function TableMenu({
   gameId = null,
   onRefetchNow,
-  logs,
-  logSize,
+  onStale,
+  log,
 }: {
   gameId: number | null;
-  // onRefetchNow reloads the table; it is also called after an undo refused
-  // because the log has changed.
-  onRefetchNow?: () => Promise<unknown>;
-  // logs and logSize are the table's, see useTableLogs.
-  logs: GameLogsState;
-  logSize: number;
+  // onRefetchNow reloads the table after an undo.
+  onRefetchNow?: () => unknown;
+  // onStale reloads the table after an undo refused because the log has
+  // changed, and returns its fresh log.
+  onStale: () => Promise<GameRoundLogs | null>;
+  // log is the round log from the table response.
+  log: GameRoundLogs;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -59,9 +60,8 @@ export default function TableMenu({
                     gameId={gameId}
                     canUndoLastRound={canUndo}
                     onUndoSuccess={onRefetchNow}
-                    onStale={onRefetchNow}
-                    tableLogs={logs}
-                    tableLogSize={logSize}
+                    onStale={onStale}
+                    logs={{ data: log }}
                   />
                 </div>
               ),

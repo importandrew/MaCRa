@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   DeleteRequest,
   GetRequest,
@@ -11,12 +11,7 @@ import {
   publicFetch,
 } from '../../components/Request';
 import { useLoadingState } from '../useLoadingState';
-import {
-  GameData,
-  GamePlayers,
-  GamesHistoryData,
-  PlayerOrder,
-} from '../../models/GameData';
+import { GameData, GamesHistoryData } from '../../models/GameData';
 import {
   GameResult,
   GameRoundLogs,
@@ -145,7 +140,6 @@ export const useFetchGameData = () => {
   const { isLoading, startLoading, finishLoading } = useLoadingState();
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState<GameData | null>(null);
-  const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
 
   // fetchGameData loads the table and returns the /now response (data is
   // null on an error). Once a table is shown, a 404 means its game has ended
@@ -176,34 +170,18 @@ export const useFetchGameData = () => {
     }
 
     setData(fresh);
-
-    if (playersList.length) {
-      finishLoading(true);
-      return result;
-    }
-
-    const gamePlayersRequest = GetRequest(
-      eventGamePath(eventId, fresh.id, '/players')
-    );
-    const playersResult = await authFetch<GamePlayers>(gamePlayersRequest);
-
-    if (!playersResult) {
-      setIsError(true);
-    }
-
-    setPlayersList(playersResult?.players || []);
     finishLoading(true);
     return result;
   };
 
   useEffect(() => {
     fetchGameData();
-    // Fetch once on mount. fetchGameData isn't memoized and reads playersList,
-    // so listing it would refetch after every load.
+    // Fetch once on mount. fetchGameData isn't memoized and reads data, so
+    // listing it would refetch after every load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { data, playersList, isLoading, isError, refetch: fetchGameData };
+  return { data, isLoading, isError, refetch: fetchGameData };
 };
 
 type GameResultFetchOptions = {
@@ -274,13 +252,11 @@ export const useFetchGameResultData = (options?: GameResultFetchOptions) => {
   return { data, isError, isForbidden, isLoading, fetchData };
 };
 
-// useFetchGameLogsData loads the round log of a game, and again each time
-// reloadKey changes (a table screen passes its table, so the log reloads with
-// it).
+// useFetchGameLogsData loads the round log of a game that has no table on
+// screen (the result page). A table screen has the log in its table response.
 export const useFetchGameLogsData = (
   gameId: number | null,
-  eventId?: number,
-  reloadKey?: unknown
+  eventId?: number
 ) => {
   const [data, setData] = useState<GameRoundLogs | null>(null);
   const [isError, setIsError] = useState(false);
@@ -332,12 +308,10 @@ export const useFetchGameLogsData = (
 
   useEffect(() => {
     fetchData();
-  }, [fetchData, reloadKey]);
+  }, [fetchData]);
 
   return { data, isError, isForbidden, isLoading, fetchData };
 };
-
-export type GameLogsState = ReturnType<typeof useFetchGameLogsData>;
 
 export const useFetchPlayerStatus = () => {
   const { selectedEventId } = useEvent();
@@ -447,10 +421,9 @@ export const useFetchLiveGameData = (eventId: number, gameId: number) => {
   const { isLoading, startLoading, finishLoading } = useLoadingState(
     `${eventId}/${gameId}`
   );
-  const [playersList, setPlayersList] = useState<PlayerOrder[]>([]);
-  const playersFetchedRef = useRef(false);
 
-  const fetchData = useCallback(async () => {
+  // fetchData loads the table and returns it (null on an error).
+  const fetchData = useCallback(async (): Promise<GameView | null> => {
     startLoading();
     setIsError(false);
     setIsForbidden(false);
@@ -461,40 +434,18 @@ export const useFetchLiveGameData = (eventId: number, gameId: number) => {
     if (liveResult.status === 403) {
       setIsForbidden(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     if (!liveResult.data) {
       setIsError(true);
       finishLoading(false);
-      return;
+      return null;
     }
 
     setData(liveResult.data);
-
-    if (playersFetchedRef.current) {
-      finishLoading(true);
-      return;
-    }
-
-    const gamePlayersRequest = GetRequest(
-      eventGamePath(eventId, gameId, '/players')
-    );
-    const playersResult = await publicFetch<GamePlayers>(gamePlayersRequest);
-
-    if (playersResult.status === 403) {
-      setIsForbidden(true);
-      finishLoading(false);
-      return;
-    }
-
-    if (!playersResult.data) {
-      setIsError(true);
-    }
-
-    setPlayersList(playersResult.data?.players || []);
-    playersFetchedRef.current = true;
     finishLoading(true);
+    return liveResult.data;
   }, [eventId, gameId, startLoading, finishLoading]);
 
   useEffect(() => {
@@ -503,7 +454,6 @@ export const useFetchLiveGameData = (eventId: number, gameId: number) => {
 
   return {
     data,
-    playersList,
     isLoading,
     isError,
     isForbidden,

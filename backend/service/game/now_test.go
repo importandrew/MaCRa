@@ -32,6 +32,21 @@ func TestNow(t *testing.T) {
 				assert.Equal(t, models.East.Kanji(), now.Me.Wind)
 			},
 		},
+		"log of the same state, players in starting seat order": {
+			playerID: 3,
+			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
+				expectCurrentGame(mg, 3, 100, drawRoundLogs(3), 1)
+				expectPlayerGets(mp)
+			},
+			expectedErr: assert.NoError,
+			checkNow: func(t *testing.T, now models.GameNow) {
+				assert.Equal(t, 3, now.LogSize)
+				assert.Len(t, now.Log.RoundLogs, now.LogSize)
+				assert.Equal(t, []models.PlayerHeader{
+					{ID: 1, Name: "Alice"}, {ID: 2, Name: "Bob"}, {ID: 3, Name: "Charlie"}, {ID: 4, Name: "David"},
+				}, now.Log.Players)
+			},
+		},
 		"player not in game": {
 			playerID: 999,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {

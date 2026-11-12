@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error) {
-	game, err := s.CurrentGame(ctx, playerID, eventID)
+	game, _, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err
 	}

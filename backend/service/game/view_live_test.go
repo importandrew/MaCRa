@@ -36,6 +36,23 @@ func TestViewLive(t *testing.T) {
 				assert.Equal(t, 0, view.PlayerScores[0].Score)
 			},
 		},
+		"log of the same state": {
+			gameID: 100,
+			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectLiveGame(mg, gameID, drawRoundLogs(2))
+				expectPlayerGets(mp)
+			},
+			expectedErr: assert.NoError,
+			checkView: func(t *testing.T, view models.GameView) {
+				assert.Equal(t, 2, view.LogSize)
+				assert.Equal(t, 100, view.Log.ID)
+				assert.Equal(t, drawRoundLogs(2)[1].ID, view.Log.RoundLogs[1].ID)
+				assert.Len(t, view.Log.RoundLogs, view.LogSize)
+				assert.Equal(t, []models.PlayerHeader{
+					{ID: 1, Name: "Alice"}, {ID: 2, Name: "Bob"}, {ID: 3, Name: "Charlie"}, {ID: 4, Name: "David"},
+				}, view.Log.Players)
+			},
+		},
 		"game not found": {
 			gameID: 999,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
