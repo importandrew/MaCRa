@@ -12,8 +12,9 @@ import (
 )
 
 // UndoLastRound deletes the last round log entry of a live game, or of a game
-// that ended less than models.UndoFinalRoundTimeout ago; such a game becomes
-// live again and loses its results. Everything happens in one transaction.
+// that ended after endedAfter; such a game becomes live again and loses its
+// results. An ended game that ended before endedAfter is refused with
+// models.ErrTooLate. Everything happens in one transaction.
 //
 // logSize is the number of log entries the caller saw: as with
 // SaveRoundOutcome, the game row is locked and the undo is refused with
@@ -23,7 +24,7 @@ import (
 // Reviving an ended game takes the same advisory locks as NewGame and refuses
 // with models.ErrUndoFinalRound if one of its players has started another
 // live game in the event: a player can't have two live games.
-func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int) error {
+func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfter time.Time) error {
 	return r.InTx(ctx, func(tx *Repo) error {
 		if err := tx.lockUnchangedLog(ctx, gameID, logSize); err != nil {
 			return err
@@ -47,7 +48,7 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int) error {
 		switch game.Status {
 		case models.GameLive:
 		case models.GameEnded:
-			if game.FinishedAt != nil && game.FinishedAt.Add(models.UndoFinalRoundTimeout).Before(time.Now()) {
+			if game.FinishedAt != nil && game.FinishedAt.Before(endedAfter) {
 				return models.ErrTooLate
 			}
 			players, err := tx.Players(ctx, gameID)

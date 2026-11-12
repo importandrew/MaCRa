@@ -50,14 +50,7 @@ func (r *Repo) GameResult(ctx context.Context, gameID int) (models.GameResult, e
 	result := models.GameResult{
 		ID:            gameID,
 		PlayerResults: playerResults,
-	}
-
-	if finishedAt != nil {
-		result.FinishedAt = finishedAt
-
-		if result.FinishedAt.Add(models.UndoFinalRoundTimeout).After(time.Now()) {
-			result.CanUndoLastRound = true
-		}
+		FinishedAt:    finishedAt,
 	}
 
 	return result, nil
