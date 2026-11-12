@@ -10,7 +10,6 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import AnimatedScore from '../CurrentGame/AnimatedScore';
 import '../CurrentGame/CurrentGame.css';
 import LiveMenu from './Menu/LiveMenu';
-import { useTableLogs } from '../CurrentGame/useTableLogs';
 
 // onGameEnded is called once this user has ended the game (Finish): the game
 // page reloads its status and shows the result.
@@ -23,9 +22,8 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
   }>();
   const eventId = eventIdParam ? parseInt(eventIdParam, 10) : 0;
   const gameId = gameIdParam ? parseInt(gameIdParam, 10) : 0;
-  const { data, playersList, isLoading, isError, isForbidden, refetch } =
+  const { data, isLoading, isError, isForbidden, refetch } =
     useFetchLiveGameData(eventId, gameId);
-  const logs = useTableLogs(data, refetch, eventId);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [rotationOffset, setRotationOffset] = useState(0);
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
@@ -33,16 +31,7 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
   );
   const currentScoresRef = useRef<Record<number, number>>({});
   const [previousScores, setPreviousScores] = useState<Record<number, number>>(
-    () => {
-      // Initialize with player IDs as keys and zeros as values
-      if (playersList.length == 0) {
-        return {};
-      }
-      return playersList.reduce(
-        (acc, p) => ({ ...acc, [p.id]: 0 }),
-        {} as Record<number, number>
-      );
-    }
+    {}
   );
 
   const closeContextMenuOpen = () => {
@@ -213,8 +202,8 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
                   gameId={data.id}
                   eventId={eventId}
                   onUndoSuccess={refetch}
-                  logs={logs}
-                  logSize={data.log_size}
+                  onStale={async () => (await refetch())?.log ?? null}
+                  log={data.log}
                   onGameEnded={onGameEnded}
                 />
               </ContextMenu>

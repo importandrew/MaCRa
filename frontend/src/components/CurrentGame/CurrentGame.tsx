@@ -12,13 +12,12 @@ import { RoundEntryPanel } from './RoundEntry';
 import CurrentGameSeat from './CurrentGameSeat';
 import { useRoundEntry } from './useRoundEntry';
 import { useShowGameGone } from './useShowGameGone';
-import { useTableLogs } from './useTableLogs';
 import { getStoredEventId } from '../../providers/event/eventConstants';
 import './CurrentGame.css';
 
 export default function CurrentGame() {
   const { t } = useTranslation();
-  const { data, playersList, isLoading, isError, refetch } = useFetchGameData();
+  const { data, isLoading, isError, refetch } = useFetchGameData();
   const [roundData, setRoundData] = useState<GameData | null>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [isEntryOpen, setIsEntryOpen] = useState(false);
@@ -36,22 +35,12 @@ export default function CurrentGame() {
     },
     () => onRefresh()
   );
-  const logs = useTableLogs(roundData, () => onRefresh());
   const [currentScores, setCurrentScores] = useState<Record<number, number>>(
     {}
   );
   const currentScoresRef = useRef<Record<number, number>>({});
   const [previousScores, setPreviousScores] = useState<Record<number, number>>(
-    () => {
-      // Initialize with player IDs as keys and zeros as values
-      if (playersList.length == 0) {
-        return {};
-      }
-      return playersList.reduce(
-        (acc, p) => ({ ...acc, [p.id]: 0 }),
-        {} as Record<number, number>
-      );
-    }
+    {}
   );
 
   // The round entry clears after a submit (in useRoundEntry) and on refresh,
@@ -211,8 +200,8 @@ export default function CurrentGame() {
                 <TableMenu
                   gameId={roundData.id}
                   onRefetchNow={onRefresh}
-                  logs={logs}
-                  logSize={roundData.log_size}
+                  onStale={async () => (await onRefresh())?.log ?? null}
+                  log={roundData.log}
                 />
               </ContextMenu>
             </div>

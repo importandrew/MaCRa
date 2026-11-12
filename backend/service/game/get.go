@@ -8,10 +8,12 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (s *Service) load(ctx context.Context, gameID int) (GameEngine, error) {
+// load rebuilds the game from its round log and returns it with that log, so
+// a response can show the table and the log of one state.
+func (s *Service) load(ctx context.Context, gameID int) (GameEngine, []models.RoundLog, error) {
 	players, err := s.gameRepo.Players(ctx, gameID)
 	if err != nil {
-		return nil, fmt.Errorf("get players: %w", err)
+		return nil, nil, fmt.Errorf("get players: %w", err)
 	}
 
 	seating := game.Seating([4]int{
@@ -31,7 +33,7 @@ func (s *Service) load(ctx context.Context, gameID int) (GameEngine, error) {
 
 	roundLogs, err := s.gameRepo.GameLog(ctx, gameID)
 	if err != nil {
-		return nil, fmt.Errorf("get game log: %w", err)
+		return nil, nil, fmt.Errorf("get game log: %w", err)
 	}
 
 	for _, log := range roundLogs {
@@ -44,43 +46,46 @@ func (s *Service) load(ctx context.Context, gameID int) (GameEngine, error) {
 			err = g.EnterRoundResult(log.Outcome, log.Value, log.Loser, log.Winner)
 		}
 		if err != nil {
-			return nil, fmt.Errorf("log record %d game %d: %w", log.ID, gameID, err)
+			return nil, nil, fmt.Errorf("log record %d game %d: %w", log.ID, gameID, err)
 		}
 	}
 
-	return g, nil
+	return g, roundLogs, nil
 }
 
-func (s *Service) LiveGame(ctx context.Context, gameID int) (GameEngine, error) {
+// LiveGame loads a live game, with its round log (see load).
+func (s *Service) LiveGame(ctx context.Context, gameID int) (GameEngine, []models.RoundLog, error) {
 	status, err := s.gameRepo.Status(ctx, gameID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if status != models.GameLive {
-		return nil, models.ErrGameNotLive
+		return nil, nil, models.ErrGameNotLive
 	}
 
-	game, err := s.load(ctx, gameID)
+	game, log, err := s.load(ctx, gameID)
 	if err != nil {
-		return nil, fmt.Errorf("load game %d: %w", gameID, err)
+		return nil, nil, fmt.Errorf("load game %d: %w", gameID, err)
 	}
 
-	return game, nil
+	return game, log, nil
 }
 
-func (s *Service) CurrentGame(ctx context.Context, playerID, eventID int) (GameEngine, error) {
+// CurrentGame loads the player's live game in the event, with its round log
+// (see load).
+func (s *Service) CurrentGame(ctx context.Context, playerID, eventID int) (GameEngine, []models.RoundLog, error) {
 	gameID, err := s.gameRepo.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
-		return nil, fmt.Errorf("get current game: %w", err)
+		return nil, nil, fmt.Errorf("get current game: %w", err)
 	}
 
-	game, err := s.load(ctx, gameID)
+	game, log, err := s.load(ctx, gameID)
 	if err != nil {
-		return nil, fmt.Errorf("load game %d: %w", gameID, err)
+		return nil, nil, fmt.Errorf("load game %d: %w", gameID, err)
 	}
 
-	return game, nil
+	return game, log, nil
 }
 
 func (s *Service) CurrentGameID(ctx context.Context, playerID, eventID int) (int, error) {

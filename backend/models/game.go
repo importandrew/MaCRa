@@ -16,6 +16,10 @@ type GameNow struct {
 	Right PlayerWindScore `json:"right"`
 	Opp   PlayerWindScore `json:"opp"`
 	Left  PlayerWindScore `json:"left"`
+
+	// Log is the round log of the same state as the table, so the table
+	// screen and its log can't disagree.
+	Log GameLog `json:"log"`
 }
 
 type Round struct {
@@ -60,6 +64,9 @@ type GameView struct {
 	LogSize int `json:"log_size"`
 
 	PlayerScores []PlayerWindScore `json:"player_scores"`
+
+	// Log is the round log of the same state, as in GameNow.
+	Log GameLog `json:"log"`
 }
 
 type MainGameInfo struct {

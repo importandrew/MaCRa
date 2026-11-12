@@ -76,7 +76,7 @@ func TestLoad(t *testing.T) {
 
 			testCase.mockSetup(mockGameRepo, testCase.gameID)
 
-			g, err := service.load(context.Background(), testCase.gameID)
+			g, _, err := service.load(context.Background(), testCase.gameID)
 
 			testCase.expectedErr(t, err)
 			if err != nil {
@@ -128,7 +128,7 @@ func TestLoad_WithDifferentOutcomes(t *testing.T) {
 		},
 	})
 
-	g, err := service.load(context.Background(), 100)
+	g, _, err := service.load(context.Background(), 100)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, g)
@@ -153,7 +153,7 @@ func TestLoad_InvalidLogError(t *testing.T) {
 		},
 	})
 
-	_, err := service.load(context.Background(), 100)
+	_, _, err := service.load(context.Background(), 100)
 
 	assert.Error(t, err)
 }

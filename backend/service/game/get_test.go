@@ -45,7 +45,7 @@ func TestLiveGame(t *testing.T) {
 
 			testCase.mockSetup(mockGameRepo, testCase.gameID)
 
-			g, err := service.LiveGame(context.Background(), testCase.gameID)
+			g, _, err := service.LiveGame(context.Background(), testCase.gameID)
 
 			testCase.expectedErr(t, err)
 			if err != nil {
@@ -110,7 +110,7 @@ func TestCurrentGame(t *testing.T) {
 
 			testCase.mockSetup(mockGameRepo)
 
-			g, err := service.CurrentGame(context.Background(), testCase.playerID, testEventID)
+			g, _, err := service.CurrentGame(context.Background(), testCase.playerID, testEventID)
 
 			testCase.expectedErr(t, err)
 			if err != nil {

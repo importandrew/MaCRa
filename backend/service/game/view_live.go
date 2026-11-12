@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, error) {
-	game, err := s.LiveGame(ctx, gameID)
+	game, log, err := s.LiveGame(ctx, gameID)
 	if err != nil {
 		return models.GameView{}, err
 	}
@@ -16,6 +16,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 	round := game.Round()
 
 	playerScores := make([]models.PlayerWindScore, 0, len(models.Winds))
+	names := make(map[int]string, len(models.Winds))
 	for _, wind := range models.Winds {
 		playerID := game.PlayerBySeatInRound(round, wind)
 
@@ -24,6 +25,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 			return models.GameView{}, err
 		}
 
+		names[playerID] = player.Name
 		playerScores = append(playerScores, models.PlayerWindScore{
 			ID:    playerID,
 			Name:  player.Name,
@@ -41,6 +43,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 			Kanji: models.RoundKanji(round),
 		},
 		PlayerScores: playerScores,
+		Log:          gameLog(game, log, names),
 	}
 
 	return view, nil

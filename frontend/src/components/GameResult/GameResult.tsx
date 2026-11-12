@@ -5,7 +5,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { getStoredEventId } from '../../providers/event/eventConstants';
 import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
-import { useFetchGameResultData } from '../../providers/game/gameDataApi';
+import {
+  useFetchGameLogsData,
+  useFetchGameResultData,
+} from '../../providers/game/gameDataApi';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import LogsMenu from '../CurrentGame/Menu/LogsMenu';
 import GameLogs from './GameLogs';
@@ -36,14 +39,24 @@ export default function GameResult() {
     hasCapability('undo_round') && Boolean(data?.can_undo_last_round);
   const [isChartVisible, setIsChartVisible] = useState(false);
   const [isLogsVisible, setIsLogsVisible] = useState(false);
+  // The log is loaded once, when the chart or the log is first shown, and
+  // serves both: a finished game's log doesn't change (an undo leaves the
+  // page).
+  const [isLogWanted, setIsLogWanted] = useState(false);
+  const logs = useFetchGameLogsData(
+    isLogWanted && data ? data.id : null,
+    resolvedEventId ?? undefined
+  );
 
   const showChart = () => {
     setIsChartVisible(!isChartVisible);
     setIsLogsVisible(false);
+    setIsLogWanted(true);
   };
   const showLogs = () => {
     setIsLogsVisible(!isLogsVisible);
     setIsChartVisible(false);
+    setIsLogWanted(true);
   };
 
   const onRefresh = useCallback(() => {
@@ -104,15 +117,12 @@ export default function GameResult() {
               onUndoSuccess={() => {
                 navigate('/now');
               }}
+              logs={logs}
+              onStale={logs.fetchData}
             />
           )}
           {isChartVisible && (
-            <GameLogs
-              isChartVisible={true}
-              isLogVisible={false}
-              gameId={data.id}
-              eventId={eventId ?? storedEventId ?? undefined}
-            />
+            <GameLogs isChartVisible={true} isLogVisible={false} logs={logs} />
           )}
         </div>
       ) : null}
