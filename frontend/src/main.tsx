@@ -1,29 +1,12 @@
 import React from 'react';
 import ReactDOM, { Container } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import HawkCatcher from '@hawk.so/javascript';
 import App from './App.tsx';
 import './index.css';
 import './i18n';
+import './monitoring';
 import { AuthProvider } from './providers/auth/AuthContext.tsx';
 import { EventProvider } from './providers/event/EventContext.tsx';
-
-if (import.meta.env.DEV) {
-  // DEBUG mode in Console
-} else if (import.meta.env.VITE_HAWK_TOKEN) {
-  new HawkCatcher({
-    token: import.meta.env.VITE_HAWK_TOKEN,
-    consoleTracking: true,
-    context: {},
-    beforeSend: (event) => {
-      const titleIgnorePatterns = ['Script error.'];
-
-      if (titleIgnorePatterns.includes(event.title.trim())) return false;
-
-      return event;
-    },
-  });
-}
 
 ReactDOM.createRoot(document.getElementById('root') as Container).render(
   <React.StrictMode>
