@@ -32,10 +32,10 @@ export default defineConfig(
   },
   js.configs.recommended,
   withFixedPlugin('react', react, react.configs.flat.recommended),
-  // Only the two classic hook rules, as with eslint-plugin-react-hooks 4.
-  // The React Compiler rules in its 7.x "recommended" set (set-state-in-effect,
-  // immutability, ...) need code changes first; enable them separately.
-  { plugins: { 'react-hooks': reactHooks } },
+  // The full "recommended" set of eslint-plugin-react-hooks 7: the classic
+  // hook rules plus the React Compiler rules (set-state-in-effect, refs,
+  // immutability, purity, ...).
+  reactHooks.configs.flat.recommended,
   withFixedPlugin('jsx-a11y', jsxA11y, jsxA11y.flatConfigs.recommended),
   prettierRecommended,
   tseslint.configs.recommended,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   GetRequest,
   authFetch,
@@ -9,7 +9,6 @@ import {
   eventPath,
   fetchWithStatus,
 } from '../../components/Request';
-import { useLoadingState } from '../useLoadingState';
 import { useFetch } from '../useFetch';
 import { Event, EventVisibility, ContentReach } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
@@ -147,83 +146,58 @@ export const useFetchEventGames = (
   eventId: number | null,
   status: EventGameListStatus | null
 ) => {
-  const [games, setGames] = useState<EventGamesListData['games']>([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isForbidden, setIsForbidden] = useState(false);
-  const { isLoading, startLoading, finishLoading } = useLoadingState(
-    `${eventId}/${status}`,
-    eventId != null && status != null
+  const key = eventId != null && status != null ? `${eventId}/${status}` : null;
+  const pagePath = (offset: number) =>
+    eventPath(
+      eventId!,
+      `/games?status=${status}&limit=${DEFAULT_GAMES_PAGE_SIZE}&offset=${offset}`
+    );
+
+  // The first page comes from useFetch; "Load more" appends the next pages,
+  // kept with the key they belong to.
+  const first = useFetch<EventGamesListData>(key, () =>
+    publicFetch<EventGamesListData>(GetRequest(pagePath(0)))
   );
+  const [more, setMore] = useState<{
+    key: string | null;
+    games: EventGamesListData['games'];
+    hasMore: boolean;
+  } | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const fetchPage = useCallback(
-    async (offset: number, append: boolean) => {
-      if (eventId == null || status == null) {
-        setGames([]);
-        setHasMore(false);
-        return;
-      }
+  const moreForKey = more?.key === key ? more : null;
+  const games = [...(first.data?.games ?? []), ...(moreForKey?.games ?? [])];
+  const hasMore = moreForKey
+    ? moreForKey.hasMore
+    : (first.data?.has_more ?? false);
 
-      if (append) {
-        setIsLoadingMore(true);
-      } else {
-        startLoading();
-      }
-      setIsError(false);
-      setIsForbidden(false);
-
-      const request = GetRequest(
-        eventPath(
-          eventId,
-          `/games?status=${status}&limit=${DEFAULT_GAMES_PAGE_SIZE}&offset=${offset}`
-        )
-      );
-      const result = await publicFetch<EventGamesListData>(request);
-
-      if (result.status === 403) {
-        setIsForbidden(true);
-        finishLoading(false);
-        setIsLoadingMore(false);
-        return;
-      }
-
-      if (!result.data) {
-        setIsError(true);
-        finishLoading(false);
-        setIsLoadingMore(false);
-        return;
-      }
-
-      setGames((prev) =>
-        append ? [...prev, ...result.data!.games] : result.data!.games
-      );
-      setHasMore(result.data.has_more);
-      finishLoading(true);
-      setIsLoadingMore(false);
-    },
-    [eventId, status, startLoading, finishLoading]
-  );
-
+  const { refetch: refetchFirst } = first;
   const refetch = useCallback(() => {
-    return fetchPage(0, false);
-  }, [fetchPage]);
+    setMore(null);
+    return refetchFirst();
+  }, [refetchFirst]);
 
-  const loadMore = useCallback(() => {
-    if (!hasMore || isLoadingMore || isLoading) return;
-    return fetchPage(games.length, true);
-  }, [fetchPage, games.length, hasMore, isLoading, isLoadingMore]);
-
-  useEffect(() => {
-    fetchPage(0, false);
-  }, [fetchPage]);
+  const loadMore = async () => {
+    if (!hasMore || isLoadingMore || first.isLoading || key == null) return;
+    setIsLoadingMore(true);
+    const result = await publicFetch<EventGamesListData>(
+      GetRequest(pagePath(games.length))
+    );
+    setIsLoadingMore(false);
+    if (!result.data) return;
+    setMore({
+      key,
+      games: [...(moreForKey?.games ?? []), ...result.data.games],
+      hasMore: result.data.has_more,
+    });
+  };
 
   return {
     games,
     hasMore,
-    isError,
-    isForbidden,
-    isLoading,
+    isError: first.isError || first.isNotFound,
+    isForbidden: first.isForbidden,
+    isLoading: first.isLoading,
     isLoadingMore,
     refetch,
     loadMore,

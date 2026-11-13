@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 import { Button, Card, Modal } from '@heroui/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import './Delta.css';
 
 type TablePosition = 'top' | 'right' | 'bottom' | 'left';
@@ -589,17 +589,19 @@ export default function Delta({
 }: DeltaProps) {
   const { t } = useTranslation();
   const [helpOpen, setHelpOpen] = useState(false);
-  useEffect(() => {
-    if (!isOpen) setHelpOpen(false);
-  }, [isOpen]);
+  // close also closes the help, so it doesn't come back open next time.
+  const close = () => {
+    setHelpOpen(false);
+    onClose();
+  };
   const playersKey = JSON.stringify(
     players.map((p) => [p.id, p.name, p.score, p.position, p.wind])
   );
-  const lastCalculations = useRef<ReturnType<typeof computeEmpty> | null>(null);
+  // Computed whenever a player is selected, open or not: while the modal
+  // closes (its exit animation) it keeps showing the same figures.
   const calculations = useMemo(() => {
     const empty = computeEmpty();
-    if (!isOpen || selectedPlayerId === null)
-      return lastCalculations.current ?? empty;
+    if (selectedPlayerId === null) return empty;
     const positions = getTablePositions(players, selectedPlayerId);
     if (!positions.selectedPlayer) return empty;
     const opponentTargets: typeof empty.opponentTargets = {};
@@ -621,10 +623,9 @@ export default function Delta({
       selfTargets: getGainTargets(players, selectedPlayerId, 'self'),
       opponentTargets,
     };
-    lastCalculations.current = result;
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, selectedPlayerId, playersKey]);
+  }, [selectedPlayerId, playersKey]);
   const {
     rank,
     selectedPlayer,
@@ -639,7 +640,7 @@ export default function Delta({
     <Modal.Backdrop
       isOpen={isOpen}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) close();
       }}
     >
       <Modal.Container
@@ -712,7 +713,7 @@ export default function Delta({
                   ) : null;
                 })}
                 <div className="delta-center">
-                  <Button variant="secondary" size="sm" onPress={onClose}>
+                  <Button variant="secondary" size="sm" onPress={close}>
                     {t('delta.backToTable')}
                   </Button>
                   <Button

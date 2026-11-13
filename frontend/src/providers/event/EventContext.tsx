@@ -42,7 +42,7 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   const { t } = useTranslation();
   const { isAuthenticated } = useContext(AuthContext);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(() =>
-    getStoredEventId()
+    isAuthenticated ? getStoredEventId() : null
   );
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   // Starts as true when the effect below will load the stored event, so the
@@ -50,6 +50,18 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(
     () => isAuthenticated && getStoredEventId() != null
   );
+
+  // Signing in or out starts the selection afresh: from the stored event
+  // after signing in, none after signing out. Adjusted while rendering (the
+  // React pattern for state that follows a changed input), not in an effect.
+  const [authSeen, setAuthSeen] = useState(isAuthenticated);
+  if (authSeen !== isAuthenticated) {
+    setAuthSeen(isAuthenticated);
+    const storedId = isAuthenticated ? getStoredEventId() : null;
+    setSelectedEventId(storedId);
+    setSelectedEvent(null);
+    setIsLoading(storedId != null);
+  }
 
   const clearEvent = useCallback(() => {
     clearStoredEventId();
@@ -86,23 +98,20 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     [t, clearEvent]
   );
 
+  // After signing out, the stored selection goes too.
   useEffect(() => {
-    if (!isAuthenticated) {
-      clearEvent();
-      return;
-    }
+    if (!isAuthenticated) clearStoredEventId();
+  }, [isAuthenticated]);
 
-    const storedId = getStoredEventId();
-    if (!storedId) {
-      setSelectedEventId(null);
-      setSelectedEvent(null);
-      return;
-    }
+  // Load the stored event on start and after signing in. State changes only
+  // when the answer comes.
+  useEffect(() => {
+    const storedId = isAuthenticated ? getStoredEventId() : null;
+    if (!storedId) return;
 
-    setSelectedEventId(storedId);
-    setIsLoading(true);
-
+    let isCurrent = true;
     fetchEventById(storedId).then(({ data: event, status }) => {
+      if (!isCurrent) return;
       if (event) {
         setSelectedEvent(event);
       } else if (isGone(status)) {
@@ -113,6 +122,9 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       // Any other failure keeps the selection; the pages show their errors.
       setIsLoading(false);
     });
+    return () => {
+      isCurrent = false;
+    };
     // t is left out: a language switch mustn't reload the event.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, clearEvent]);

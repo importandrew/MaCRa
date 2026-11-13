@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
-import { useEffect, useMemo, useState } from 'react';
-import type { GameData } from '../../models/GameData';
+import { useMemo, useState } from 'react';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import RefreshButton from '../RefreshButton';
@@ -18,8 +17,13 @@ import { useScoreAnimation } from '../Table/useScoreAnimation';
 
 export default function CurrentGame() {
   const { t } = useTranslation();
-  const { data, isLoading, isError, refetch } = useFetchGameData();
-  const [roundData, setRoundData] = useState<GameData | null>(null);
+  const {
+    data: roundData,
+    isLoading,
+    isError,
+    refetch,
+    setData: setRoundData,
+  } = useFetchGameData();
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [isEntryOpen, setIsEntryOpen] = useState(false);
   const [isDeltaOpen, setIsDeltaOpen] = useState(false);
@@ -28,29 +32,12 @@ export default function CurrentGame() {
     setDeltaPlayerId(playerId);
     setIsDeltaOpen(true);
   };
-  const entry = useRoundEntry(
-    roundData,
-    (next) => {
-      setRoundData(next);
-      setIsEntryOpen(false);
-    },
-    () => onRefresh()
-  );
-  const { previousScores, currentScores } = useScoreAnimation(
-    roundData
-      ? [roundData.me, roundData.right, roundData.opp, roundData.left]
-      : null
-  );
-
-  // The round entry clears after a submit (in useRoundEntry) and on refresh,
-  // including undo, as agreed with the owner. Closing it with the kanji keeps
-  // the choices.
   // A 404 for a table on screen means its game has ended or been aborted:
   // open the result (or home) instead of a loading error.
   const showGameGone = useShowGameGone();
   const { selectedEventId: eventId } = useEvent();
-  const onRefresh = async () => {
-    entry.reset();
+  // refreshTable reloads the table and returns it (null on an error).
+  const refreshTable = async () => {
     setIsEntryOpen(false);
     const { data: fresh, status } = await refetch();
     if (status === 404 && roundData && eventId) {
@@ -58,12 +45,27 @@ export default function CurrentGame() {
     }
     return fresh;
   };
+  const entry = useRoundEntry(
+    roundData,
+    (next) => {
+      setRoundData(next);
+      setIsEntryOpen(false);
+    },
+    refreshTable
+  );
+  const { previousScores, currentScores } = useScoreAnimation(
+    roundData
+      ? [roundData.me, roundData.right, roundData.opp, roundData.left]
+      : null
+  );
 
-  useEffect(() => {
-    if (data) {
-      setRoundData(data);
-    }
-  }, [data]);
+  // Refresh (and an undo) clears the round entry, as agreed with the owner;
+  // closing it with the kanji keeps the choices. A stale entry clears itself
+  // (useRoundEntry).
+  const onRefresh = () => {
+    entry.reset();
+    return refreshTable();
+  };
 
   const deltaPlayers = useMemo(
     () =>

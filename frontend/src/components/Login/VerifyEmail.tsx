@@ -10,12 +10,14 @@ export default function VerifyEmailPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
-  const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
+  // Without a token there is nothing to verify: the link is broken.
+  const [status, setStatus] = useState<'loading' | 'ok' | 'error'>(() =>
+    token ? 'loading' : 'error'
+  );
   const started = useRef(false);
 
   useEffect(() => {
     if (!token) {
-      setStatus('error');
       return;
     }
 
