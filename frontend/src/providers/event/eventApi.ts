@@ -7,8 +7,10 @@ import {
   DeleteRequest,
   publicFetch,
   eventPath,
+  fetchWithStatus,
 } from '../../components/Request';
 import { useLoadingState } from '../useLoadingState';
+import { useFetch } from '../useFetch';
 import { Event, EventVisibility, ContentReach } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
 import { EventMember, EventRole } from '../../models/EventRole';
@@ -36,167 +38,49 @@ export type UpdateEventPayload = {
 };
 
 export const useFetchEvent = (id: number | null) => {
-  const [data, setData] = useState<Event | null>(null);
-  const [isError, setIsError] = useState(false);
-  const [isForbidden, setIsForbidden] = useState(false);
-  // isNotFound: the event doesn't exist (404); no toast, the page says so.
-  const [isNotFound, setIsNotFound] = useState(false);
-  const { isLoading, startLoading, finishLoading } = useLoadingState(
-    id,
-    id != null
-  );
-
-  const fetchData = useCallback(async () => {
-    if (id == null) {
-      setData(null);
-      return;
-    }
-
-    startLoading();
-    setIsError(false);
-    setIsForbidden(false);
-    setIsNotFound(false);
-
-    const request = GetRequest(`/api/event/${id}`);
-    const result = await publicFetch<Event>(request, {
+  // A 404 is quiet: the page says "Event not found" (isNotFound).
+  const f = useFetch<Event>(id, () =>
+    publicFetch<Event>(GetRequest(`/api/event/${id}`), {
       quietStatuses: [404],
-    });
-
-    if (result.status === 404) {
-      setIsNotFound(true);
-      finishLoading(false);
-      return;
-    }
-
-    if (result.status === 403) {
-      setIsForbidden(true);
-      finishLoading(false);
-      return;
-    }
-
-    if (!result.data) {
-      setIsError(true);
-      finishLoading(false);
-      return;
-    }
-
-    setData(result.data);
-    finishLoading(true);
-  }, [id, startLoading, finishLoading]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
+    })
+  );
   return {
-    data,
-    isError,
-    isForbidden,
-    isNotFound,
-    isLoading,
-    refetch: fetchData,
+    data: f.data,
+    isError: f.isError,
+    isForbidden: f.isForbidden,
+    isNotFound: f.isNotFound,
+    isLoading: f.isLoading,
+    refetch: f.refetch,
   };
 };
 
 export const useFetchEventMe = (eventId: number | null) => {
-  const [data, setData] = useState<EventMe | null>(null);
-  const [isError, setIsError] = useState(false);
-  const [isForbidden, setIsForbidden] = useState(false);
-  // isNotFound: the event doesn't exist (404); no toast, the page says so.
-  const [isNotFound, setIsNotFound] = useState(false);
-  const { isLoading, startLoading, finishLoading } = useLoadingState(
-    eventId,
-    eventId != null
-  );
-
-  const fetchData = useCallback(async () => {
-    if (eventId == null) {
-      setData(null);
-      finishLoading(false);
-      return;
-    }
-
-    startLoading();
-    setIsError(false);
-    setIsForbidden(false);
-    setIsNotFound(false);
-
-    const request = GetRequest(`/api/event/${eventId}/me`);
-    const result = await publicFetch<EventMe>(request, {
+  // A 404 is quiet: the page says "Event not found" (isNotFound).
+  const f = useFetch<EventMe>(eventId, () =>
+    publicFetch<EventMe>(GetRequest(`/api/event/${eventId}/me`), {
       quietStatuses: [404],
-    });
-
-    if (result.status === 404) {
-      setIsNotFound(true);
-      finishLoading(false);
-      return;
-    }
-
-    if (result.status === 403) {
-      setIsForbidden(true);
-      finishLoading(false);
-      return;
-    }
-
-    if (!result.data) {
-      setIsError(true);
-      finishLoading(false);
-      return;
-    }
-
-    setData(result.data);
-    finishLoading(true);
-  }, [eventId, startLoading, finishLoading]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
+    })
+  );
   return {
-    data,
-    isError,
-    isForbidden,
-    isNotFound,
-    isLoading,
-    refetch: fetchData,
+    data: f.data,
+    isError: f.isError,
+    isForbidden: f.isForbidden,
+    isNotFound: f.isNotFound,
+    isLoading: f.isLoading,
+    refetch: f.refetch,
   };
 };
 
 export const useFetchEventMembers = (eventId: number | null) => {
-  const [data, setData] = useState<EventMember[] | null>(null);
-  const [isError, setIsError] = useState(false);
-  const { isLoading, startLoading, finishLoading } = useLoadingState(
-    eventId,
-    eventId != null
+  const f = useFetch<EventMember[]>(eventId, () =>
+    fetchWithStatus<EventMember[]>(GetRequest(`/api/event/${eventId}/members`))
   );
-
-  const fetchData = useCallback(async () => {
-    if (eventId == null) {
-      setData(null);
-      return;
-    }
-
-    startLoading();
-    setIsError(false);
-
-    const request = GetRequest(`/api/event/${eventId}/members`);
-    const result = await authFetch<EventMember[]>(request);
-
-    if (!result) {
-      setIsError(true);
-      finishLoading(false);
-      return;
-    }
-
-    setData(result);
-    finishLoading(true);
-  }, [eventId, startLoading, finishLoading]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return { data, isError, isLoading, refetch: fetchData };
+  return {
+    data: f.data,
+    isError: f.isFailed,
+    isLoading: f.isLoading,
+    refetch: f.refetch,
+  };
 };
 
 export async function createEvent(
@@ -246,32 +130,15 @@ export async function finishEvent(eventId: number): Promise<boolean> {
 }
 
 export const useFetchVisibleEvents = () => {
-  const [data, setData] = useState<Event[] | null>(null);
-  const [isError, setIsError] = useState(false);
-  const { isLoading, startLoading, finishLoading } = useLoadingState();
-
-  const fetchData = useCallback(async () => {
-    startLoading();
-    setIsError(false);
-
-    const request = GetRequest('/api/event');
-    const result = await publicFetch<Event[]>(request);
-
-    if (result.status === 403 || !result.data) {
-      setIsError(true);
-      finishLoading(false);
-      return;
-    }
-
-    setData(result.data);
-    finishLoading(true);
-  }, [startLoading, finishLoading]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return { data, isError, isLoading, refetch: fetchData };
+  const f = useFetch<Event[]>('events', () =>
+    publicFetch<Event[]>(GetRequest('/api/event'))
+  );
+  return {
+    data: f.data,
+    isError: f.isFailed,
+    isLoading: f.isLoading,
+    refetch: f.refetch,
+  };
 };
 
 const DEFAULT_GAMES_PAGE_SIZE = 50;
@@ -364,46 +231,14 @@ export const useFetchEventGames = (
 };
 
 export const useFetchEventRatings = (eventId: number | null) => {
-  const [data, setData] = useState<EventRatingsData | null>(null);
-  const [isError, setIsError] = useState(false);
-  const [isForbidden, setIsForbidden] = useState(false);
-  const { isLoading, startLoading, finishLoading } = useLoadingState(
-    eventId,
-    eventId != null
+  const f = useFetch<EventRatingsData>(eventId, () =>
+    publicFetch<EventRatingsData>(GetRequest(eventPath(eventId!, '/ratings')))
   );
-
-  const fetchData = useCallback(async () => {
-    if (eventId == null) {
-      setData(null);
-      return;
-    }
-
-    startLoading();
-    setIsError(false);
-    setIsForbidden(false);
-
-    const request = GetRequest(eventPath(eventId, '/ratings'));
-    const result = await publicFetch<EventRatingsData>(request);
-
-    if (result.status === 403) {
-      setIsForbidden(true);
-      finishLoading(false);
-      return;
-    }
-
-    if (!result.data) {
-      setIsError(true);
-      finishLoading(false);
-      return;
-    }
-
-    setData(result.data);
-    finishLoading(true);
-  }, [eventId, startLoading, finishLoading]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return { data, isError, isForbidden, isLoading, refetch: fetchData };
+  return {
+    data: f.data,
+    isError: f.isError || f.isNotFound,
+    isForbidden: f.isForbidden,
+    isLoading: f.isLoading,
+    refetch: f.refetch,
+  };
 };
