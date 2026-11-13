@@ -1,49 +1,28 @@
 import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  Label,
-  TextArea,
-  TextField,
-} from '@heroui/react';
+import { Button, Card, Form } from '@heroui/react';
 import { FormEvent, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
-import {
-  CONTENT_REACHES,
-  ContentReach,
-  EventVisibility,
-} from '../../models/Event';
 import { createEvent } from '../../providers/event/eventApi';
 import { showToast } from '../Toast';
 import SegmentedPicker from '../SegmentedPicker';
 import PendingButton from '../PendingButton';
-
-const VISIBILITIES: EventVisibility[] = ['private', 'public'];
+import EventSettingsFields from './EventSettingsFields';
+import { type EventSettings, isValidSettings } from './eventSettings';
 
 export default function EventCreate() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
   const [type, setType] = useState<'regular' | 'tournament'>('regular');
-  const [visibility, setVisibility] = useState<EventVisibility>('private');
-  const [ratingsReach, setRatingsReach] = useState<ContentReach>('members');
-  const [gamesReach, setGamesReach] = useState<ContentReach>('members');
+  // A new event is private by default, its rating and games for members.
+  const [settings, setSettings] = useState<EventSettings>({
+    name: '',
+    description: '',
+    visibility: 'private',
+    ratingsReach: 'members',
+    gamesReach: 'members',
+  });
   const { isPending: isSubmitting, run } = useSubmitOnce();
-
-  const publicReachDisabled = visibility === 'private';
-  const isReachOptionDisabled = (value: ContentReach) =>
-    value === 'public' && publicReachDisabled;
-
-  const applyVisibilityPreset = (value: EventVisibility) => {
-    setVisibility(value);
-    const reach: ContentReach = value === 'public' ? 'public' : 'members';
-    setRatingsReach(reach);
-    setGamesReach(reach);
-  };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,11 +32,11 @@ export default function EventCreate() {
   const submit = async () => {
     const id = await createEvent({
       type,
-      name: name.trim(),
-      description: description.trim() || undefined,
-      visibility,
-      ratings_reach: ratingsReach,
-      games_reach: gamesReach,
+      name: settings.name.trim(),
+      description: settings.description.trim(),
+      visibility: settings.visibility,
+      ratings_reach: settings.ratingsReach,
+      games_reach: settings.gamesReach,
     });
 
     if (!id) return;
@@ -81,62 +60,28 @@ export default function EventCreate() {
             onSubmit={onSubmit}
             className="flex flex-col gap-3"
           >
-            <TextField fullWidth isRequired value={name} onChange={setName}>
-              <Label>{t('events.name')}</Label>
-              <Input />
-            </TextField>
-            <TextField fullWidth value={description} onChange={setDescription}>
-              <Label>{t('events.description')}</Label>
-              <TextArea />
-            </TextField>
-            <div className="w-full flex flex-col gap-2">
-              <p className="text-muted">{t('events.type')}</p>
-              <SegmentedPicker
-                ariaLabel={t('events.type')}
-                options={[
-                  { value: 'regular', label: t('eventType.regular') },
-                  {
-                    value: 'tournament',
-                    label: t('eventType.tournament'),
-                    isDisabled: true,
-                  },
-                ]}
-                selectedKey={type}
-                onSelectionChange={setType}
-              />
-              <p className="text-muted">{t('events.visibility')}</p>
-              <SegmentedPicker
-                label={t('events.general')}
-                options={VISIBILITIES.map((value) => ({
-                  value,
-                  label: t(`visibility.${value}`),
-                }))}
-                selectedKey={visibility}
-                onSelectionChange={applyVisibilityPreset}
-              />
-              <div className="flex flex-col gap-5">
-                <SegmentedPicker
-                  label={t('events.ratingsReach')}
-                  options={CONTENT_REACHES.map((value) => ({
-                    value,
-                    label: t(`reach.${value}`),
-                  }))}
-                  selectedKey={ratingsReach}
-                  onSelectionChange={setRatingsReach}
-                  isOptionDisabled={isReachOptionDisabled}
-                />
-                <SegmentedPicker
-                  label={t('events.gamesReach')}
-                  options={CONTENT_REACHES.map((value) => ({
-                    value,
-                    label: t(`reach.${value}`),
-                  }))}
-                  selectedKey={gamesReach}
-                  onSelectionChange={setGamesReach}
-                  isOptionDisabled={isReachOptionDisabled}
-                />
-              </div>
-            </div>
+            <EventSettingsFields
+              value={settings}
+              onChange={setSettings}
+              afterDescription={
+                <>
+                  <p className="text-muted">{t('events.type')}</p>
+                  <SegmentedPicker
+                    ariaLabel={t('events.type')}
+                    options={[
+                      { value: 'regular', label: t('eventType.regular') },
+                      {
+                        value: 'tournament',
+                        label: t('eventType.tournament'),
+                        isDisabled: true,
+                      },
+                    ]}
+                    selectedKey={type}
+                    onSelectionChange={setType}
+                  />
+                </>
+              }
+            />
           </Form>
         </Card.Content>
       </Card>
@@ -155,7 +100,7 @@ export default function EventCreate() {
           form="create-event-form"
           variant="primary"
           isPending={isSubmitting}
-          isDisabled={!name.trim()}
+          isDisabled={!isValidSettings(settings)}
           className="flex-1"
         >
           {t('events.create')}
