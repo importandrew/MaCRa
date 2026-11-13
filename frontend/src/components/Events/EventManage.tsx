@@ -34,6 +34,7 @@ import PlayerAutocomplete from '../PlayerAutocomplete';
 import PendingButton from '../PendingButton';
 import Confirm from '../Confirm';
 import EventSettingsFields from './EventSettingsFields';
+import EventRulesForm from './EventRulesForm';
 import { type EventSettings, isValidSettings } from './eventSettings';
 
 const ALL_ROLES: EventRole[] = ['player', 'referee', 'observer'];
@@ -57,7 +58,9 @@ export default function EventManage() {
 
   const canManageEvent = hasCapability('manage_event');
   const canManageMembers = hasCapability('manage_members');
-  const hasMultipleManagingCapabilities = canManageEvent && canManageMembers;
+  // The sections: overview and rules with manage_event, members with
+  // manage_members; the picker shows when there is more than one.
+  const hasMultipleSections = canManageEvent;
 
   const {
     data: members,
@@ -90,7 +93,7 @@ export default function EventManage() {
   const [memberToRemove, setMemberToRemove] = useState<EventMember | null>(
     null
   );
-  const [activeTab, setActiveTab] = useState<'overview' | 'members'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'rules' | 'members'>(
     canManageEvent ? 'overview' : 'members'
   );
 
@@ -195,12 +198,15 @@ export default function EventManage() {
         {t('events.manageTitle', { name: event.name })}
       </h1>
 
-      {hasMultipleManagingCapabilities && (
+      {hasMultipleSections && (
         <SegmentedPicker
           ariaLabel={t('events.manageSections')}
           options={[
             { value: 'overview', label: t('events.overview') },
-            { value: 'members', label: t('members.title') },
+            { value: 'rules', label: t('rules.title') },
+            ...(canManageMembers
+              ? [{ value: 'members' as const, label: t('members.title') }]
+              : []),
           ]}
           selectedKey={activeTab}
           onSelectionChange={setActiveTab}
@@ -243,6 +249,10 @@ export default function EventManage() {
             {t('events.saveChanges')}
           </PendingButton>
         </>
+      )}
+
+      {activeTab === 'rules' && canManageEvent && (
+        <EventRulesForm event={event} onSaved={refetch} />
       )}
 
       {activeTab === 'members' && canManageMembers && isFinished && (

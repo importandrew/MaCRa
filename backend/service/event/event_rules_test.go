@@ -24,6 +24,7 @@ func TestCreate_validatesAndDefaultsToPrivate(t *testing.T) {
 			want: models.Event{
 				Type: models.EventRegular, Name: "Club", Description: "d", OwnerUserID: 7,
 				Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers,
+				Rules: models.StandardGameRules(),
 			},
 		},
 		"empty name after trimming": {

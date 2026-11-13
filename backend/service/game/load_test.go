@@ -58,10 +58,19 @@ func TestLoad(t *testing.T) {
 			},
 			expectedErr: assert.Error,
 		},
+		"rules error": {
+			gameID: 100,
+			mockSetup: func(m *MockGameRepo, gameID int) {
+				m.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil)
+				m.EXPECT().Rules(mock.Anything, gameID).Return(models.GameRules{}, errors.New("database error"))
+			},
+			expectedErr: assert.Error,
+		},
 		"game log error": {
 			gameID: 100,
 			mockSetup: func(m *MockGameRepo, gameID int) {
 				m.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil)
+				m.EXPECT().Rules(mock.Anything, gameID).Return(models.StandardGameRules(), nil)
 				m.EXPECT().GameLog(mock.Anything, gameID).Return(nil, errors.New("database error"))
 			},
 			expectedErr: assert.Error,
@@ -156,4 +165,55 @@ func TestLoad_InvalidLogError(t *testing.T) {
 	_, _, err := service.load(context.Background(), 100)
 
 	assert.Error(t, err)
+}
+
+// TestLoad_ByGameRules checks that a game is replayed by the rules it
+// started with: a short game ends after 8 hands, and its log is valid only
+// by its own minimum hand and false mahjong amounts.
+func TestLoad_ByGameRules(t *testing.T) {
+	short := models.GameRules{Hands: 8, MinHand: 24, FalseMahjong: [2]int{30, 90}}
+
+	testData := map[string]struct {
+		logs        []models.RoundLog
+		expectedErr assert.ErrorAssertionFunc
+		wantStatus  models.GameStatus
+	}{
+		"ends after 8 hands": {
+			logs:        drawRoundLogs(8),
+			expectedErr: assert.NoError,
+			wantStatus:  models.GameEnded,
+		},
+		"7 hands: still live": {
+			logs:        drawRoundLogs(7),
+			expectedErr: assert.NoError,
+			wantStatus:  models.GameLive,
+		},
+		"hand below the game's minimum": {
+			logs:        []models.RoundLog{{ID: 1, Round: 1, Outcome: models.Self, Winner: 1, Value: 16}},
+			expectedErr: assert.Error,
+		},
+		"false mahjong of the game's amounts": {
+			logs:        []models.RoundLog{{ID: 1, Round: 1, Outcome: models.FalseMahjong, Loser: 1, Value: 90}},
+			expectedErr: assert.NoError,
+			wantStatus:  models.GameLive,
+		},
+	}
+
+	for name, testCase := range testData {
+		t.Run(name, func(t *testing.T) {
+			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().Players(mock.Anything, 100).Return(defaultStartingPlayers, nil)
+			mockGameRepo.EXPECT().Rules(mock.Anything, 100).Return(short, nil)
+			mockGameRepo.EXPECT().GameLog(mock.Anything, 100).Return(testCase.logs, nil)
+
+			g, _, err := NewService(mockGameRepo, NewMockPlayerRepo(t)).load(context.Background(), 100)
+
+			testCase.expectedErr(t, err)
+			if err != nil {
+				return
+			}
+			assert.Equal(t, testCase.wantStatus, g.Status())
+			assert.Equal(t, short, g.Rules())
+		})
+	}
 }

@@ -11,6 +11,8 @@ export type EventGameListItem = {
   id: number;
   status: EventGameListStatus;
   round: { num: number; kanji: string } | null;
+  // hands: the number of hands of a live game, for its progress.
+  hands?: number;
   players: EventGameListPlayer[];
 };
 

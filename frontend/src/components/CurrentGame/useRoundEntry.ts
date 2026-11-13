@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { GameData, Outcome } from '../../models/GameData';
+import { STANDARD_RULES } from '../../models/GameRules';
 import { useEvent } from '../../providers/event/eventConstants';
 import { fetchWithStatus, PostRequest, eventPath } from '../Request';
 import { showToast } from '../Toast';
 
-export const MIN_HAND = 8;
 const START_FINE = 10;
 export const MIN_FINE = 1;
 
@@ -34,7 +34,13 @@ export function useRoundEntry(
   const [outcome, setOutcome] = useState<EntryOutcome | null>(null);
   const [winner, setWinner] = useState<number | null>(null);
   const [loser, setLoser] = useState<number | null>(null);
-  const [hand, setHand] = useState(MIN_HAND);
+  // The game's rules; the standard ones only until the table is loaded.
+  const rules = table?.rules ?? STANDARD_RULES;
+  const minHand = rules.min_hand;
+  // handInput is null until the player changes it: the hand starts at the
+  // game's minimum.
+  const [handInput, setHandInput] = useState<number | null>(null);
+  const hand = handInput ?? minHand;
   const [penaltyType, setPenaltyType] = useState<PenaltyType>(Outcome.Penalty);
   const [fine, setFine] = useState(START_FINE);
   const [falseMahjongFine, setFalseMahjongFine] = useState<number | null>(null);
@@ -51,12 +57,12 @@ export function useRoundEntry(
   // the chosen outcome uses.
   const isComplete =
     outcome === Outcome.Draw ||
-    (outcome === Outcome.Self && winner !== null && hand >= MIN_HAND) ||
+    (outcome === Outcome.Self && winner !== null && hand >= minHand) ||
     (outcome === Outcome.Deal &&
       winner !== null &&
       loser !== null &&
       winner !== loser &&
-      hand >= MIN_HAND) ||
+      hand >= minHand) ||
     (isPenalty &&
       loser !== null &&
       (isFalseMahjong ? !!falseMahjongFine : fine >= MIN_FINE));
@@ -85,7 +91,7 @@ export function useRoundEntry(
     setOutcome(null);
     setWinner(null);
     setLoser(null);
-    setHand(MIN_HAND);
+    setHandInput(null);
     setPenaltyType(Outcome.Penalty);
     setFine(START_FINE);
     setFalseMahjongFine(null);
@@ -161,7 +167,9 @@ export function useRoundEntry(
     winner,
     loser,
     hand,
-    setHand,
+    setHand: setHandInput,
+    minHand,
+    falseMahjongAmounts: rules.false_mahjong,
     penaltyType,
     setPenaltyType,
     fine,

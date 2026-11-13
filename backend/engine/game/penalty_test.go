@@ -22,7 +22,7 @@ func TestGame_Penalty(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -44,7 +44,7 @@ func TestGame_Penalty(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -63,7 +63,7 @@ func TestGame_Penalty(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				g.End()
 				return g
@@ -104,7 +104,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -126,7 +126,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -148,7 +148,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -166,7 +166,7 @@ func TestGame_FalseMahjong(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				g.End()
 				return g

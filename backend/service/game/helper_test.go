@@ -19,6 +19,7 @@ var defaultStartingPlayers = models.StartingPlayers{
 
 func expectLoadGame(m *MockGameRepo, gameID int, logs []models.RoundLog) {
 	m.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil).Once()
+	m.EXPECT().Rules(mock.Anything, gameID).Return(models.StandardGameRules(), nil).Once()
 	if logs == nil {
 		logs = []models.RoundLog{}
 	}

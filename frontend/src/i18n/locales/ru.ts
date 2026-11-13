@@ -109,6 +109,9 @@ const ru: Messages = {
     member_in_current_game:
       '{{name}} сейчас играет. Удалите участника после окончания игры.',
     event_already_finished: 'Событие уже завершено',
+    invalid_game_rules: 'Неверные правила',
+    event_rules_frozen:
+      'В событии уже есть игры: его правила больше нельзя менять.',
     game_has_rounds:
       'Раунд уже внесён: прервать игру теперь может только судья.',
     event_has_ongoing_games:
@@ -233,6 +236,38 @@ const ru: Messages = {
     referees: 'Судьи',
     observers: 'Наблюдатели',
     createdAt: 'Создано',
+    rules: 'Правила',
+  },
+  rules: {
+    title: 'Правила',
+    preset: 'Взять за основу',
+    standard: 'Стандарт MCR',
+    short: 'Короткая',
+    hands: 'Раздачи',
+    hands16: '16: все четыре ветра',
+    hands8: '8: Восток и Юг',
+    minHand: 'Минимальная рука',
+    minHandRange: 'От {{min}} до {{max}}',
+    minHandOutOfRange: 'От {{min}} до {{max}}',
+    falseMahjong: 'Ложный маджонг',
+    falseMahjongHint:
+      'Две суммы, каждая кратна 3: остальные трое игроков получают по трети.',
+    falseMahjongSmall: 'Меньшая',
+    falseMahjongBig: 'Большая',
+    falseMahjongInvalid: 'Кратно 3, не больше {{max}}',
+    falseMahjongOrder: 'Больше меньшей суммы',
+    editableHint:
+      'Правила можно менять только до первой игры: все игры рейтинга идут по одним правилам.',
+    frozen: 'В событии уже есть игры: его правила больше нельзя менять.',
+    finishedReadOnly: 'Событие завершено: его правила больше нельзя менять.',
+    save: 'Сохранить правила',
+    saved: 'Правила сохранены',
+    handsCount_one: '{{count}} раздача',
+    handsCount_few: '{{count}} раздачи',
+    handsCount_many: '{{count}} раздач',
+    handsCount_other: '{{count}} раздачи',
+    minHandValue: 'минимальная рука {{value}}',
+    falseMahjongValue: 'ложный маджонг {{small}} или {{big}}',
   },
   members: {
     title: 'Участники',

@@ -73,9 +73,10 @@ func TestDetails(t *testing.T) {
 	repo := NewMockEventRepo(t)
 	repo.EXPECT().Get(mock.Anything, 1).Return(models.Event{ID: 1, Name: "Club"}, nil)
 	repo.EXPECT().CountPlayers(mock.Anything, 1).Return(12, nil)
+	repo.EXPECT().RulesFrozen(mock.Anything, 1).Return(true, nil)
 
 	details, err := NewService(repo, nil, nil).Details(context.Background(), 1)
 
 	require.NoError(t, err)
-	assert.Equal(t, models.EventDetails{ID: 1, Name: "Club", PlayerCount: 12}, details)
+	assert.Equal(t, models.EventDetails{ID: 1, Name: "Club", PlayerCount: 12, RulesFrozen: true}, details)
 }

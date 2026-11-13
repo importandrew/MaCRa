@@ -6,6 +6,7 @@ import {
   EventGameListPlayer,
 } from '../../models/EventGames';
 import NavList from '../NavList';
+import { STANDARD_RULES } from '../../models/GameRules';
 import PendingButton from '../PendingButton';
 
 type EventGamesListProps = {
@@ -19,8 +20,6 @@ type EventGamesListProps = {
   onLoadMore: () => void;
 };
 
-const TOTAL_ROUNDS = 16;
-
 function roundProgress(
   game: EventGameListItem,
   mode: 'live' | 'finished',
@@ -31,7 +30,7 @@ function roundProgress(
   }
 
   return {
-    value: ((game.round.num - 1) / TOTAL_ROUNDS) * 100,
+    value: ((game.round.num - 1) / (game.hands ?? STANDARD_RULES.hands)) * 100,
     label: game.round.kanji,
     ariaLabel: t('games.round', { round: game.round.kanji }),
   };

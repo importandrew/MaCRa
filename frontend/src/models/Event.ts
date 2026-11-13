@@ -1,4 +1,5 @@
 import type { EventRole } from './EventRole';
+import type { GameRules } from './GameRules';
 
 export type EventVisibility = 'private' | 'public';
 
@@ -13,6 +14,7 @@ export type Event = {
   visibility: EventVisibility;
   ratings_reach: ContentReach;
   games_reach: ContentReach;
+  rules: GameRules;
   created_at: string;
   finished_at: string | null;
   is_participating?: boolean;
@@ -21,6 +23,9 @@ export type Event = {
   // player_count comes only with GET /api/event/:id (the overview): non-members
   // don't get the member list, so the overview can't count it.
   player_count?: number;
+  // rules_frozen also comes only with the overview: the event has games, so
+  // its rules can't change.
+  rules_frozen?: boolean;
 };
 
 // CONTENT_REACHES in the order the pickers show them (labels: reach.* texts).

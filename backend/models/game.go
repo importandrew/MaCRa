@@ -11,6 +11,8 @@ type GameNow struct {
 	Round  Round      `json:"round"`
 	// LogSize is the number of round log entries; a new entry sends it back.
 	LogSize int `json:"log_size"`
+	// Rules are the rules the game is played by.
+	Rules GameRules `json:"rules"`
 
 	Me    PlayerWindScore `json:"me"`
 	Right PlayerWindScore `json:"right"`
@@ -60,7 +62,8 @@ type GameView struct {
 	Status GameStatus `json:"status"`
 	Round  Round      `json:"round"`
 	// LogSize is the number of round log entries, as in GameNow.
-	LogSize int `json:"log_size"`
+	LogSize int       `json:"log_size"`
+	Rules   GameRules `json:"rules"`
 
 	PlayerScores []PlayerWindScore `json:"player_scores"`
 
@@ -81,9 +84,11 @@ type EventGames struct {
 
 // EventGameItem is one game row in GET /api/event/:eventId/games.
 type EventGameItem struct {
-	ID      int                    `json:"id"`
-	Status  GameStatus             `json:"status"`
-	Round   *Round                 `json:"round"`
+	ID     int        `json:"id"`
+	Status GameStatus `json:"status"`
+	Round  *Round     `json:"round"`
+	// Hands is the number of hands in a live game, for its progress.
+	Hands   int                    `json:"hands,omitempty"`
 	Players []EventGamePlayerScore `json:"players"`
 }
 

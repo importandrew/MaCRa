@@ -8,12 +8,17 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// load rebuilds the game from its round log and returns it with that log, so
+// load rebuilds the game, by the rules it started with, from its round log and returns it with that log, so
 // a response can show the table and the log of one state.
 func (s *Service) load(ctx context.Context, gameID int) (GameEngine, []models.RoundLog, error) {
 	players, err := s.gameRepo.Players(ctx, gameID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get players: %w", err)
+	}
+
+	rules, err := s.gameRepo.Rules(ctx, gameID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get rules: %w", err)
 	}
 
 	seating := game.Seating([4]int{
@@ -26,7 +31,7 @@ func (s *Service) load(ctx context.Context, gameID int) (GameEngine, []models.Ro
 	gameCfg := game.Config{
 		ID:      gameID,
 		Players: seating,
-		Rules:   game.Rules{},
+		Rules:   rules,
 	}
 
 	g := game.NewGame(gameCfg)

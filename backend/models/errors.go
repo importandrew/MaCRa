@@ -70,6 +70,10 @@ var (
 	ErrLongEventName       = errors.New("event name too long")
 	ErrLongDescription     = errors.New("event description too long")
 	ErrInvalidGameStatus   = errors.New("invalid game status")
+	ErrInvalidGameRules    = errors.New("invalid game rules")
+	// ErrEventRulesFrozen means the event's game rules can't change: it
+	// already has games, and all games of one rating follow the same rules.
+	ErrEventRulesFrozen = errors.New("event rules are frozen")
 
 	ErrNoRounds = errors.New("no rounds to undo")
 	// ErrGameHasRounds means a seated player can't abort the game any more: a
@@ -115,6 +119,7 @@ var Errors = map[error]APIError{
 	ErrLongEventName:            {http.StatusBadRequest, "long_event_name"},
 	ErrLongDescription:          {http.StatusBadRequest, "long_description"},
 	ErrInvalidGameStatus:        {http.StatusBadRequest, "invalid_game_status"},
+	ErrInvalidGameRules:         {http.StatusBadRequest, "invalid_game_rules"},
 	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
 
 	// 401
@@ -139,6 +144,7 @@ var Errors = map[error]APIError{
 	ErrEventAlreadyFinished: {http.StatusConflict, "event_already_finished"},
 	ErrEventHasOngoingGames: {http.StatusConflict, "event_has_ongoing_games"},
 	ErrGameHasRounds:        {http.StatusConflict, "game_has_rounds"},
+	ErrEventRulesFrozen:     {http.StatusConflict, "event_rules_frozen"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

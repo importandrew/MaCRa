@@ -1,6 +1,7 @@
 import { Trans, useTranslation } from 'react-i18next';
 import { Button, Card, Modal } from '@heroui/react';
 import { useMemo, useState } from 'react';
+import { STANDARD_RULES } from '../../models/GameRules';
 import './Delta.css';
 
 type TablePosition = 'top' | 'right' | 'bottom' | 'left';
@@ -19,6 +20,8 @@ type DeltaProps = {
   selectedPlayerId: number | null;
   onSelectPlayer: (playerId: number) => void;
   players: DeltaPlayer[];
+  // minHand is the game's minimum hand value: no target is below it.
+  minHand: number;
 };
 
 type PlaceTarget = { place: number; handValue: number; tiedThrough: number };
@@ -29,8 +32,6 @@ type LossTarget = {
   handValue: number;
 };
 type OpponentArea = 'top' | 'left' | 'right' | 'bottom';
-
-const MIN_HAND = 8;
 
 type HandMode = 'self' | 'direct' | 'deal-in';
 type Scenario = {
@@ -96,18 +97,18 @@ function buildScenario(
 
 // Rankings can only change where two linear score functions cross.
 // Evaluate those boundaries instead of scanning every possible hand value.
-function candidateHands(scores: LinearScore[]): number[] {
-  const values = new Set<number>([MIN_HAND]);
+function candidateHands(scores: LinearScore[], minHand: number): number[] {
+  const values = new Set<number>([minHand]);
   for (let i = 0; i < scores.length; i++) {
     for (let j = i + 1; j < scores.length; j++) {
       const a = scores[i];
       const b = scores[j];
       if (a.slope === b.slope) continue;
       const crossing = (b.base - a.base) / (a.slope - b.slope);
-      if (crossing < MIN_HAND - 1) continue;
+      if (crossing < minHand - 1) continue;
       const floor = Math.floor(crossing);
       for (const hand of [floor, floor + 1, floor + 2]) {
-        if (hand >= MIN_HAND && Number.isSafeInteger(hand)) values.add(hand);
+        if (hand >= minHand && Number.isSafeInteger(hand)) values.add(hand);
       }
     }
   }
@@ -128,10 +129,11 @@ function currentRank(players: DeltaPlayer[], selectedPlayerId: number): Rank {
 function selectTargets(
   scores: LinearScore[],
   selectedPlayerId: number,
+  minHand: number,
   isRelevant: (rank: Rank) => boolean
 ): PlaceTarget[] {
   const candidates = new Map<number, PlaceTarget>();
-  for (const handValue of candidateHands(scores)) {
+  for (const handValue of candidateHands(scores, minHand)) {
     const rank = rankOf(scores, selectedPlayerId, handValue);
     if (!isRelevant(rank)) continue;
     const target: PlaceTarget = {
@@ -157,6 +159,7 @@ function selectTargets(
 function getGainTargets(
   players: DeltaPlayer[],
   selectedPlayerId: number,
+  minHand: number,
   mode: 'self' | 'direct',
   discarderId?: number
 ): PlaceTarget[] {
@@ -170,6 +173,7 @@ function getGainTargets(
   return selectTargets(
     scores,
     selectedPlayerId,
+    minHand,
     (rank) =>
       rank.first < initial.first ||
       (rank.first === initial.first && rank.last < initial.last)
@@ -179,6 +183,7 @@ function getGainTargets(
 function getDiscardTargets(
   players: DeltaPlayer[],
   selectedPlayerId: number,
+  minHand: number,
   winnerId: number
 ): LossTarget[] {
   const initial = currentRank(players, selectedPlayerId);
@@ -192,6 +197,7 @@ function getDiscardTargets(
   return selectTargets(
     scores,
     selectedPlayerId,
+    minHand,
     (rank) =>
       rank.first > initial.first ||
       (rank.first === initial.first && rank.last > initial.last)
@@ -425,21 +431,26 @@ const EXAMPLE_PLAYERS: DeltaPlayer[] = [
 ];
 const EXAMPLE_SELECTED_ID = 104;
 const EXAMPLE_SELECTED = EXAMPLE_PLAYERS[3];
+// The static help example uses the standard minimum hand.
+const EXAMPLE_MIN_HAND = STANDARD_RULES.min_hand;
 const EXAMPLE_RANK = currentRank(EXAMPLE_PLAYERS, EXAMPLE_SELECTED_ID);
 const EXAMPLE_SELF = getGainTargets(
   EXAMPLE_PLAYERS,
   EXAMPLE_SELECTED_ID,
+  EXAMPLE_MIN_HAND,
   'self'
 );
 const EXAMPLE_WEST_WIN = getGainTargets(
   EXAMPLE_PLAYERS,
   EXAMPLE_SELECTED_ID,
+  EXAMPLE_MIN_HAND,
   'direct',
   102
 );
 const EXAMPLE_SOUTH_LOSS = getDiscardTargets(
   EXAMPLE_PLAYERS,
   EXAMPLE_SELECTED_ID,
+  EXAMPLE_MIN_HAND,
   103
 );
 
@@ -586,6 +597,7 @@ export default function Delta({
   selectedPlayerId,
   onSelectPlayer,
   players,
+  minHand,
 }: DeltaProps) {
   const { t } = useTranslation();
   const [helpOpen, setHelpOpen] = useState(false);
@@ -611,21 +623,27 @@ export default function Delta({
         direct: getGainTargets(
           players,
           selectedPlayerId,
+          minHand,
           'direct',
           opponent.id
         ),
-        discard: getDiscardTargets(players, selectedPlayerId, opponent.id),
+        discard: getDiscardTargets(
+          players,
+          selectedPlayerId,
+          minHand,
+          opponent.id
+        ),
       };
     }
     const result = {
       ...positions,
       rank: currentRank(players, selectedPlayerId),
-      selfTargets: getGainTargets(players, selectedPlayerId, 'self'),
+      selfTargets: getGainTargets(players, selectedPlayerId, minHand, 'self'),
       opponentTargets,
     };
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPlayerId, playersKey]);
+  }, [selectedPlayerId, playersKey, minHand]);
   const {
     rank,
     selectedPlayer,

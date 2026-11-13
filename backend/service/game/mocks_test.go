@@ -790,6 +790,72 @@ func (_c *MockGameRepo_Players_Call) RunAndReturn(run func(ctx context.Context, 
 	return _c
 }
 
+// Rules provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) Rules(ctx context.Context, gameID int) (models.GameRules, error) {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Rules")
+	}
+
+	var r0 models.GameRules
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.GameRules, error)); ok {
+		return returnFunc(ctx, gameID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.GameRules); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		r0 = ret.Get(0).(models.GameRules)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, gameID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_Rules_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Rules'
+type MockGameRepo_Rules_Call struct {
+	*mock.Call
+}
+
+// Rules is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) Rules(ctx any, gameID any) *MockGameRepo_Rules_Call {
+	return &MockGameRepo_Rules_Call{Call: _e.mock.On("Rules", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_Rules_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_Rules_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_Rules_Call) Return(gameRules models.GameRules, err error) *MockGameRepo_Rules_Call {
+	_c.Call.Return(gameRules, err)
+	return _c
+}
+
+func (_c *MockGameRepo_Rules_Call) RunAndReturn(run func(ctx context.Context, gameID int) (models.GameRules, error)) *MockGameRepo_Rules_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SaveRoundOutcome provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) SaveRoundOutcome(ctx context.Context, gameID int, data models.RoundData) error {
 	ret := _mock.Called(ctx, gameID, data)
@@ -1954,6 +2020,50 @@ func (_c *MockGameEngine_Round_Call) Return(n int) *MockGameEngine_Round_Call {
 }
 
 func (_c *MockGameEngine_Round_Call) RunAndReturn(run func() int) *MockGameEngine_Round_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Rules provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) Rules() models.GameRules {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Rules")
+	}
+
+	var r0 models.GameRules
+	if returnFunc, ok := ret.Get(0).(func() models.GameRules); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(models.GameRules)
+	}
+	return r0
+}
+
+// MockGameEngine_Rules_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Rules'
+type MockGameEngine_Rules_Call struct {
+	*mock.Call
+}
+
+// Rules is a helper method to define mock.On call
+func (_e *MockGameEngine_Expecter) Rules() *MockGameEngine_Rules_Call {
+	return &MockGameEngine_Rules_Call{Call: _e.mock.On("Rules")}
+}
+
+func (_c *MockGameEngine_Rules_Call) Run(run func()) *MockGameEngine_Rules_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_Rules_Call) Return(gameRules models.GameRules) *MockGameEngine_Rules_Call {
+	_c.Call.Return(gameRules)
+	return _c
+}
+
+func (_c *MockGameEngine_Rules_Call) RunAndReturn(run func() models.GameRules) *MockGameEngine_Rules_Call {
 	_c.Call.Return(run)
 	return _c
 }

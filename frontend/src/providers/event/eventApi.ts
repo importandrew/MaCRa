@@ -3,6 +3,7 @@ import {
   GetRequest,
   authFetch,
   PatchRequest,
+  PutRequest,
   PostRequest,
   DeleteRequest,
   publicFetch,
@@ -12,6 +13,7 @@ import {
 import { useFetch } from '../useFetch';
 import { Event, EventVisibility, ContentReach } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
+import type { GameRules } from '../../models/GameRules';
 import { EventMember, EventRole } from '../../models/EventRole';
 import { EventRatingsData } from '../../models/EventRating';
 import {
@@ -95,6 +97,17 @@ export async function updateEvent(
   payload: UpdateEventPayload
 ): Promise<boolean> {
   const request = PatchRequest(`/api/event/${id}`, payload);
+  const result = await authFetch<null>(request);
+  return result !== null;
+}
+
+// updateEventRules sets the event's game rules, all at once. The server
+// refuses them once the event has games (event_rules_frozen).
+export async function updateEventRules(
+  id: number,
+  rules: GameRules
+): Promise<boolean> {
+  const request = PutRequest(eventPath(id, '/rules'), rules);
   const result = await authFetch<null>(request);
   return result !== null;
 }

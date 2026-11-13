@@ -12,7 +12,7 @@ func TestGame_Players(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	players := g.Players()
@@ -28,7 +28,7 @@ func TestGame_Left(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	// Player 1 is East, Left is North (player 4)
@@ -45,7 +45,7 @@ func TestGame_Right(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	// Player 1 is East, Right is South (player 2)
@@ -62,7 +62,7 @@ func TestGame_Opposite(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	// Player 1 is East, Opposite is West (player 3)
@@ -79,7 +79,7 @@ func TestGame_CurrentWind(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	// Initial seating: 1=East, 2=South, 3=West, 4=North
@@ -101,7 +101,7 @@ func TestGame_StartWind(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	// Start wind should always be the same regardless of rounds

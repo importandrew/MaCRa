@@ -1,4 +1,5 @@
 import type { GameRoundLogs } from './GameResult';
+import type { GameRules } from './GameRules';
 
 export interface GameData {
   id: number;
@@ -10,6 +11,8 @@ export interface GameData {
   // log_size is the number of round log entries; a new entry sends it back so
   // that the server refuses an entry made from an outdated table.
   log_size: number;
+  // rules: the rules the game is played by.
+  rules: GameRules;
   status: 'created' | 'live' | 'ended' | 'aborted';
   // log is the round log of the same state as the table.
   log: GameRoundLogs;
