@@ -6,16 +6,15 @@ import {
   useOverlayState,
 } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
-import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { useAuth } from '../../providers/auth/authConstants';
 import { useEvent } from '../../providers/event/eventConstants';
 import SelectEventModal from '../Events/SelectEventModal';
 import UserAvatar from '../UserAvatar';
 
 export default function UserMenu({ signOut }: { signOut: () => void }) {
   const { t } = useTranslation();
-  const username =
-    JSON.parse(localStorage.getItem(AUTH_USER_DATA) || '{}')?.name ||
-    t('header.profile');
+  const { user } = useAuth();
+  const username = user?.name || t('header.profile');
   const { selectedEvent } = useEvent();
   const eventLabel = selectedEvent?.name || t('header.noEventSelected');
   const { isOpen, open: onOpen, close: onClose } = useOverlayState();

@@ -7,41 +7,23 @@ import {
 import { NavigateFunction } from 'react-router-dom';
 import { UserData } from '../../models/UserData';
 import { fetchLogoutApi } from './authApi';
-import { AUTH_USER_DATA, AuthContext } from './authConstants';
-
-// storeUserData keeps only the fields the UI needs. Older versions also saved
-// the session token from the login response here, where any script could read
-// it; the token belongs only in the HttpOnly cookie.
-const storeUserData = ({ id, name }: UserData) => {
-  localStorage.setItem(AUTH_USER_DATA, JSON.stringify({ id, name }));
-};
-
-// dropStoredToken rewrites user data saved by an older version without its
-// token.
-const dropStoredToken = () => {
-  try {
-    const stored = JSON.parse(localStorage.getItem(AUTH_USER_DATA) || 'null');
-    if (stored && typeof stored === 'object' && 'token' in stored) {
-      storeUserData(stored as UserData);
-    }
-  } catch {
-    // Unreadable data is left as is: it holds no usable token either.
-  }
-};
+import { AuthContext } from './authConstants';
+import { clearStoredUser, readStoredUser, storeUser } from './authStorage';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigateRef = useRef<NavigateFunction | null>(null);
 
-  const isAuthenticatedFromStore = AUTH_USER_DATA in localStorage;
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    isAuthenticatedFromStore
-  );
+  // user is the one source of truth for who is signed in; the stored copy
+  // only carries it across page loads.
+  const [user, setUser] = useState<UserData | null>(() => readStoredUser());
+  const isAuthenticated = user != null;
 
-  // A 401 found by any request signs out at once: the UI switches to the
-  // signed-out state and goes to /login while the toast is still shown.
+  // A 401 found by any request signs out at once (Request.ts has cleared the
+  // stored user): the UI switches to the signed-out state and goes to /login
+  // while the toast is still shown.
   useEffect(() => {
     setSessionExpiredHandler(() => {
-      setIsAuthenticated(false);
+      setUser(null);
       if (navigateRef.current) {
         // Login returns to `from` after a sign-in, as with RequireAuth.
         const { pathname, search } = window.location;
@@ -56,28 +38,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => setSessionExpiredHandler(null);
   }, []);
 
-  // The stored user data outlives the auth cookie (the browser drops it after
-  // its Max-Age), so check the session once on start: a 401 logs out.
-  useEffect(() => {
-    if (isAuthenticatedFromStore) {
-      dropStoredToken();
-      authFetch(GetRequest('/api/profile'), { isToastEnabled: false });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateUser = useCallback((data: UserData) => {
+    storeUser(data);
+    setUser({ id: data.id, name: data.name });
   }, []);
 
-  const signIn = useCallback((data: UserData) => {
-    storeUserData(data);
-    setIsAuthenticated(true);
-  }, []);
+  // The stored user outlives the auth cookie (the browser drops it after its
+  // Max-Age), so check the session once on start: a 401 signs out. The
+  // answer also brings the current name (it may have changed on another
+  // device).
+  useEffect(() => {
+    if (!readStoredUser()) return;
+    authFetch<UserData>(GetRequest('/api/profile'), {
+      isToastEnabled: false,
+    }).then((profile) => {
+      if (profile) updateUser(profile);
+    });
+  }, [updateUser]);
+
+  const signIn = useCallback(
+    (data: UserData) => {
+      updateUser(data);
+    },
+    [updateUser]
+  );
 
   const signOut = useCallback(async () => {
     const isSignOut = await fetchLogoutApi();
 
     if (!isSignOut) return;
 
-    localStorage.removeItem(AUTH_USER_DATA);
-    setIsAuthenticated(false);
+    clearStoredUser();
+    setUser(null);
 
     if (navigateRef.current) {
       navigateRef.current('/login');
@@ -86,7 +78,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, signIn, signOut, navigateRef }}
+      value={{
+        user,
+        isAuthenticated,
+        signIn,
+        signOut,
+        updateUser,
+        navigateRef,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useCallback, useMemo } from 'react';
 import { HistoryProps } from '../../models/GameData';
-import { UserData } from '../../models/UserData';
-import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { useAuth } from '../../providers/auth/authConstants';
 import { useEvent } from '../../providers/event/eventConstants';
 import {
   useFetchBatchGameResults,
@@ -13,11 +12,10 @@ import NavList from '../NavList';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 
 const History = (props: HistoryProps) => {
-  const currentPlayer = JSON.parse(
-    localStorage.getItem(AUTH_USER_DATA) || '{}'
-  ) as UserData;
+  const { user } = useAuth();
   const { t } = useTranslation();
-  const { playerId = currentPlayer.id } = props;
+  // History is behind RequireAuth, so a user is signed in.
+  const { playerId = user?.id ?? 0 } = props;
   const { data, isLoading, isError, refetch } =
     useFetchPlayerGamesHistory(playerId);
 
@@ -40,9 +38,7 @@ const History = (props: HistoryProps) => {
   const getPlayerResult = (gameId: number) => {
     const result = resultsMap?.[gameId];
     if (!result) return null;
-    const playerResult = result.player_results.find(
-      (pr) => pr.id === currentPlayer.id
-    );
+    const playerResult = result.player_results.find((pr) => pr.id === playerId);
     return playerResult;
   };
 

@@ -7,7 +7,7 @@ import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 import { Player } from '../../models/Player';
-import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { useAuth } from '../../providers/auth/authConstants';
 import { useFetchEventMembers } from '../../providers/event/eventApi';
 import { useEvent } from '../../providers/event/eventConstants';
 import { useEventCapabilities } from '../../providers/event/useEventCapabilities';
@@ -20,6 +20,7 @@ export default function Draft() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   // One slot per seat from the start: Shuffle only moves slots that exist,
   // so with [] and one pick it had nothing to swap with. "Play again" passes
   // the last game's players (location state), seated as they were.
@@ -95,11 +96,7 @@ export default function Draft() {
   };
 
   const submit = async () => {
-    const currentPlayerId = JSON.parse(
-      localStorage.getItem(AUTH_USER_DATA) || '{}'
-    ).id;
-
-    if (!players.includes(currentPlayerId)) {
+    if (!user || !players.includes(user.id)) {
       showToast({
         title: t('draft.pickYourself'),
         variant: 'warning',

@@ -1,6 +1,6 @@
 import i18n from '../i18n';
 import { fetchLogoutApi } from '../providers/auth/authApi';
-import { AUTH_USER_DATA } from '../providers/auth/authConstants';
+import { clearStoredUser, hasStoredUser } from '../providers/auth/authStorage';
 import type { ApiError } from '../models/ApiError';
 import { apiErrorText } from './apiErrorText';
 import { showToast } from './Toast';
@@ -38,7 +38,7 @@ function setSessionExpiredHandler(handler: (() => void) | null) {
 function handleSessionExpired(wasSignedIn: boolean) {
   sessionGeneration++;
 
-  localStorage.removeItem(AUTH_USER_DATA);
+  clearStoredUser();
   showToast(
     wasSignedIn
       ? {
@@ -95,7 +95,7 @@ async function fetchWithStatus<T>(
         return { data: null, status: response.status };
       }
 
-      const isSignedIn = AUTH_USER_DATA in localStorage;
+      const isSignedIn = hasStoredUser();
 
       if (!retryRequest || isSignedIn) {
         handleSessionExpired(isSignedIn);
