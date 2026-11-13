@@ -10,7 +10,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
-import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { useAuth } from '../../providers/auth/authConstants';
 import {
   fetchProfileApi,
   updateProfileApi,
@@ -21,39 +21,26 @@ import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 import PendingButton from '../PendingButton';
 
 export default function ProfilePage() {
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [name, setName] = useState('');
+  const { user, updateUser } = useAuth();
+  const [userData, setUserData] = useState<UserData | null>(user);
+  const [name, setName] = useState(user?.name ?? '');
   const [isLoading, setIsLoading] = useState(true);
   const { isPending: isSaving, run } = useSubmitOnce();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  // The latest profile from the server; it also refreshes the signed-in user
+  // everywhere (the name may have changed on another device).
   useEffect(() => {
-    const loadProfile = async () => {
-      setIsLoading(true);
-
-      // Load from localStorage initially
-      const localData = JSON.parse(
-        localStorage.getItem(AUTH_USER_DATA) || '{}'
-      ) as UserData;
-
-      if (localData.id && localData.name) {
-        setUserData(localData);
-        setName(localData.name);
-      }
-
-      // Fetch latest from server
-      const profileData = await fetchProfileApi();
+    fetchProfileApi().then((profileData) => {
       if (profileData) {
         setUserData(profileData);
         setName(profileData.name);
+        updateUser(profileData);
       }
-
       setIsLoading(false);
-    };
-
-    loadProfile();
-  }, []);
+    });
+  }, [updateUser]);
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
@@ -64,15 +51,15 @@ export default function ProfilePage() {
 
     if (!updatedData) return;
 
-    // Update localStorage
-    localStorage.setItem(AUTH_USER_DATA, JSON.stringify(updatedData));
+    // The header shows the new name at once.
+    updateUser(updatedData);
     setUserData(updatedData);
 
     showToast({
       title: t('profile.updated'),
       variant: 'success',
     });
-  }, [name, t]);
+  }, [name, t, updateUser]);
 
   if (isLoading) {
     return (

@@ -1,18 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Table } from '@heroui/react';
 import { GameResult } from '../../models/GameResult';
-import { UserData } from '../../models/UserData';
-import { AUTH_USER_DATA } from '../../providers/auth/authConstants';
+import { useAuth } from '../../providers/auth/authConstants';
 import { getDateTimeFormatted } from '../../utils/date-tools';
 
 // Table component for rendering game results
 export default function GameResultTable({ data }: { data: GameResult }) {
   const { t } = useTranslation();
-  const currentPlayerId = (
-    JSON.parse(
-      localStorage.getItem(AUTH_USER_DATA) || '{}'
-    ) as Partial<UserData>
-  ).id;
+  const currentPlayerId = useAuth().user?.id;
 
   return (
     <div className="flex flex-col gap-1">
