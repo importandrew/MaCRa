@@ -25,6 +25,8 @@ const ru: Messages = {
     newGame: 'Новая игра',
     lastGame: 'Последняя игра',
     playedGames: 'Сыгранные игры',
+    eventFinished: 'Событие завершено',
+    notAPlayer: 'Вы не игрок этого события',
   },
   settings: {
     title: 'Настройки',
@@ -181,6 +183,8 @@ const ru: Messages = {
     noEvents: 'Нет доступных событий.',
     selectEvent: 'Выбрать событие',
     selectFirst: 'Сначала выберите событие',
+    noAccessTo: 'Нет доступа к событию «{{name}}»',
+    noAccessToSelected: 'Выбранное событие больше недоступно',
     loadingEvent: 'Загрузка события...',
     loadingEvents: 'Загрузка событий...',
     loadFailed: 'Не удалось загрузить события.',

@@ -24,6 +24,9 @@ export type EventContextValue = {
   isLoading: boolean;
   selectEvent: (id: number) => Promise<void>;
   clearEvent: () => void;
+  // dropInaccessibleEvent clears the selection, with a toast, after the user
+  // has lost access to the selected event.
+  dropInaccessibleEvent: () => void;
 };
 
 export const EventContext = createContext<EventContextValue>({
@@ -32,6 +35,7 @@ export const EventContext = createContext<EventContextValue>({
   isLoading: false,
   selectEvent: async () => {},
   clearEvent: () => {},
+  dropInaccessibleEvent: () => {},
 });
 
 export const useEvent = () => useContext(EventContext);

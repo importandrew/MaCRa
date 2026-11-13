@@ -27,6 +27,8 @@ const en = {
     newGame: 'New game',
     lastGame: 'Last game',
     playedGames: 'Played games',
+    eventFinished: 'The event is finished',
+    notAPlayer: 'You are not a player in this event',
   },
   settings: {
     title: 'Settings',
@@ -186,6 +188,8 @@ const en = {
     noEvents: 'No events available.',
     selectEvent: 'Select event',
     selectFirst: 'Select an event first',
+    noAccessTo: 'No access to {{name}}',
+    noAccessToSelected: 'No access to the selected event any more',
     loadingEvent: 'Loading event...',
     loadingEvents: 'Loading events...',
     loadFailed: 'Failed to load events.',
