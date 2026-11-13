@@ -7,8 +7,8 @@ export interface Player {
 export interface PlayerSelectorArgs {
   wind: string;
   index: number;
-  players: (number | undefined)[];
   suggestions: Player[];
   selectedKeys: string[];
-  handleSuggestionsChange: () => void;
+  // onChange picks (or, with undefined, clears) the player of seat index.
+  onChange: (index: number, playerId: number | undefined) => void;
 }

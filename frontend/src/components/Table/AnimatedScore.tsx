@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface AnimatedScoreProps {
   previousScores: Record<number, number>;
@@ -7,6 +7,16 @@ interface AnimatedScoreProps {
   className?: string;
 }
 
+// ANIMATION_MS is how long the score counts from the old value to the new.
+const ANIMATION_MS = 2000;
+// CLASS_LINGER_MS keeps the increase/decrease style a moment after the end.
+const CLASS_LINGER_MS = 200;
+
+type Frame = { score: number; className: string };
+
+// AnimatedScore shows a player's score; when it changes, it counts from the
+// previous value to the new one with an increase/decrease style. Between
+// animations it shows the score as it is.
 export default function AnimatedScore({
   previousScores,
   currentScores,
@@ -16,81 +26,39 @@ export default function AnimatedScore({
   const previousScore = previousScores[playerId] ?? 0;
   const currentScore = currentScores[playerId] ?? 0;
 
-  const [displayScore, setDisplayScore] = useState(currentScore);
-  const [animationClass, setAnimationClass] = useState('');
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const animationDuration = 2000; // 2 seconds
-
-  // Clean up animation frames and timers
-  const cleanup = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  };
-
-  // Animation function for counting scores
-  const animateScoreChange = (start: number, end: number) => {
-    const animate = (timestamp: number) => {
-      if (!startTimeRef.current) {
-        startTimeRef.current = timestamp;
-      }
-
-      const elapsed = timestamp - startTimeRef.current;
-      const progress = Math.min(elapsed / animationDuration, 1);
-
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-
-      // Calculate current score based on progress
-      const currentScore = Math.round(start + (end - start) * easeOutQuart);
-
-      setDisplayScore(currentScore);
-
-      // Continue animation if not complete
-      if (progress < 1) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      } else {
-        // Animation complete
-        setDisplayScore(end);
-        startTimeRef.current = null;
-
-        // Clear animation class after a short delay
-        timerRef.current = setTimeout(() => {
-          setAnimationClass('');
-        }, 200);
-      }
-    };
-
-    animationFrameRef.current = requestAnimationFrame(animate);
-  };
+  // frame is the animation's current value, null when not animating. It
+  // changes only from animation frames and timers, never while rendering.
+  const [frame, setFrame] = useState<Frame | null>(null);
 
   useEffect(() => {
-    // Only trigger animation if score actually changed
-    if (currentScore !== previousScore) {
-      // Clean up any existing animations
-      cleanup();
+    if (currentScore === previousScore) return;
 
-      // Determine animation direction
-      const isIncreasing = currentScore > previousScore;
-      setAnimationClass(isIncreasing ? 'score-increase' : 'score-decrease');
+    const style =
+      currentScore > previousScore ? 'score-increase' : 'score-decrease';
+    let startTime: number | null = null;
+    let request = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-      // Start the counting animation
-      animateScoreChange(previousScore, currentScore);
-    } else {
-      // Score hasn't changed, just update display
-      setDisplayScore(currentScore);
-    }
+    const animate = (timestamp: number) => {
+      startTime ??= timestamp;
+      const progress = Math.min((timestamp - startTime) / ANIMATION_MS, 1);
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const score = Math.round(
+        previousScore + (currentScore - previousScore) * easeOutQuart
+      );
+      setFrame({ score, className: style });
 
-    // Cleanup on unmount
+      if (progress < 1) {
+        request = requestAnimationFrame(animate);
+      } else {
+        timer = setTimeout(() => setFrame(null), CLASS_LINGER_MS);
+      }
+    };
+    request = requestAnimationFrame(animate);
+
     return () => {
-      cleanup();
+      cancelAnimationFrame(request);
+      clearTimeout(timer);
     };
     // Animate only when currentScore changes; previousScore is read as the
     // starting value, and a change to it alone must not restart the animation.
@@ -98,6 +66,8 @@ export default function AnimatedScore({
   }, [currentScore]);
 
   return (
-    <span className={`${className} ${animationClass}`}>{displayScore}</span>
+    <span className={`${className} ${frame?.className ?? ''}`}>
+      {frame?.score ?? currentScore}
+    </span>
   );
 }

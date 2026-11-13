@@ -95,6 +95,8 @@ export const useFetchGameData = () => {
     isLoading: f.isLoading,
     isError: f.isFailed,
     refetch: f.refetch,
+    // setData shows a table the caller already has (a round entry's answer).
+    setData: f.mutate,
   };
 };
 

@@ -65,7 +65,18 @@ export default function EventManage() {
     refetch: refetchMembers,
   } = useFetchEventMembers(canManageMembers ? eventId : null);
 
-  const [settings, setSettings] = useState<EventSettings | null>(null);
+  // draft holds the owner's edits; until there are any (and again after a
+  // save), the form shows the event's own settings.
+  const [draft, setDraft] = useState<EventSettings | null>(null);
+  const settings: EventSettings | null =
+    draft ??
+    (event && {
+      name: event.name,
+      description: event.description || '',
+      visibility: event.visibility,
+      ratingsReach: event.ratings_reach,
+      gamesReach: event.games_reach,
+    });
   // A finished event: only its visibility can change, members are final.
   const isFinished = Boolean(event?.finished_at);
   const { isPending: isSaving, run: runSave } = useSubmitOnce();
@@ -82,18 +93,6 @@ export default function EventManage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'members'>(
     canManageEvent ? 'overview' : 'members'
   );
-
-  useEffect(() => {
-    if (event) {
-      setSettings({
-        name: event.name,
-        description: event.description || '',
-        visibility: event.visibility,
-        ratingsReach: event.ratings_reach,
-        gamesReach: event.games_reach,
-      });
-    }
-  }, [event]);
 
   useEffect(() => {
     if (!canManageMembers) return;
@@ -126,6 +125,7 @@ export default function EventManage() {
 
       if (ok) {
         showToast({ title: t('events.updated'), variant: 'success' });
+        setDraft(null);
         refetch();
       }
     });
@@ -225,7 +225,7 @@ export default function EventManage() {
                 {settings && (
                   <EventSettingsFields
                     value={settings}
-                    onChange={setSettings}
+                    onChange={setDraft}
                     isFinished={isFinished}
                   />
                 )}

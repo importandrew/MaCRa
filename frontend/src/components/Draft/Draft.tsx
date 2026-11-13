@@ -21,13 +21,12 @@ export default function Draft() {
   const navigate = useNavigate();
   const location = useLocation();
   // One slot per seat from the start: Shuffle only moves slots that exist,
-  // so with [] and one pick it had nothing to swap with.
-  const [players, setPlayers] = useState<(number | undefined)[]>([
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-  ]);
+  // so with [] and one pick it had nothing to swap with. "Play again" passes
+  // the last game's players (location state), seated as they were.
+  const [players, setPlayers] = useState<(number | undefined)[]>(() => {
+    const given = (location.state?.playerIds as number[] | undefined) ?? [];
+    return [0, 1, 2, 3].map((i) => given[i]);
+  });
   const { selectedEventId: eventId } = useEvent();
   const { data: members, isLoading: membersLoading } =
     useFetchEventMembers(eventId);
@@ -72,23 +71,10 @@ export default function Draft() {
     [players]
   );
 
-  // Set initial player IDs if provided in location state
-  useEffect(() => {
-    if (location.state?.playerIds) {
-      const playerIds = location.state.playerIds as number[];
-      // Pad with undefined values if less than 4 players
-      const paddedPlayerIds: (number | undefined)[] = [...playerIds];
-      while (paddedPlayerIds.length < 4) {
-        paddedPlayerIds.push(undefined);
-      }
-      setPlayers(paddedPlayerIds.slice(0, 4));
-    }
-  }, [location.state]);
-
-  // Handle player selection changes
-  const handleSuggestionsChange = useCallback(() => {
-    setPlayers([...players]); // Ensure immutability
-  }, [players]);
+  // setSeat picks (or clears) the player of one seat.
+  const setSeat = useCallback((index: number, playerId: number | undefined) => {
+    setPlayers((prev) => prev.map((id, i) => (i === index ? playerId : id)));
+  }, []);
 
   // Clear players and selectedKeys
   const onClear = () => {
@@ -161,10 +147,9 @@ export default function Draft() {
                   key={wind}
                   wind={`${WIND_SYMBOLS[index]} ${t(`winds.${wind}`)}`}
                   index={index}
-                  players={players}
                   suggestions={suggestions}
                   selectedKeys={selectedKeys}
-                  handleSuggestionsChange={handleSuggestionsChange}
+                  onChange={setSeat}
                 />
               ))}
 

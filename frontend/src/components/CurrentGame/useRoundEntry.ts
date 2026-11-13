@@ -121,6 +121,7 @@ export function useRoundEntry(
     // 404: the player has no live game any more: someone else entered the
     // last round, finished or aborted it. The refresh tells them which.
     if (status === 404) {
+      reset();
       await onStale();
       return;
     }
@@ -129,6 +130,7 @@ export function useRoundEntry(
     // loaded. Don't store this entry on top of it; show the table as it is
     // now and let the player decide whether to enter it again.
     if (status === 409) {
+      reset();
       const fresh = await onStale();
       if (!fresh) return;
       showToast({
