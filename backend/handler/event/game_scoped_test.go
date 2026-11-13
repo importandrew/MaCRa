@@ -1,7 +1,6 @@
 package event
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -50,49 +49,29 @@ func TestHandler_GamePlayersAndLogs(t *testing.T) {
 		},
 	}
 
-	statuses := map[models.GameStatus]models.Capability{
-		models.GameCreated: models.CapWatchLive,
-		models.GameLive:    models.CapWatchLive,
-		models.GameEnded:   models.CapWatchResults,
-		models.GameAborted: models.CapWatchResults,
-	}
-
+	// Which of watch_live / watch_results applies is the service's business
+	// now (view_game); the handler asks for view_game.
 	for name, route := range routes {
-		for status, capability := range statuses {
-			t.Run(name+" "+string(status)+" allowed", func(t *testing.T) {
-				eventSvc := NewMockEventService(t)
-				gameSvc := NewMockGameService(t)
-				gameSvc.EXPECT().Status(mock.Anything, gameID).Return(status, nil)
-				eventSvc.EXPECT().HasCapability(mock.Anything, eventID, userID, gameID, capability).Return(nil)
-				route.expectGet(gameSvc)
-
-				c, w := newGameScopedContext(userID, eventID, gameID)
-				route.handle(NewHandler(eventSvc, gameSvc), c)
-
-				assert.Equal(t, http.StatusOK, w.Code)
-			})
-
-			t.Run(name+" "+string(status)+" forbidden", func(t *testing.T) {
-				eventSvc := NewMockEventService(t)
-				gameSvc := NewMockGameService(t)
-				gameSvc.EXPECT().Status(mock.Anything, gameID).Return(status, nil)
-				eventSvc.EXPECT().HasCapability(mock.Anything, eventID, userID, gameID, capability).Return(models.ErrEventForbidden)
-
-				c, w := newGameScopedContext(userID, eventID, gameID)
-				route.handle(NewHandler(eventSvc, gameSvc), c)
-
-				assert.Equal(t, http.StatusForbidden, w.Code)
-			})
-		}
-
-		t.Run(name+" status error", func(t *testing.T) {
+		t.Run(name+" allowed", func(t *testing.T) {
+			eventSvc := NewMockEventService(t)
 			gameSvc := NewMockGameService(t)
-			gameSvc.EXPECT().Status(mock.Anything, gameID).Return(models.GameStatus(""), errors.New("database error"))
+			eventSvc.EXPECT().HasCapability(mock.Anything, eventID, userID, gameID, models.CapViewGame).Return(nil)
+			route.expectGet(gameSvc)
 
 			c, w := newGameScopedContext(userID, eventID, gameID)
-			route.handle(NewHandler(NewMockEventService(t), gameSvc), c)
+			route.handle(NewHandler(eventSvc, gameSvc), c)
 
-			assert.Equal(t, http.StatusInternalServerError, w.Code)
+			assert.Equal(t, http.StatusOK, w.Code)
+		})
+
+		t.Run(name+" forbidden", func(t *testing.T) {
+			eventSvc := NewMockEventService(t)
+			eventSvc.EXPECT().HasCapability(mock.Anything, eventID, userID, gameID, models.CapViewGame).Return(models.ErrEventForbidden)
+
+			c, w := newGameScopedContext(userID, eventID, gameID)
+			route.handle(NewHandler(eventSvc, NewMockGameService(t)), c)
+
+			assert.Equal(t, http.StatusForbidden, w.Code)
 		})
 	}
 }

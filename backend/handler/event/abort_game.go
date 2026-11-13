@@ -7,7 +7,6 @@ import (
 
 	"github.com/importandrew/MaCRa/handler/httperr"
 	"github.com/importandrew/MaCRa/handler/reqctx"
-	"github.com/importandrew/MaCRa/models"
 )
 
 func (h Handler) Abort(c *gin.Context) {
@@ -15,13 +14,9 @@ func (h Handler) Abort(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
 	gameID := reqctx.GetGameID(c)
 
-	if err := h.event.HasCapability(c.Request.Context(), eventID, callerID, gameID, models.CapAbortGame); err != nil {
-		httperr.Error(c, err)
-		return
-	}
-
-	err := h.event.AbortGame(c.Request.Context(), gameID)
-	if err != nil {
+	// AbortGame checks the capability itself: a seated player may abort only
+	// while the game has no rounds, which it checks again in the abort.
+	if err := h.event.AbortGame(c.Request.Context(), eventID, callerID, gameID); err != nil {
 		httperr.Error(c, err)
 		return
 	}

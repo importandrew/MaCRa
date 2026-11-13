@@ -35,5 +35,5 @@ func (s *Service) RemoveMembers(ctx context.Context, eventID int, targetUserIDs 
 }
 
 func (s *Service) GetMe(ctx context.Context, eventID, callerID int) (models.EventMe, error) {
-	return s.MyCapabilities(ctx, eventID, callerID, 0)
+	return s.MyCapabilities(ctx, eventID, callerID)
 }

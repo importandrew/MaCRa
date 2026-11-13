@@ -43,10 +43,9 @@ type PlayerWindScore struct {
 }
 
 type GameResult struct {
-	ID               int            `json:"id"`
-	FinishedAt       *time.Time     `json:"finished_at"`
-	CanUndoLastRound bool           `json:"can_undo_last_round"`
-	PlayerResults    []PlayerResult `json:"player_results"`
+	ID            int            `json:"id"`
+	FinishedAt    *time.Time     `json:"finished_at"`
+	PlayerResults []PlayerResult `json:"player_results"`
 }
 
 type PlayerResult struct {
@@ -100,4 +99,17 @@ type EventGamePlayerScore struct {
 type EventGameItemRow struct {
 	ID     int        `db:"id"`
 	Status GameStatus `db:"status"`
+}
+
+// GameSummary is what the capability rules need to know about a game.
+type GameSummary struct {
+	Status     GameStatus `db:"status"`
+	FinishedAt *time.Time `db:"finished_at"`
+	LogSize    int        `db:"log_size"`
+}
+
+// GameMe is the caller's capabilities for one game
+// (GET /event/:id/game/:gameId/me).
+type GameMe struct {
+	Capabilities []Capability `json:"capabilities"`
 }

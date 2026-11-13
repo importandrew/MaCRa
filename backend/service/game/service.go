@@ -9,7 +9,8 @@ import (
 
 type GameRepo interface {
 	Status(ctx context.Context, gameID int) (models.GameStatus, error)
-	SetStatus(ctx context.Context, gameID int, status models.GameStatus) error
+	Abort(ctx context.Context, gameID int, onlyWithoutRounds bool) error
+	Summary(ctx context.Context, gameID int) (models.GameSummary, error)
 	Players(ctx context.Context, gameID int) (models.StartingPlayers, error)
 	GameLog(ctx context.Context, gameID int) ([]models.RoundLog, error)
 	SaveRoundOutcome(ctx context.Context, gameID int, data models.RoundData) error

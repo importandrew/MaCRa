@@ -8,7 +8,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Who is who in an event
 
-- **Owner**: the user who created the event. Not a role, but the owner always has staff rights in their own event (see below), whatever roles they hold.
+- **Owner**: the user who created the event. Not a role. The owner always sees everything in their own event, as staff do, and manages it (settings, members, finishing), whatever roles they hold. Acting as a referee (undo, abort) takes the referee role, also for the owner: an organizer who isn't a referee can leave it out and can't press those by accident. In a regular event the owner gets the referee role at creation.
 - **Member roles**: player, referee, observer. One user can hold several.
 - **Member**: the owner or anyone with at least one role.
 - **Staff**: referees, observers and the owner.
@@ -32,7 +32,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 - **Create a game**: a player of a regular, unfinished event, who is one of the four players; all four must be players of the event.
 - **Enter round results and penalties**: any of the four players seated in the game.
-- **Undo the last round**: referees (and so the owner) only. Players can't, because a dishonest player could quietly undo a round and enter a better one. Revisit once undos leave a visible audit trail.
+- **Undo the last round**: referees only (the owner too when they have the referee role). Players can't, because a dishonest player could quietly undo a round and enter a better one. Revisit once undos leave a visible audit trail.
 - **Abort a game** (regular events): referees at any time; the seated players only while no round has been entered (a game started by mistake).
 - **Finish a game early** (regular events): a seated player or a referee.
 - **Manage the event and its members, finish the event**: the owner. An event with live games can't be finished.

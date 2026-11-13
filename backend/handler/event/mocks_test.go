@@ -957,16 +957,16 @@ func (_m *MockEventService) EXPECT() *MockEventService_Expecter {
 }
 
 // AbortGame provides a mock function for the type MockEventService
-func (_mock *MockEventService) AbortGame(ctx context.Context, gameID int) error {
-	ret := _mock.Called(ctx, gameID)
+func (_mock *MockEventService) AbortGame(ctx context.Context, eventID int, callerID int, gameID int) error {
+	ret := _mock.Called(ctx, eventID, callerID, gameID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AbortGame")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
-		r0 = returnFunc(ctx, gameID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int) error); ok {
+		r0 = returnFunc(ctx, eventID, callerID, gameID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -980,12 +980,14 @@ type MockEventService_AbortGame_Call struct {
 
 // AbortGame is a helper method to define mock.On call
 //   - ctx context.Context
+//   - eventID int
+//   - callerID int
 //   - gameID int
-func (_e *MockEventService_Expecter) AbortGame(ctx any, gameID any) *MockEventService_AbortGame_Call {
-	return &MockEventService_AbortGame_Call{Call: _e.mock.On("AbortGame", ctx, gameID)}
+func (_e *MockEventService_Expecter) AbortGame(ctx any, eventID any, callerID any, gameID any) *MockEventService_AbortGame_Call {
+	return &MockEventService_AbortGame_Call{Call: _e.mock.On("AbortGame", ctx, eventID, callerID, gameID)}
 }
 
-func (_c *MockEventService_AbortGame_Call) Run(run func(ctx context.Context, gameID int)) *MockEventService_AbortGame_Call {
+func (_c *MockEventService_AbortGame_Call) Run(run func(ctx context.Context, eventID int, callerID int, gameID int)) *MockEventService_AbortGame_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -995,9 +997,19 @@ func (_c *MockEventService_AbortGame_Call) Run(run func(ctx context.Context, gam
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		var arg3 int
+		if args[3] != nil {
+			arg3 = args[3].(int)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -1008,7 +1020,7 @@ func (_c *MockEventService_AbortGame_Call) Return(err error) *MockEventService_A
 	return _c
 }
 
-func (_c *MockEventService_AbortGame_Call) RunAndReturn(run func(ctx context.Context, gameID int) error) *MockEventService_AbortGame_Call {
+func (_c *MockEventService_AbortGame_Call) RunAndReturn(run func(ctx context.Context, eventID int, callerID int, gameID int) error) *MockEventService_AbortGame_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1843,6 +1855,84 @@ func (_c *MockEventService_MainGameInfo_Call) Return(mainGameInfo models.MainGam
 }
 
 func (_c *MockEventService_MainGameInfo_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) (models.MainGameInfo, error)) *MockEventService_MainGameInfo_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MyGameCapabilities provides a mock function for the type MockEventService
+func (_mock *MockEventService) MyGameCapabilities(ctx context.Context, eventID int, callerID int, gameID int) (models.GameMe, error) {
+	ret := _mock.Called(ctx, eventID, callerID, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MyGameCapabilities")
+	}
+
+	var r0 models.GameMe
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int) (models.GameMe, error)); ok {
+		return returnFunc(ctx, eventID, callerID, gameID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int) models.GameMe); ok {
+		r0 = returnFunc(ctx, eventID, callerID, gameID)
+	} else {
+		r0 = ret.Get(0).(models.GameMe)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, callerID, gameID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventService_MyGameCapabilities_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MyGameCapabilities'
+type MockEventService_MyGameCapabilities_Call struct {
+	*mock.Call
+}
+
+// MyGameCapabilities is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - callerID int
+//   - gameID int
+func (_e *MockEventService_Expecter) MyGameCapabilities(ctx any, eventID any, callerID any, gameID any) *MockEventService_MyGameCapabilities_Call {
+	return &MockEventService_MyGameCapabilities_Call{Call: _e.mock.On("MyGameCapabilities", ctx, eventID, callerID, gameID)}
+}
+
+func (_c *MockEventService_MyGameCapabilities_Call) Run(run func(ctx context.Context, eventID int, callerID int, gameID int)) *MockEventService_MyGameCapabilities_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		var arg3 int
+		if args[3] != nil {
+			arg3 = args[3].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_MyGameCapabilities_Call) Return(gameMe models.GameMe, err error) *MockEventService_MyGameCapabilities_Call {
+	_c.Call.Return(gameMe, err)
+	return _c
+}
+
+func (_c *MockEventService_MyGameCapabilities_Call) RunAndReturn(run func(ctx context.Context, eventID int, callerID int, gameID int) (models.GameMe, error)) *MockEventService_MyGameCapabilities_Call {
 	_c.Call.Return(run)
 	return _c
 }

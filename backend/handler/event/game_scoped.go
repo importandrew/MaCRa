@@ -61,10 +61,6 @@ func (h Handler) GameResult(c *gin.Context) {
 		return
 	}
 
-	if err := h.event.HasCapability(c.Request.Context(), eventID, userID, gameID, models.CapUndoRound); err != nil {
-		result.CanUndoLastRound = false
-	}
-
 	c.JSON(http.StatusOK, result)
 }
 
@@ -106,20 +102,10 @@ func (h Handler) GameLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, logs)
 }
 
-// canWatchGame checks the capability the game page needs: watch_live while the
-// game hasn't ended, watch_results once it has ended or been aborted.
+// canWatchGame checks that the caller may see the game: their own always,
+// others' by the games reach (view_game).
 func (h Handler) canWatchGame(ctx context.Context, eventID, userID, gameID int) error {
-	status, err := h.game.Status(ctx, gameID)
-	if err != nil {
-		return err
-	}
-
-	capability := models.CapWatchResults
-	if status == models.GameCreated || status == models.GameLive {
-		capability = models.CapWatchLive
-	}
-
-	return h.event.HasCapability(ctx, eventID, userID, gameID, capability)
+	return h.event.HasCapability(ctx, eventID, userID, gameID, models.CapViewGame)
 }
 
 func (h Handler) GameHUD(c *gin.Context) {

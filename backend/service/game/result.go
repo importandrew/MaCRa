@@ -3,7 +3,6 @@ package game
 import (
 	"context"
 	"sort"
-	"time"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -22,9 +21,6 @@ func (s *Service) GameResult(ctx context.Context, gameID int) (models.GameResult
 	if err != nil {
 		return models.GameResult{}, err
 	}
-
-	result.CanUndoLastRound = result.FinishedAt != nil &&
-		result.FinishedAt.After(undoFinalRoundCutoff(time.Now()))
 
 	// sort from first place to last
 	sort.Slice(result.PlayerResults, func(i, j int) bool {
