@@ -66,6 +66,16 @@ func TestLoad(t *testing.T) {
 			},
 			expectedErr: assert.Error,
 		},
+		"invalid stored rules": {
+			gameID: 100,
+			mockSetup: func(m *MockGameRepo, gameID int) {
+				m.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil)
+				m.EXPECT().Rules(mock.Anything, gameID).Return(models.GameRules{Hands: 0, MinHand: 8}, nil)
+			},
+			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.Error(t, err) && assert.NotErrorIs(t, err, models.ErrInvalidGameRules)
+			},
+		},
 		"game log error": {
 			gameID: 100,
 			mockSetup: func(m *MockGameRepo, gameID int) {

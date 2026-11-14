@@ -20,6 +20,12 @@ func (s *Service) load(ctx context.Context, gameID int) (GameEngine, []models.Ro
 	if err != nil {
 		return nil, nil, fmt.Errorf("get rules: %w", err)
 	}
+	// Stored rules were valid when saved; invalid ones mean broken data, a
+	// server error (%v: not the client's invalid_game_rules), not a game
+	// that never ends.
+	if err := rules.Validate(); err != nil {
+		return nil, nil, fmt.Errorf("game %d: stored rules: %v", gameID, err) //nolint:errorlint // see above
+	}
 
 	seating := game.Seating([4]int{
 		players.East,
