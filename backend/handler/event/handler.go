@@ -26,6 +26,12 @@ type EventService interface {
 	TurnOffInvite(ctx context.Context, eventID int) error
 	Invite(ctx context.Context, token string, userID int) (models.EventInvite, error)
 	JoinByInvite(ctx context.Context, token string, userID int) (int, error)
+	UpdateJoining(ctx context.Context, eventID int, settings models.JoiningSettings) error
+	RequestToJoin(ctx context.Context, eventID, userID int) error
+	WithdrawJoinRequest(ctx context.Context, eventID, userID int) error
+	JoinRequests(ctx context.Context, eventID int) ([]models.JoinRequest, error)
+	AcceptJoinRequest(ctx context.Context, eventID, userID int) error
+	DeclineJoinRequest(ctx context.Context, eventID, userID int) error
 	ListMembers(ctx context.Context, eventID, callerID int) ([]models.EventMember, error)
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)

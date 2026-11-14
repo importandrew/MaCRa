@@ -3,8 +3,7 @@ package event
 import (
 	"context"
 	"errors"
-	"fmt"
-	"time"
+	"slices"
 
 	"github.com/jackc/pgx/v5"
 
@@ -68,31 +67,30 @@ func (r *Repo) EventByInviteToken(ctx context.Context, token string) (models.Eve
 
 // JoinByInvite makes the user a player of the event the invite token belongs
 // to and returns the event's ID; a player already stays as they are. It
-// refuses an unknown token (models.ErrInviteNotFound) and a finished event
-// (models.ErrEventAlreadyFinished). The event row is locked FOR SHARE, as for
-// any member change (member_locks.go), so the link can't be used while the
-// event is being finished.
+// refuses an unknown token (models.ErrInviteNotFound), a finished event
+// (models.ErrEventAlreadyFinished) and a full one (models.ErrEventFull). It
+// takes the locks of joining (join_request.go), so the link can't be used
+// while the event is being finished, and two users can't both take its last
+// place.
 func (r *Repo) JoinByInvite(ctx context.Context, token string, userID int) (int, error) {
 	var eventID int
 	err := r.InTx(ctx, func(tx *Repo) error {
-		rows, err := tx.db.Query(ctx, `
-			SELECT id, finished_at FROM events WHERE invite_token = $1 FOR SHARE`, token)
+		event, err := tx.lockJoinEvent(ctx, byInviteLink, token, models.ErrInviteNotFound)
 		if err != nil {
-			return fmt.Errorf("lock event: %w", err)
+			return err
+		}
+		if event.FinishedAt != nil {
+			return models.ErrEventAlreadyFinished
 		}
 
-		type invited struct {
-			ID         int        `db:"id"`
-			FinishedAt *time.Time `db:"finished_at"`
+		roles, err := tx.GetMemberRoles(ctx, event.ID, userID)
+		if err != nil {
+			return err
 		}
-		event, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[invited])
-		switch {
-		case errors.Is(err, pgx.ErrNoRows):
-			return models.ErrInviteNotFound
-		case err != nil:
-			return fmt.Errorf("lock event: %w", err)
-		case event.FinishedAt != nil:
-			return models.ErrEventAlreadyFinished
+		if !slices.Contains(roles, models.EventPlayer) {
+			if err := tx.checkRoom(ctx, event.ID, event.PlayerLimit); err != nil {
+				return err
+			}
 		}
 
 		eventID = event.ID

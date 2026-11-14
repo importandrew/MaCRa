@@ -8,4 +8,6 @@ export type EventInvite = {
   type: Event['type'];
   // is_member: the user is already a member (false for a visitor).
   is_member: boolean;
+  // is_full: the event has no places left (false for a member).
+  is_full: boolean;
 };

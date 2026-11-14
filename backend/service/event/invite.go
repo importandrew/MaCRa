@@ -40,7 +40,8 @@ func (s *Service) TurnOffInvite(ctx context.Context, eventID int) error {
 }
 
 // Invite shows the invite link's event before joining: its name and type,
-// and whether the user is already a member (false for a visitor, userID 0).
+// whether the user is already a member (false for a visitor, userID 0), and
+// whether the event is full.
 // The link is the access: its holder sees the event's name even in a
 // private event.
 func (s *Service) Invite(ctx context.Context, token string, userID int) (models.EventInvite, error) {
@@ -56,6 +57,11 @@ func (s *Service) Invite(ctx context.Context, token string, userID int) (models.
 			return models.EventInvite{}, err
 		}
 		invite.IsMember = len(roles) > 0 || event.OwnerUserID == userID
+	}
+	if !invite.IsMember {
+		if invite.IsFull, err = s.isFull(ctx, event); err != nil {
+			return models.EventInvite{}, err
+		}
 	}
 	return invite, nil
 }

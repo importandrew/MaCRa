@@ -17,6 +17,11 @@ export type Event = {
   games_reach: ContentReach;
   rules: GameRules;
   settings: EventSettings;
+  // accept_requests: the owner takes requests to join (public events only).
+  accept_requests: boolean;
+  // player_limit: the most players the event takes by a request or the
+  // invite link; null for no limit.
+  player_limit: number | null;
   created_at: string;
   finished_at: string | null;
   is_participating?: boolean;

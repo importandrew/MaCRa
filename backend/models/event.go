@@ -42,8 +42,13 @@ type Event struct {
 	GamesReach   ContentReach    `db:"games_reach" json:"games_reach"`
 	Rules        GameRules       `db:"rules" json:"rules"`
 	Settings     EventSettings   `db:"settings" json:"settings"`
-	CreatedAt    time.Time       `db:"created_at" json:"created_at"`
-	FinishedAt   *time.Time      `db:"finished_at" json:"finished_at"`
+	// AcceptRequests: the owner takes requests to join (public events only).
+	AcceptRequests bool `db:"accept_requests" json:"accept_requests"`
+	// PlayerLimit is the most players the event takes by a request or the
+	// invite link; nil for no limit.
+	PlayerLimit *int       `db:"player_limit" json:"player_limit"`
+	CreatedAt   time.Time  `db:"created_at" json:"created_at"`
+	FinishedAt  *time.Time `db:"finished_at" json:"finished_at"`
 }
 
 // EventDetails is an event with what its overview shows besides the event
@@ -81,6 +86,12 @@ type EventMe struct {
 	IsOwner      bool         `json:"is_owner"`
 	Roles        []EventRole  `json:"roles"`
 	Capabilities []Capability `json:"capabilities"`
+	// JoinRequest is what the overview offers a non-member about joining by
+	// a request; empty (not sent) when it offers nothing.
+	JoinRequest JoinRequestState `json:"join_request,omitempty"`
+	// PendingRequests is the number of requests to join waiting for an
+	// answer, for whoever has CapManageMembers (0, not sent, otherwise).
+	PendingRequests int `json:"pending_requests,omitempty"`
 }
 
 type EventCreateParams struct {
@@ -134,11 +145,12 @@ type EventPlayerResultRow struct {
 }
 
 // EventInvite is what an invite link shows before joining: the event's name
-// and type, and whether the caller is already a member (false for a
-// visitor).
+// and type, whether the caller is already a member (false for a visitor),
+// and whether the event is full (false for a member).
 type EventInvite struct {
 	EventID  int       `json:"event_id"`
 	Name     string    `json:"name"`
 	Type     EventType `json:"type"`
 	IsMember bool      `json:"is_member"`
+	IsFull   bool      `json:"is_full"`
 }

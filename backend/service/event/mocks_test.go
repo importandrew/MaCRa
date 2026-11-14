@@ -149,6 +149,69 @@ func (_m *MockEventRepo) EXPECT() *MockEventRepo_Expecter {
 	return &MockEventRepo_Expecter{mock: &_m.Mock}
 }
 
+// AcceptJoinRequest provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) AcceptJoinRequest(ctx context.Context, eventID int, userID int) error {
+	ret := _mock.Called(ctx, eventID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AcceptJoinRequest")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = returnFunc(ctx, eventID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_AcceptJoinRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AcceptJoinRequest'
+type MockEventRepo_AcceptJoinRequest_Call struct {
+	*mock.Call
+}
+
+// AcceptJoinRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - userID int
+func (_e *MockEventRepo_Expecter) AcceptJoinRequest(ctx any, eventID any, userID any) *MockEventRepo_AcceptJoinRequest_Call {
+	return &MockEventRepo_AcceptJoinRequest_Call{Call: _e.mock.On("AcceptJoinRequest", ctx, eventID, userID)}
+}
+
+func (_c *MockEventRepo_AcceptJoinRequest_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockEventRepo_AcceptJoinRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_AcceptJoinRequest_Call) Return(err error) *MockEventRepo_AcceptJoinRequest_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_AcceptJoinRequest_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) error) *MockEventRepo_AcceptJoinRequest_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AddMemberRoles provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) AddMemberRoles(ctx context.Context, eventID int, userID int, roles []models.EventRole) error {
 	ret := _mock.Called(ctx, eventID, userID, roles)
@@ -214,6 +277,72 @@ func (_c *MockEventRepo_AddMemberRoles_Call) Return(err error) *MockEventRepo_Ad
 }
 
 func (_c *MockEventRepo_AddMemberRoles_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int, roles []models.EventRole) error) *MockEventRepo_AddMemberRoles_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CountJoinRequests provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) CountJoinRequests(ctx context.Context, eventID int) (int, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CountJoinRequests")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (int, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) int); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_CountJoinRequests_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountJoinRequests'
+type MockEventRepo_CountJoinRequests_Call struct {
+	*mock.Call
+}
+
+// CountJoinRequests is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) CountJoinRequests(ctx any, eventID any) *MockEventRepo_CountJoinRequests_Call {
+	return &MockEventRepo_CountJoinRequests_Call{Call: _e.mock.On("CountJoinRequests", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_CountJoinRequests_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_CountJoinRequests_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_CountJoinRequests_Call) Return(n int, err error) *MockEventRepo_CountJoinRequests_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockEventRepo_CountJoinRequests_Call) RunAndReturn(run func(ctx context.Context, eventID int) (int, error)) *MockEventRepo_CountJoinRequests_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -346,6 +475,132 @@ func (_c *MockEventRepo_Create_Call) Return(n int, err error) *MockEventRepo_Cre
 }
 
 func (_c *MockEventRepo_Create_Call) RunAndReturn(run func(ctx context.Context, event models.Event) (int, error)) *MockEventRepo_Create_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateJoinRequest provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) CreateJoinRequest(ctx context.Context, eventID int, userID int) error {
+	ret := _mock.Called(ctx, eventID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateJoinRequest")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = returnFunc(ctx, eventID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_CreateJoinRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateJoinRequest'
+type MockEventRepo_CreateJoinRequest_Call struct {
+	*mock.Call
+}
+
+// CreateJoinRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - userID int
+func (_e *MockEventRepo_Expecter) CreateJoinRequest(ctx any, eventID any, userID any) *MockEventRepo_CreateJoinRequest_Call {
+	return &MockEventRepo_CreateJoinRequest_Call{Call: _e.mock.On("CreateJoinRequest", ctx, eventID, userID)}
+}
+
+func (_c *MockEventRepo_CreateJoinRequest_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockEventRepo_CreateJoinRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_CreateJoinRequest_Call) Return(err error) *MockEventRepo_CreateJoinRequest_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_CreateJoinRequest_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) error) *MockEventRepo_CreateJoinRequest_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeclineJoinRequest provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) DeclineJoinRequest(ctx context.Context, eventID int, userID int) error {
+	ret := _mock.Called(ctx, eventID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeclineJoinRequest")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = returnFunc(ctx, eventID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_DeclineJoinRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeclineJoinRequest'
+type MockEventRepo_DeclineJoinRequest_Call struct {
+	*mock.Call
+}
+
+// DeclineJoinRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - userID int
+func (_e *MockEventRepo_Expecter) DeclineJoinRequest(ctx any, eventID any, userID any) *MockEventRepo_DeclineJoinRequest_Call {
+	return &MockEventRepo_DeclineJoinRequest_Call{Call: _e.mock.On("DeclineJoinRequest", ctx, eventID, userID)}
+}
+
+func (_c *MockEventRepo_DeclineJoinRequest_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockEventRepo_DeclineJoinRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_DeclineJoinRequest_Call) Return(err error) *MockEventRepo_DeclineJoinRequest_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_DeclineJoinRequest_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) error) *MockEventRepo_DeclineJoinRequest_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -821,6 +1076,78 @@ func (_c *MockEventRepo_JoinByInvite_Call) RunAndReturn(run func(ctx context.Con
 	return _c
 }
 
+// JoinRequestStatus provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) JoinRequestStatus(ctx context.Context, eventID int, userID int) (models.JoinRequestStatus, error) {
+	ret := _mock.Called(ctx, eventID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for JoinRequestStatus")
+	}
+
+	var r0 models.JoinRequestStatus
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (models.JoinRequestStatus, error)); ok {
+		return returnFunc(ctx, eventID, userID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) models.JoinRequestStatus); ok {
+		r0 = returnFunc(ctx, eventID, userID)
+	} else {
+		r0 = ret.Get(0).(models.JoinRequestStatus)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_JoinRequestStatus_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'JoinRequestStatus'
+type MockEventRepo_JoinRequestStatus_Call struct {
+	*mock.Call
+}
+
+// JoinRequestStatus is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - userID int
+func (_e *MockEventRepo_Expecter) JoinRequestStatus(ctx any, eventID any, userID any) *MockEventRepo_JoinRequestStatus_Call {
+	return &MockEventRepo_JoinRequestStatus_Call{Call: _e.mock.On("JoinRequestStatus", ctx, eventID, userID)}
+}
+
+func (_c *MockEventRepo_JoinRequestStatus_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockEventRepo_JoinRequestStatus_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_JoinRequestStatus_Call) Return(joinRequestStatus models.JoinRequestStatus, err error) *MockEventRepo_JoinRequestStatus_Call {
+	_c.Call.Return(joinRequestStatus, err)
+	return _c
+}
+
+func (_c *MockEventRepo_JoinRequestStatus_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) (models.JoinRequestStatus, error)) *MockEventRepo_JoinRequestStatus_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // List provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) List(ctx context.Context, userID int) ([]models.EventListRow, error) {
 	ret := _mock.Called(ctx, userID)
@@ -1039,6 +1366,74 @@ func (_c *MockEventRepo_ListGamesByStatus_Call) Return(eventGameItemRows []model
 }
 
 func (_c *MockEventRepo_ListGamesByStatus_Call) RunAndReturn(run func(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int) ([]models.EventGameItemRow, error)) *MockEventRepo_ListGamesByStatus_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListJoinRequests provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) ListJoinRequests(ctx context.Context, eventID int) ([]models.JoinRequest, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListJoinRequests")
+	}
+
+	var r0 []models.JoinRequest
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) ([]models.JoinRequest, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) []models.JoinRequest); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.JoinRequest)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_ListJoinRequests_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListJoinRequests'
+type MockEventRepo_ListJoinRequests_Call struct {
+	*mock.Call
+}
+
+// ListJoinRequests is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) ListJoinRequests(ctx any, eventID any) *MockEventRepo_ListJoinRequests_Call {
+	return &MockEventRepo_ListJoinRequests_Call{Call: _e.mock.On("ListJoinRequests", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_ListJoinRequests_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_ListJoinRequests_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_ListJoinRequests_Call) Return(joinRequests []models.JoinRequest, err error) *MockEventRepo_ListJoinRequests_Call {
+	_c.Call.Return(joinRequests, err)
+	return _c
+}
+
+func (_c *MockEventRepo_ListJoinRequests_Call) RunAndReturn(run func(ctx context.Context, eventID int) ([]models.JoinRequest, error)) *MockEventRepo_ListJoinRequests_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1503,6 +1898,69 @@ func (_c *MockEventRepo_Update_Call) RunAndReturn(run func(ctx context.Context, 
 	return _c
 }
 
+// UpdateJoining provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) UpdateJoining(ctx context.Context, eventID int, settings models.JoiningSettings) error {
+	ret := _mock.Called(ctx, eventID, settings)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateJoining")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.JoiningSettings) error); ok {
+		r0 = returnFunc(ctx, eventID, settings)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_UpdateJoining_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateJoining'
+type MockEventRepo_UpdateJoining_Call struct {
+	*mock.Call
+}
+
+// UpdateJoining is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - settings models.JoiningSettings
+func (_e *MockEventRepo_Expecter) UpdateJoining(ctx any, eventID any, settings any) *MockEventRepo_UpdateJoining_Call {
+	return &MockEventRepo_UpdateJoining_Call{Call: _e.mock.On("UpdateJoining", ctx, eventID, settings)}
+}
+
+func (_c *MockEventRepo_UpdateJoining_Call) Run(run func(ctx context.Context, eventID int, settings models.JoiningSettings)) *MockEventRepo_UpdateJoining_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.JoiningSettings
+		if args[2] != nil {
+			arg2 = args[2].(models.JoiningSettings)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_UpdateJoining_Call) Return(err error) *MockEventRepo_UpdateJoining_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_UpdateJoining_Call) RunAndReturn(run func(ctx context.Context, eventID int, settings models.JoiningSettings) error) *MockEventRepo_UpdateJoining_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdateRules provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) UpdateRules(ctx context.Context, eventID int, rules models.GameRules) error {
 	ret := _mock.Called(ctx, eventID, rules)
@@ -1625,6 +2083,69 @@ func (_c *MockEventRepo_UpdateSettings_Call) Return(err error) *MockEventRepo_Up
 }
 
 func (_c *MockEventRepo_UpdateSettings_Call) RunAndReturn(run func(ctx context.Context, eventID int, settings models.EventSettings) error) *MockEventRepo_UpdateSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WithdrawJoinRequest provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) WithdrawJoinRequest(ctx context.Context, eventID int, userID int) error {
+	ret := _mock.Called(ctx, eventID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WithdrawJoinRequest")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = returnFunc(ctx, eventID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_WithdrawJoinRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithdrawJoinRequest'
+type MockEventRepo_WithdrawJoinRequest_Call struct {
+	*mock.Call
+}
+
+// WithdrawJoinRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - userID int
+func (_e *MockEventRepo_Expecter) WithdrawJoinRequest(ctx any, eventID any, userID any) *MockEventRepo_WithdrawJoinRequest_Call {
+	return &MockEventRepo_WithdrawJoinRequest_Call{Call: _e.mock.On("WithdrawJoinRequest", ctx, eventID, userID)}
+}
+
+func (_c *MockEventRepo_WithdrawJoinRequest_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockEventRepo_WithdrawJoinRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_WithdrawJoinRequest_Call) Return(err error) *MockEventRepo_WithdrawJoinRequest_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_WithdrawJoinRequest_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) error) *MockEventRepo_WithdrawJoinRequest_Call {
 	_c.Call.Return(run)
 	return _c
 }
