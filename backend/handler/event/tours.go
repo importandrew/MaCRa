@@ -29,16 +29,17 @@ func (h Handler) Tours(c *gin.Context) {
 	c.JSON(http.StatusOK, state)
 }
 
-type publishTourRequest struct {
+type generateTourRequest struct {
 	Seating models.SeatingMethod `json:"seating" binding:"required"`
 }
 
-// PublishTour publishes the next tour's seating (POST /event/:id/tours,
-// {"seating": "random"}). It needs models.CapRunTournament.
-func (h Handler) PublishTour(c *gin.Context) {
+// GenerateTour drafts the next tour's seating, replacing an earlier draft
+// (POST /event/:id/tours, {"seating": "random"}). It needs
+// models.CapRunTournament.
+func (h Handler) GenerateTour(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
 
-	var req publishTourRequest
+	var req generateTourRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httperr.InvalidRequest(c, err)
 		return
@@ -49,7 +50,7 @@ func (h Handler) PublishTour(c *gin.Context) {
 		return
 	}
 
-	tour, err := h.event.PublishTour(c.Request.Context(), eventID, req.Seating)
+	tour, err := h.event.GenerateTour(c.Request.Context(), eventID, req.Seating)
 	if err != nil {
 		httperr.Error(c, err)
 		return
@@ -57,8 +58,8 @@ func (h Handler) PublishTour(c *gin.Context) {
 	c.JSON(http.StatusOK, tour)
 }
 
-// CancelTour cancels the published seating of the tour not started yet
-// (DELETE /event/:id/tours/current). It needs models.CapRunTournament.
+// CancelTour cancels the drafted or published seating of the tour not started
+// yet (DELETE /event/:id/tours/current). It needs models.CapRunTournament.
 func (h Handler) CancelTour(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
 	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
@@ -71,6 +72,12 @@ func (h Handler) CancelTour(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
+}
+
+// PublishTour publishes the drafted seating to the players
+// (POST /event/:id/tours/current/publish).
+func (h Handler) PublishTour(c *gin.Context) {
+	h.tourAction(c, h.event.PublishTour)
 }
 
 // StartTour starts the published tour (POST /event/:id/tours/current/start).

@@ -10,14 +10,20 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// PublishTour publishes the tournament's next tour with tables made by the
-// seating method, creating its games (status created).
-func (s *Service) PublishTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error) {
+// GenerateTour drafts the tournament's next tour with tables made by the
+// seating method (games with status created, seen by the staff only),
+// replacing an earlier draft.
+func (s *Service) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error) {
 	makeTables, err := seatingFunc(method)
 	if err != nil {
 		return models.Tour{}, err
 	}
-	return s.repo.PublishTour(ctx, eventID, method, makeTables)
+	return s.repo.GenerateTour(ctx, eventID, method, makeTables)
+}
+
+// PublishTour publishes the drafted seating to the players.
+func (s *Service) PublishTour(ctx context.Context, eventID int) error {
+	return s.repo.PublishTour(ctx, eventID)
 }
 
 // CancelTour cancels the published seating of the tour not started yet.

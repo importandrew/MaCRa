@@ -4,7 +4,7 @@ import type { TourState } from '../../models/Tour';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
   cancelTour,
-  publishTour,
+  generateTour,
   tourAction,
 } from '../../providers/event/tournamentApi';
 import Confirm from '../Confirm';
@@ -32,10 +32,11 @@ export default function ToursCard({
   onChanged: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const { isPending: isPublishing, run: runPublish } = useSubmitOnce();
+  const { isPending: isGenerating, run: runGenerate } = useSubmitOnce();
   const { isPending: isCancelling, run: runCancel } = useSubmitOnce();
   const cancelConfirm = useOverlayState();
   const current = state.current;
+  const isDraft = current?.status === 'draft';
   const isPublished = current?.status === 'published';
   const isLive = current?.status === 'live';
   // playing: the live tour's tables whose game hasn't ended.
@@ -46,7 +47,7 @@ export default function ToursCard({
   const finishConfirm = useOverlayState();
   const abortConfirm = useOverlayState();
 
-  const act = (action: 'start' | 'finish' | 'abort') =>
+  const act = (action: 'publish' | 'start' | 'finish' | 'abort') =>
     runAct(async () => {
       finishConfirm.close();
       abortConfirm.close();
@@ -59,11 +60,11 @@ export default function ToursCard({
       await onChanged();
     });
 
-  const publish = () =>
-    runPublish(async () => {
-      if (await publishTour(eventId, 'random')) {
+  const generate = () =>
+    runGenerate(async () => {
+      if (await generateTour(eventId, 'random')) {
         showToast({
-          title: t('tours.published', { n: state.next }),
+          title: t('tours.generated', { n: state.next }),
           variant: 'success',
         });
       }
@@ -98,23 +99,53 @@ export default function ToursCard({
             : t('tours.title')}
         </h2>
 
-        {canRun && state.next > 0 && (
+        {canRun && state.next > 0 && !isDraft && (
           <>
             <p className="text-sm text-muted">
               {blocker ??
-                t('tours.publishHint', {
+                t('tours.generateHint', {
                   n: state.next,
                   players: state.active,
                 })}
             </p>
             <PendingButton
               variant="primary"
-              isPending={isPublishing}
+              isPending={isGenerating}
               isDisabled={blocker != null}
-              onPress={publish}
+              onPress={generate}
               className="w-3/4 self-center"
             >
-              {t('tours.publish', { n: state.next })}
+              {t('tours.generate', { n: state.next })}
+            </PendingButton>
+          </>
+        )}
+
+        {canRun && isDraft && (
+          <>
+            <p className="text-sm text-muted">{t('tours.draftHint')}</p>
+            <PendingButton
+              variant="primary"
+              isPending={isActing}
+              onPress={() => act('publish')}
+              className="w-3/4 self-center"
+            >
+              {t('tours.publish')}
+            </PendingButton>
+            <PendingButton
+              variant="secondary"
+              isPending={isGenerating}
+              onPress={generate}
+              className="w-3/4 self-center"
+            >
+              {t('tours.regenerate')}
+            </PendingButton>
+            <PendingButton
+              variant="danger-soft"
+              isPending={isCancelling}
+              onPress={cancelConfirm.open}
+              className="w-3/4 self-center"
+            >
+              {t('tours.cancel')}
             </PendingButton>
           </>
         )}

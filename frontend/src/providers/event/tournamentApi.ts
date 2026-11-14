@@ -59,9 +59,9 @@ export const useFetchTours = (eventId: number | null) => {
   };
 };
 
-// publishTour publishes the next tour's seating: its games are created and
-// each player sees their table.
-export async function publishTour(
+// generateTour drafts the next tour's seating (seen by the staff only),
+// replacing an earlier draft.
+export async function generateTour(
   eventId: number,
   seating: SeatingMethod
 ): Promise<boolean> {
@@ -79,10 +79,11 @@ export async function cancelTour(eventId: number): Promise<boolean> {
   return result !== null;
 }
 
-// tourAction starts the published tour, or finishes or aborts the live one.
+// tourAction publishes the drafted seating, starts the published tour, or
+// finishes or aborts the live one.
 export async function tourAction(
   eventId: number,
-  action: 'start' | 'finish' | 'abort'
+  action: 'publish' | 'start' | 'finish' | 'abort'
 ): Promise<boolean> {
   const result = await authFetch<null>(
     PostRequest(eventPath(eventId, `/tours/current/${action}`))

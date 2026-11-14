@@ -1024,6 +1024,84 @@ func (_c *MockEventRepo_GameHistory_Call) RunAndReturn(run func(ctx context.Cont
 	return _c
 }
 
+// GenerateTour provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error) {
+	ret := _mock.Called(ctx, eventID, method, makeTables)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GenerateTour")
+	}
+
+	var r0 models.Tour
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) (models.Tour, error)); ok {
+		return returnFunc(ctx, eventID, method, makeTables)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) models.Tour); ok {
+		r0 = returnFunc(ctx, eventID, method, makeTables)
+	} else {
+		r0 = ret.Get(0).(models.Tour)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) error); ok {
+		r1 = returnFunc(ctx, eventID, method, makeTables)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_GenerateTour_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateTour'
+type MockEventRepo_GenerateTour_Call struct {
+	*mock.Call
+}
+
+// GenerateTour is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - method models.SeatingMethod
+//   - makeTables models.TablesFunc
+func (_e *MockEventRepo_Expecter) GenerateTour(ctx any, eventID any, method any, makeTables any) *MockEventRepo_GenerateTour_Call {
+	return &MockEventRepo_GenerateTour_Call{Call: _e.mock.On("GenerateTour", ctx, eventID, method, makeTables)}
+}
+
+func (_c *MockEventRepo_GenerateTour_Call) Run(run func(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc)) *MockEventRepo_GenerateTour_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.SeatingMethod
+		if args[2] != nil {
+			arg2 = args[2].(models.SeatingMethod)
+		}
+		var arg3 models.TablesFunc
+		if args[3] != nil {
+			arg3 = args[3].(models.TablesFunc)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_GenerateTour_Call) Return(tour models.Tour, err error) *MockEventRepo_GenerateTour_Call {
+	_c.Call.Return(tour, err)
+	return _c
+}
+
+func (_c *MockEventRepo_GenerateTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error)) *MockEventRepo_GenerateTour_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Get provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) Get(ctx context.Context, eventID int) (models.Event, error) {
 	ret := _mock.Called(ctx, eventID)
@@ -1947,29 +2025,20 @@ func (_c *MockEventRepo_PlayerStats_Call) RunAndReturn(run func(ctx context.Cont
 }
 
 // PublishTour provides a mock function for the type MockEventRepo
-func (_mock *MockEventRepo) PublishTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error) {
-	ret := _mock.Called(ctx, eventID, method, makeTables)
+func (_mock *MockEventRepo) PublishTour(ctx context.Context, eventID int) error {
+	ret := _mock.Called(ctx, eventID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PublishTour")
 	}
 
-	var r0 models.Tour
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) (models.Tour, error)); ok {
-		return returnFunc(ctx, eventID, method, makeTables)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) models.Tour); ok {
-		r0 = returnFunc(ctx, eventID, method, makeTables)
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, eventID)
 	} else {
-		r0 = ret.Get(0).(models.Tour)
+		r0 = ret.Error(0)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) error); ok {
-		r1 = returnFunc(ctx, eventID, method, makeTables)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
+	return r0
 }
 
 // MockEventRepo_PublishTour_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PublishTour'
@@ -1980,13 +2049,11 @@ type MockEventRepo_PublishTour_Call struct {
 // PublishTour is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-//   - method models.SeatingMethod
-//   - makeTables models.TablesFunc
-func (_e *MockEventRepo_Expecter) PublishTour(ctx any, eventID any, method any, makeTables any) *MockEventRepo_PublishTour_Call {
-	return &MockEventRepo_PublishTour_Call{Call: _e.mock.On("PublishTour", ctx, eventID, method, makeTables)}
+func (_e *MockEventRepo_Expecter) PublishTour(ctx any, eventID any) *MockEventRepo_PublishTour_Call {
+	return &MockEventRepo_PublishTour_Call{Call: _e.mock.On("PublishTour", ctx, eventID)}
 }
 
-func (_c *MockEventRepo_PublishTour_Call) Run(run func(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc)) *MockEventRepo_PublishTour_Call {
+func (_c *MockEventRepo_PublishTour_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_PublishTour_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1996,30 +2063,20 @@ func (_c *MockEventRepo_PublishTour_Call) Run(run func(ctx context.Context, even
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
-		var arg2 models.SeatingMethod
-		if args[2] != nil {
-			arg2 = args[2].(models.SeatingMethod)
-		}
-		var arg3 models.TablesFunc
-		if args[3] != nil {
-			arg3 = args[3].(models.TablesFunc)
-		}
 		run(
 			arg0,
 			arg1,
-			arg2,
-			arg3,
 		)
 	})
 	return _c
 }
 
-func (_c *MockEventRepo_PublishTour_Call) Return(tour models.Tour, err error) *MockEventRepo_PublishTour_Call {
-	_c.Call.Return(tour, err)
+func (_c *MockEventRepo_PublishTour_Call) Return(err error) *MockEventRepo_PublishTour_Call {
+	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *MockEventRepo_PublishTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error)) *MockEventRepo_PublishTour_Call {
+func (_c *MockEventRepo_PublishTour_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventRepo_PublishTour_Call {
 	_c.Call.Return(run)
 	return _c
 }

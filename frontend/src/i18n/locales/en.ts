@@ -219,6 +219,7 @@ const en = {
     abortPrompt:
       'All the tour’s games are aborted and don’t count; the tour is played again from its seating. This can’t be undone.',
     done: {
+      publish: 'Tour {{n}} seating published',
       start: 'Tour {{n}} started',
       finish: 'Tour {{n}} finished',
       abort: 'Tour {{n}} aborted',
@@ -232,15 +233,20 @@ const en = {
     title: 'Tours',
     current: 'Tour {{n}}: {{status}}',
     status: {
+      draft: 'seating generated, not published',
       published: 'seating published',
       live: 'in progress',
       finished: 'finished',
       aborted: 'aborted',
     },
-    publishHint:
-      'Random seating of {{players}} players. Each player sees their table at once; rounds start with the tour.',
-    publish: 'Publish tour {{n}} seating',
-    published: 'Tour {{n}} seating published',
+    generateHint:
+      'Random seating of {{players}} players. Only the staff see it until it is published.',
+    generate: 'Generate tour {{n}} seating',
+    generated: 'Tour {{n}} seating generated',
+    draftHint:
+      'Only the staff see this seating. Publish it to show the players their tables, or generate it again.',
+    regenerate: 'Generate again',
+    publish: 'Publish to the players',
     needsDraw: 'Draw the participant numbers first (below).',
     missing_one:
       '{{count}} player is missing for whole tables: add a player or a substitute.',

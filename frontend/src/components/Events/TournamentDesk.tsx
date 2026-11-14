@@ -51,9 +51,11 @@ export default function TournamentDesk() {
 
   const status = event ? eventStatus(event) : null;
   const participants = data?.participants ?? [];
-  // A published seating goes by the numbers: it is cancelled before a new
-  // draw.
-  const isSeated = tours.data?.current?.status === 'published';
+  // A drafted or published seating goes by the numbers: it is cancelled
+  // before a new draw.
+  const isSeated =
+    tours.data?.current?.status === 'draft' ||
+    tours.data?.current?.status === 'published';
   const canDraw =
     canRun && status === 'preparation' && participants.length > 0 && !isSeated;
   const canWithdraw = canRun && status === 'in_progress';

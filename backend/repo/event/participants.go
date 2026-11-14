@@ -176,11 +176,11 @@ func (r *Repo) checkPlayersOpen(ctx context.Context, eventID int) error {
 }
 
 // checkNoPublishedTour returns models.ErrTourInProgress if a tour's seating
-// is published (or the tour is live).
+// is drafted or published (or the tour is live).
 func (r *Repo) checkNoPublishedTour(ctx context.Context, eventID int) error {
 	rows, err := r.db.Query(ctx, `
-		SELECT EXISTS (SELECT 1 FROM tours WHERE event_id = $1 AND status IN ($2, $3))`,
-		eventID, models.TourPublished, models.TourLive)
+		SELECT EXISTS (SELECT 1 FROM tours WHERE event_id = $1 AND status IN ($2, $3, $4))`,
+		eventID, models.TourDraft, models.TourPublished, models.TourLive)
 	if err != nil {
 		return err
 	}
