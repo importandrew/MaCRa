@@ -26,6 +26,7 @@ import CheckEmailPage from './components/Login/CheckEmail';
 import ForgotPasswordPage from './components/Login/ForgotPassword';
 import ResetPasswordPage from './components/Login/ResetPassword';
 import VerifyEmailPage from './components/Login/VerifyEmail';
+import JoinEvent from './components/Join/JoinEvent';
 import Landing from './components/Main/Landing';
 import ProfilePage from './components/Profile/Profile';
 import SettingsPage from './components/Settings/Settings';
@@ -64,6 +65,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/join/:token" element={<JoinEvent />} />
 
               <Route element={<RequireAuth />}>
                 <Route path="/profile" element={<ProfilePage />} />

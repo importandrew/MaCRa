@@ -350,6 +350,72 @@ func (_c *MockEventRepo_Create_Call) RunAndReturn(run func(ctx context.Context, 
 	return _c
 }
 
+// EventByInviteToken provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) EventByInviteToken(ctx context.Context, token string) (models.Event, error) {
+	ret := _mock.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for EventByInviteToken")
+	}
+
+	var r0 models.Event
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (models.Event, error)); ok {
+		return returnFunc(ctx, token)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) models.Event); ok {
+		r0 = returnFunc(ctx, token)
+	} else {
+		r0 = ret.Get(0).(models.Event)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, token)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_EventByInviteToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EventByInviteToken'
+type MockEventRepo_EventByInviteToken_Call struct {
+	*mock.Call
+}
+
+// EventByInviteToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+func (_e *MockEventRepo_Expecter) EventByInviteToken(ctx any, token any) *MockEventRepo_EventByInviteToken_Call {
+	return &MockEventRepo_EventByInviteToken_Call{Call: _e.mock.On("EventByInviteToken", ctx, token)}
+}
+
+func (_c *MockEventRepo_EventByInviteToken_Call) Run(run func(ctx context.Context, token string)) *MockEventRepo_EventByInviteToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_EventByInviteToken_Call) Return(event models.Event, err error) *MockEventRepo_EventByInviteToken_Call {
+	_c.Call.Return(event, err)
+	return _c
+}
+
+func (_c *MockEventRepo_EventByInviteToken_Call) RunAndReturn(run func(ctx context.Context, token string) (models.Event, error)) *MockEventRepo_EventByInviteToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Finish provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) Finish(ctx context.Context, eventID int) error {
 	ret := _mock.Called(ctx, eventID)
@@ -611,6 +677,146 @@ func (_c *MockEventRepo_GetMemberRoles_Call) Return(eventRoles []models.EventRol
 }
 
 func (_c *MockEventRepo_GetMemberRoles_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) ([]models.EventRole, error)) *MockEventRepo_GetMemberRoles_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// InviteToken provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) InviteToken(ctx context.Context, eventID int) (*string, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InviteToken")
+	}
+
+	var r0 *string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (*string, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) *string); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_InviteToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InviteToken'
+type MockEventRepo_InviteToken_Call struct {
+	*mock.Call
+}
+
+// InviteToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) InviteToken(ctx any, eventID any) *MockEventRepo_InviteToken_Call {
+	return &MockEventRepo_InviteToken_Call{Call: _e.mock.On("InviteToken", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_InviteToken_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_InviteToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_InviteToken_Call) Return(s *string, err error) *MockEventRepo_InviteToken_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockEventRepo_InviteToken_Call) RunAndReturn(run func(ctx context.Context, eventID int) (*string, error)) *MockEventRepo_InviteToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// JoinByInvite provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) JoinByInvite(ctx context.Context, token string, userID int) (int, error) {
+	ret := _mock.Called(ctx, token, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for JoinByInvite")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) (int, error)); ok {
+		return returnFunc(ctx, token, userID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) int); ok {
+		r0 = returnFunc(ctx, token, userID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int) error); ok {
+		r1 = returnFunc(ctx, token, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_JoinByInvite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'JoinByInvite'
+type MockEventRepo_JoinByInvite_Call struct {
+	*mock.Call
+}
+
+// JoinByInvite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+//   - userID int
+func (_e *MockEventRepo_Expecter) JoinByInvite(ctx any, token any, userID any) *MockEventRepo_JoinByInvite_Call {
+	return &MockEventRepo_JoinByInvite_Call{Call: _e.mock.On("JoinByInvite", ctx, token, userID)}
+}
+
+func (_c *MockEventRepo_JoinByInvite_Call) Run(run func(ctx context.Context, token string, userID int)) *MockEventRepo_JoinByInvite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_JoinByInvite_Call) Return(n int, err error) *MockEventRepo_JoinByInvite_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockEventRepo_JoinByInvite_Call) RunAndReturn(run func(ctx context.Context, token string, userID int) (int, error)) *MockEventRepo_JoinByInvite_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1104,6 +1310,69 @@ func (_c *MockEventRepo_RulesFrozen_Call) Return(b bool, err error) *MockEventRe
 }
 
 func (_c *MockEventRepo_RulesFrozen_Call) RunAndReturn(run func(ctx context.Context, eventID int) (bool, error)) *MockEventRepo_RulesFrozen_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SetInviteToken provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) SetInviteToken(ctx context.Context, eventID int, token *string) error {
+	ret := _mock.Called(ctx, eventID, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetInviteToken")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, *string) error); ok {
+		r0 = returnFunc(ctx, eventID, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_SetInviteToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetInviteToken'
+type MockEventRepo_SetInviteToken_Call struct {
+	*mock.Call
+}
+
+// SetInviteToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - token *string
+func (_e *MockEventRepo_Expecter) SetInviteToken(ctx any, eventID any, token any) *MockEventRepo_SetInviteToken_Call {
+	return &MockEventRepo_SetInviteToken_Call{Call: _e.mock.On("SetInviteToken", ctx, eventID, token)}
+}
+
+func (_c *MockEventRepo_SetInviteToken_Call) Run(run func(ctx context.Context, eventID int, token *string)) *MockEventRepo_SetInviteToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_SetInviteToken_Call) Return(err error) *MockEventRepo_SetInviteToken_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_SetInviteToken_Call) RunAndReturn(run func(ctx context.Context, eventID int, token *string) error) *MockEventRepo_SetInviteToken_Call {
 	_c.Call.Return(run)
 	return _c
 }

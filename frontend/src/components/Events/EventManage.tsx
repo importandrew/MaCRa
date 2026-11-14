@@ -24,6 +24,7 @@ import EventSettingsFields from './EventSettingsFields';
 import EventRulesForm from './EventRulesForm';
 import EventSettingsCard from './EventSettingsCard';
 import MemberRolesModal from './MemberRolesModal';
+import InviteLink from './InviteLink';
 import RoleCheckboxes from './RoleCheckboxes';
 import { ALL_ROLES, ROLE_ICONS } from './roles';
 import { type EventSettings, isValidSettings } from './eventSettings';
@@ -244,6 +245,11 @@ export default function EventManage() {
             ...(isFinished
               ? []
               : [
+                  {
+                    id: 'invite',
+                    title: t('invite.section'),
+                    content: () => <InviteLink eventId={eventId} />,
+                  },
                   {
                     id: 'add',
                     title: t('members.addTitle'),

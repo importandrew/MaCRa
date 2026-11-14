@@ -67,6 +67,9 @@ var (
 	// ErrOwnerNotRemovable means the owner can't be removed from their event
 	// (they may drop their roles).
 	ErrOwnerNotRemovable = errors.New("the owner can't be removed")
+	// ErrInviteNotFound means the invite link is unknown or has been turned
+	// off or replaced.
+	ErrInviteNotFound = errors.New("invite not found")
 	// ErrNotMember means the user isn't a member of the event.
 	ErrNotMember = errors.New("not a member of the event")
 	// ErrInvalidRole means a role isn't one of the member roles, or a member
@@ -152,6 +155,7 @@ var Errors = map[error]APIError{
 	ErrGameNotEnded:   {http.StatusNotFound, "game_not_ended"},
 	ErrEventNotFound:  {http.StatusNotFound, "event_not_found"},
 	ErrNotMember:      {http.StatusNotFound, "not_member"},
+	ErrInviteNotFound: {http.StatusNotFound, "invite_not_found"},
 
 	// 409
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},

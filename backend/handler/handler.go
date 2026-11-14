@@ -39,6 +39,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	api := router.Group("/api", h.authmw.SetUserID)
 	{
 		api.GET("/event", h.event.ListVisible)
+		api.GET("/invite/:token", h.event.Invite)
 
 		eventAccess := api.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess)
 		{
@@ -71,6 +72,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			required.PUT("/profile", h.player.UpdateProfile)
 
 			required.POST("/event", h.event.Create)
+			required.POST("/invite/:token/join", h.event.JoinByInvite)
 
 			h.registerEventActions(required.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess))
 		}
@@ -89,6 +91,9 @@ func (h *Handler) registerEventActions(event *gin.RouterGroup) {
 	event.POST("/members", h.event.AddMembers)
 	event.DELETE("/members", h.event.RemoveMember)
 	event.PUT("/members/:playerId", middleware.RequirePlayer, h.event.SetMemberRoles)
+	event.GET("/invite", h.event.InviteToken)
+	event.POST("/invite", h.event.NewInviteToken)
+	event.DELETE("/invite", h.event.TurnOffInvite)
 
 	// user relative game block
 	{

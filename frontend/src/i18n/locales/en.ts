@@ -110,6 +110,7 @@ const en = {
       'The game has changed since you opened it. Check the log and try again.',
     player_in_another_game:
       '{{name}} is still in another game. Wait until it ends.',
+    invite_not_found: 'This invite link doesn’t work',
     invalid_role: 'The roles are invalid',
     not_member: 'This user is not a member of the event',
     player_role_in_game:
@@ -322,6 +323,40 @@ const en = {
     finishByReferees: 'only referees finish games',
     abortByReferees: 'only referees abort games',
     abortBySeated: 'players abort games at any time',
+  },
+  invite: {
+    section: 'Invite link',
+    offHint:
+      'Whoever opens the link while signed in becomes a player of the event. The link is off.',
+    onHint:
+      'Whoever opens the link while signed in becomes a player of the event.',
+    create: 'Create a link',
+    created: 'Invite link created',
+    qr: 'QR code of the invite link',
+    copy: 'Copy',
+    copied: 'Link copied',
+    copyFailed: 'Couldn’t copy the link',
+    share: 'Share',
+    shareTitle: 'Join the event',
+    replace: 'New link',
+    replaceTitle: 'Replace the link',
+    replacePrompt:
+      'The current link and its QR code will stop working. Create a new one?',
+    turnOff: 'Turn off',
+    turnOffTitle: 'Turn off the link',
+    turnOffPrompt:
+      'The link and its QR code will stop working. Members stay as they are.',
+    turnedOff: 'Invite link turned off',
+    loadFailed: 'Couldn’t load the invite link.',
+    title: 'You are invited to',
+    join: 'Join as a player',
+    joined: 'You joined the event',
+    signInToJoin: 'Sign in to join',
+    alreadyMember: 'You are already a member of this event.',
+    openEvent: 'Open the event',
+    invalid: 'This invite link doesn’t work',
+    invalidHint:
+      'It may have been turned off or replaced. Ask the organizer for a new one.',
   },
   members: {
     title: 'Members',

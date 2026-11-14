@@ -132,3 +132,13 @@ type EventPlayerResultRow struct {
 	TP       float32 `db:"tp"`
 	GP       int     `db:"gp"`
 }
+
+// EventInvite is what an invite link shows before joining: the event's name
+// and type, and whether the caller is already a member (false for a
+// visitor).
+type EventInvite struct {
+	EventID  int       `json:"event_id"`
+	Name     string    `json:"name"`
+	Type     EventType `json:"type"`
+	IsMember bool      `json:"is_member"`
+}
