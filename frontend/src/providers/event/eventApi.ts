@@ -14,6 +14,7 @@ import { useFetch } from '../useFetch';
 import { Event, EventVisibility, ContentReach } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
 import type { GameRules } from '../../models/GameRules';
+import type { EventSettings } from '../../models/EventSettings';
 import { EventMember, EventRole } from '../../models/EventRole';
 import { EventRatingsData } from '../../models/EventRating';
 import {
@@ -109,6 +110,17 @@ export async function updateEventRules(
   rules: GameRules
 ): Promise<boolean> {
   const request = PutRequest(eventPath(id, '/rules'), rules);
+  const result = await authFetch<null>(request);
+  return result !== null;
+}
+
+// updateEventSettings sets the event's settings (who may finish or abort a
+// game), all at once.
+export async function updateEventSettings(
+  id: number,
+  settings: EventSettings
+): Promise<boolean> {
+  const request = PutRequest(eventPath(id, '/settings'), settings);
   const result = await authFetch<null>(request);
   return result !== null;
 }

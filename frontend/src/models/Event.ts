@@ -1,5 +1,6 @@
 import type { EventRole } from './EventRole';
 import type { GameRules } from './GameRules';
+import type { EventSettings } from './EventSettings';
 
 export type EventVisibility = 'private' | 'public';
 
@@ -15,6 +16,7 @@ export type Event = {
   ratings_reach: ContentReach;
   games_reach: ContentReach;
   rules: GameRules;
+  settings: EventSettings;
   created_at: string;
   finished_at: string | null;
   is_participating?: boolean;

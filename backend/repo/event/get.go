@@ -12,7 +12,7 @@ import (
 func (r *Repo) Get(ctx context.Context, eventID int) (models.Event, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id, type, name, description, owner_user_id,
-			visibility, ratings_reach, games_reach, rules,
+			visibility, ratings_reach, games_reach, rules, settings,
 			created_at, finished_at
 		FROM events WHERE id = $1`,
 		eventID,

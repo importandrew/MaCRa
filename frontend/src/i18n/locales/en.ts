@@ -117,6 +117,7 @@ const en = {
       'A round has been entered: only a referee can abort the game now.',
     event_has_ongoing_games:
       'The event has games in progress. Finish or abort them first.',
+    invalid_event_settings: 'The permissions are invalid',
     invalid_game_rules: 'The rules are invalid',
     event_rules_frozen:
       'The event already has games: its rules can no longer change.',
@@ -260,6 +261,24 @@ const en = {
     handsCount_one: '{{count}} hand',
     handsCount_other: '{{count}} hands',
     minHandValue: 'minimum hand {{value}}',
+  },
+  permissions: {
+    title: 'Permissions',
+    hint: 'Can change at any time. Referees can always finish and abort games.',
+    finishedReadOnly:
+      'The event is finished: its permissions can no longer change.',
+    finishGame: 'Finish a game early',
+    finishSeated: 'Players at the table and referees',
+    finishReferees: 'Referees only',
+    abortGame: 'Abort a game',
+    abortReferees: 'Referees only',
+    abortBeforeFirstRound: 'Also players at the table, before the first round',
+    abortSeated: 'Also players at the table, at any time',
+    save: 'Save permissions',
+    saved: 'Permissions saved',
+    finishByReferees: 'only referees finish games',
+    abortByReferees: 'only referees abort games',
+    abortBySeated: 'players abort games at any time',
   },
   members: {
     title: 'Members',

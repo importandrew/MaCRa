@@ -24,7 +24,7 @@ func TestCreate_validatesAndDefaultsToPrivate(t *testing.T) {
 			want: models.Event{
 				Type: models.EventRegular, Name: "Club", Description: "d", OwnerUserID: 7,
 				Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers,
-				Rules: models.StandardGameRules(),
+				Rules: models.StandardGameRules(), Settings: models.DefaultEventSettings(),
 			},
 		},
 		"given rules": {
@@ -35,7 +35,7 @@ func TestCreate_validatesAndDefaultsToPrivate(t *testing.T) {
 			want: models.Event{
 				Type: models.EventRegular, Name: "Club", OwnerUserID: 7,
 				Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers,
-				Rules: models.GameRules{Hands: 8, MinHand: 8},
+				Rules: models.GameRules{Hands: 8, MinHand: 8}, Settings: models.DefaultEventSettings(),
 			},
 		},
 		"invalid rules": {

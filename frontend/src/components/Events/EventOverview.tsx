@@ -14,7 +14,8 @@ import { TrophyIcon } from '../Icons/TrophyIcon';
 import { UsersIcon } from '../Icons/UsersIcon';
 import { MahjongTileIcon } from '../Icons/MahjongTileIcon';
 import { BookIcon } from '../Icons/BookIcon';
-import { rulesDifferences } from './rulesText';
+import { UserIcon } from '../Icons/UserIcon';
+import { permissionDifferences, rulesDifferences } from './rulesText';
 
 const iconClass = 'w-6 h-6';
 
@@ -76,6 +77,7 @@ export default function EventOverview() {
 
   const isFinished = Boolean(event.finished_at);
   const differences = rulesDifferences(event.rules, t);
+  const permissions = permissionDifferences(event.settings, t);
   const typeLabel = t(`eventType.${event.type}`);
 
   return (
@@ -133,6 +135,14 @@ export default function EventOverview() {
             ? differences.join(', ')
             : t('rules.standard')}
         </DetailRow>
+        {permissions.length > 0 && (
+          <DetailRow
+            icon={<UserIcon className={iconClass} />}
+            label={t('permissions.title')}
+          >
+            {permissions.join(', ')}
+          </DetailRow>
+        )}
         <DetailRow
           icon={<ScalesIcon className={iconClass} />}
           label={t('events.referees')}

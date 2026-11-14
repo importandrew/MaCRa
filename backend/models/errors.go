@@ -71,6 +71,8 @@ var (
 	ErrLongDescription     = errors.New("event description too long")
 	ErrInvalidGameStatus   = errors.New("invalid game status")
 	ErrInvalidGameRules    = errors.New("invalid game rules")
+	// ErrInvalidEventSettings means a setting isn't one of its options.
+	ErrInvalidEventSettings = errors.New("invalid event settings")
 	// ErrEventRulesFrozen means the event's game rules can't change: it
 	// already has games, and all games of one rating follow the same rules.
 	ErrEventRulesFrozen = errors.New("event rules are frozen")
@@ -120,6 +122,7 @@ var Errors = map[error]APIError{
 	ErrLongDescription:          {http.StatusBadRequest, "long_description"},
 	ErrInvalidGameStatus:        {http.StatusBadRequest, "invalid_game_status"},
 	ErrInvalidGameRules:         {http.StatusBadRequest, "invalid_game_rules"},
+	ErrInvalidEventSettings:     {http.StatusBadRequest, "invalid_event_settings"},
 	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
 
 	// 401

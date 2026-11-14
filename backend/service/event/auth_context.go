@@ -141,18 +141,21 @@ func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool
 func (authCtx EventAuthContext) hasGameCapability(capability models.Capability) bool {
 	switch capability {
 	case models.CapAbortGame:
-		// Referees at any time; the seated players while no round has been
-		// entered (a game started by mistake).
+		// Referees at any time; the seated players as the event's settings
+		// allow.
 		if !slices.Contains(models.AllowsAbortGameInEvent, authCtx.Event.Type) || !authCtx.isGameLive() {
 			return false
 		}
 		return authCtx.hasRole(models.EventReferee) ||
-			(authCtx.IsSeatedInGame && authCtx.Game.LogSize == 0)
+			(authCtx.IsSeatedInGame && authCtx.seatedMayAbort(authCtx.Game.LogSize))
 	case models.CapFinishGame:
+		// Referees at any time; the seated players unless the event's
+		// settings leave it to referees.
 		if !slices.Contains(models.AllowsFinishGameInEvent, authCtx.Event.Type) || !authCtx.isGameLive() {
 			return false
 		}
-		return authCtx.IsSeatedInGame || authCtx.hasRole(models.EventReferee)
+		return authCtx.hasRole(models.EventReferee) ||
+			(authCtx.IsSeatedInGame && authCtx.Event.Settings.FinishGame == models.FinishBySeated)
 	case models.CapUndoRound:
 		return authCtx.hasRole(models.EventReferee) && authCtx.canUndoInGame()
 	case models.CapEnterRound:
@@ -170,6 +173,26 @@ func (authCtx EventAuthContext) hasGameCapability(capability models.Capability) 
 	default:
 		return false
 	}
+}
+
+// seatedMayAbort reports whether the event's settings let a seated player
+// abort a game with logSize log entries.
+func (authCtx EventAuthContext) seatedMayAbort(logSize int) bool {
+	switch authCtx.Event.Settings.AbortGame {
+	case models.AbortBySeated:
+		return true
+	case models.AbortBySeatedBeforeFirstRound:
+		return logSize == 0
+	default:
+		return false
+	}
+}
+
+// seatedAbortOnlyWithoutRounds reports whether a seated player's abort must
+// be refused once the game has a round: it is checked again in the same
+// statement as the abort (repo/game.Abort).
+func (authCtx EventAuthContext) seatedAbortOnlyWithoutRounds() bool {
+	return authCtx.Event.Settings.AbortGame == models.AbortBySeatedBeforeFirstRound
 }
 
 func (authCtx EventAuthContext) baseWatchGamesAccess() bool {

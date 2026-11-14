@@ -33,8 +33,8 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 - **Create a game**: a player of a regular, unfinished event, who is one of the four players; all four must be players of the event.
 - **Enter round results and penalties**: any of the four players seated in the game.
 - **Undo the last round**: referees only (the owner too when they have the referee role). Players can't, because a dishonest player could quietly undo a round and enter a better one. Revisit once undos leave a visible audit trail.
-- **Abort a game** (regular events): referees at any time; the seated players only while no round has been entered (a game started by mistake).
-- **Finish a game early** (regular events): a seated player or a referee.
+- **Abort a game** (regular events): referees at any time; by default also the seated players while no round has been entered (a game started by mistake). The event's permissions can leave it to referees or let the seated players abort at any time (area 3, "Event settings").
+- **Finish a game early** (regular events): a referee, and by default a seated player; the event's permissions can leave it to referees.
 - **Manage the event and its members, finish the event**: the owner. An event with live games can't be finished.
 - **After the event is finished**: only its visibility can change. The name stays (players search by it), members stay (the rating is final), no new games.
 - **Removing a member** who is in a live game is not allowed. A removed member of a private event loses all access to it.
@@ -107,10 +107,10 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Event settings
 
-Game rules are in place; permissions and display settings are planned. Two kinds, set by the owner when creating the event or later in Manage → Rules, starting from a preset ("MCR standard": 16 hands, minimum 8; "Short": 8 hands, minimum 8) and adjusted value by value. The overview lists the settings that differ from the standard, so players know what they play.
+Game rules and permissions are in place; display settings are planned. Two kinds, set by the owner in Manage → Rules (game rules also when creating the event), starting from a preset ("MCR standard": 16 hands, minimum 8; "Short": 8 hands, minimum 8) and adjusted value by value. The overview lists the settings that differ from the standard, so players know what they play.
 
 - **Game rules** affect the score: number of hands (16, 8, 4 or 1; 16 = East, South, West, North rounds), minimum hand value (8 by default). False mahjong is always 30 or 60, not a setting. They can be changed only while the event has no games (aborted games don't count); after the first game they are frozen, so all games of one rating follow the same rules. Each game also stores a copy of the rules it started with and is always replayed by them.
-- **Permissions** don't affect the score and can be changed at any time: who may finish a game early (seated players and referees / referees only), abort it (referees / also seated players before the first round / also seated players at any time), undo a round (referees / also seated players, once undos are audited), create games (players / referees only). Defaults are the ones in area 1.
+- **Permissions** don't affect the score and can be changed at any time (not after the event is finished): who may finish a game early (seated players and referees / referees only), abort it (referees / also seated players before the first round / also seated players at any time). Referees always may. Defaults are the ones in area 1. Planned: undo a round (referees / also seated players, once undos are audited). Creating games by referees for other players' tables comes with tournament seating (area 8), not as a regular-event setting.
 - **Display and input** (can be changed at any time): minimum number of games to appear in the rating (the rating itself is computed the same way); hand input mode — total value (now) or picking fans, once fan-based input exists.
 - Time limits per game are tournament-only (area 8). Not planned for regular events: a choice of who enters rounds, round confirmation by a second player, penalty switches, other rating methods or placement points, automatic seating.
 

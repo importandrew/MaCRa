@@ -2396,3 +2396,66 @@ func (_c *MockEventService_UpdateRules_Call) RunAndReturn(run func(ctx context.C
 	_c.Call.Return(run)
 	return _c
 }
+
+// UpdateSettings provides a mock function for the type MockEventService
+func (_mock *MockEventService) UpdateSettings(ctx context.Context, eventID int, settings models.EventSettings) error {
+	ret := _mock.Called(ctx, eventID, settings)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateSettings")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.EventSettings) error); ok {
+		r0 = returnFunc(ctx, eventID, settings)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventService_UpdateSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateSettings'
+type MockEventService_UpdateSettings_Call struct {
+	*mock.Call
+}
+
+// UpdateSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - settings models.EventSettings
+func (_e *MockEventService_Expecter) UpdateSettings(ctx any, eventID any, settings any) *MockEventService_UpdateSettings_Call {
+	return &MockEventService_UpdateSettings_Call{Call: _e.mock.On("UpdateSettings", ctx, eventID, settings)}
+}
+
+func (_c *MockEventService_UpdateSettings_Call) Run(run func(ctx context.Context, eventID int, settings models.EventSettings)) *MockEventService_UpdateSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.EventSettings
+		if args[2] != nil {
+			arg2 = args[2].(models.EventSettings)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_UpdateSettings_Call) Return(err error) *MockEventService_UpdateSettings_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventService_UpdateSettings_Call) RunAndReturn(run func(ctx context.Context, eventID int, settings models.EventSettings) error) *MockEventService_UpdateSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}

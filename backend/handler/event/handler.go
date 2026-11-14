@@ -10,6 +10,7 @@ type EventService interface {
 	Create(ctx context.Context, params models.EventCreateParams) (int, error)
 	Update(ctx context.Context, params models.UpdateEventParams) error
 	UpdateRules(ctx context.Context, eventID int, rules models.GameRules) error
+	UpdateSettings(ctx context.Context, eventID int, settings models.EventSettings) error
 	Finish(ctx context.Context, eventID int) error
 	Details(ctx context.Context, eventID int) (models.EventDetails, error)
 	ListVisible(ctx context.Context, userID int) ([]models.EventListItem, error)

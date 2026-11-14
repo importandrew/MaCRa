@@ -76,6 +76,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			{
 				event.PATCH("", h.event.Update)
 				event.PUT("/rules", h.event.UpdateRules)
+				event.PUT("/settings", h.event.UpdateSettings)
 				event.POST("/finish", h.event.FinishEvent)
 
 				event.POST("/members", h.event.AddMembers)

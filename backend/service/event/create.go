@@ -42,6 +42,7 @@ func (s *Service) Create(ctx context.Context, params models.EventCreateParams) (
 		RatingsReach: models.DefaultContentReach(visibility),
 		GamesReach:   models.DefaultContentReach(visibility),
 		Rules:        models.StandardGameRules(),
+		Settings:     models.DefaultEventSettings(),
 	}
 
 	if params.RatingsReach != nil {

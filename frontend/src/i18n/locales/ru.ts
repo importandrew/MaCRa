@@ -109,6 +109,7 @@ const ru: Messages = {
     member_in_current_game:
       '{{name}} сейчас играет. Удалите участника после окончания игры.',
     event_already_finished: 'Событие уже завершено',
+    invalid_event_settings: 'Неверные права',
     invalid_game_rules: 'Неверные правила',
     event_rules_frozen:
       'В событии уже есть игры: его правила больше нельзя менять.',
@@ -257,6 +258,23 @@ const ru: Messages = {
     handsCount_many: '{{count}} раздач',
     handsCount_other: '{{count}} раздачи',
     minHandValue: 'минимальная рука {{value}}',
+  },
+  permissions: {
+    title: 'Права',
+    hint: 'Можно менять в любой момент. Судьи всегда могут завершить и прервать игру.',
+    finishedReadOnly: 'Событие завершено: его права больше нельзя менять.',
+    finishGame: 'Досрочно завершить игру',
+    finishSeated: 'Игроки за столом и судьи',
+    finishReferees: 'Только судьи',
+    abortGame: 'Прервать игру',
+    abortReferees: 'Только судьи',
+    abortBeforeFirstRound: 'Ещё игроки за столом, до первого раунда',
+    abortSeated: 'Ещё игроки за столом, в любой момент',
+    save: 'Сохранить права',
+    saved: 'Права сохранены',
+    finishByReferees: 'завершают игры только судьи',
+    abortByReferees: 'прерывают игры только судьи',
+    abortBySeated: 'игроки прерывают игры в любой момент',
   },
   members: {
     title: 'Участники',
