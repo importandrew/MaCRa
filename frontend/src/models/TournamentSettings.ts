@@ -36,3 +36,20 @@ export function isValidTournamentSettings(s: TournamentSettings): boolean {
     return s.extra_hands >= MIN_EXTRA_HANDS && s.extra_hands <= MAX_EXTRA_HANDS;
   return s.extra_hands === 0;
 }
+
+// TournamentParticipant mirrors models.TournamentParticipant.
+export type TournamentParticipant = {
+  user_id: number;
+  name: string;
+  // number: null before the draw and while it is out of date.
+  number: number | null;
+  withdrawn: boolean;
+};
+
+// TournamentParticipants mirrors models.TournamentParticipants
+// (GET /api/event/:id/participants).
+export type TournamentParticipants = {
+  // drawn: the numbers belong to exactly the current players.
+  drawn: boolean;
+  participants: TournamentParticipant[];
+};

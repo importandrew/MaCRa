@@ -605,6 +605,63 @@ func (_c *MockEventRepo_DeclineJoinRequest_Call) RunAndReturn(run func(ctx conte
 	return _c
 }
 
+// Draw provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) Draw(ctx context.Context, eventID int) error {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Draw")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_Draw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Draw'
+type MockEventRepo_Draw_Call struct {
+	*mock.Call
+}
+
+// Draw is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) Draw(ctx any, eventID any) *MockEventRepo_Draw_Call {
+	return &MockEventRepo_Draw_Call{Call: _e.mock.On("Draw", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_Draw_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_Draw_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_Draw_Call) Return(err error) *MockEventRepo_Draw_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_Draw_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventRepo_Draw_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // EventByInviteToken provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) EventByInviteToken(ctx context.Context, token string) (models.Event, error) {
 	ret := _mock.Called(ctx, token)
@@ -1506,6 +1563,72 @@ func (_c *MockEventRepo_ListMembers_Call) RunAndReturn(run func(ctx context.Cont
 	return _c
 }
 
+// ListParticipants provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) ListParticipants(ctx context.Context, eventID int) (models.TournamentParticipants, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListParticipants")
+	}
+
+	var r0 models.TournamentParticipants
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.TournamentParticipants, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.TournamentParticipants); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Get(0).(models.TournamentParticipants)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_ListParticipants_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListParticipants'
+type MockEventRepo_ListParticipants_Call struct {
+	*mock.Call
+}
+
+// ListParticipants is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) ListParticipants(ctx any, eventID any) *MockEventRepo_ListParticipants_Call {
+	return &MockEventRepo_ListParticipants_Call{Call: _e.mock.On("ListParticipants", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_ListParticipants_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_ListParticipants_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_ListParticipants_Call) Return(tournamentParticipants models.TournamentParticipants, err error) *MockEventRepo_ListParticipants_Call {
+	_c.Call.Return(tournamentParticipants, err)
+	return _c
+}
+
+func (_c *MockEventRepo_ListParticipants_Call) RunAndReturn(run func(ctx context.Context, eventID int) (models.TournamentParticipants, error)) *MockEventRepo_ListParticipants_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PlayerGameHistory provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) PlayerGameHistory(ctx context.Context, eventID int, playerID int) ([]int, error) {
 	ret := _mock.Called(ctx, eventID, playerID)
@@ -2218,6 +2341,69 @@ func (_c *MockEventRepo_UpdateTournament_Call) Return(err error) *MockEventRepo_
 }
 
 func (_c *MockEventRepo_UpdateTournament_Call) RunAndReturn(run func(ctx context.Context, eventID int, settings models.TournamentSettings) error) *MockEventRepo_UpdateTournament_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Withdraw provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) Withdraw(ctx context.Context, eventID int, userID int) error {
+	ret := _mock.Called(ctx, eventID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Withdraw")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) error); ok {
+		r0 = returnFunc(ctx, eventID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_Withdraw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Withdraw'
+type MockEventRepo_Withdraw_Call struct {
+	*mock.Call
+}
+
+// Withdraw is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - userID int
+func (_e *MockEventRepo_Expecter) Withdraw(ctx any, eventID any, userID any) *MockEventRepo_Withdraw_Call {
+	return &MockEventRepo_Withdraw_Call{Call: _e.mock.On("Withdraw", ctx, eventID, userID)}
+}
+
+func (_c *MockEventRepo_Withdraw_Call) Run(run func(ctx context.Context, eventID int, userID int)) *MockEventRepo_Withdraw_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_Withdraw_Call) Return(err error) *MockEventRepo_Withdraw_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_Withdraw_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int) error) *MockEventRepo_Withdraw_Call {
 	_c.Call.Return(run)
 	return _c
 }

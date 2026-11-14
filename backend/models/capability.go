@@ -12,6 +12,12 @@ const (
 	CapWatchLive     Capability = "watch_live"
 	CapWatchResults  Capability = "watch_results"
 	CapViewRatings   Capability = "view_ratings"
+	// CapViewTournament: the tournament's desk (participants and their
+	// numbers, later the tours), for its staff.
+	CapViewTournament Capability = "view_tournament"
+	// CapRunTournament: run the tournament (the draw, withdrawals, later the
+	// tours): the referee role, until it is finished.
+	CapRunTournament Capability = "run_tournament"
 
 	// Game level (GET /event/:id/game/:gameId/me): what the caller may do with
 	// one game.
@@ -29,6 +35,7 @@ const (
 var EventCapabilities = []Capability{
 	CapManageEvent, CapManageMembers, CapCreateGame,
 	CapWatchLive, CapWatchResults, CapViewRatings,
+	CapViewTournament, CapRunTournament,
 }
 
 // GameCapabilities are the capabilities about one game, the ones

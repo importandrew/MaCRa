@@ -26,6 +26,19 @@ func (r *Repo) AddMemberRoles(ctx context.Context, eventID, userID int, roles []
 // pending request to join, so it deletes the user's one (a declined request
 // stays: the user still can't ask again after leaving).
 func (r *Repo) insertRoles(ctx context.Context, eventID, userID int, roles []models.EventRole) error {
+	if slices.Contains(roles, models.EventPlayer) {
+		current, err := r.GetMemberRoles(ctx, eventID, userID)
+		if err != nil {
+			return err
+		}
+		// A started tournament takes no new players.
+		if !slices.Contains(current, models.EventPlayer) {
+			if err := r.checkPlayersOpen(ctx, eventID); err != nil {
+				return err
+			}
+		}
+	}
+
 	if _, err := r.db.Exec(ctx, `
 		DELETE FROM event_join_requests
 		WHERE event_id = $1 AND user_id = $2 AND status = $3`,
@@ -100,6 +113,9 @@ func (r *Repo) RemoveMembers(ctx context.Context, eventID int, userIDs []int) er
 		if err := tx.checkNotInLiveGame(ctx, eventID, userIDs, models.ErrMemberInCurrentGame); err != nil {
 			return err
 		}
+		if err := tx.checkPlayersNotRemoved(ctx, eventID, userIDs); err != nil {
+			return err
+		}
 
 		_, err = tx.db.Exec(ctx, `
 			DELETE FROM event_user_roles
@@ -141,7 +157,7 @@ func (r *Repo) SetMemberRoles(ctx context.Context, eventID, userID int, roles []
 			return fmt.Errorf("%w: a member needs a role", models.ErrInvalidRole)
 		}
 		if slices.Contains(current, models.EventPlayer) && !slices.Contains(roles, models.EventPlayer) {
-			if err := tx.checkNotInLiveGame(ctx, eventID, []int{userID}, models.ErrPlayerRoleInGame); err != nil {
+			if err := tx.checkPlayerRoleRemovable(ctx, eventID, userID); err != nil {
 				return err
 			}
 		}
@@ -156,4 +172,35 @@ func (r *Repo) SetMemberRoles(ctx context.Context, eventID, userID int, roles []
 
 		return tx.insertRoles(ctx, eventID, userID, roles)
 	})
+}
+
+// checkPlayersNotRemoved refuses removing a player from a started tournament
+// (models.ErrParticipantsClosed): they withdraw instead.
+func (r *Repo) checkPlayersNotRemoved(ctx context.Context, eventID int, userIDs []int) error {
+	rows, err := r.db.Query(ctx, `
+		SELECT EXISTS (SELECT 1 FROM event_user_roles
+			WHERE event_id = $1 AND user_id = ANY($2) AND role = $3)`,
+		eventID, userIDs, models.EventPlayer)
+	if err != nil {
+		return err
+	}
+	hasPlayer, err := pgx.CollectOneRow(rows, pgx.RowTo[bool])
+	if err != nil {
+		return err
+	}
+	if !hasPlayer {
+		return nil
+	}
+	return r.checkPlayersOpen(ctx, eventID)
+}
+
+// checkPlayerRoleRemovable refuses taking the player role from a member of a
+// started tournament (models.ErrParticipantsClosed: they withdraw instead) or
+// from one in a live game (models.ErrPlayerRoleInGame). Call it after
+// lockMembers.
+func (r *Repo) checkPlayerRoleRemovable(ctx context.Context, eventID, userID int) error {
+	if err := r.checkPlayersOpen(ctx, eventID); err != nil {
+		return err
+	}
+	return r.checkNotInLiveGame(ctx, eventID, []int{userID}, models.ErrPlayerRoleInGame)
 }

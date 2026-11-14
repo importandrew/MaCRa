@@ -8,7 +8,11 @@ export type EventCapability =
   | 'create_game'
   | 'watch_live'
   | 'watch_results'
-  | 'view_ratings';
+  | 'view_ratings'
+  // view_tournament: a tournament's desk (staff); run_tournament: its
+  // referee actions (the draw, withdrawals).
+  | 'view_tournament'
+  | 'run_tournament';
 
 // JoinRequestState is what the overview offers a non-member about joining by
 // a request: ask (a visitor signs in first), the pending request (it can be

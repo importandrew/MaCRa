@@ -139,6 +139,12 @@ func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool
 			return true
 		}
 		return authCtx.canViewContent(authCtx.Event.GamesReach, authCtx.baseWatchGamesAccess())
+	case models.CapViewTournament:
+		return authCtx.Event.Type == models.EventTournament && authCtx.isStaff()
+	case models.CapRunTournament:
+		// Running it takes the referee role, also for the owner (area 1).
+		return authCtx.Event.Type == models.EventTournament &&
+			authCtx.Event.FinishedAt == nil && authCtx.hasRole(models.EventReferee)
 	case models.CapViewRatings:
 		return authCtx.canViewContent(authCtx.Event.RatingsReach, authCtx.baseViewRatingsAccess())
 	default:
