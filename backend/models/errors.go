@@ -101,6 +101,14 @@ var (
 	ErrLongDescription     = errors.New("event description too long")
 	ErrInvalidGameStatus   = errors.New("invalid game status")
 	ErrInvalidGameRules    = errors.New("invalid game rules")
+	// ErrInvalidTournamentSettings means a tournament setting is out of its
+	// range or not one of its options.
+	ErrInvalidTournamentSettings = errors.New("invalid tournament settings")
+	// ErrNotTournament means the action is for tournaments only.
+	ErrNotTournament = errors.New("not a tournament")
+	// ErrPlayerAndSubstitute means a member would be both a player and a
+	// substitute, which can't be.
+	ErrPlayerAndSubstitute = errors.New("a member can't be both a player and a substitute")
 	// ErrInvalidEventSettings means a setting isn't one of its options.
 	ErrInvalidEventSettings = errors.New("invalid event settings")
 	// ErrEventRulesFrozen means the event's game rules can't change: it
@@ -128,34 +136,36 @@ var ErrInternal = APIError{Status: http.StatusInternalServerError, Code: "intern
 
 var Errors = map[error]APIError{
 	// 400
-	ErrInvalidRequest:           {http.StatusBadRequest, "invalid_request"},
-	ErrBadCredentials:           {http.StatusBadRequest, "bad_credentials"},
-	ErrUserNotInPlayers:         {http.StatusBadRequest, "user_not_in_players"},
-	ErrValidateEnterRoundResult: {http.StatusBadRequest, "invalid_round"},
-	ErrValidatePenalty:          {http.StatusBadRequest, "invalid_penalty"},
-	ErrValidatePlayers:          {http.StatusBadRequest, "invalid_players"},
-	ErrNoRounds:                 {http.StatusBadRequest, "no_rounds"},
-	ErrTooLate:                  {http.StatusBadRequest, "too_late"},
-	ErrEmptyName:                {http.StatusBadRequest, "empty_name"},
-	ErrLongName:                 {http.StatusBadRequest, "long_name"},
-	ErrEmptyEmail:               {http.StatusBadRequest, "empty_email"},
-	ErrLongEmail:                {http.StatusBadRequest, "long_email"},
-	ErrInvalidEmail:             {http.StatusBadRequest, "invalid_email"},
-	ErrEmptyPassword:            {http.StatusBadRequest, "empty_password"},
-	ErrLongPassword:             {http.StatusBadRequest, "long_password"},
-	ErrMissingPlayerRole:        {http.StatusBadRequest, "missing_player_role"},
-	ErrGameNotInEvent:           {http.StatusBadRequest, "game_not_in_event"},
-	ErrInvalidEventType:         {http.StatusBadRequest, "invalid_event_type"},
-	ErrInvalidContentReach:      {http.StatusBadRequest, "invalid_content_reach"},
-	ErrInvalidVisibility:        {http.StatusBadRequest, "invalid_visibility"},
-	ErrLongEventName:            {http.StatusBadRequest, "long_event_name"},
-	ErrLongDescription:          {http.StatusBadRequest, "long_description"},
-	ErrInvalidGameStatus:        {http.StatusBadRequest, "invalid_game_status"},
-	ErrInvalidGameRules:         {http.StatusBadRequest, "invalid_game_rules"},
-	ErrInvalidRole:              {http.StatusBadRequest, "invalid_role"},
-	ErrInvalidEventSettings:     {http.StatusBadRequest, "invalid_event_settings"},
-	ErrInvalidPlayerLimit:       {http.StatusBadRequest, "invalid_player_limit"},
-	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
+	ErrInvalidRequest:            {http.StatusBadRequest, "invalid_request"},
+	ErrBadCredentials:            {http.StatusBadRequest, "bad_credentials"},
+	ErrUserNotInPlayers:          {http.StatusBadRequest, "user_not_in_players"},
+	ErrValidateEnterRoundResult:  {http.StatusBadRequest, "invalid_round"},
+	ErrValidatePenalty:           {http.StatusBadRequest, "invalid_penalty"},
+	ErrValidatePlayers:           {http.StatusBadRequest, "invalid_players"},
+	ErrNoRounds:                  {http.StatusBadRequest, "no_rounds"},
+	ErrTooLate:                   {http.StatusBadRequest, "too_late"},
+	ErrEmptyName:                 {http.StatusBadRequest, "empty_name"},
+	ErrLongName:                  {http.StatusBadRequest, "long_name"},
+	ErrEmptyEmail:                {http.StatusBadRequest, "empty_email"},
+	ErrLongEmail:                 {http.StatusBadRequest, "long_email"},
+	ErrInvalidEmail:              {http.StatusBadRequest, "invalid_email"},
+	ErrEmptyPassword:             {http.StatusBadRequest, "empty_password"},
+	ErrLongPassword:              {http.StatusBadRequest, "long_password"},
+	ErrMissingPlayerRole:         {http.StatusBadRequest, "missing_player_role"},
+	ErrGameNotInEvent:            {http.StatusBadRequest, "game_not_in_event"},
+	ErrInvalidEventType:          {http.StatusBadRequest, "invalid_event_type"},
+	ErrInvalidContentReach:       {http.StatusBadRequest, "invalid_content_reach"},
+	ErrInvalidVisibility:         {http.StatusBadRequest, "invalid_visibility"},
+	ErrLongEventName:             {http.StatusBadRequest, "long_event_name"},
+	ErrLongDescription:           {http.StatusBadRequest, "long_description"},
+	ErrInvalidGameStatus:         {http.StatusBadRequest, "invalid_game_status"},
+	ErrInvalidGameRules:          {http.StatusBadRequest, "invalid_game_rules"},
+	ErrInvalidRole:               {http.StatusBadRequest, "invalid_role"},
+	ErrInvalidEventSettings:      {http.StatusBadRequest, "invalid_event_settings"},
+	ErrInvalidPlayerLimit:        {http.StatusBadRequest, "invalid_player_limit"},
+	ErrInvalidTournamentSettings: {http.StatusBadRequest, "invalid_tournament_settings"},
+	ErrNotTournament:             {http.StatusBadRequest, "not_tournament"},
+	ErrInvalidAuthToken:          {http.StatusBadRequest, "invalid_auth_token"},
 
 	// 401
 	ErrSessionExpired: {http.StatusUnauthorized, "session_expired"},
@@ -189,6 +199,7 @@ var Errors = map[error]APIError{
 	ErrRequestDeclined:      {http.StatusConflict, "request_declined"},
 	ErrAlreadyMember:        {http.StatusConflict, "already_member"},
 	ErrEventFull:            {http.StatusConflict, "event_full"},
+	ErrPlayerAndSubstitute:  {http.StatusConflict, "player_and_substitute"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

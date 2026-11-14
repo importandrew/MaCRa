@@ -27,6 +27,7 @@ type EventService interface {
 	Invite(ctx context.Context, token string, userID int) (models.EventInvite, error)
 	JoinByInvite(ctx context.Context, token string, userID int) (int, error)
 	UpdateJoining(ctx context.Context, eventID int, settings models.JoiningSettings) error
+	UpdateTournament(ctx context.Context, eventID int, settings models.TournamentSettings) error
 	RequestToJoin(ctx context.Context, eventID, userID int) error
 	WithdrawJoinRequest(ctx context.Context, eventID, userID int) error
 	JoinRequests(ctx context.Context, eventID int) ([]models.JoinRequest, error)

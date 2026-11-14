@@ -42,3 +42,27 @@ func TestAddMemberRoles_needsValidRoles(t *testing.T) {
 		})
 	}
 }
+
+func TestAddMemberRoles_substituteOnlyInTournaments(t *testing.T) {
+	for eventType, wantErr := range map[models.EventType]error{
+		models.EventRegular:    models.ErrInvalidRole,
+		models.EventTournament: nil,
+	} {
+		t.Run(string(eventType), func(t *testing.T) {
+			repo := NewMockEventRepo(t)
+			repo.EXPECT().Get(mock.Anything, 1).Return(models.Event{ID: 1, Type: eventType}, nil)
+			if wantErr == nil {
+				repo.EXPECT().AddMemberRoles(mock.Anything, 1, 20, []models.EventRole{models.EventSubstitute}).Return(nil)
+			}
+
+			err := NewService(repo, nil, nil).
+				AddMemberRoles(context.Background(), 1, 20, []models.EventRole{models.EventSubstitute})
+
+			if wantErr == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorIs(t, err, wantErr)
+			}
+		})
+	}
+}

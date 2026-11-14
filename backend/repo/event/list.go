@@ -17,7 +17,7 @@ func (r *Repo) List(ctx context.Context, userID int) ([]models.EventListRow, err
 	rows, err := r.db.Query(ctx, `
 		SELECT e.id, e.type, e.name, e.description, e.owner_user_id,
 			e.visibility, e.ratings_reach, e.games_reach, e.rules, e.settings,
-			e.accept_requests, e.player_limit, e.created_at, e.finished_at,
+			e.accept_requests, e.player_limit, e.tournament, e.started_at, e.created_at, e.finished_at,
 			COALESCE(
 				(SELECT array_agg(eur.role ORDER BY eur.role) FROM event_user_roles eur
 				 WHERE eur.event_id = e.id AND eur.user_id = $1),

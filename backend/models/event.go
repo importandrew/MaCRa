@@ -42,6 +42,10 @@ type Event struct {
 	GamesReach   ContentReach    `db:"games_reach" json:"games_reach"`
 	Rules        GameRules       `db:"rules" json:"rules"`
 	Settings     EventSettings   `db:"settings" json:"settings"`
+	// Tournament is a tournament's own settings; nil for a regular event.
+	Tournament *TournamentSettings `db:"tournament" json:"tournament"`
+	// StartedAt is when a tournament's first tour started; nil before.
+	StartedAt *time.Time `db:"started_at" json:"started_at"`
 	// AcceptRequests: the owner takes requests to join (public events only).
 	AcceptRequests bool `db:"accept_requests" json:"accept_requests"`
 	// PlayerLimit is the most players the event takes by a request or the
@@ -49,6 +53,11 @@ type Event struct {
 	PlayerLimit *int       `db:"player_limit" json:"player_limit"`
 	CreatedAt   time.Time  `db:"created_at" json:"created_at"`
 	FinishedAt  *time.Time `db:"finished_at" json:"finished_at"`
+}
+
+// Status is where the event is in its life (see EventStatus).
+func (e Event) Status() EventStatus {
+	return eventStatus(e.Type, e.StartedAt, e.FinishedAt)
 }
 
 // EventDetails is an event with what its overview shows besides the event

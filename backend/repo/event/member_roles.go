@@ -46,6 +46,20 @@ func (r *Repo) insertRoles(ctx context.Context, eventID, userID int, roles []mod
 			return err
 		}
 	}
+	return r.checkNotPlayerAndSubstitute(ctx, eventID, userID)
+}
+
+// checkNotPlayerAndSubstitute returns models.ErrPlayerAndSubstitute if the
+// user holds both roles: every way of giving roles ends in insertRoles,
+// which checks after inserting, so the transaction rolls back.
+func (r *Repo) checkNotPlayerAndSubstitute(ctx context.Context, eventID, userID int) error {
+	roles, err := r.GetMemberRoles(ctx, eventID, userID)
+	if err != nil {
+		return err
+	}
+	if slices.Contains(roles, models.EventPlayer) && slices.Contains(roles, models.EventSubstitute) {
+		return fmt.Errorf("user %d in event %d: %w", userID, eventID, models.ErrPlayerAndSubstitute)
+	}
 	return nil
 }
 

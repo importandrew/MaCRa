@@ -20,7 +20,13 @@ import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 
 // SectionHeading starts a section of the card: its heading and a hint.
-function SectionHeading({ title, hint }: { title: string; hint: string }) {
+export function SectionHeading({
+  title,
+  hint,
+}: {
+  title: string;
+  hint: string;
+}) {
   return (
     <div className="flex flex-col gap-1">
       <h2 className="font-medium">{title}</h2>
@@ -31,7 +37,7 @@ function SectionHeading({ title, hint }: { title: string; hint: string }) {
 
 // SettingRadios is one setting: a vertical list of its options (the labels
 // are too long for a SegmentedPicker on a phone).
-function SettingRadios<T extends string>({
+export function SettingRadios<T extends string>({
   label,
   options,
   value,
@@ -89,6 +95,7 @@ export default function EventSettingsCard({
   const settings = draft ?? event.settings;
   const { isPending, run } = useSubmitOnce();
   const isFinished = Boolean(event.finished_at);
+  const isTournament = event.type === 'tournament';
 
   const handleSave = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -120,26 +127,40 @@ export default function EventSettingsCard({
             <section className="flex flex-col gap-4">
               <SectionHeading
                 title={t('eventSettings.permissions')}
-                hint={t('eventSettings.permissionsHint')}
-              />
-              <SettingRadios
-                label={t('eventSettings.finishGame')}
-                options={FINISH_GAME_OPTIONS}
-                value={settings.finish_game}
-                onChange={(finish_game) =>
-                  setDraft({ ...settings, finish_game })
+                hint={
+                  isTournament
+                    ? t('eventSettings.permissionsHintTournament')
+                    : t('eventSettings.permissionsHint')
                 }
-                isDisabled={isFinished}
-                optionLabel={(option) => t(`eventSettings.finish.${option}`)}
               />
-              <SettingRadios
-                label={t('eventSettings.abortGame')}
-                options={ABORT_GAME_OPTIONS}
-                value={settings.abort_game}
-                onChange={(abort_game) => setDraft({ ...settings, abort_game })}
-                isDisabled={isFinished}
-                optionLabel={(option) => t(`eventSettings.abort.${option}`)}
-              />
+              {/* No one finishes or aborts a single game in a tournament:
+                  referees abort whole tours. */}
+              {!isTournament && (
+                <>
+                  <SettingRadios
+                    label={t('eventSettings.finishGame')}
+                    options={FINISH_GAME_OPTIONS}
+                    value={settings.finish_game}
+                    onChange={(finish_game) =>
+                      setDraft({ ...settings, finish_game })
+                    }
+                    isDisabled={isFinished}
+                    optionLabel={(option) =>
+                      t(`eventSettings.finish.${option}`)
+                    }
+                  />
+                  <SettingRadios
+                    label={t('eventSettings.abortGame')}
+                    options={ABORT_GAME_OPTIONS}
+                    value={settings.abort_game}
+                    onChange={(abort_game) =>
+                      setDraft({ ...settings, abort_game })
+                    }
+                    isDisabled={isFinished}
+                    optionLabel={(option) => t(`eventSettings.abort.${option}`)}
+                  />
+                </>
+              )}
               <SettingRadios
                 label={t('eventSettings.undoRound')}
                 options={UNDO_ROUND_OPTIONS}
@@ -159,41 +180,45 @@ export default function EventSettingsCard({
                 }
               />
             </section>
-            <section className="flex flex-col gap-4">
-              <SectionHeading
-                title={t('eventSettings.rating')}
-                hint={t('eventSettings.ratingHint')}
-              />
-              <div className="flex flex-col gap-1.5">
-                <p className="text-sm">{t('eventSettings.minRatingGames')}</p>
-                {isFinished ? (
-                  <p>{settings.min_rating_games}</p>
-                ) : (
-                  <>
-                    <ValueStepper
-                      label={t('eventSettings.minRatingGames')}
-                      value={settings.min_rating_games}
-                      min={MIN_MIN_RATING_GAMES}
-                      onChange={(min_rating_games) =>
-                        setDraft({ ...settings, min_rating_games })
-                      }
-                    />
-                    <p
-                      className={`text-xs text-center ${
-                        settings.min_rating_games > MAX_MIN_RATING_GAMES
-                          ? 'text-danger'
-                          : 'text-muted'
-                      }`}
-                    >
-                      {t('eventSettings.minRatingGamesRange', {
-                        min: MIN_MIN_RATING_GAMES,
-                        max: MAX_MIN_RATING_GAMES,
-                      })}
-                    </p>
-                  </>
-                )}
-              </div>
-            </section>
+            {/* A tournament's rating counts every tour of every player: no
+                minimum games. */}
+            {!isTournament && (
+              <section className="flex flex-col gap-4">
+                <SectionHeading
+                  title={t('eventSettings.rating')}
+                  hint={t('eventSettings.ratingHint')}
+                />
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-sm">{t('eventSettings.minRatingGames')}</p>
+                  {isFinished ? (
+                    <p>{settings.min_rating_games}</p>
+                  ) : (
+                    <>
+                      <ValueStepper
+                        label={t('eventSettings.minRatingGames')}
+                        value={settings.min_rating_games}
+                        min={MIN_MIN_RATING_GAMES}
+                        onChange={(min_rating_games) =>
+                          setDraft({ ...settings, min_rating_games })
+                        }
+                      />
+                      <p
+                        className={`text-xs text-center ${
+                          settings.min_rating_games > MAX_MIN_RATING_GAMES
+                            ? 'text-danger'
+                            : 'text-muted'
+                        }`}
+                      >
+                        {t('eventSettings.minRatingGamesRange', {
+                          min: MIN_MIN_RATING_GAMES,
+                          max: MAX_MIN_RATING_GAMES,
+                        })}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </section>
+            )}
           </Form>
         </Card.Content>
       </Card>
