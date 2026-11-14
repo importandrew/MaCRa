@@ -31,7 +31,8 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 ### What each user can do
 
 - **Create a game**: a player of a regular, unfinished event, who is one of the four players; all four must be players of the event.
-- **Enter round results and penalties**: any of the four players seated in the game.
+- **Enter round results**: any of the four players seated in the game.
+- **Enter penalties and false mahjongs**: referees always, in any live game of the event, from the game's view (also a game they play in); at the table, the seated players, unless the event's permissions leave it to referees (area 3), and a seated referee.
 - **Undo the last round**: by default referees only (the owner too when they have the referee role): a dishonest player could quietly undo a round and enter a better one, and undos don't leave a visible trail yet. The owner may let the seated players undo too, while the game is live (area 3, "Event settings"), for an event whose players they trust. Undoing the final round of an ended game stays with referees: it changes the rating.
 - **Abort a game** (regular events): referees at any time; by default also the seated players while no round has been entered (a game started by mistake). The event's permissions can leave it to referees or let the seated players abort at any time (area 3, "Event settings").
 - **Finish a game early** (regular events): a referee, and by default a seated player; the event's permissions can leave it to referees.
@@ -110,9 +111,9 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 Game rules, permissions and the minimum games for the rating are in place; the hand input mode is planned. Two kinds, set by the owner in Manage → Settings, each kind in its own card (game rules also when creating the event), starting from a preset ("MCR standard": 16 hands, minimum 8; "Short": 8 hands, minimum 8) and adjusted value by value. The overview lists the settings that differ from the standard, so players know what they play.
 
 - **Game rules** affect the score: number of hands (16, 8, 4 or 1; 16 = East, South, West, North rounds), minimum hand value (8 by default). False mahjong is always 30 or 60, not a setting. They can be changed only while the event has no games (aborted games don't count); after the first game they are frozen, so all games of one rating follow the same rules. Each game also stores a copy of the rules it started with and is always replayed by them.
-- **Permissions** don't affect the score and can be changed at any time (not after the event is finished): who may finish a game early (seated players and referees / referees only), abort it (referees / also seated players before the first round / also seated players at any time). Referees always may. Defaults are the ones in area 1., undo the last round (referees / also seated players while the game is live; the owner decides without waiting for an undo audit trail, owner's decision of 2026-11-14). Creating games by referees for other players' tables comes with tournament seating (area 8), not as a regular-event setting.
+- **Permissions** don't affect the score and can be changed at any time (not after the event is finished): who may finish a game early (seated players and referees / referees only), abort it (referees / also seated players before the first round / also seated players at any time). Referees always may. Defaults are the ones in area 1., enter penalties and false mahjongs (referees only / also the seated players; referees always may, from the game's view), undo the last round (referees / also seated players while the game is live; the owner decides without waiting for an undo audit trail, owner's decision of 2026-11-14). Creating games by referees for other players' tables comes with tournament seating (area 8), not as a regular-event setting.
 - **Display and input** (can be changed at any time, not after the event is finished): minimum number of ended games for a place in the rating, 1–100, 1 by default (the rating itself is computed the same way; players with fewer are listed below it without a place); hand input mode — total value (now) or picking fans, once fan-based input exists.
-- Time limits per game are tournament-only (area 8). Not planned for regular events: a choice of who enters rounds, round confirmation by a second player, penalty switches, other rating methods or placement points, automatic seating.
+- Time limits per game are tournament-only (area 8). Not planned for regular events: a choice of who enters rounds, round confirmation by a second player, other rating methods or placement points, automatic seating.
 
 ## 4. Playing a game
 
@@ -155,6 +156,8 @@ Applies to regular events; tournament games follow area 8.
 - The page shows the live table or, for an ended game, the result (same as `/last`). Opening one's own game from the list shows it the same way; one's own table to play is reached from the home page.
 - The live table can be rotated (who is at the bottom) and refreshed; Refresh keeps the rotation. Like at the table, scores change only on Refresh by default, and the Refresh button lights up when the game moved on; an **Auto-refresh** switch (remembered on the device) updates the scores by itself, e.g. for a club screen.
 - The table menu (log, fans, Finish, Abort, Undo) follows the user's rights for that game: this is where referees manage other people's games.
+- **Penalties from the view**: for a referee of the event, the round kanji in the center is a button, in any live game, also one they play in: that is where a referee hands out penalties. It's the referee's own entry into a game, and other referee entries (e.g. round results) may join it later. It opens the same entry as at the table, with only Penalty and False mahjong active (the other outcomes are shown disabled, so the layout is the same); the penalized player is marked with − at their seat. Others, the seated players included, see the kanji as text.
+- At the table, when the event leaves penalties to referees, Penalty is shown disabled in the round entry, in its usual place.
 
 ### Stream overlay (HUD)
 

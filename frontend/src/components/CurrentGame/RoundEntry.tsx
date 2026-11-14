@@ -136,6 +136,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
           <ToggleButton
             key={opt.value}
             id={opt.value}
+            isDisabled={entry.isOutcomeDisabled(opt.value)}
             size="sm"
             className={`w-full min-w-0 not-data-selected:text-foreground ${DESKTOP_BUTTON_CLASS}`}
           >

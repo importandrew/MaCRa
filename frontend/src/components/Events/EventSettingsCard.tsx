@@ -10,6 +10,7 @@ import {
   MAX_MIN_RATING_GAMES,
   MIN_MIN_RATING_GAMES,
   sameSettings,
+  PENALTIES_OPTIONS,
   UNDO_ROUND_OPTIONS,
 } from '../../models/EventSettings';
 import ValueStepper from '../ValueStepper';
@@ -70,7 +71,8 @@ function SettingRadios<T extends string>({
 
 // EventSettingsCard is the card under the game rules in Manage → Settings:
 // the event's settings that don't affect the score, in sections with their
-// own headings (Permissions: who may finish, abort or undo in a game; Rating: the
+// own headings (Permissions: who may finish, abort, undo in a game and enter
+// penalties; Rating: the
 // minimum games for a place). They can change at any time, except in a
 // finished event, and are saved together.
 export default function EventSettingsCard({
@@ -145,6 +147,16 @@ export default function EventSettingsCard({
                 onChange={(undo_round) => setDraft({ ...settings, undo_round })}
                 isDisabled={isFinished}
                 optionLabel={(option) => t(`eventSettings.undo.${option}`)}
+              />
+              <SettingRadios
+                label={t('eventSettings.penalties')}
+                options={PENALTIES_OPTIONS}
+                value={settings.penalties}
+                onChange={(penalties) => setDraft({ ...settings, penalties })}
+                isDisabled={isFinished}
+                optionLabel={(option) =>
+                  t(`eventSettings.penaltiesBy.${option}`)
+                }
               />
             </section>
             <section className="flex flex-col gap-4">

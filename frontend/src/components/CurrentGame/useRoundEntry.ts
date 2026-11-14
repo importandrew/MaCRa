@@ -1,16 +1,20 @@
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
-import { GameData, Outcome } from '../../models/GameData';
+import { Outcome, type RoundData } from '../../models/GameData';
 import {
   FALSE_MAHJONG_AMOUNTS,
   PENALTY_AMOUNTS,
   STANDARD_RULES,
+  type GameRules,
 } from '../../models/GameRules';
-import { useEvent } from '../../providers/event/eventConstants';
-import { fetchWithStatus, PostRequest, eventPath } from '../Request';
+import {
+  fetchWithStatus,
+  PostRequest,
+  eventGamePath,
+  eventPath,
+} from '../Request';
 import { showToast } from '../Toast';
 
 // START_FINE: the penalty picked when the form opens, the most common one.
@@ -20,22 +24,58 @@ export type EntryOutcome =
   Outcome.Draw | Outcome.Self | Outcome.Deal | Outcome.Penalty;
 export type PenaltyType = Outcome.Penalty | Outcome.FalseMahjong;
 
-// useRoundEntry holds the round entry on the game screen: the outcome and
-// values in the center of the table, and the +/− marks next to each seat.
-// table is the game as the screen shows it; an entry is refused when the
-// server's game has moved on since, and onStale then refreshes the table and
-// returns it (null if it can't be loaded, e.g. the game has ended: onStale
-// tells the player then).
-export function useRoundEntry(
-  table: GameData | null,
-  onSubmitted: (data: GameData) => void,
-  onStale: () => Promise<GameData | null>
-) {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { selectedEventId: eventId } = useEvent();
+// EntryTable is what the entry needs of the game on screen: the player's
+// table (GameData) or a game's live view (GameView).
+type EntryTable = {
+  round: RoundData;
+  log_size: number;
+  rules: GameRules;
+  status: string;
+};
 
-  const [outcome, setOutcome] = useState<EntryOutcome | null>(null);
+export type RoundEntryOptions<T extends EntryTable> = {
+  // table is the game as the screen shows it.
+  table: T | null;
+  eventId: number | null;
+  // gameId: enter into this game from its view, as a referee does; without
+  // it, into the player's own game at their table.
+  gameId?: number;
+  // penaltyOnly: only a penalty or a false mahjong (the game's view); the
+  // other outcomes are shown but disabled, so the layout stays the same.
+  penaltyOnly?: boolean;
+  // canPenalize: whether Penalty may be picked (the event's settings may
+  // leave penalties to referees); shown disabled when it may not.
+  canPenalize: boolean;
+  onSubmitted: (data: T) => void;
+  // onStale refreshes the table after an entry was refused because the
+  // game has moved on since, and returns it (null if it can't be loaded).
+  onStale: () => Promise<T | null>;
+  // onGone: the game is no longer live (ended, finished or aborted
+  // elsewhere); the screen tells the user and moves on.
+  onGone: () => void | Promise<unknown>;
+  // onEnded: this entry has ended the game.
+  onEnded: () => void;
+};
+
+// useRoundEntry holds the round entry on a game screen: the outcome and
+// values in the center of the table, and the +/− marks next to each seat.
+// An entry is refused when the server's game has moved on since the table
+// was loaded; onStale then refreshes it.
+export function useRoundEntry<T extends EntryTable>({
+  table,
+  eventId,
+  gameId,
+  penaltyOnly = false,
+  canPenalize,
+  onSubmitted,
+  onStale,
+  onGone,
+  onEnded,
+}: RoundEntryOptions<T>) {
+  const { t } = useTranslation();
+  const startOutcome = penaltyOnly ? Outcome.Penalty : null;
+
+  const [outcome, setOutcome] = useState<EntryOutcome | null>(startOutcome);
   const [winner, setWinner] = useState<number | null>(null);
   const [loser, setLoser] = useState<number | null>(null);
   // The game's rules; the standard ones only until the table is loaded.
@@ -68,6 +108,7 @@ export function useRoundEntry(
       winner !== loser &&
       hand >= minHand) ||
     (isPenalty &&
+      canPenalize &&
       loser !== null &&
       (isFalseMahjong ? !!falseMahjongFine : PENALTY_AMOUNTS.includes(fine)));
 
@@ -91,8 +132,12 @@ export function useRoundEntry(
     if (winner === id && outcome === Outcome.Deal) setWinner(null);
   };
 
+  // isOutcomeDisabled: the outcomes this entry can't take, shown disabled.
+  const isOutcomeDisabled = (option: EntryOutcome) =>
+    option === Outcome.Penalty ? !canPenalize : penaltyOnly;
+
   const reset = () => {
-    setOutcome(null);
+    setOutcome(startOutcome);
     setWinner(null);
     setLoser(null);
     setHandInput(null);
@@ -107,9 +152,12 @@ export function useRoundEntry(
   const send = async () => {
     if (!eventId || !outcome || !table) return;
 
+    const penaltyPath = isFalseMahjong ? '/false-mahjong' : '/penalty';
     const request = isPenalty
       ? PostRequest(
-          eventPath(eventId, isFalseMahjong ? '/false-mahjong' : '/penalty'),
+          gameId != null
+            ? eventGamePath(eventId, gameId, penaltyPath)
+            : eventPath(eventId, penaltyPath),
           {
             loser,
             value: isFalseMahjong ? falseMahjongFine : fine,
@@ -124,15 +172,15 @@ export function useRoundEntry(
           score: isWin ? hand : 0,
           log_size: table.log_size,
         });
-    const { data, status } = await fetchWithStatus<GameData>(request, {
+    const { data, status } = await fetchWithStatus<T>(request, {
       quietStatuses: [404, 409],
     });
 
-    // 404: the player has no live game any more: someone else entered the
-    // last round, finished or aborted it. The refresh tells them which.
+    // 404: the game is no longer live: someone else entered the last round,
+    // finished or aborted it. onGone tells the user which.
     if (status === 404) {
       reset();
-      await onStale();
+      await onGone();
       return;
     }
 
@@ -154,7 +202,7 @@ export function useRoundEntry(
     if (!data) return;
 
     if (data.status === 'ended' || data.status === 'aborted') {
-      navigate('/last');
+      onEnded();
       return;
     }
 
@@ -188,6 +236,7 @@ export function useRoundEntry(
     isFalseMahjong,
     showLose,
     isComplete,
+    isOutcomeDisabled,
     pickWinner,
     pickLoser,
     reset,
@@ -199,7 +248,7 @@ export type RoundEntry = ReturnType<typeof useRoundEntry>;
 
 // staleTitle says what changed between the table the player saw and the
 // table now: a round entered, a penalty entered, or an entry undone.
-function staleTitle(seen: GameData, now: GameData, t: TFunction): string {
+function staleTitle(seen: EntryTable, now: EntryTable, t: TFunction): string {
   if (now.round.num > seen.round.num) {
     return t('game.roundAlreadyEntered', { round: seen.round.kanji });
   }

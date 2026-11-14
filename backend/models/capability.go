@@ -17,6 +17,11 @@ const (
 	// one game.
 	CapViewGame   Capability = "view_game"
 	CapEnterRound Capability = "enter_round"
+	// CapEnterPenalty: enter a penalty or a false mahjong at one's own table.
+	CapEnterPenalty Capability = "enter_penalty"
+	// CapRefereeEntry: enter into the game as a referee, from its view (by
+	// game id), whether or not one plays in it: penalties and false mahjongs.
+	CapRefereeEntry Capability = "referee_entry"
 )
 
 // EventCapabilities are the capabilities that don't depend on a game, the ones
@@ -29,5 +34,5 @@ var EventCapabilities = []Capability{
 // GameCapabilities are the capabilities about one game, the ones
 // GET /event/:id/game/:gameId/me lists.
 var GameCapabilities = []Capability{
-	CapViewGame, CapEnterRound, CapUndoRound, CapAbortGame, CapFinishGame,
+	CapViewGame, CapEnterRound, CapEnterPenalty, CapRefereeEntry, CapUndoRound, CapAbortGame, CapFinishGame,
 }

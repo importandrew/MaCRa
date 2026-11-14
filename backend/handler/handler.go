@@ -72,34 +72,40 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 
 			required.POST("/event", h.event.Create)
 
-			event := required.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess)
-			{
-				event.PATCH("", h.event.Update)
-				event.PUT("/rules", h.event.UpdateRules)
-				event.PUT("/settings", h.event.UpdateSettings)
-				event.POST("/finish", h.event.FinishEvent)
-
-				event.POST("/members", h.event.AddMembers)
-				event.DELETE("/members", h.event.RemoveMember)
-
-				// user relative game block
-				{
-					event.POST("/new", h.event.NewGame)
-					event.GET("/now", h.event.Now)
-					event.GET("/last", h.event.Last)
-					event.POST("/round", h.event.EnterRoundResult)
-					event.POST("/penalty", h.event.Penalty)
-					event.POST("/false-mahjong", h.event.FalseMahjong)
-				}
-
-				// explicit game block
-				eventGame := event.Group("/game/:gameId", middleware.RequireGame, h.event.GameBelongsToEvent)
-				{
-					eventGame.DELETE("/abort", h.event.Abort)
-					eventGame.DELETE("/undo-round", h.event.UndoLastRound)
-					eventGame.POST("/finish", h.event.FinishGame)
-				}
-			}
+			h.registerEventActions(required.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess))
 		}
+	}
+}
+
+// registerEventActions registers what a signed-in user does in an event: its
+// settings and members, their own game (resolved from the user) and games
+// by id.
+func (h *Handler) registerEventActions(event *gin.RouterGroup) {
+	event.PATCH("", h.event.Update)
+	event.PUT("/rules", h.event.UpdateRules)
+	event.PUT("/settings", h.event.UpdateSettings)
+	event.POST("/finish", h.event.FinishEvent)
+
+	event.POST("/members", h.event.AddMembers)
+	event.DELETE("/members", h.event.RemoveMember)
+
+	// user relative game block
+	{
+		event.POST("/new", h.event.NewGame)
+		event.GET("/now", h.event.Now)
+		event.GET("/last", h.event.Last)
+		event.POST("/round", h.event.EnterRoundResult)
+		event.POST("/penalty", h.event.Penalty)
+		event.POST("/false-mahjong", h.event.FalseMahjong)
+	}
+
+	// explicit game block
+	eventGame := event.Group("/game/:gameId", middleware.RequireGame, h.event.GameBelongsToEvent)
+	{
+		eventGame.DELETE("/abort", h.event.Abort)
+		eventGame.DELETE("/undo-round", h.event.UndoLastRound)
+		eventGame.POST("/penalty", h.event.GamePenalty)
+		eventGame.POST("/false-mahjong", h.event.GameFalseMahjong)
+		eventGame.POST("/finish", h.event.FinishGame)
 	}
 }

@@ -271,7 +271,7 @@ const en = {
     permissions: 'Permissions',
     hint: 'Can change at any time.',
     permissionsHint:
-      'Referees can always finish and abort games and undo the last round.',
+      'Referees can always finish and abort games, undo the last round and enter penalties, also from the game’s view.',
     finishGame: 'Finish a game early',
     finish: {
       referees: 'Referees only',
@@ -290,6 +290,12 @@ const en = {
       seated: 'Also players at the table, while the game is live',
     },
     undoBySeated: 'players undo rounds',
+    penalties: 'Enter penalties and false mahjong',
+    penaltiesBy: {
+      referees: 'Referees only',
+      seated: 'Also players at the table',
+    },
+    penaltiesByReferees: 'only referees enter penalties',
     rating: 'Rating',
     ratingHint:
       'Players with fewer ended games are listed below the rating, without a place.',
@@ -374,6 +380,7 @@ const en = {
     fined: '{{name}} fined',
   },
   game: {
+    enterPenalty: 'Enter a penalty, round {{round}}',
     enterRound: 'Enter result of round {{round}}',
     tableMenu: 'Table menu',
     logs: 'Logs',

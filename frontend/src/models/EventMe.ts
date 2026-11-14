@@ -20,7 +20,13 @@ export type EventMe = {
 // (GET /api/event/:id/game/:gameId/me): the rules about being seated, the
 // game's status and its rounds live on the backend.
 export type GameCapability =
-  'view_game' | 'enter_round' | 'undo_round' | 'abort_game' | 'finish_game';
+  | 'view_game'
+  | 'enter_round'
+  | 'enter_penalty'
+  | 'referee_entry'
+  | 'undo_round'
+  | 'abort_game'
+  | 'finish_game';
 
 export type GameMe = {
   capabilities: GameCapability[];
