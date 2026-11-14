@@ -63,6 +63,18 @@ type EventListItem struct {
 	IsParticipating bool        `json:"is_participating"`
 	IsOwner         bool        `json:"is_owner"`
 	Roles           []EventRole `json:"roles"`
+	// LastGameAt is when the last game that wasn't aborted started; nil
+	// without games. Lists order active events by it.
+	LastGameAt *time.Time `json:"last_game_at"`
+}
+
+// EventListRow is an event as the event list reads it: with the caller's
+// roles in it and the start of its last game.
+type EventListRow struct {
+	Event
+
+	Roles      []EventRole `db:"roles"`
+	LastGameAt *time.Time  `db:"last_game_at"`
 }
 
 type EventMe struct {

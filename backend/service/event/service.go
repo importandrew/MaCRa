@@ -21,7 +21,7 @@ type PlayerRepo interface {
 type EventRepo interface {
 	Create(ctx context.Context, event models.Event) (int, error)
 	Get(ctx context.Context, eventID int) (models.Event, error)
-	List(ctx context.Context) ([]models.Event, error)
+	List(ctx context.Context, userID int) ([]models.EventListRow, error)
 	Update(ctx context.Context, event models.Event) error
 	Finish(ctx context.Context, eventID int) error
 	AddMemberRoles(ctx context.Context, eventID int, userID int, roles []models.EventRole) error
