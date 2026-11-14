@@ -60,6 +60,15 @@ func createTestEvent(t *testing.T, conn *pgxpool.Conn) {
 	if err != nil {
 		t.Fatalf("Failed to create test event: %v", err)
 	}
+	// Games need players with the player role (checkPlayerRoles): every test
+	// user is one in the test event, created before it or after it
+	// (createTestUser).
+	if _, err := conn.Exec(ctx, `
+		INSERT INTO event_user_roles(event_id, user_id, role, created_at)
+		SELECT $1, id, 'player', now() FROM users
+		ON CONFLICT DO NOTHING`, testEventID); err != nil {
+		t.Fatalf("Failed to grant player roles: %v", err)
+	}
 }
 
 func createTestUser(t *testing.T, conn *pgxpool.Conn, id int) {
@@ -76,6 +85,13 @@ func createTestUser(t *testing.T, conn *pgxpool.Conn, id int) {
 	)
 	if err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
+	}
+	// A player of the test event once it exists (see createTestEvent).
+	if _, err := conn.Exec(ctx, `
+		INSERT INTO event_user_roles(event_id, user_id, role, created_at)
+		SELECT id, $2, 'player', now() FROM events WHERE id = $1
+		ON CONFLICT DO NOTHING`, testEventID, id); err != nil {
+		t.Fatalf("Failed to grant the player role: %v", err)
 	}
 }
 

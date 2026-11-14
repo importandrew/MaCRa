@@ -96,6 +96,10 @@ func (r *Repo) reviveGame(ctx context.Context, gameID, eventID int, seating [4]i
 		return err
 	}
 
+	if err := r.checkPlayerRoles(ctx, seating, eventID); err != nil {
+		return err
+	}
+
 	if err := r.checkNoOtherLiveGame(ctx, seating, eventID, gameID); err != nil {
 		return err
 	}

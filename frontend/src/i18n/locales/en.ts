@@ -340,8 +340,7 @@ const en = {
     none: 'No members yet',
     rolesOf: 'Roles: {{name}}',
     editRoles: 'Change roles of {{name}}',
-    rolesHint:
-      'A member keeps at least one role; to take all of them away, remove the member.',
+    rolesHint: 'A member must have at least one role.',
     ownerRolesHint: 'The owner may drop any role and still manages the event.',
     rolesSaved: 'Roles saved',
   },

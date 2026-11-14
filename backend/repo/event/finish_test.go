@@ -34,6 +34,11 @@ func createTestEvent(t *testing.T, db database.DB) int {
 		Settings:     models.DefaultEventSettings(),
 	})
 	require.NoError(t, err)
+	// The owner got player and referee at creation; games need the others
+	// to be players too.
+	for id := 2; id <= 4; id++ {
+		require.NoError(t, NewRepo(db).AddMemberRoles(context.Background(), eventID, id, []models.EventRole{models.EventPlayer}))
+	}
 
 	return eventID
 }

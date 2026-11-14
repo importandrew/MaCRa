@@ -195,3 +195,30 @@ func TestNewGame_finishedEvent(t *testing.T) {
 		assert.ErrorIs(t, err, models.ErrEventAlreadyFinished)
 	})
 }
+
+// TestNewGame_MissingPlayerRole checks that a game can't start with a user
+// who isn't a player of the event, and names them.
+func TestNewGame_MissingPlayerRole(t *testing.T) {
+	db, err := database.NewTestDB()
+	require.NoError(t, err)
+	defer db.Close()
+
+	db.Test(t, "missing player role", func(t *testing.T) {
+		ctx := context.Background()
+		conn, err := db.Acquire(ctx)
+		require.NoError(t, err)
+		defer conn.Release()
+
+		for id := 1; id <= 4; id++ {
+			createTestUser(t, conn, id)
+		}
+		createTestEvent(t, conn)
+		_, err = conn.Exec(ctx, `UPDATE event_user_roles SET role = 'observer' WHERE event_id = $1 AND user_id = 3`, testEventID)
+		require.NoError(t, err)
+
+		_, err = NewRepo(db).NewGame(ctx, [4]int{1, 2, 3, 4}, testEventID)
+
+		assert.ErrorIs(t, err, models.ErrMissingPlayerRole)
+		assertErrorName(t, err, "3")
+	})
+}
