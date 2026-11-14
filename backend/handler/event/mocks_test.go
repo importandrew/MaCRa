@@ -1729,6 +1729,218 @@ func (_c *MockEventService_HasCapability_Call) RunAndReturn(run func(ctx context
 	return _c
 }
 
+// Invite provides a mock function for the type MockEventService
+func (_mock *MockEventService) Invite(ctx context.Context, token string, userID int) (models.EventInvite, error) {
+	ret := _mock.Called(ctx, token, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Invite")
+	}
+
+	var r0 models.EventInvite
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) (models.EventInvite, error)); ok {
+		return returnFunc(ctx, token, userID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) models.EventInvite); ok {
+		r0 = returnFunc(ctx, token, userID)
+	} else {
+		r0 = ret.Get(0).(models.EventInvite)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int) error); ok {
+		r1 = returnFunc(ctx, token, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventService_Invite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Invite'
+type MockEventService_Invite_Call struct {
+	*mock.Call
+}
+
+// Invite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+//   - userID int
+func (_e *MockEventService_Expecter) Invite(ctx any, token any, userID any) *MockEventService_Invite_Call {
+	return &MockEventService_Invite_Call{Call: _e.mock.On("Invite", ctx, token, userID)}
+}
+
+func (_c *MockEventService_Invite_Call) Run(run func(ctx context.Context, token string, userID int)) *MockEventService_Invite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_Invite_Call) Return(eventInvite models.EventInvite, err error) *MockEventService_Invite_Call {
+	_c.Call.Return(eventInvite, err)
+	return _c
+}
+
+func (_c *MockEventService_Invite_Call) RunAndReturn(run func(ctx context.Context, token string, userID int) (models.EventInvite, error)) *MockEventService_Invite_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// InviteToken provides a mock function for the type MockEventService
+func (_mock *MockEventService) InviteToken(ctx context.Context, eventID int) (*string, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InviteToken")
+	}
+
+	var r0 *string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (*string, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) *string); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventService_InviteToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InviteToken'
+type MockEventService_InviteToken_Call struct {
+	*mock.Call
+}
+
+// InviteToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventService_Expecter) InviteToken(ctx any, eventID any) *MockEventService_InviteToken_Call {
+	return &MockEventService_InviteToken_Call{Call: _e.mock.On("InviteToken", ctx, eventID)}
+}
+
+func (_c *MockEventService_InviteToken_Call) Run(run func(ctx context.Context, eventID int)) *MockEventService_InviteToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_InviteToken_Call) Return(s *string, err error) *MockEventService_InviteToken_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockEventService_InviteToken_Call) RunAndReturn(run func(ctx context.Context, eventID int) (*string, error)) *MockEventService_InviteToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// JoinByInvite provides a mock function for the type MockEventService
+func (_mock *MockEventService) JoinByInvite(ctx context.Context, token string, userID int) (int, error) {
+	ret := _mock.Called(ctx, token, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for JoinByInvite")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) (int, error)); ok {
+		return returnFunc(ctx, token, userID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) int); ok {
+		r0 = returnFunc(ctx, token, userID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int) error); ok {
+		r1 = returnFunc(ctx, token, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventService_JoinByInvite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'JoinByInvite'
+type MockEventService_JoinByInvite_Call struct {
+	*mock.Call
+}
+
+// JoinByInvite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - token string
+//   - userID int
+func (_e *MockEventService_Expecter) JoinByInvite(ctx any, token any, userID any) *MockEventService_JoinByInvite_Call {
+	return &MockEventService_JoinByInvite_Call{Call: _e.mock.On("JoinByInvite", ctx, token, userID)}
+}
+
+func (_c *MockEventService_JoinByInvite_Call) Run(run func(ctx context.Context, token string, userID int)) *MockEventService_JoinByInvite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_JoinByInvite_Call) Return(n int, err error) *MockEventService_JoinByInvite_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockEventService_JoinByInvite_Call) RunAndReturn(run func(ctx context.Context, token string, userID int) (int, error)) *MockEventService_JoinByInvite_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListGamesByStatus provides a mock function for the type MockEventService
 func (_mock *MockEventService) ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int) (models.EventGames, error) {
 	ret := _mock.Called(ctx, eventID, status, limit, offset)
@@ -2177,6 +2389,72 @@ func (_c *MockEventService_NewGame_Call) RunAndReturn(run func(ctx context.Conte
 	return _c
 }
 
+// NewInviteToken provides a mock function for the type MockEventService
+func (_mock *MockEventService) NewInviteToken(ctx context.Context, eventID int) (string, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for NewInviteToken")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (string, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) string); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventService_NewInviteToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'NewInviteToken'
+type MockEventService_NewInviteToken_Call struct {
+	*mock.Call
+}
+
+// NewInviteToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventService_Expecter) NewInviteToken(ctx any, eventID any) *MockEventService_NewInviteToken_Call {
+	return &MockEventService_NewInviteToken_Call{Call: _e.mock.On("NewInviteToken", ctx, eventID)}
+}
+
+func (_c *MockEventService_NewInviteToken_Call) Run(run func(ctx context.Context, eventID int)) *MockEventService_NewInviteToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_NewInviteToken_Call) Return(s string, err error) *MockEventService_NewInviteToken_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *MockEventService_NewInviteToken_Call) RunAndReturn(run func(ctx context.Context, eventID int) (string, error)) *MockEventService_NewInviteToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PlayerGameHistory provides a mock function for the type MockEventService
 func (_mock *MockEventService) PlayerGameHistory(ctx context.Context, eventID int, playerID int) ([]int, error) {
 	ret := _mock.Called(ctx, eventID, playerID)
@@ -2451,6 +2729,63 @@ func (_c *MockEventService_SetMemberRoles_Call) Return(err error) *MockEventServ
 }
 
 func (_c *MockEventService_SetMemberRoles_Call) RunAndReturn(run func(ctx context.Context, eventID int, targetUserID int, roles []models.EventRole) error) *MockEventService_SetMemberRoles_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// TurnOffInvite provides a mock function for the type MockEventService
+func (_mock *MockEventService) TurnOffInvite(ctx context.Context, eventID int) error {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TurnOffInvite")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventService_TurnOffInvite_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TurnOffInvite'
+type MockEventService_TurnOffInvite_Call struct {
+	*mock.Call
+}
+
+// TurnOffInvite is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventService_Expecter) TurnOffInvite(ctx any, eventID any) *MockEventService_TurnOffInvite_Call {
+	return &MockEventService_TurnOffInvite_Call{Call: _e.mock.On("TurnOffInvite", ctx, eventID)}
+}
+
+func (_c *MockEventService_TurnOffInvite_Call) Run(run func(ctx context.Context, eventID int)) *MockEventService_TurnOffInvite_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_TurnOffInvite_Call) Return(err error) *MockEventService_TurnOffInvite_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventService_TurnOffInvite_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventService_TurnOffInvite_Call {
 	_c.Call.Return(run)
 	return _c
 }
