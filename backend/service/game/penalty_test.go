@@ -77,6 +77,15 @@ func TestPenalty(t *testing.T) {
 				assert.Equal(t, 2, now.Round.Num)
 			},
 		},
+		"amount not in the official list": {
+			playerID:    1,
+			penalizedID: 1,
+			value:       15,
+			mockSetup:   func(*MockGameRepo, *MockPlayerRepo, int) {},
+			expectedErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, models.ErrValidatePenalty)
+			},
+		},
 		"game not found": {
 			playerID:       999,
 			penalizedID:    1,
@@ -222,4 +231,19 @@ func TestPenalty(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestPenalty_ReplaysOldAmounts checks that a game is still replayed with a
+// penalty entered before the official list (15): only new entries are
+// checked against it.
+func TestPenalty_ReplaysOldAmounts(t *testing.T) {
+	mockGameRepo := NewMockGameRepo(t)
+	expectLoadGame(mockGameRepo, 100, []models.RoundLog{
+		{ID: 1, Round: 1, EventSequence: 1, Outcome: models.Penalty, Loser: 1, Value: 15, CreatedAt: time.Now()},
+	})
+
+	g, _, err := NewService(mockGameRepo, NewMockPlayerRepo(t)).load(context.Background(), 100)
+
+	assert.NoError(t, err)
+	assert.Equal(t, -15, g.Score()[1].GP)
 }

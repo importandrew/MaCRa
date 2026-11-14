@@ -15,6 +15,10 @@ export const MAX_MIN_HAND = 88;
 // FALSE_MAHJONG_AMOUNTS: what a false mahjong may cost, in every game.
 export const FALSE_MAHJONG_AMOUNTS = [30, 60];
 
+// PENALTY_AMOUNTS: what an in-game penalty may cost, the official MCR list
+// (models.PenaltyAmounts on the backend).
+export const PENALTY_AMOUNTS = [5, 10, 20, 30, 40, 50, 60];
+
 export const STANDARD_RULES: GameRules = { hands: 16, min_hand: 8 };
 
 export const SHORT_RULES: GameRules = { hands: 8, min_hand: 8 };

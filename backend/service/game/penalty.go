@@ -3,11 +3,20 @@ package game
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/importandrew/MaCRa/models"
 )
 
+// Penalty enters a penalty or a false mahjong into the player's live game. A
+// penalty must be one of models.PenaltyAmounts (models.ErrValidatePenalty);
+// the engine checks the rest, also the false mahjong amounts.
 func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error) {
+	if penaltyType == models.Penalty && !slices.Contains(models.PenaltyAmounts, value) {
+		return models.GameNow{}, fmt.Errorf("%w: penalty should be one of %v, got %d",
+			models.ErrValidatePenalty, models.PenaltyAmounts, value)
+	}
+
 	game, _, err := s.CurrentGame(ctx, playerID, eventID)
 	if err != nil {
 		return models.GameNow{}, err

@@ -11,7 +11,9 @@ import { SignIcon } from '../Icons/SignIcon';
 import PendingButton from '../PendingButton';
 import SegmentedPicker from '../SegmentedPicker';
 import ValueStepper from '../ValueStepper';
-import { EntryOutcome, MIN_FINE, RoundEntry } from './useRoundEntry';
+import ListStepper from '../ListStepper';
+import { PENALTY_AMOUNTS } from '../../models/GameRules';
+import { EntryOutcome, RoundEntry } from './useRoundEntry';
 
 // OUTCOMES are the outcome buttons with their texts. The texts must not wrap
 // in the narrow center of the table: non-breaking hyphens and spaces there.
@@ -177,10 +179,10 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
       )}
 
       {entry.isPenalty && !entry.isFalseMahjong && (
-        <ValueStepper
+        <ListStepper
           label={t('roundEntry.fine')}
+          values={PENALTY_AMOUNTS}
           value={entry.fine}
-          min={MIN_FINE}
           onChange={entry.setFine}
         />
       )}
