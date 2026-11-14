@@ -98,6 +98,11 @@ export default function EventLayout() {
       path: '/manage',
       isAllowed: canManage,
     },
+    {
+      label: t('tournamentDesk.menu'),
+      path: '/tournament',
+      isAllowed: hasCapability('view_tournament'),
+    },
     { label: t('events.rating'), path: '/rating', isAllowed: canRating },
     {
       label: t('events.liveGames'),

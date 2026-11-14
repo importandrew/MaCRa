@@ -324,3 +324,32 @@ func TestSeatedAbortOnlyWithoutRounds(t *testing.T) {
 		assert.Equal(t, want, EventAuthContext{Event: event}.seatedAbortOnlyWithoutRounds(), abort)
 	}
 }
+
+func TestHasCapability_tournamentDesk(t *testing.T) {
+	tournament := models.Event{ID: 1, Type: models.EventTournament, OwnerUserID: 10,
+		Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers}
+	regular := tournament
+	regular.Type = models.EventRegular
+
+	testData := map[string]struct {
+		event  models.Event
+		caller int
+		roles  []models.EventRole
+		view   bool
+		run    bool
+	}{
+		"referee":         {event: tournament, caller: 5, roles: []models.EventRole{models.EventReferee}, view: true, run: true},
+		"observer":        {event: tournament, caller: 5, roles: []models.EventRole{models.EventObserver}, view: true},
+		"owner, no roles": {event: tournament, caller: 10, view: true},
+		"player":          {event: tournament, caller: 5, roles: []models.EventRole{models.EventPlayer}},
+		"regular referee": {event: regular, caller: 5, roles: []models.EventRole{models.EventReferee}},
+	}
+
+	for name, testCase := range testData {
+		t.Run(name, func(t *testing.T) {
+			authCtx := eventAuthContext(testCase.event, testCase.caller, testCase.roles)
+			assert.Equal(t, testCase.view, authCtx.hasCapability(models.CapViewTournament))
+			assert.Equal(t, testCase.run, authCtx.hasCapability(models.CapRunTournament))
+		})
+	}
+}

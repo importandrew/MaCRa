@@ -136,6 +136,11 @@ const en = {
     invalid_tournament_settings: 'The tournament settings are invalid',
     not_tournament: 'This is for tournaments only',
     player_and_substitute: 'A member can’t be both a player and a substitute',
+    participants_closed:
+      'The first tour has started: players can’t be added or removed any more (a player withdraws instead)',
+    tournament_not_started: 'The tournament hasn’t started yet',
+    no_players: 'The tournament has no players yet',
+    not_participant: 'This user has no participant number',
   },
   auth: {
     tabs: 'Authentication',
@@ -190,6 +195,29 @@ const en = {
     preparation: 'Preparation',
     in_progress: 'In progress',
     finished: 'Finished',
+  },
+  tournamentDesk: {
+    menu: 'Tournament',
+    title: 'Tournament — {{name}}',
+    participants: 'Participants [{{n}}]',
+    participantsList: 'Participants',
+    noPlayers: 'No players yet. Add them in Manage → Members.',
+    drawnHint: 'The numbers are drawn. A change of players needs a new draw.',
+    closedHint:
+      'The first tour has started: the players and their numbers are final. A player who leaves withdraws.',
+    notDrawnHint:
+      'The participant numbers aren’t drawn for the current players yet. The draw is needed before the first tour’s seating.',
+    draw: 'Draw numbers',
+    redraw: 'Draw again',
+    drawn: 'Numbers drawn',
+    redrawTitle: 'Draw again',
+    redrawPrompt: 'Everyone gets a new random number. Continue?',
+    withdraw: 'Withdraw',
+    withdrawTitle: 'Withdraw from the tournament',
+    withdrawPrompt:
+      '{{name}} withdraws: their games stay in the rating, and they won’t be seated any more. This can’t be undone.',
+    withdrawn: '{{name}} withdrew',
+    withdrewMark: 'withdrew',
   },
   tournament: {
     title: 'Tournament',

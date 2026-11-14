@@ -104,6 +104,17 @@ var (
 	// ErrInvalidTournamentSettings means a tournament setting is out of its
 	// range or not one of its options.
 	ErrInvalidTournamentSettings = errors.New("invalid tournament settings")
+	// ErrParticipantsClosed means the tournament's first tour has started:
+	// players can't be added or removed any more (a player withdraws instead).
+	ErrParticipantsClosed = errors.New("tournament participants are closed")
+	// ErrTournamentNotStarted means the action needs a tournament in
+	// progress (e.g. a withdrawal).
+	ErrTournamentNotStarted = errors.New("tournament not started")
+	// ErrNoPlayers means a tournament has no players to draw numbers for.
+	ErrNoPlayers = errors.New("no players")
+	// ErrNotParticipant means the user has no participant number in the
+	// tournament (or has withdrawn already).
+	ErrNotParticipant = errors.New("not a participant")
 	// ErrNotTournament means the action is for tournaments only.
 	ErrNotTournament = errors.New("not a tournament")
 	// ErrPlayerAndSubstitute means a member would be both a player and a
@@ -184,6 +195,7 @@ var Errors = map[error]APIError{
 	ErrNotMember:       {http.StatusNotFound, "not_member"},
 	ErrInviteNotFound:  {http.StatusNotFound, "invite_not_found"},
 	ErrRequestNotFound: {http.StatusNotFound, "request_not_found"},
+	ErrNotParticipant:  {http.StatusNotFound, "not_participant"},
 
 	// 409
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},
@@ -200,6 +212,9 @@ var Errors = map[error]APIError{
 	ErrAlreadyMember:        {http.StatusConflict, "already_member"},
 	ErrEventFull:            {http.StatusConflict, "event_full"},
 	ErrPlayerAndSubstitute:  {http.StatusConflict, "player_and_substitute"},
+	ErrParticipantsClosed:   {http.StatusConflict, "participants_closed"},
+	ErrTournamentNotStarted: {http.StatusConflict, "tournament_not_started"},
+	ErrNoPlayers:            {http.StatusConflict, "no_players"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

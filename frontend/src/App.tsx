@@ -16,6 +16,7 @@ import EventLayout from './components/Events/EventLayout';
 import EventManage from './components/Events/EventManage';
 import EventOverview from './components/Events/EventOverview';
 import EventRating from './components/Events/EventRating';
+import TournamentDesk from './components/Events/TournamentDesk';
 import EventPlayerStats from './components/Events/EventPlayerStats';
 import EventsList from './components/Events/EventsList';
 import FinishedGames from './components/Events/FinishedGames';
@@ -97,6 +98,7 @@ function App() {
                 <Route index element={<EventOverview />} />
                 <Route path="manage" element={<EventManage />} />
                 <Route path="rating" element={<EventRating />} />
+                <Route path="tournament" element={<TournamentDesk />} />
                 <Route path="player/:playerId" element={<EventPlayerStats />} />
                 <Route path="games/live" element={<LiveGames />} />
                 <Route path="games/finished" element={<FinishedGames />} />

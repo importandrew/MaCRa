@@ -225,7 +225,7 @@ Applies to regular events; tournament games follow area 8.
 
 ## 8. Tournaments
 
-Being built in stages. So far: creating a tournament, its status (preparation until the first tour starts, then in progress, then finished), its settings in Manage → Settings (number of tours, tour length, what happens when time is up; the regular-event permissions to finish or abort a game and the rating's minimum games don't apply and are hidden), and the substitute role. No games can be played in a tournament yet. The rules follow the official *Mahjong Competition Rules* (WMO / WMCC, 2021 edition) where they cover a question; where the rules are silent, these are the organizer's practice. A few questions are still open with referees; they are listed at the end.
+Being built in stages. So far: creating a tournament, its status (preparation until the first tour starts, then in progress, then finished), its settings in Manage → Settings (number of tours, tour length, what happens when time is up; the regular-event permissions to finish or abort a game and the rating's minimum games don't apply and are hidden), the substitute role, and the tournament's desk (≡ → Tournament, for its staff) with the participants and their numbers: the referee's draw, redone after the players change, and withdrawals once the first tour has started, when the players are closed (they can't be added or removed, also not by the invite link or a request). No games can be played in a tournament yet. The rules follow the official *Mahjong Competition Rules* (WMO / WMCC, 2021 edition) where they cover a question; where the rules are silent, these are the organizer's practice. A few questions are still open with referees; they are listed at the end.
 
 ### Format
 
@@ -245,8 +245,8 @@ Being built in stages. So far: creating a tournament, its status (preparation un
 
 - Everyone registers in advance with an account (no guests). Ways in: the invite link, being added by the organizer, or a request to join that the organizer accepts or declines.
 - A participant can't leave a tournament themselves.
-- **Participant numbers** come from a draw (a shuffle), a referee's button that must be pressed before the first tour's seating is published. Random numbers, so nobody can pick opponents by the order of registration.
-- Before the first tour starts, the participants may change: after a change, the draw is redone (cancelling the seating first if it was published).
+- **Participant numbers** come from a draw (a shuffle), a referee's button on the tournament's desk that must be pressed before the first tour's seating is published. Random numbers, so nobody can pick opponents by the order of registration. The desk lists the players by number for the staff (referees, observers, the owner); a redraw asks for a confirmation.
+- Before the first tour starts, the participants may change: after a change, the numbers no longer count and the desk asks for a new draw (cancelling the seating first if it was published).
 - **Once the first tour starts, the list of players is closed.** After that only staff and substitutes can be added.
 - **A player who withdraws** keeps their past games in the rating, is marked "withdrew" and isn't seated any more; a substitute takes their number in the seating.
 - **Late players**: the app doesn't track lateness. The referee decides and seats or removes a substitute by hand. Under the official rules, being late by up to 15 minutes costs 10 or 20 points (an out-of-game penalty), and by more than 15 minutes the player misses that tour and a substitute plays; from the next tour the player plays again.

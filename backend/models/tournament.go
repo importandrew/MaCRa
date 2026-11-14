@@ -113,3 +113,22 @@ func eventStatus(eventType EventType, startedAt, finishedAt *time.Time) EventSta
 		return EventInProgress
 	}
 }
+
+// TournamentParticipant is a tournament's player as its desk lists them.
+type TournamentParticipant struct {
+	UserID int    `db:"user_id" json:"user_id"`
+	Name   string `db:"name" json:"name"`
+	// Number is the participant number from the draw; nil before it, and
+	// while the draw is out of date (TournamentParticipants.Drawn).
+	Number    *int `db:"number" json:"number"`
+	Withdrawn bool `db:"withdrawn" json:"withdrawn"`
+}
+
+// TournamentParticipants is a tournament's players with their numbers.
+type TournamentParticipants struct {
+	// Drawn: the numbers belong to exactly the current players. False before
+	// the first draw and after the players changed: the draw is redone.
+	Drawn bool `json:"drawn"`
+	// Participants by number when drawn, by name otherwise.
+	Participants []TournamentParticipant `json:"participants"`
+}
