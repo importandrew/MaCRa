@@ -213,7 +213,11 @@ const ru: Messages = {
   },
   tours: {
     endsAt: 'Время тура выходит в {{time}}.',
-    addTime: '+{{n}} мин',
+    addTime: 'Добавить время',
+    addTimeTitle: 'Добавить время столу {{table}}',
+    minutes: 'Минуты',
+    minutesRange: 'От {{min}} до {{max}} минут',
+    addMinutes: 'Добавить {{n}} мин',
     timeAdded: 'Столу {{table}} добавлено {{n}} минут',
     extra: '+{{n}} мин',
     start: 'Начать тур {{n}}',

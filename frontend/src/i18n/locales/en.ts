@@ -217,7 +217,11 @@ const en = {
   },
   tours: {
     endsAt: 'Time is up at {{time}}.',
-    addTime: '+{{n}} min',
+    addTime: 'Add time',
+    addTimeTitle: 'Add time to table {{table}}',
+    minutes: 'Minutes',
+    minutesRange: 'From {{min}} to {{max}} minutes',
+    addMinutes: 'Add {{n}} min',
     timeAdded: '{{n}} minutes added to table {{table}}',
     extra: '+{{n}} min',
     start: 'Start tour {{n}}',
