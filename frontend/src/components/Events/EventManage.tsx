@@ -129,8 +129,10 @@ export default function EventManage() {
 
       if (ok) {
         showToast({ title: t('events.updated'), variant: 'success' });
+        // The edits stay on screen until the event has reloaded with them:
+        // clearing them first would show the old values for a moment.
+        await refetch();
         setDraft(null);
-        refetch();
       }
     });
   };

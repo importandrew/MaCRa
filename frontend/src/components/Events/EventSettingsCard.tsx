@@ -77,7 +77,7 @@ export default function EventSettingsCard({
   onSaved,
 }: {
   event: Event;
-  onSaved: () => void;
+  onSaved: () => Promise<void>;
 }) {
   const { t } = useTranslation();
   // draft holds the owner's edits; until there are any (and again after a
@@ -92,8 +92,10 @@ export default function EventSettingsCard({
     void run(async () => {
       if (await updateEventSettings(event.id, settings)) {
         showToast({ title: t('eventSettings.saved'), variant: 'success' });
+        // The edits stay on screen until the event has reloaded with them:
+        // clearing them first would show the old values for a moment.
+        await onSaved();
         setDraft(null);
-        onSaved();
       }
     });
   };

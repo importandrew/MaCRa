@@ -9,7 +9,9 @@ export type EventLayoutContextValue = {
   isLoading: boolean;
   isError: boolean;
   isForbidden: boolean;
-  refetch: () => void;
+  // refetch reloads the event and the capabilities; it resolves when both
+  // have loaded (a form keeps its edits on screen until then).
+  refetch: () => Promise<void>;
   hasCapability: (cap: EventCapability) => boolean;
 };
 

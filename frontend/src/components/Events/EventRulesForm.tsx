@@ -21,7 +21,7 @@ export default function EventRulesForm({
   onSaved,
 }: {
   event: Event;
-  onSaved: () => void;
+  onSaved: () => Promise<void>;
 }) {
   const { t } = useTranslation();
   // draft holds the owner's edits; until there are any (and again after a
@@ -38,8 +38,10 @@ export default function EventRulesForm({
     void run(async () => {
       if (await updateEventRules(event.id, rules)) {
         showToast({ title: t('rules.saved'), variant: 'success' });
+        // The edits stay on screen until the event has reloaded with them:
+        // clearing them first would show the old values for a moment.
+        await onSaved();
         setDraft(null);
-        onSaved();
       }
     });
   };
