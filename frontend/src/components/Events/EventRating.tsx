@@ -61,20 +61,27 @@ function PlayerName({ name }: { name: string }) {
 // with a fixed layout; the columns use the same padding.
 const CELL_CLASS = 'px-1.5';
 
-// RatingTable is one block of the rating: the ranked players, or the ones
-// below the event's minimum games (no place: "—").
+// RatingRow is a row of the rating table: a player, or the separator above
+// the players without a place.
+type RatingRow =
+  | { id: number; kind: 'player'; entry: EventRatingEntry; isBelow: boolean }
+  | { id: 'separator'; kind: 'separator'; label: string };
+
+// RatingTable is the rating: the ranked players, then a separator row and
+// the players below the event's minimum games, greyed, without a place
+// ("—").
 function RatingTable({
   label,
-  items,
+  rows,
   sortDescriptor,
   onSortChange,
   emptyText,
 }: {
   label: string;
-  items: EventRatingEntry[];
+  rows: RatingRow[];
   sortDescriptor: SortDescriptor;
   onSortChange: (descriptor: SortDescriptor) => void;
-  emptyText?: string;
+  emptyText: string;
 }) {
   const { t } = useTranslation();
   return (
@@ -147,27 +154,41 @@ function RatingTable({
             </Table.Column>
           </Table.Header>
           <Table.Body
-            items={items}
+            items={rows}
             renderEmptyState={() => (
               <p className="py-6 text-center text-muted">{emptyText}</p>
             )}
           >
-            {(item: EventRatingEntry) => (
-              <Table.Row
-                id={item.player_id}
-                className="text-center even:bg-default/50"
-              >
-                <Table.Cell className={CELL_CLASS}>
-                  {item.rank ?? '—'}
-                </Table.Cell>
-                <Table.Cell className={CELL_CLASS}>
-                  <PlayerName name={item.name} />
-                </Table.Cell>
-                <Table.Cell className={CELL_CLASS}>{item.games}</Table.Cell>
-                <Table.Cell className={CELL_CLASS}>{item.tp}</Table.Cell>
-                <Table.Cell className={CELL_CLASS}>{item.gp}</Table.Cell>
-              </Table.Row>
-            )}
+            {(row: RatingRow) => {
+              if (row.kind === 'separator') {
+                return (
+                  <Table.Row id={row.id}>
+                    <Table.Cell
+                      colSpan={5}
+                      className={`${CELL_CLASS} bg-default py-1.5 text-start text-xs font-medium text-muted`}
+                    >
+                      {row.label}
+                    </Table.Cell>
+                  </Table.Row>
+                );
+              }
+              // The cells, not the row, carry the colors: HeroUI styles
+              // each cell's background and text.
+              const cell = `${CELL_CLASS} ${row.isBelow ? 'text-muted' : ''}`;
+              return (
+                <Table.Row id={row.id} className="text-center">
+                  <Table.Cell className={cell}>
+                    {row.entry.rank ?? '—'}
+                  </Table.Cell>
+                  <Table.Cell className={cell}>
+                    <PlayerName name={row.entry.name} />
+                  </Table.Cell>
+                  <Table.Cell className={cell}>{row.entry.games}</Table.Cell>
+                  <Table.Cell className={cell}>{row.entry.tp}</Table.Cell>
+                  <Table.Cell className={cell}>{row.entry.gp}</Table.Cell>
+                </Table.Row>
+              );
+            }}
           </Table.Body>
         </Table.Content>
       </Table.ScrollContainer>
@@ -205,23 +226,42 @@ export default function EventRating() {
   const isLoading = layoutLoading || (!!canViewRatings && ratingsLoading);
   const forbidden = !canViewRatings || ratingsForbidden;
 
-  // Both blocks sort by the same column. Rows below the minimum have no
-  // place: sorting by it keeps their order (the rating's).
-  const sortedRatings = useMemo(
-    () => sortRatings(data?.ratings ?? [], sortDescriptor),
-    [data, sortDescriptor]
-  );
-  // With a minimum of 1 the block holds only the players who haven't
-  // played yet.
+  // A column sorts each group on its own: the players below the minimum stay
+  // under the separator whatever the order. They have no place, so sorting
+  // by it keeps their order (the rating's). With a minimum of 1 the group
+  // holds only the players who haven't played yet.
   const minGames = data?.min_games ?? 1;
-  const belowTitle =
+  const belowLabel =
     minGames > 1
       ? t('rating.belowMinimum', { count: minGames })
       : t('rating.notPlayedYet');
-  const sortedBelow = useMemo(
-    () => sortRatings(data?.below_minimum ?? [], sortDescriptor),
-    [data, sortDescriptor]
-  );
+  const rows = useMemo((): RatingRow[] => {
+    const ranked = sortRatings(data?.ratings ?? [], sortDescriptor);
+    const below = sortRatings(data?.below_minimum ?? [], sortDescriptor);
+    return [
+      ...ranked.map((entry) => ({
+        id: entry.player_id,
+        kind: 'player' as const,
+        entry,
+        isBelow: false,
+      })),
+      ...(below.length > 0
+        ? [
+            {
+              id: 'separator' as const,
+              kind: 'separator' as const,
+              label: belowLabel,
+            },
+          ]
+        : []),
+      ...below.map((entry) => ({
+        id: entry.player_id,
+        kind: 'player' as const,
+        entry,
+        isBelow: true,
+      })),
+    ];
+  }, [data, sortDescriptor, belowLabel]);
 
   return (
     <LoadingTemplate
@@ -242,22 +282,11 @@ export default function EventRating() {
 
           <RatingTable
             label={t('events.rating')}
-            items={sortedRatings}
+            rows={rows}
             sortDescriptor={sortDescriptor}
             onSortChange={setSortDescriptor}
             emptyText={t('rating.noGames')}
           />
-          {sortedBelow.length > 0 && (
-            <section className="flex flex-col gap-2">
-              <h2 className="font-medium">{belowTitle}</h2>
-              <RatingTable
-                label={belowTitle}
-                items={sortedBelow}
-                sortDescriptor={sortDescriptor}
-                onSortChange={setSortDescriptor}
-              />
-            </section>
-          )}
         </div>
       )}
     </LoadingTemplate>
