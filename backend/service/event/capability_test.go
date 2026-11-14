@@ -16,6 +16,7 @@ func testEvent(typ models.EventType) models.Event {
 		Visibility:   models.EventVisibilityPrivate,
 		RatingsReach: models.ContentReachPublic,
 		GamesReach:   models.ContentReachPublic,
+		Settings:     models.DefaultEventSettings(),
 	}
 }
 
@@ -310,4 +311,16 @@ func TestCanViewContent_publicReachLoggedInNonMemberOnPublicEvent(t *testing.T) 
 	}
 
 	assert.True(t, stranger.hasCapability(models.CapWatchLive))
+}
+
+func TestSeatedAbortOnlyWithoutRounds(t *testing.T) {
+	for abort, want := range map[string]bool{
+		models.AbortByReferees:               false,
+		models.AbortBySeatedBeforeFirstRound: true,
+		models.AbortBySeated:                 false,
+	} {
+		event := testEvent(models.EventRegular)
+		event.Settings.AbortGame = abort
+		assert.Equal(t, want, EventAuthContext{Event: event}.seatedAbortOnlyWithoutRounds(), abort)
+	}
 }

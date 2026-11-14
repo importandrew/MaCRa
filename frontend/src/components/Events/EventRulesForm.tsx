@@ -13,8 +13,8 @@ import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 import GameRulesFields from './GameRulesFields';
 
-// EventRulesForm is Manage → Rules: the event's game rules. They can change
-// only until the first game (the server refuses them after it) and not in a
+// EventRulesForm is the Game rules card in Manage → Settings. The rules can
+// change only until the first game (the server refuses them after it) and not in a
 // finished event; then the form only shows them.
 export default function EventRulesForm({
   event,
@@ -48,13 +48,16 @@ export default function EventRulesForm({
     <>
       <Card>
         <Card.Content className="gap-4">
-          <p className="text-sm text-muted">
-            {isFinished
-              ? t('rules.finishedReadOnly')
-              : event.rules_frozen
-                ? t('rules.frozen')
-                : t('rules.editableHint')}
-          </p>
+          <div className="flex flex-col gap-1">
+            <h2 className="font-medium">{t('rules.title')}</h2>
+            <p className="text-sm text-muted">
+              {isFinished
+                ? t('rules.finishedReadOnly')
+                : event.rules_frozen
+                  ? t('rules.frozen')
+                  : t('rules.editableHint')}
+            </p>
+          </div>
           <Form
             id="event-rules-form"
             onSubmit={handleSave}

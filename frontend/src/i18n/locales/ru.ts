@@ -109,6 +109,7 @@ const ru: Messages = {
     member_in_current_game:
       '{{name}} сейчас играет. Удалите участника после окончания игры.',
     event_already_finished: 'Событие уже завершено',
+    invalid_event_settings: 'Неверные настройки',
     invalid_game_rules: 'Неверные правила',
     event_rules_frozen:
       'В событии уже есть игры: его правила больше нельзя менять.',
@@ -239,10 +240,12 @@ const ru: Messages = {
     rules: 'Правила',
   },
   rules: {
-    title: 'Правила',
+    title: 'Правила игры',
     preset: 'Взять за основу',
-    standard: 'Стандарт MCR',
-    short: 'Короткая',
+    presets: {
+      standard: 'Стандарт MCR',
+      short: 'Короткая',
+    },
     hands: 'Раздачи',
     minHand: 'Минимальная рука',
     minHandRange: 'От {{min}} до {{max}}',
@@ -257,6 +260,29 @@ const ru: Messages = {
     handsCount_many: '{{count}} раздач',
     handsCount_other: '{{count}} раздачи',
     minHandValue: 'минимальная рука {{value}}',
+  },
+  eventSettings: {
+    title: 'Настройки',
+    finishedReadOnly: 'Событие завершено: его настройки больше нельзя менять.',
+    permissions: 'Права',
+    permissionsHint:
+      'Можно менять в любой момент. Судьи всегда могут завершить и прервать игру.',
+    finishGame: 'Досрочно завершить игру',
+    finish: {
+      referees: 'Только судьи',
+      seated: 'Также игроки за столом',
+    },
+    abortGame: 'Прервать игру',
+    abort: {
+      referees: 'Только судьи',
+      seated_before_first_round: 'Также игроки за столом, до первого раунда',
+      seated: 'Также игроки за столом, в любой момент',
+    },
+    save: 'Сохранить настройки',
+    saved: 'Настройки сохранены',
+    finishByReferees: 'завершают игры только судьи',
+    abortByReferees: 'прерывают игры только судьи',
+    abortBySeated: 'игроки прерывают игры в любой момент',
   },
   members: {
     title: 'Участники',

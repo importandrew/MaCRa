@@ -35,6 +35,7 @@ import PendingButton from '../PendingButton';
 import Confirm from '../Confirm';
 import EventSettingsFields from './EventSettingsFields';
 import EventRulesForm from './EventRulesForm';
+import EventSettingsCard from './EventSettingsCard';
 import { type EventSettings, isValidSettings } from './eventSettings';
 
 const ALL_ROLES: EventRole[] = ['player', 'referee', 'observer'];
@@ -93,9 +94,9 @@ export default function EventManage() {
   const [memberToRemove, setMemberToRemove] = useState<EventMember | null>(
     null
   );
-  const [activeTab, setActiveTab] = useState<'overview' | 'rules' | 'members'>(
-    canManageEvent ? 'overview' : 'members'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'settings' | 'members'
+  >(canManageEvent ? 'overview' : 'members');
 
   useEffect(() => {
     if (!canManageMembers) return;
@@ -203,7 +204,7 @@ export default function EventManage() {
           ariaLabel={t('events.manageSections')}
           options={[
             { value: 'overview', label: t('events.overview') },
-            { value: 'rules', label: t('rules.title') },
+            { value: 'settings', label: t('eventSettings.title') },
             ...(canManageMembers
               ? [{ value: 'members' as const, label: t('members.title') }]
               : []),
@@ -251,8 +252,11 @@ export default function EventManage() {
         </>
       )}
 
-      {activeTab === 'rules' && canManageEvent && (
-        <EventRulesForm event={event} onSaved={refetch} />
+      {activeTab === 'settings' && canManageEvent && (
+        <>
+          <EventRulesForm event={event} onSaved={refetch} />
+          <EventSettingsCard event={event} onSaved={refetch} />
+        </>
       )}
 
       {activeTab === 'members' && canManageMembers && isFinished && (

@@ -31,6 +31,7 @@ func createTestEvent(t *testing.T, db database.DB) int {
 		RatingsReach: models.ContentReachPublic,
 		GamesReach:   models.ContentReachPublic,
 		Rules:        models.StandardGameRules(),
+		Settings:     models.DefaultEventSettings(),
 	})
 	require.NoError(t, err)
 

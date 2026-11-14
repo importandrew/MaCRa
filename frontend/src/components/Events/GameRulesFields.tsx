@@ -14,7 +14,7 @@ import ValueStepper from '../ValueStepper';
 const PRESETS = Object.keys(RULE_PRESETS) as RulePreset[];
 
 // GameRulesFields are an event's game rules, the same when creating an event
-// and in Manage → Rules: a preset to start from, then each value. With
+// and in Manage → Settings: a preset to start from, then each value. With
 // isReadOnly they only show the rules.
 export default function GameRulesFields({
   value,
@@ -36,7 +36,7 @@ export default function GameRulesFields({
           label={t('rules.preset')}
           options={PRESETS.map((name) => ({
             value: name,
-            label: t(name === 'standard' ? 'rules.standard' : 'rules.short'),
+            label: t(`rules.presets.${name}`),
           }))}
           selectedKey={preset}
           onSelectionChange={(name) => onChange(RULE_PRESETS[name])}

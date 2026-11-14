@@ -41,6 +41,7 @@ type Event struct {
 	RatingsReach ContentReach    `db:"ratings_reach" json:"ratings_reach"`
 	GamesReach   ContentReach    `db:"games_reach" json:"games_reach"`
 	Rules        GameRules       `db:"rules" json:"rules"`
+	Settings     EventSettings   `db:"settings" json:"settings"`
 	CreatedAt    time.Time       `db:"created_at" json:"created_at"`
 	FinishedAt   *time.Time      `db:"finished_at" json:"finished_at"`
 }

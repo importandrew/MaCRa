@@ -22,13 +22,15 @@ func TestGameCapabilities(t *testing.T) {
 	player := []models.EventRole{models.EventPlayer}
 
 	testData := map[string]struct {
-		event   models.EventType
-		roles   []models.EventRole
-		owner   bool
-		seated  bool
-		game    *models.GameSummary
-		want    []models.Capability
-		wantNot []models.Capability
+		event models.EventType
+		// settings: the default ones if nil.
+		settings *models.EventSettings
+		roles    []models.EventRole
+		owner    bool
+		seated   bool
+		game     *models.GameSummary
+		want     []models.Capability
+		wantNot  []models.Capability
 	}{
 		"seated player, live game without rounds: abort, finish, enter": {
 			event: models.EventRegular, roles: player, seated: true, game: live(0),
@@ -64,6 +66,33 @@ func TestGameCapabilities(t *testing.T) {
 			want:    []models.Capability{models.CapUndoRound},
 			wantNot: []models.Capability{models.CapAbortGame, models.CapFinishGame},
 		},
+		"settings, finish by referees: a seated player can't finish": {
+			event: models.EventRegular, roles: player, seated: true, game: live(3),
+			settings: &models.EventSettings{FinishGame: models.FinishByReferees, AbortGame: models.AbortBySeatedBeforeFirstRound},
+			want:     []models.Capability{models.CapEnterRound},
+			wantNot:  []models.Capability{models.CapFinishGame, models.CapAbortGame},
+		},
+		"settings, finish by referees: a referee still can": {
+			event: models.EventRegular, roles: referee, game: live(3),
+			settings: &models.EventSettings{FinishGame: models.FinishByReferees, AbortGame: models.AbortByReferees},
+			want:     []models.Capability{models.CapFinishGame, models.CapAbortGame},
+		},
+		"settings, abort by referees: a seated player can't abort even without rounds": {
+			event: models.EventRegular, roles: player, seated: true, game: live(0),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortByReferees},
+			want:     []models.Capability{models.CapFinishGame},
+			wantNot:  []models.Capability{models.CapAbortGame},
+		},
+		"settings, abort by seated at any time: after rounds too": {
+			event: models.EventRegular, roles: player, seated: true, game: live(5),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeated},
+			want:     []models.Capability{models.CapAbortGame, models.CapFinishGame},
+		},
+		"settings, abort by seated at any time: not a player at another table": {
+			event: models.EventRegular, roles: player, game: live(5),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeated},
+			wantNot:  []models.Capability{models.CapAbortGame, models.CapFinishGame},
+		},
 		"no game: none of the game capabilities": {
 			event: models.EventRegular, roles: referee,
 			wantNot: []models.Capability{models.CapViewGame, models.CapUndoRound, models.CapAbortGame, models.CapFinishGame, models.CapEnterRound},
@@ -73,6 +102,9 @@ func TestGameCapabilities(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			event := testEvent(testCase.event)
+			if testCase.settings != nil {
+				event.Settings = *testCase.settings
+			}
 			authCtx := EventAuthContext{
 				Event:          event,
 				CallerID:       5,

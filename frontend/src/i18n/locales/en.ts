@@ -117,6 +117,7 @@ const en = {
       'A round has been entered: only a referee can abort the game now.',
     event_has_ongoing_games:
       'The event has games in progress. Finish or abort them first.',
+    invalid_event_settings: 'The settings are invalid',
     invalid_game_rules: 'The rules are invalid',
     event_rules_frozen:
       'The event already has games: its rules can no longer change.',
@@ -244,10 +245,12 @@ const en = {
     rules: 'Rules',
   },
   rules: {
-    title: 'Rules',
+    title: 'Game rules',
     preset: 'Start from',
-    standard: 'MCR standard',
-    short: 'Short',
+    presets: {
+      standard: 'MCR standard',
+      short: 'Short',
+    },
     hands: 'Hands',
     minHand: 'Minimum hand',
     minHandRange: 'From {{min}} to {{max}}',
@@ -260,6 +263,31 @@ const en = {
     handsCount_one: '{{count}} hand',
     handsCount_other: '{{count}} hands',
     minHandValue: 'minimum hand {{value}}',
+  },
+  eventSettings: {
+    title: 'Settings',
+    finishedReadOnly:
+      'The event is finished: its settings can no longer change.',
+    permissions: 'Permissions',
+    permissionsHint:
+      'Can change at any time. Referees can always finish and abort games.',
+    finishGame: 'Finish a game early',
+    finish: {
+      referees: 'Referees only',
+      seated: 'Also players at the table',
+    },
+    abortGame: 'Abort a game',
+    abort: {
+      referees: 'Referees only',
+      seated_before_first_round:
+        'Also players at the table, before the first round',
+      seated: 'Also players at the table, at any time',
+    },
+    save: 'Save settings',
+    saved: 'Settings saved',
+    finishByReferees: 'only referees finish games',
+    abortByReferees: 'only referees abort games',
+    abortBySeated: 'players abort games at any time',
   },
   members: {
     title: 'Members',
