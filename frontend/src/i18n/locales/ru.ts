@@ -321,6 +321,7 @@ const ru: Messages = {
     belowMinimum_few: 'Меньше {{count}} игр',
     belowMinimum_many: 'Меньше {{count}} игр',
     belowMinimum_other: 'Меньше {{count}} игры',
+    notPlayedYet: 'Ещё не играли',
   },
   games: {
     gameNumber: 'Игра #{{id}}',

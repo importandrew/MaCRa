@@ -99,11 +99,11 @@ func TestRatings(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			repo := NewMockEventRepo(t)
 			repo.EXPECT().Get(mock.Anything, eventID).
-				Return(models.Event{ID: eventID, Settings: models.DefaultEventSettings()}, nil)
+				Return(models.Event{ID: eventID, OwnerUserID: 1, Settings: models.DefaultEventSettings()}, nil)
 			testCase.mockSetup(repo)
 
 			service := NewService(repo, nil, nil)
-			got, err := service.Ratings(context.Background(), eventID)
+			got, err := service.Ratings(context.Background(), eventID, 0)
 
 			testCase.expectedErr(t, err)
 			if err != nil {
@@ -132,7 +132,7 @@ func TestRatings_MinGames(t *testing.T) {
 	settings.MinRatingGames = 2
 
 	repo := NewMockEventRepo(t)
-	repo.EXPECT().Get(mock.Anything, eventID).Return(models.Event{ID: eventID, Settings: settings}, nil)
+	repo.EXPECT().Get(mock.Anything, eventID).Return(models.Event{ID: eventID, OwnerUserID: 1, Settings: settings}, nil)
 	repo.EXPECT().ListEndedPlayerResults(mock.Anything, eventID).Return([]models.EventPlayerResultRow{
 		{PlayerID: 1, Name: "A", TP: 4, GP: 100}, // one game, best TP
 		{PlayerID: 2, Name: "B", TP: 1, GP: 10},
@@ -142,7 +142,7 @@ func TestRatings_MinGames(t *testing.T) {
 		{PlayerID: 4, Name: "D", TP: 3, GP: 0}, // one game
 	}, nil)
 
-	got, err := NewService(repo, nil, nil).Ratings(context.Background(), eventID)
+	got, err := NewService(repo, nil, nil).Ratings(context.Background(), eventID, 0)
 
 	require.NoError(t, err)
 	assert.Equal(t, 2, got.MinGames)
@@ -154,4 +154,51 @@ func TestRatings_MinGames(t *testing.T) {
 		{PlayerID: 1, Name: "A", Games: 1, TP: 4, GP: 100},
 		{PlayerID: 4, Name: "D", Games: 1, TP: 3, GP: 0},
 	}, got.BelowMinimum)
+}
+
+// TestRatings_PlayersWithoutGames checks that members see the event's players
+// who haven't played yet below the rating, and outsiders don't.
+func TestRatings_PlayersWithoutGames(t *testing.T) {
+	const eventID = 7
+	event := models.Event{
+		ID: eventID, OwnerUserID: 1, Visibility: models.EventVisibilityPublic,
+		RatingsReach: models.ContentReachPublic, Settings: models.DefaultEventSettings(),
+	}
+	results := []models.EventPlayerResultRow{{PlayerID: 1, Name: "A", TP: 4, GP: 100}}
+	members := []models.EventMember{
+		{UserID: 1, Name: "A", Roles: []models.EventRole{models.EventPlayer, models.EventReferee}},
+		{UserID: 4, Name: "Zed", Roles: []models.EventRole{models.EventPlayer}},
+		{UserID: 3, Name: "Bob", Roles: []models.EventRole{models.EventPlayer}},
+		{UserID: 5, Name: "Watcher", Roles: []models.EventRole{models.EventObserver}},
+	}
+
+	t.Run("member", func(t *testing.T) {
+		repo := NewMockEventRepo(t)
+		repo.EXPECT().Get(mock.Anything, eventID).Return(event, nil)
+		repo.EXPECT().GetMemberRoles(mock.Anything, eventID, 4).Return([]models.EventRole{models.EventPlayer}, nil)
+		repo.EXPECT().ListEndedPlayerResults(mock.Anything, eventID).Return(results, nil)
+		repo.EXPECT().ListMembers(mock.Anything, eventID).Return(members, nil)
+
+		got, err := NewService(repo, nil, nil).Ratings(context.Background(), eventID, 4)
+
+		require.NoError(t, err)
+		assert.Equal(t, []int{1}, rankedPlayerIDs(got.Ratings))
+		assert.Equal(t, []models.EventRatingEntry{
+			{PlayerID: 3, Name: "Bob"},
+			{PlayerID: 4, Name: "Zed"},
+		}, got.BelowMinimum)
+	})
+
+	t.Run("not a member", func(t *testing.T) {
+		repo := NewMockEventRepo(t)
+		repo.EXPECT().Get(mock.Anything, eventID).Return(event, nil)
+		repo.EXPECT().GetMemberRoles(mock.Anything, eventID, 9).Return([]models.EventRole{}, nil)
+		repo.EXPECT().ListEndedPlayerResults(mock.Anything, eventID).Return(results, nil)
+
+		got, err := NewService(repo, nil, nil).Ratings(context.Background(), eventID, 9)
+
+		require.NoError(t, err)
+		assert.Equal(t, []int{1}, rankedPlayerIDs(got.Ratings))
+		assert.Empty(t, got.BelowMinimum)
+	})
 }

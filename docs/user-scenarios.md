@@ -164,10 +164,10 @@ Applies to regular events; tournament games follow area 8.
 
 ### Event rating
 
-- A table of players: place, name, games, TP, GP; sortable by any column. Only ended games count (not live or aborted ones). Members who left or were removed stay in it.
+- A table of players: place, name, games, TP, GP; sortable by any column. A long name is cut with an ellipsis so rows keep one height; the full name shows on hover and on a tap. The table never scrolls sideways, also at 320 px. Only ended games count (not live or aborted ones). Members who left or were removed stay in it.
 - Order: total TP, then total GP, then the best single games by GP. Players equal in all of that share the place (5, 5, then 7).
 - The user's own row is highlighted; when it is far down, it stays pinned at the bottom of the screen.
-- Players with fewer ended games than the event's minimum (event settings) get no place: they are listed in a separate block "Fewer than N games" below the table, in the same order. Places in the table count only the players above the minimum.
+- Players with fewer ended games than the event's minimum (event settings) get no place: they are listed in a separate block "Fewer than N games" below the table, in the same order. Places in the table count only the players above the minimum. Members and staff also see there the event's players who haven't played yet (0 games, by name; the block is "No games yet" when the minimum is 1), so players know who is in the event; others don't, as they don't get the member list.
 - Tapping a row opens that player's history in the event (for users who can see the event's results; one's own always).
 
 ### History

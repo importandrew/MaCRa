@@ -320,6 +320,7 @@ const en = {
     noGames: 'No games played yet',
     belowMinimum_one: 'Fewer than {{count}} game',
     belowMinimum_other: 'Fewer than {{count}} games',
+    notPlayedYet: 'No games yet',
   },
   games: {
     gameNumber: 'Game #{{id}}',

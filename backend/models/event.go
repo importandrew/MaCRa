@@ -105,7 +105,8 @@ type EventRatingEntry struct {
 
 // EventRatings is an event's rating: the players with at least MinGames
 // ended games, ranked, and below them, without a place, the players with
-// fewer, in the same order.
+// fewer, in the same order, then (for members and staff) the players who
+// haven't played yet.
 type EventRatings struct {
 	Ratings      []EventRatingEntry `json:"ratings"`
 	BelowMinimum []EventRatingEntry `json:"below_minimum"`

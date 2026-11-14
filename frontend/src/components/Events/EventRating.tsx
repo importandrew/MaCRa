@@ -37,6 +37,30 @@ function sortRatings(
   return [...ratings].sort((a, b) => compareRatings(a, b, column) * direction);
 }
 
+// PlayerName is a name in the rating: one line with an ellipsis, so every row
+// has the same height. The full name shows on hover (title) and on a tap,
+// which toggles the name onto as many lines as it needs.
+function PlayerName({ name }: { name: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  return (
+    <button
+      type="button"
+      title={name}
+      aria-expanded={isExpanded}
+      onClick={() => setIsExpanded(!isExpanded)}
+      className={`block w-full cursor-default text-center ${
+        isExpanded ? 'whitespace-normal break-words' : 'truncate'
+      }`}
+    >
+      {name}
+    </button>
+  );
+}
+
+// CELL_CLASS: HeroUI's px-4 leaves too little room for five columns at 320px
+// with a fixed layout; the columns use the same padding.
+const CELL_CLASS = 'px-1.5';
+
 // RatingTable is one block of the rating: the ranked players, or the ones
 // below the event's minimum games (no place: "—").
 function RatingTable({
@@ -56,7 +80,10 @@ function RatingTable({
   return (
     <Table className="z-0">
       <Table.ScrollContainer>
+        {/* Fixed layout: the name column takes the room the others leave and
+            never widens the table past the screen. */}
         <Table.Content
+          className="table-fixed"
           aria-label={label}
           sortDescriptor={sortDescriptor}
           onSortChange={onSortChange}
@@ -65,7 +92,7 @@ function RatingTable({
             <Table.Column
               id="rank"
               allowsSorting
-              className="text-center w-[10%]"
+              className="px-1.5 text-center w-[12%]"
             >
               {({ sortDirection }) => (
                 <Table.SortableColumnHeader sortDirection={sortDirection}>
@@ -77,7 +104,7 @@ function RatingTable({
               id="name"
               allowsSorting
               isRowHeader
-              className="text-center "
+              className="px-1.5 text-center"
             >
               {({ sortDirection }) => (
                 <Table.SortableColumnHeader sortDirection={sortDirection}>
@@ -88,7 +115,7 @@ function RatingTable({
             <Table.Column
               id="games"
               allowsSorting
-              className="text-center w-[15%]"
+              className="px-1.5 text-center w-[16%]"
             >
               {({ sortDirection }) => (
                 <Table.SortableColumnHeader sortDirection={sortDirection}>
@@ -96,14 +123,22 @@ function RatingTable({
                 </Table.SortableColumnHeader>
               )}
             </Table.Column>
-            <Table.Column id="tp" allowsSorting className="text-center w-[15%]">
+            <Table.Column
+              id="tp"
+              allowsSorting
+              className="px-1.5 text-center w-[16%]"
+            >
               {({ sortDirection }) => (
                 <Table.SortableColumnHeader sortDirection={sortDirection}>
                   {t('rating.tp')}
                 </Table.SortableColumnHeader>
               )}
             </Table.Column>
-            <Table.Column id="gp" allowsSorting className="text-center w-[15%]">
+            <Table.Column
+              id="gp"
+              allowsSorting
+              className="px-1.5 text-center w-[18%]"
+            >
               {({ sortDirection }) => (
                 <Table.SortableColumnHeader sortDirection={sortDirection}>
                   {t('rating.gp')}
@@ -122,11 +157,15 @@ function RatingTable({
                 id={item.player_id}
                 className="text-center even:bg-default/50"
               >
-                <Table.Cell>{item.rank ?? '—'}</Table.Cell>
-                <Table.Cell>{item.name}</Table.Cell>
-                <Table.Cell>{item.games}</Table.Cell>
-                <Table.Cell>{item.tp}</Table.Cell>
-                <Table.Cell>{item.gp}</Table.Cell>
+                <Table.Cell className={CELL_CLASS}>
+                  {item.rank ?? '—'}
+                </Table.Cell>
+                <Table.Cell className={CELL_CLASS}>
+                  <PlayerName name={item.name} />
+                </Table.Cell>
+                <Table.Cell className={CELL_CLASS}>{item.games}</Table.Cell>
+                <Table.Cell className={CELL_CLASS}>{item.tp}</Table.Cell>
+                <Table.Cell className={CELL_CLASS}>{item.gp}</Table.Cell>
               </Table.Row>
             )}
           </Table.Body>
@@ -172,6 +211,13 @@ export default function EventRating() {
     () => sortRatings(data?.ratings ?? [], sortDescriptor),
     [data, sortDescriptor]
   );
+  // With a minimum of 1 the block holds only the players who haven't
+  // played yet.
+  const minGames = data?.min_games ?? 1;
+  const belowTitle =
+    minGames > 1
+      ? t('rating.belowMinimum', { count: minGames })
+      : t('rating.notPlayedYet');
   const sortedBelow = useMemo(
     () => sortRatings(data?.below_minimum ?? [], sortDescriptor),
     [data, sortDescriptor]
@@ -203,13 +249,9 @@ export default function EventRating() {
           />
           {sortedBelow.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="font-medium">
-                {t('rating.belowMinimum', { count: data?.min_games ?? 0 })}
-              </h2>
+              <h2 className="font-medium">{belowTitle}</h2>
               <RatingTable
-                label={t('rating.belowMinimum', {
-                  count: data?.min_games ?? 0,
-                })}
+                label={belowTitle}
                 items={sortedBelow}
                 sortDescriptor={sortDescriptor}
                 onSortChange={setSortDescriptor}

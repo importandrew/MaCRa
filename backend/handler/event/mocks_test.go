@@ -2084,8 +2084,8 @@ func (_c *MockEventService_PlayerGameHistory_Call) RunAndReturn(run func(ctx con
 }
 
 // Ratings provides a mock function for the type MockEventService
-func (_mock *MockEventService) Ratings(ctx context.Context, eventID int) (models.EventRatings, error) {
-	ret := _mock.Called(ctx, eventID)
+func (_mock *MockEventService) Ratings(ctx context.Context, eventID int, callerID int) (models.EventRatings, error) {
+	ret := _mock.Called(ctx, eventID, callerID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Ratings")
@@ -2093,16 +2093,16 @@ func (_mock *MockEventService) Ratings(ctx context.Context, eventID int) (models
 
 	var r0 models.EventRatings
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.EventRatings, error)); ok {
-		return returnFunc(ctx, eventID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (models.EventRatings, error)); ok {
+		return returnFunc(ctx, eventID, callerID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.EventRatings); ok {
-		r0 = returnFunc(ctx, eventID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) models.EventRatings); ok {
+		r0 = returnFunc(ctx, eventID, callerID)
 	} else {
 		r0 = ret.Get(0).(models.EventRatings)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
-		r1 = returnFunc(ctx, eventID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, callerID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2117,11 +2117,12 @@ type MockEventService_Ratings_Call struct {
 // Ratings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-func (_e *MockEventService_Expecter) Ratings(ctx any, eventID any) *MockEventService_Ratings_Call {
-	return &MockEventService_Ratings_Call{Call: _e.mock.On("Ratings", ctx, eventID)}
+//   - callerID int
+func (_e *MockEventService_Expecter) Ratings(ctx any, eventID any, callerID any) *MockEventService_Ratings_Call {
+	return &MockEventService_Ratings_Call{Call: _e.mock.On("Ratings", ctx, eventID, callerID)}
 }
 
-func (_c *MockEventService_Ratings_Call) Run(run func(ctx context.Context, eventID int)) *MockEventService_Ratings_Call {
+func (_c *MockEventService_Ratings_Call) Run(run func(ctx context.Context, eventID int, callerID int)) *MockEventService_Ratings_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -2131,9 +2132,14 @@ func (_c *MockEventService_Ratings_Call) Run(run func(ctx context.Context, event
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2144,7 +2150,7 @@ func (_c *MockEventService_Ratings_Call) Return(eventRatings models.EventRatings
 	return _c
 }
 
-func (_c *MockEventService_Ratings_Call) RunAndReturn(run func(ctx context.Context, eventID int) (models.EventRatings, error)) *MockEventService_Ratings_Call {
+func (_c *MockEventService_Ratings_Call) RunAndReturn(run func(ctx context.Context, eventID int, callerID int) (models.EventRatings, error)) *MockEventService_Ratings_Call {
 	_c.Call.Return(run)
 	return _c
 }
