@@ -14,7 +14,8 @@ import (
 )
 
 // inOrder seats the participants as given, four to a table.
-func inOrder(participants []models.Participant) ([][4]int, error) {
+func inOrder(input models.SeatingInput) ([][4]int, error) {
+	participants := input.Participants
 	tables := [][4]int{}
 	for i := 0; i+4 <= len(participants); i += 4 {
 		tables = append(tables, [4]int{participants[i].UserID, participants[i+1].UserID,
@@ -187,13 +188,27 @@ func TestTourRun(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, rating, 4)
 
-		// Tour 2 is aborted: its games don't count, the number is played again.
-		_, err = generateAndPublish(ctx, repo, eventID)
+		// The seating of tour 2 sees tour 1: who met whom, and the standings.
+		var seen models.SeatingInput
+		_, err = repo.GenerateTour(ctx, eventID, models.SeatingRandom, func(input models.SeatingInput) ([][4]int, error) {
+			seen = input
+			return inOrder(input)
+		})
 		require.NoError(t, err)
+		assert.Len(t, seen.Meetings, 6, "the 6 pairs of tour 1's table")
+		for _, n := range seen.Meetings {
+			assert.Equal(t, 1, n)
+		}
+		assert.InDelta(t, 4, seen.Standings[seats[0].UserID].TP, 0.001)
+		assert.Equal(t, 30, seen.Standings[seats[0].UserID].GP)
+
+		// Tour 2 is aborted: its games don't count, the number is played again.
+		require.NoError(t, repo.PublishTour(ctx, eventID))
 		require.NoError(t, repo.StartTour(ctx, eventID))
 		state, err = repo.TourState(ctx, eventID)
 		require.NoError(t, err)
 		require.Equal(t, 2, state.Current.Number)
+		assert.Equal(t, 6, state.Repeats, "the same table again: each pair meets a second time")
 		aborted := state.Tables[0].GameID
 		require.NoError(t, repo.AbortTour(ctx, eventID))
 		status, err := games.Status(ctx, aborted)

@@ -20,11 +20,17 @@ const (
 type SeatingMethod string
 
 const (
-	// SeatingRandom: the active participants shuffled into tables.
+	// SeatingRandom: at random, with as few repeat meetings as possible.
 	SeatingRandom SeatingMethod = "random"
+	// SeatingSwiss: neighbours in the current standings together, avoiding
+	// repeat meetings.
+	SeatingSwiss SeatingMethod = "swiss"
+	// SeatingInterval: by the current standings with a step of the number
+	// of tables: table i gets places i, i+k, i+2k, i+3k.
+	SeatingInterval SeatingMethod = "interval"
 )
 
-var ValidSeatingMethods = []SeatingMethod{SeatingRandom}
+var ValidSeatingMethods = []SeatingMethod{SeatingRandom, SeatingSwiss, SeatingInterval}
 
 // Tour is one tour of a tournament.
 type Tour struct {
@@ -71,6 +77,9 @@ type TourState struct {
 	Tables  []TourTable `json:"tables"`
 	// Next is the number of the tour to publish next; 0 when all are played.
 	Next int `json:"next"`
+	// Repeats counts the repeat meetings at the current tour's tables: each
+	// earlier meeting of each pair seated together.
+	Repeats int `json:"repeats"`
 	// Active is the number of participants who can be seated (not
 	// withdrawn); Missing how many players a whole number of tables lacks.
 	Active  int `json:"active"`
@@ -84,9 +93,28 @@ type Participant struct {
 	Number int `db:"number"`
 }
 
-// TablesFunc makes a tour's tables from the participants to seat: each
-// table's four user IDs, east to north.
-type TablesFunc func(participants []Participant) ([][4]int, error)
+// SeatingPair is two players, the lower user ID first.
+type SeatingPair [2]int
+
+// SeatingStanding is a participant's totals from the finished tours.
+type SeatingStanding struct {
+	TP float64
+	GP int
+}
+
+// SeatingInput is what a tour's seating is made from: the participants to
+// seat (numbered, not withdrawn; a multiple of four), how many times each
+// pair has already met in this tournament's tours, and the standings so far
+// (missing ones count as zero).
+type SeatingInput struct {
+	Participants []Participant
+	Meetings     map[SeatingPair]int
+	Standings    map[int]SeatingStanding
+}
+
+// TablesFunc makes a tour's tables: each table's four user IDs, east to
+// north.
+type TablesFunc func(input SeatingInput) ([][4]int, error)
 
 // TourSeat is where a player sits in a tour, for their own table screen.
 type TourSeat struct {

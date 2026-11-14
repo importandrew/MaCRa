@@ -1,7 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Card, useOverlayState } from '@heroui/react';
 import { useState } from 'react';
-import type { TourState } from '../../models/Tour';
+import {
+  SEATING_METHODS,
+  type SeatingMethod,
+  type TourState,
+} from '../../models/Tour';
+import SegmentedPicker from '../SegmentedPicker';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
   cancelTour,
@@ -77,9 +82,23 @@ export default function ToursCard({
       await onChanged();
     });
 
+  // method: the seating method the next generation uses.
+  const [method, setMethod] = useState<SeatingMethod>('random');
+  const methodPicker = (
+    <SegmentedPicker
+      ariaLabel={t('tours.methodLabel')}
+      options={SEATING_METHODS.map((value) => ({
+        value,
+        label: t(`tours.method.${value}`),
+      }))}
+      selectedKey={method}
+      onSelectionChange={setMethod}
+    />
+  );
+
   const generate = () =>
     runGenerate(async () => {
-      if (await generateTour(eventId, 'random')) {
+      if (await generateTour(eventId, method)) {
         showToast({
           title: t('tours.generated', { n: state.next }),
           variant: 'success',
@@ -115,15 +134,21 @@ export default function ToursCard({
               })
             : t('tours.title')}
         </h2>
+        {current && current.status !== 'finished' && (
+          <p className="text-sm">
+            {t('tours.seatingInfo', {
+              method: t(`tours.method.${current.seating}`),
+              count: state.repeats,
+            })}
+          </p>
+        )}
 
         {canRun && state.next > 0 && !isDraft && (
           <>
+            {blocker == null && methodPicker}
             <p className="text-sm text-muted">
               {blocker ??
-                t('tours.generateHint', {
-                  n: state.next,
-                  players: state.active,
-                })}
+                t(`tours.methodHint.${method}`, { players: state.active })}
             </p>
             <PendingButton
               variant="primary"
@@ -140,6 +165,7 @@ export default function ToursCard({
         {canRun && isDraft && (
           <>
             <p className="text-sm text-muted">{t('tours.draftHint')}</p>
+            {methodPicker}
             <PendingButton
               variant="primary"
               isPending={isActing}

@@ -257,8 +257,22 @@ const en = {
       finished: 'finished',
       aborted: 'aborted',
     },
-    generateHint:
-      'Random seating of {{players}} players. Only the staff see it until it is published.',
+    methodLabel: 'Seating method',
+    method: {
+      random: 'Random',
+      swiss: 'Swiss',
+      interval: 'Interval',
+    },
+    methodHint: {
+      random:
+        'Random seating of {{players}} players with as few repeat meetings as possible. Only the staff see it until it is published.',
+      swiss:
+        'Neighbours in the current standings play together (places 1–4, 5–8, …), moved apart only to avoid repeat meetings. Only the staff see it until it is published.',
+      interval:
+        'By the current standings with a step of the number of tables: table 1 gets places 1, 1+k, 1+2k, 1+3k. Only the staff see it until it is published.',
+    },
+    seatingInfo_one: 'Seating: {{method}} · {{count}} repeat meeting',
+    seatingInfo_other: 'Seating: {{method}} · {{count}} repeat meetings',
     generate: 'Generate tour {{n}} seating',
     generated: 'Tour {{n}} seating generated',
     draftHint:

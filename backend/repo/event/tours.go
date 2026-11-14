@@ -51,7 +51,11 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, method models.Seat
 			return models.WithData(models.ErrTablesIncomplete, models.ErrorData{"missing": missing})
 		}
 
-		tables, err := makeTables(participants)
+		input, err := tx.seatingInput(ctx, eventID, participants)
+		if err != nil {
+			return err
+		}
+		tables, err := makeTables(input)
 		if err != nil {
 			return err
 		}
@@ -238,6 +242,9 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 		default:
 			state.Current = &tour
 			if state.Tables, err = tx.tourTables(ctx, tour.ID); err != nil {
+				return err
+			}
+			if state.Repeats, err = tx.tourRepeats(ctx, eventID, tour); err != nil {
 				return err
 			}
 		}
@@ -444,4 +451,91 @@ func (r *Repo) AddTime(ctx context.Context, eventID, gameID, minutes int) error 
 		}
 		return nil
 	})
+}
+
+// seatingInput gathers what a seating is made from: the participants, how
+// many times each pair has met in the tournament's live and finished tours
+// (aborted ones don't count), and the totals from the finished tours.
+func (r *Repo) seatingInput(ctx context.Context, eventID int, participants []models.Participant) (models.SeatingInput, error) {
+	input := models.SeatingInput{
+		Participants: participants,
+		Meetings:     map[models.SeatingPair]int{},
+		Standings:    map[int]models.SeatingStanding{},
+	}
+
+	rows, err := r.db.Query(ctx, `
+		SELECT a.player_id AS a, b.player_id AS b, count(*) AS meetings
+		FROM tours t
+		JOIN games g ON g.tour_id = t.id
+		JOIN game_players a ON a.game_id = g.id
+		JOIN game_players b ON b.game_id = g.id AND a.player_id < b.player_id
+		WHERE t.event_id = $1 AND t.status IN ($2, $3)
+		GROUP BY a.player_id, b.player_id`,
+		eventID, models.TourLive, models.TourFinished)
+	if err != nil {
+		return input, fmt.Errorf("meetings: %w", err)
+	}
+	type meetingRow struct {
+		A        int `db:"a"`
+		B        int `db:"b"`
+		Meetings int `db:"meetings"`
+	}
+	meetings, err := pgx.CollectRows(rows, pgx.RowToStructByName[meetingRow])
+	if err != nil {
+		return input, fmt.Errorf("meetings: %w", err)
+	}
+	for _, m := range meetings {
+		input.Meetings[models.SeatingPair{m.A, m.B}] = m.Meetings
+	}
+
+	rows, err = r.db.Query(ctx, `
+		SELECT pr.player_id, sum(pr.tournament_points)::float8 AS tp, sum(pr.game_points)::int AS gp
+		FROM tours t
+		JOIN games g ON g.tour_id = t.id AND g.status = $3
+		JOIN player_results pr ON pr.game_id = g.id
+		WHERE t.event_id = $1 AND t.status = $2
+		GROUP BY pr.player_id`,
+		eventID, models.TourFinished, models.GameEnded)
+	if err != nil {
+		return input, fmt.Errorf("standings: %w", err)
+	}
+	type standingRow struct {
+		PlayerID int     `db:"player_id"`
+		TP       float64 `db:"tp"`
+		GP       int     `db:"gp"`
+	}
+	standings, err := pgx.CollectRows(rows, pgx.RowToStructByName[standingRow])
+	if err != nil {
+		return input, fmt.Errorf("standings: %w", err)
+	}
+	for _, s := range standings {
+		input.Standings[s.PlayerID] = models.SeatingStanding{TP: s.TP, GP: s.GP}
+	}
+	return input, nil
+}
+
+// tourRepeats counts the repeat meetings at a tour's tables: for each pair
+// seated together, how many times they met in the tournament's earlier live
+// or finished tours.
+func (r *Repo) tourRepeats(ctx context.Context, eventID int, tour models.Tour) (int, error) {
+	rows, err := r.db.Query(ctx, `
+		WITH cur AS (
+			SELECT g.id AS game_id, gp.player_id FROM games g
+			JOIN game_players gp ON gp.game_id = g.id
+			WHERE g.tour_id = $2
+		), prev AS (
+			SELECT g.id AS game_id, gp.player_id FROM tours t
+			JOIN games g ON g.tour_id = t.id
+			JOIN game_players gp ON gp.game_id = g.id
+			WHERE t.event_id = $1 AND t.id <> $2 AND t.number < $3 AND t.status IN ($4, $5)
+		)
+		SELECT count(*) FROM cur a
+		JOIN cur b ON b.game_id = a.game_id AND a.player_id < b.player_id
+		JOIN prev pa ON pa.player_id = a.player_id
+		JOIN prev pb ON pb.game_id = pa.game_id AND pb.player_id = b.player_id`,
+		eventID, tour.ID, tour.Number, models.TourLive, models.TourFinished)
+	if err != nil {
+		return 0, err
+	}
+	return pgx.CollectOneRow(rows, pgx.RowTo[int])
 }

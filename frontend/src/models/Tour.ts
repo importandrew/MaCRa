@@ -4,7 +4,11 @@
 export type TourStatus =
   'draft' | 'published' | 'live' | 'finished' | 'aborted';
 
-export type SeatingMethod = 'random';
+export type SeatingMethod = 'random' | 'swiss' | 'interval';
+
+// SEATING_METHODS in the order the desk offers them (labels:
+// tours.method.<method>).
+export const SEATING_METHODS: SeatingMethod[] = ['random', 'swiss', 'interval'];
 
 export type Tour = {
   id: number;
@@ -45,6 +49,8 @@ export type TourState = {
   // next: the number of the tour to publish next; 0 while one is published
   // or live, and when all are played.
   next: number;
+  // repeats: repeat meetings at the current tour's tables.
+  repeats: number;
   // active: participants who can be seated; missing: players lacking for
   // whole tables.
   active: number;

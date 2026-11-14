@@ -2,12 +2,11 @@ package event
 
 import (
 	"context"
-	"crypto/rand"
 	"fmt"
-	"math/big"
-	"slices"
+	"time"
 
 	"github.com/importandrew/MaCRa/models"
+	"github.com/importandrew/MaCRa/service/seating"
 )
 
 // GenerateTour drafts the tournament's next tour with tables made by the
@@ -37,46 +36,29 @@ func (s *Service) Tours(ctx context.Context, eventID int) (models.TourState, err
 	return s.repo.TourState(ctx, eventID)
 }
 
+// seatingSearchTime is how long a seating may search for fewer repeat
+// meetings.
+const seatingSearchTime = 2 * time.Second
+
 // seatingFunc returns the table maker of a seating method, or
 // models.ErrInvalidSeating.
 func seatingFunc(method models.SeatingMethod) (models.TablesFunc, error) {
 	switch method {
 	case models.SeatingRandom:
-		return randomTables, nil
+		return func(input models.SeatingInput) ([][4]int, error) {
+			return seating.Random(input, time.Now().Add(seatingSearchTime))
+		}, nil
+	case models.SeatingSwiss:
+		return func(input models.SeatingInput) ([][4]int, error) {
+			return seating.Swiss(input, time.Now().Add(seatingSearchTime))
+		}, nil
+	case models.SeatingInterval:
+		return func(input models.SeatingInput) ([][4]int, error) {
+			return seating.Interval(input, 0), nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("%w: %q", models.ErrInvalidSeating, method)
 	}
-}
-
-// randomTables shuffles the participants into tables of four. At a table the
-// winds go by participant number, east the lowest (area 8: table and wind by
-// participant number). The repo has checked that they fill whole tables.
-func randomTables(participants []models.Participant) ([][4]int, error) {
-	shuffled := slices.Clone(participants)
-	if err := shuffle(shuffled); err != nil {
-		return nil, err
-	}
-
-	tables := make([][4]int, 0, len(shuffled)/models.SeatsPerTable)
-	for start := 0; start+models.SeatsPerTable <= len(shuffled); start += models.SeatsPerTable {
-		table := slices.Clone(shuffled[start : start+models.SeatsPerTable])
-		slices.SortFunc(table, func(a, b models.Participant) int { return a.Number - b.Number })
-		tables = append(tables, [4]int{table[0].UserID, table[1].UserID, table[2].UserID, table[3].UserID})
-	}
-	return tables, nil
-}
-
-// shuffle puts the participants in a random order (Fisher–Yates) with
-// crypto/rand: nobody should be able to predict the seating.
-func shuffle(participants []models.Participant) error {
-	for i := len(participants) - 1; i > 0; i-- {
-		j, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
-		if err != nil {
-			return fmt.Errorf("shuffle: %w", err)
-		}
-		participants[i], participants[j.Int64()] = participants[j.Int64()], participants[i]
-	}
-	return nil
 }
 
 // StartTour starts the published tour: its games go live.
