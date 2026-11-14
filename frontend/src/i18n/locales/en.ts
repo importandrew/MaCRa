@@ -245,7 +245,7 @@ const en = {
     rules: 'Rules',
   },
   rules: {
-    title: 'Rules',
+    title: 'Game rules',
     preset: 'Start from',
     presets: {
       standard: 'MCR standard',
@@ -266,15 +266,15 @@ const en = {
   },
   eventSettings: {
     title: 'Settings',
-    hint: 'Can change at any time.',
     finishedReadOnly:
       'The event is finished: its settings can no longer change.',
     permissions: 'Permissions',
-    permissionsHint: 'Referees can always finish and abort games.',
+    permissionsHint:
+      'Can change at any time. Referees can always finish and abort games.',
     finishGame: 'Finish a game early',
     finish: {
-      seated: 'Players at the table and referees',
       referees: 'Referees only',
+      seated: 'Also players at the table',
     },
     abortGame: 'Abort a game',
     abort: {

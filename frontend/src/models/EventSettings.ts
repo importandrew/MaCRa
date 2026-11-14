@@ -8,8 +8,9 @@ export type EventSettings = {
   abort_game: AbortGameBy;
 };
 
-// The options in the order the form shows them; referees always may.
-export const FINISH_GAME_OPTIONS: FinishGameBy[] = ['seated', 'referees'];
+// The options in the order the form shows them, from referees only to the
+// most open; referees always may.
+export const FINISH_GAME_OPTIONS: FinishGameBy[] = ['referees', 'seated'];
 export const ABORT_GAME_OPTIONS: AbortGameBy[] = [
   'referees',
   'seated_before_first_round',

@@ -53,10 +53,11 @@ function SettingRadios<T extends string>({
   );
 }
 
-// EventSettingsCard is the Settings card in Manage → Rules: the event's
-// settings that don't affect the score, in sections (Permissions: who may
-// finish or abort a game; more sections join it as settings are added). They
-// can change at any time, except in a finished event, and are saved together.
+// EventSettingsCard is the card under the game rules in Manage → Settings:
+// the event's settings that don't affect the score, in sections with their
+// own headings (Permissions: who may finish or abort a game; more sections
+// join it as settings are added). They can change at any time, except in a
+// finished event, and are saved together.
 export default function EventSettingsCard({
   event,
   onSaved,
@@ -87,12 +88,6 @@ export default function EventSettingsCard({
     <>
       <Card>
         <Card.Content className="gap-4">
-          <p className="text-muted">{t('eventSettings.title')}</p>
-          <p className="text-sm text-muted">
-            {isFinished
-              ? t('eventSettings.finishedReadOnly')
-              : t('eventSettings.hint')}
-          </p>
           <Form
             id="event-settings-form"
             onSubmit={handleSave}
@@ -104,7 +99,9 @@ export default function EventSettingsCard({
                   {t('eventSettings.permissions')}
                 </h2>
                 <p className="text-sm text-muted">
-                  {t('eventSettings.permissionsHint')}
+                  {isFinished
+                    ? t('eventSettings.finishedReadOnly')
+                    : t('eventSettings.permissionsHint')}
                 </p>
               </div>
               <SettingRadios
