@@ -4,10 +4,8 @@ import { type FormEvent, useState } from 'react';
 import type { Event } from '../../models/Event';
 import {
   ABORT_GAME_OPTIONS,
-  type AbortGameBy,
   type EventSettings,
   FINISH_GAME_OPTIONS,
-  type FinishGameBy,
   sameSettings,
 } from '../../models/EventSettings';
 import { updateEventSettings } from '../../providers/event/eventApi';
@@ -15,9 +13,9 @@ import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 
-// PermissionsRadios is one permission: a vertical list of its options (the
-// labels are too long for a SegmentedPicker on a phone).
-function PermissionsRadios<T extends string>({
+// SettingRadios is one setting: a vertical list of its options (the labels
+// are too long for a SegmentedPicker on a phone).
+function SettingRadios<T extends string>({
   label,
   options,
   value,
@@ -55,10 +53,11 @@ function PermissionsRadios<T extends string>({
   );
 }
 
-// EventPermissionsForm is the Permissions card in Manage → Rules: who may
-// finish or abort a game. Referees always may; the permissions can change at
-// any time, except in a finished event.
-export default function EventPermissionsForm({
+// EventSettingsCard is the Settings card in Manage → Rules: the event's
+// settings that don't affect the score, in sections (Permissions: who may
+// finish or abort a game; more sections join it as settings are added). They
+// can change at any time, except in a finished event, and are saved together.
+export default function EventSettingsCard({
   event,
   onSaved,
 }: {
@@ -77,7 +76,7 @@ export default function EventPermissionsForm({
     e.preventDefault();
     void run(async () => {
       if (await updateEventSettings(event.id, settings)) {
-        showToast({ title: t('permissions.saved'), variant: 'success' });
+        showToast({ title: t('eventSettings.saved'), variant: 'success' });
         setDraft(null);
         onSaved();
       }
@@ -88,56 +87,58 @@ export default function EventPermissionsForm({
     <>
       <Card>
         <Card.Content className="gap-4">
-          <p className="text-muted">{t('permissions.title')}</p>
+          <p className="text-muted">{t('eventSettings.title')}</p>
           <p className="text-sm text-muted">
             {isFinished
-              ? t('permissions.finishedReadOnly')
-              : t('permissions.hint')}
+              ? t('eventSettings.finishedReadOnly')
+              : t('eventSettings.hint')}
           </p>
           <Form
-            id="event-permissions-form"
+            id="event-settings-form"
             onSubmit={handleSave}
             className="flex flex-col gap-4"
           >
-            <PermissionsRadios<FinishGameBy>
-              label={t('permissions.finishGame')}
-              options={FINISH_GAME_OPTIONS}
-              value={settings.finish_game}
-              onChange={(finish_game) => setDraft({ ...settings, finish_game })}
-              isDisabled={isFinished}
-              optionLabel={(option) =>
-                option === 'seated'
-                  ? t('permissions.finishSeated')
-                  : t('permissions.finishReferees')
-              }
-            />
-            <PermissionsRadios<AbortGameBy>
-              label={t('permissions.abortGame')}
-              options={ABORT_GAME_OPTIONS}
-              value={settings.abort_game}
-              onChange={(abort_game) => setDraft({ ...settings, abort_game })}
-              isDisabled={isFinished}
-              optionLabel={(option) =>
-                option === 'referees'
-                  ? t('permissions.abortReferees')
-                  : option === 'seated'
-                    ? t('permissions.abortSeated')
-                    : t('permissions.abortBeforeFirstRound')
-              }
-            />
+            <section className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <h2 className="font-medium">
+                  {t('eventSettings.permissions')}
+                </h2>
+                <p className="text-sm text-muted">
+                  {t('eventSettings.permissionsHint')}
+                </p>
+              </div>
+              <SettingRadios
+                label={t('eventSettings.finishGame')}
+                options={FINISH_GAME_OPTIONS}
+                value={settings.finish_game}
+                onChange={(finish_game) =>
+                  setDraft({ ...settings, finish_game })
+                }
+                isDisabled={isFinished}
+                optionLabel={(option) => t(`eventSettings.finish.${option}`)}
+              />
+              <SettingRadios
+                label={t('eventSettings.abortGame')}
+                options={ABORT_GAME_OPTIONS}
+                value={settings.abort_game}
+                onChange={(abort_game) => setDraft({ ...settings, abort_game })}
+                isDisabled={isFinished}
+                optionLabel={(option) => t(`eventSettings.abort.${option}`)}
+              />
+            </section>
           </Form>
         </Card.Content>
       </Card>
       {!isFinished && (
         <PendingButton
           type="submit"
-          form="event-permissions-form"
+          form="event-settings-form"
           variant="primary"
           isPending={isPending}
           isDisabled={sameSettings(settings, event.settings)}
           className="w-3/4 self-center"
         >
-          {t('permissions.save')}
+          {t('eventSettings.save')}
         </PendingButton>
       )}
     </>

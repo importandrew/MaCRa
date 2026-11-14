@@ -23,12 +23,12 @@ export function permissionDifferences(
 ): string[] {
   const differences: string[] = [];
   if (settings.finish_game === 'referees') {
-    differences.push(t('permissions.finishByReferees'));
+    differences.push(t('eventSettings.finishByReferees'));
   }
   if (settings.abort_game === 'referees') {
-    differences.push(t('permissions.abortByReferees'));
+    differences.push(t('eventSettings.abortByReferees'));
   } else if (settings.abort_game === 'seated') {
-    differences.push(t('permissions.abortBySeated'));
+    differences.push(t('eventSettings.abortBySeated'));
   }
   return differences;
 }

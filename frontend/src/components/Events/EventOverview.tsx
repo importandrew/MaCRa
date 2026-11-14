@@ -133,12 +133,12 @@ export default function EventOverview() {
         >
           {differences.length > 0
             ? differences.join(', ')
-            : t('rules.standard')}
+            : t('rules.presets.standard')}
         </DetailRow>
         {permissions.length > 0 && (
           <DetailRow
             icon={<UserIcon className={iconClass} />}
-            label={t('permissions.title')}
+            label={t('eventSettings.title')}
           >
             {permissions.join(', ')}
           </DetailRow>

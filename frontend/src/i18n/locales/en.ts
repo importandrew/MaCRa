@@ -117,7 +117,7 @@ const en = {
       'A round has been entered: only a referee can abort the game now.',
     event_has_ongoing_games:
       'The event has games in progress. Finish or abort them first.',
-    invalid_event_settings: 'The permissions are invalid',
+    invalid_event_settings: 'The settings are invalid',
     invalid_game_rules: 'The rules are invalid',
     event_rules_frozen:
       'The event already has games: its rules can no longer change.',
@@ -247,8 +247,10 @@ const en = {
   rules: {
     title: 'Rules',
     preset: 'Start from',
-    standard: 'MCR standard',
-    short: 'Short',
+    presets: {
+      standard: 'MCR standard',
+      short: 'Short',
+    },
     hands: 'Hands',
     minHand: 'Minimum hand',
     minHandRange: 'From {{min}} to {{max}}',
@@ -262,20 +264,27 @@ const en = {
     handsCount_other: '{{count}} hands',
     minHandValue: 'minimum hand {{value}}',
   },
-  permissions: {
-    title: 'Permissions',
-    hint: 'Can change at any time. Referees can always finish and abort games.',
+  eventSettings: {
+    title: 'Settings',
+    hint: 'Can change at any time.',
     finishedReadOnly:
-      'The event is finished: its permissions can no longer change.',
+      'The event is finished: its settings can no longer change.',
+    permissions: 'Permissions',
+    permissionsHint: 'Referees can always finish and abort games.',
     finishGame: 'Finish a game early',
-    finishSeated: 'Players at the table and referees',
-    finishReferees: 'Referees only',
+    finish: {
+      seated: 'Players at the table and referees',
+      referees: 'Referees only',
+    },
     abortGame: 'Abort a game',
-    abortReferees: 'Referees only',
-    abortBeforeFirstRound: 'Also players at the table, before the first round',
-    abortSeated: 'Also players at the table, at any time',
-    save: 'Save permissions',
-    saved: 'Permissions saved',
+    abort: {
+      referees: 'Referees only',
+      seated_before_first_round:
+        'Also players at the table, before the first round',
+      seated: 'Also players at the table, at any time',
+    },
+    save: 'Save settings',
+    saved: 'Settings saved',
     finishByReferees: 'only referees finish games',
     abortByReferees: 'only referees abort games',
     abortBySeated: 'players abort games at any time',

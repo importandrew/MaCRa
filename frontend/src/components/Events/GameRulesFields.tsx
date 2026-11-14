@@ -36,7 +36,7 @@ export default function GameRulesFields({
           label={t('rules.preset')}
           options={PRESETS.map((name) => ({
             value: name,
-            label: t(name === 'standard' ? 'rules.standard' : 'rules.short'),
+            label: t(`rules.presets.${name}`),
           }))}
           selectedKey={preset}
           onSelectionChange={(name) => onChange(RULE_PRESETS[name])}

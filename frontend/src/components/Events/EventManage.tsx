@@ -35,7 +35,7 @@ import PendingButton from '../PendingButton';
 import Confirm from '../Confirm';
 import EventSettingsFields from './EventSettingsFields';
 import EventRulesForm from './EventRulesForm';
-import EventPermissionsForm from './EventPermissionsForm';
+import EventSettingsCard from './EventSettingsCard';
 import { type EventSettings, isValidSettings } from './eventSettings';
 
 const ALL_ROLES: EventRole[] = ['player', 'referee', 'observer'];
@@ -255,7 +255,7 @@ export default function EventManage() {
       {activeTab === 'rules' && canManageEvent && (
         <>
           <EventRulesForm event={event} onSaved={refetch} />
-          <EventPermissionsForm event={event} onSaved={refetch} />
+          <EventSettingsCard event={event} onSaved={refetch} />
         </>
       )}
 
