@@ -271,8 +271,18 @@ const en = {
       interval:
         'By the current standings with a step of the number of tables: table 1 gets places 1, 1+k, 1+2k, 1+3k. Only the staff see it until it is published.',
     },
-    seatingInfo_one: 'Seating: {{method}} · {{count}} repeat meeting',
-    seatingInfo_other: 'Seating: {{method}} · {{count}} repeat meetings',
+    methodUsed: 'Seating: {{method}}',
+    methodWithStep: 'Seating: {{method}}, step {{step}}',
+    step: 'Step (places i, i+k, …)',
+    noRepeats: 'No repeat meetings',
+    repeatsSummary_one:
+      '{{count}} repeat meeting · a pair met up to {{maxMet}} times before · {{players}} players meet someone again',
+    repeatsSummary_other:
+      '{{count}} repeat meetings · a pair met up to {{maxMet}} times before · {{players}} players meet someone again',
+    places: 'places {{from}}–{{to}}',
+    metBefore: 'Met before: {{pairs}}',
+    pair_one: '{{a}} – {{b}}',
+    pair_other: '{{a}} – {{b}} (×{{count}})',
     generate: 'Generate tour {{n}} seating',
     generated: 'Tour {{n}} seating generated',
     draftHint:

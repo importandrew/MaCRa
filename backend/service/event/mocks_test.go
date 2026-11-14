@@ -1094,8 +1094,8 @@ func (_c *MockEventRepo_GameHistory_Call) RunAndReturn(run func(ctx context.Cont
 }
 
 // GenerateTour provides a mock function for the type MockEventRepo
-func (_mock *MockEventRepo) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error) {
-	ret := _mock.Called(ctx, eventID, method, makeTables)
+func (_mock *MockEventRepo) GenerateTour(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc) (models.Tour, error) {
+	ret := _mock.Called(ctx, eventID, seating, makeTables)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GenerateTour")
@@ -1103,16 +1103,16 @@ func (_mock *MockEventRepo) GenerateTour(ctx context.Context, eventID int, metho
 
 	var r0 models.Tour
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) (models.Tour, error)); ok {
-		return returnFunc(ctx, eventID, method, makeTables)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating, models.TablesFunc) (models.Tour, error)); ok {
+		return returnFunc(ctx, eventID, seating, makeTables)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) models.Tour); ok {
-		r0 = returnFunc(ctx, eventID, method, makeTables)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating, models.TablesFunc) models.Tour); ok {
+		r0 = returnFunc(ctx, eventID, seating, makeTables)
 	} else {
 		r0 = ret.Get(0).(models.Tour)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.SeatingMethod, models.TablesFunc) error); ok {
-		r1 = returnFunc(ctx, eventID, method, makeTables)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Seating, models.TablesFunc) error); ok {
+		r1 = returnFunc(ctx, eventID, seating, makeTables)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1127,13 +1127,13 @@ type MockEventRepo_GenerateTour_Call struct {
 // GenerateTour is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-//   - method models.SeatingMethod
+//   - seating models.Seating
 //   - makeTables models.TablesFunc
-func (_e *MockEventRepo_Expecter) GenerateTour(ctx any, eventID any, method any, makeTables any) *MockEventRepo_GenerateTour_Call {
-	return &MockEventRepo_GenerateTour_Call{Call: _e.mock.On("GenerateTour", ctx, eventID, method, makeTables)}
+func (_e *MockEventRepo_Expecter) GenerateTour(ctx any, eventID any, seating any, makeTables any) *MockEventRepo_GenerateTour_Call {
+	return &MockEventRepo_GenerateTour_Call{Call: _e.mock.On("GenerateTour", ctx, eventID, seating, makeTables)}
 }
 
-func (_c *MockEventRepo_GenerateTour_Call) Run(run func(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc)) *MockEventRepo_GenerateTour_Call {
+func (_c *MockEventRepo_GenerateTour_Call) Run(run func(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc)) *MockEventRepo_GenerateTour_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1143,9 +1143,9 @@ func (_c *MockEventRepo_GenerateTour_Call) Run(run func(ctx context.Context, eve
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
-		var arg2 models.SeatingMethod
+		var arg2 models.Seating
 		if args[2] != nil {
-			arg2 = args[2].(models.SeatingMethod)
+			arg2 = args[2].(models.Seating)
 		}
 		var arg3 models.TablesFunc
 		if args[3] != nil {
@@ -1166,7 +1166,7 @@ func (_c *MockEventRepo_GenerateTour_Call) Return(tour models.Tour, err error) *
 	return _c
 }
 
-func (_c *MockEventRepo_GenerateTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error)) *MockEventRepo_GenerateTour_Call {
+func (_c *MockEventRepo_GenerateTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc) (models.Tour, error)) *MockEventRepo_GenerateTour_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2275,6 +2275,78 @@ func (_c *MockEventRepo_RulesFrozen_Call) Return(b bool, err error) *MockEventRe
 }
 
 func (_c *MockEventRepo_RulesFrozen_Call) RunAndReturn(run func(ctx context.Context, eventID int) (bool, error)) *MockEventRepo_RulesFrozen_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SeatingHistory provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) SeatingHistory(ctx context.Context, eventID int, beforeNumber int) (models.SeatingInput, error) {
+	ret := _mock.Called(ctx, eventID, beforeNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SeatingHistory")
+	}
+
+	var r0 models.SeatingInput
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (models.SeatingInput, error)); ok {
+		return returnFunc(ctx, eventID, beforeNumber)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) models.SeatingInput); ok {
+		r0 = returnFunc(ctx, eventID, beforeNumber)
+	} else {
+		r0 = ret.Get(0).(models.SeatingInput)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, beforeNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_SeatingHistory_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SeatingHistory'
+type MockEventRepo_SeatingHistory_Call struct {
+	*mock.Call
+}
+
+// SeatingHistory is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - beforeNumber int
+func (_e *MockEventRepo_Expecter) SeatingHistory(ctx any, eventID any, beforeNumber any) *MockEventRepo_SeatingHistory_Call {
+	return &MockEventRepo_SeatingHistory_Call{Call: _e.mock.On("SeatingHistory", ctx, eventID, beforeNumber)}
+}
+
+func (_c *MockEventRepo_SeatingHistory_Call) Run(run func(ctx context.Context, eventID int, beforeNumber int)) *MockEventRepo_SeatingHistory_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_SeatingHistory_Call) Return(seatingInput models.SeatingInput, err error) *MockEventRepo_SeatingHistory_Call {
+	_c.Call.Return(seatingInput, err)
+	return _c
+}
+
+func (_c *MockEventRepo_SeatingHistory_Call) RunAndReturn(run func(ctx context.Context, eventID int, beforeNumber int) (models.SeatingInput, error)) *MockEventRepo_SeatingHistory_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -269,10 +269,24 @@ const ru: Messages = {
       interval:
         'По текущему рейтингу с шагом, равным числу столов: стол 1 получает места 1, 1+k, 1+2k, 1+3k. До публикации её видят только судьи, наблюдатели и организатор.',
     },
-    seatingInfo_one: 'Рассадка: {{method}} · {{count}} повторная встреча',
-    seatingInfo_few: 'Рассадка: {{method}} · {{count}} повторные встречи',
-    seatingInfo_many: 'Рассадка: {{method}} · {{count}} повторных встреч',
-    seatingInfo_other: 'Рассадка: {{method}} · {{count}} повторной встречи',
+    methodUsed: 'Рассадка: {{method}}',
+    methodWithStep: 'Рассадка: {{method}}, шаг {{step}}',
+    step: 'Шаг (места i, i+k, …)',
+    noRepeats: 'Повторных встреч нет',
+    repeatsSummary_one:
+      '{{count}} повторная встреча · пара встречалась до {{maxMet}} раз · игроков с повторами: {{players}}',
+    repeatsSummary_few:
+      '{{count}} повторные встречи · пара встречалась до {{maxMet}} раз · игроков с повторами: {{players}}',
+    repeatsSummary_many:
+      '{{count}} повторных встреч · пара встречалась до {{maxMet}} раз · игроков с повторами: {{players}}',
+    repeatsSummary_other:
+      '{{count}} повторной встречи · пара встречалась до {{maxMet}} раз · игроков с повторами: {{players}}',
+    places: 'места {{from}}–{{to}}',
+    metBefore: 'Уже встречались: {{pairs}}',
+    pair_one: '{{a}} – {{b}}',
+    pair_few: '{{a}} – {{b}} (×{{count}})',
+    pair_many: '{{a}} – {{b}} (×{{count}})',
+    pair_other: '{{a}} – {{b}} (×{{count}})',
     generate: 'Сгенерировать рассадку тура {{n}}',
     generated: 'Рассадка тура {{n}} сгенерирована',
     draftHint:

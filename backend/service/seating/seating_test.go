@@ -146,3 +146,29 @@ func TestInterval(t *testing.T) {
 		{110, 112, 114, 116},
 	}, tables, "step 2: blocks of two tables")
 }
+
+func TestQuality(t *testing.T) {
+	input := Input{Participants: participants(8), Standings: map[int]Standing{}}
+	for _, p := range input.Participants {
+		input.Standings[p.UserID] = Standing{TP: float64(100 - p.Number)} // place = number
+	}
+	input.Meetings = map[Pair]int{NewPair(101, 102): 2, NewPair(105, 108): 1}
+	tables := [][4]int{{101, 102, 103, 104}, {105, 106, 107, 108}}
+
+	quality, summary := Quality(tables, input)
+
+	require.Len(t, quality, 2)
+	assert.Equal(t, 2, quality[0].Repeats)
+	assert.Equal(t, []models.RepeatPair{{A: 101, B: 102, Met: 2}}, quality[0].Pairs)
+	assert.Equal(t, &models.PlaceRange{From: 1, To: 4}, quality[0].Places)
+	assert.Equal(t, 1, quality[1].Repeats)
+	assert.Equal(t, &models.PlaceRange{From: 5, To: 8}, quality[1].Places)
+	assert.Equal(t, 3, summary.Repeats)
+	assert.Equal(t, 2, summary.MaxMet)
+	assert.Equal(t, 4, summary.PlayersWithRepeats)
+
+	input.Standings = nil
+	quality, _ = Quality(tables, input)
+	assert.Nil(t, quality[0].Places, "no places before any tour is finished")
+	assert.Empty(t, quality[0].Pairs[1:], "only the pairs who met")
+}

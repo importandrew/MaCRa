@@ -27,7 +27,7 @@ func inOrder(input models.SeatingInput) ([][4]int, error) {
 // generateAndPublish drafts the next tour seated by inOrder and publishes
 // it, returning the tour as drafted.
 func generateAndPublish(ctx context.Context, repo *Repo, eventID int) (models.Tour, error) {
-	tour, err := repo.GenerateTour(ctx, eventID, models.SeatingRandom, inOrder)
+	tour, err := repo.GenerateTour(ctx, eventID, models.Seating{Method: models.SeatingRandom}, inOrder)
 	if err != nil {
 		return tour, err
 	}
@@ -65,7 +65,7 @@ func TestTours(t *testing.T) {
 		require.NoError(t, repo.Draw(ctx, eventID))
 		// A draft is seen by the staff only, and may be generated again.
 		assert.ErrorIs(t, repo.PublishTour(ctx, eventID), models.ErrTourNotFound, "nothing drafted")
-		draft, err := repo.GenerateTour(ctx, eventID, models.SeatingRandom, inOrder)
+		draft, err := repo.GenerateTour(ctx, eventID, models.Seating{Method: models.SeatingRandom}, inOrder)
 		require.NoError(t, err)
 		assert.Equal(t, models.TourDraft, draft.Status)
 		assert.Nil(t, draft.PublishedAt)
@@ -77,7 +77,7 @@ func TestTours(t *testing.T) {
 		assert.ErrorIs(t, err, models.ErrGameNotFound, "players don't see a draft")
 		assert.ErrorIs(t, repo.Draw(ctx, eventID), models.ErrTourInProgress, "no draw over a draft")
 		assert.ErrorIs(t, repo.StartTour(ctx, eventID), models.ErrTourNotFound, "a draft can't start")
-		_, err = repo.GenerateTour(ctx, eventID, models.SeatingRandom, inOrder)
+		_, err = repo.GenerateTour(ctx, eventID, models.Seating{Method: models.SeatingRandom}, inOrder)
 		require.NoError(t, err, "generated again")
 		_, err = games.Status(ctx, draftGame)
 		assert.ErrorIs(t, err, models.ErrGameNotFound, "the old draft's games are gone")
@@ -190,7 +190,7 @@ func TestTourRun(t *testing.T) {
 
 		// The seating of tour 2 sees tour 1: who met whom, and the standings.
 		var seen models.SeatingInput
-		_, err = repo.GenerateTour(ctx, eventID, models.SeatingRandom, func(input models.SeatingInput) ([][4]int, error) {
+		_, err = repo.GenerateTour(ctx, eventID, models.Seating{Method: models.SeatingRandom}, func(input models.SeatingInput) ([][4]int, error) {
 			seen = input
 			return inOrder(input)
 		})
@@ -208,7 +208,15 @@ func TestTourRun(t *testing.T) {
 		state, err = repo.TourState(ctx, eventID)
 		require.NoError(t, err)
 		require.Equal(t, 2, state.Current.Number)
-		assert.Equal(t, 6, state.Repeats, "the same table again: each pair meets a second time")
+		// The history before tour 2 (for its quality): tour 1's 6 pairs, and
+		// tour 2 itself doesn't count.
+		history, err := repo.SeatingHistory(ctx, eventID, state.Current.Number)
+		require.NoError(t, err)
+		assert.Len(t, history.Meetings, 6)
+		assert.NotEmpty(t, history.Standings)
+		history, err = repo.SeatingHistory(ctx, eventID, 1)
+		require.NoError(t, err)
+		assert.Empty(t, history.Meetings, "nothing before tour 1")
 		aborted := state.Tables[0].GameID
 		require.NoError(t, repo.AbortTour(ctx, eventID))
 		status, err := games.Status(ctx, aborted)

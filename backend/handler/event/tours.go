@@ -31,10 +31,13 @@ func (h Handler) Tours(c *gin.Context) {
 
 type generateTourRequest struct {
 	Seating models.SeatingMethod `json:"seating" binding:"required"`
+	// Step is an interval seating's step; missing: the number of tables.
+	Step *int `json:"step"`
 }
 
 // GenerateTour drafts the next tour's seating, replacing an earlier draft
-// (POST /event/:id/tours, {"seating": "random"}). It needs
+// (POST /event/:id/tours, {"seating": "interval", "step": 2}; the step only
+// for "interval"). It needs
 // models.CapRunTournament.
 func (h Handler) GenerateTour(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
@@ -50,7 +53,7 @@ func (h Handler) GenerateTour(c *gin.Context) {
 		return
 	}
 
-	tour, err := h.event.GenerateTour(c.Request.Context(), eventID, req.Seating)
+	tour, err := h.event.GenerateTour(c.Request.Context(), eventID, models.Seating{Method: req.Seating, Step: req.Step})
 	if err != nil {
 		httperr.Error(c, err)
 		return

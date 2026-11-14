@@ -32,12 +32,21 @@ const (
 
 var ValidSeatingMethods = []SeatingMethod{SeatingRandom, SeatingSwiss, SeatingInterval}
 
+// Seating is how a tour's tables are made: the method, and for an interval
+// seating its step (nil: the number of tables).
+type Seating struct {
+	Method SeatingMethod
+	Step   *int
+}
+
 // Tour is one tour of a tournament.
 type Tour struct {
 	ID      int           `db:"id" json:"id"`
 	Number  int           `db:"number" json:"number"`
 	Status  TourStatus    `db:"status" json:"status"`
 	Seating SeatingMethod `db:"seating" json:"seating"`
+	// Step is an interval seating's step; nil for the other methods.
+	Step *int `db:"seating_step" json:"seating_step"`
 	// PublishedAt is nil while the seating is a draft.
 	PublishedAt *time.Time `db:"published_at" json:"published_at"`
 	// Minutes is the tour's length, set when it starts; nil before.
@@ -67,6 +76,26 @@ type TourTable struct {
 	// ExtraMinutes is the time a referee added to the table.
 	ExtraMinutes int    `json:"extra_minutes"`
 	Seats        []Seat `json:"seats"`
+	// Repeats counts the table's repeat meetings; RepeatPairs are the pairs
+	// who met before, with how many times.
+	Repeats     int          `json:"repeats"`
+	RepeatPairs []RepeatPair `json:"repeat_pairs"`
+	// Places are the lowest and highest places in the standings at the
+	// table; nil before any tour is finished.
+	Places *PlaceRange `json:"places"`
+}
+
+// RepeatPair is two players at a table who have met before, Met times.
+type RepeatPair struct {
+	A   int `json:"a"`
+	B   int `json:"b"`
+	Met int `json:"met"`
+}
+
+// PlaceRange is the range of places in the standings at a table.
+type PlaceRange struct {
+	From int `json:"from"`
+	To   int `json:"to"`
 }
 
 // TourState is a tournament's tours as its desk shows them: the current tour
@@ -78,8 +107,12 @@ type TourState struct {
 	// Next is the number of the tour to publish next; 0 when all are played.
 	Next int `json:"next"`
 	// Repeats counts the repeat meetings at the current tour's tables: each
-	// earlier meeting of each pair seated together.
-	Repeats int `json:"repeats"`
+	// earlier meeting of each pair seated together. MaxMet is the most times
+	// a pair seated together has met before; PlayersWithRepeats how many
+	// players meet someone again.
+	Repeats            int `json:"repeats"`
+	MaxMet             int `json:"max_met"`
+	PlayersWithRepeats int `json:"players_with_repeats"`
 	// Active is the number of participants who can be seated (not
 	// withdrawn); Missing how many players a whole number of tables lacks.
 	Active  int `json:"active"`

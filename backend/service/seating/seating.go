@@ -223,3 +223,55 @@ func newRNG() (*mrand.Rand, error) {
 	}
 	return mrand.New(mrand.NewChaCha8(seed)), nil //nolint:gosec // ChaCha8 seeded from crypto/rand
 }
+
+// Quality describes the tables of a tour: per table its repeat meetings
+// (the pairs who met before, and how often) and the range of places in the
+// standings (nil without standings); and for the tour the repeat meetings,
+// the most times one pair has met before and how many players meet someone
+// again.
+func Quality(tables [][4]int, input Input) ([]TableQuality, models.TourState) {
+	var place map[int]int
+	if len(input.Standings) > 0 {
+		place = map[int]int{}
+		for i, p := range Ranked(input) {
+			place[p.UserID] = i + 1
+		}
+	}
+
+	quality := make([]TableQuality, 0, len(tables))
+	var summary models.TourState
+	withRepeats := map[int]bool{}
+	for _, table := range tables {
+		q := TableQuality{Pairs: []models.RepeatPair{}}
+		for i := range table {
+			for j := i + 1; j < len(table); j++ {
+				met := input.Meetings[NewPair(table[i], table[j])]
+				if met == 0 {
+					continue
+				}
+				q.Repeats += met
+				q.Pairs = append(q.Pairs, models.RepeatPair{A: table[i], B: table[j], Met: met})
+				summary.MaxMet = max(summary.MaxMet, met)
+				withRepeats[table[i]], withRepeats[table[j]] = true, true
+			}
+		}
+		if place != nil {
+			q.Places = &models.PlaceRange{From: len(place) + 1}
+			for _, userID := range table {
+				q.Places.From = min(q.Places.From, place[userID])
+				q.Places.To = max(q.Places.To, place[userID])
+			}
+		}
+		summary.Repeats += q.Repeats
+		quality = append(quality, q)
+	}
+	summary.PlayersWithRepeats = len(withRepeats)
+	return quality, summary
+}
+
+// TableQuality is one table's part of Quality.
+type TableQuality struct {
+	Repeats int
+	Pairs   []models.RepeatPair
+	Places  *models.PlaceRange
+}
