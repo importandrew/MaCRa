@@ -35,7 +35,7 @@ func TestHandler_PenaltyInGame(t *testing.T) {
 	eventSvc := NewMockEventService(t)
 	gameSvc := NewMockGameService(t)
 	eventSvc.EXPECT().HasCapability(mock.Anything, 1, 1, 100, models.CapRefereeEntry).Return(nil)
-	gameSvc.EXPECT().PenaltyInGame(mock.Anything, models.FalseMahjong, 100, 2, 30, true, 5).
+	gameSvc.EXPECT().PenaltyInGame(mock.Anything, models.FalseMahjong, 100, 1, 2, 30, true, 5).
 		Return(models.GameView{ID: 100, Status: models.GameLive, LogSize: 6}, nil)
 	c, w := newEntryTestContext("/game/100/false-mahjong", `{"loser":2,"value":30,"force_next_round":true,"log_size":5}`)
 	c.Params = append(c.Params, gin.Param{Key: "gameId", Value: "100"})

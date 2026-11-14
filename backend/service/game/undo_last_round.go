@@ -12,13 +12,13 @@ import (
 // models.UndoFinalRoundTimeout); without it only a live game is undone
 // (models.ErrGameNotLive). logSize is the number of log entries the caller
 // saw; the repo refuses the undo with models.ErrLogChanged if the log has
-// changed since.
-func (s *Service) UndoLastRound(ctx context.Context, gameID, logSize int, reviveEnded bool) error {
+// changed since. undoneBy is the user undoing it, kept with the undone entry.
+func (s *Service) UndoLastRound(ctx context.Context, gameID, logSize, undoneBy int, reviveEnded bool) error {
 	var endedAfter *time.Time
 	if reviveEnded {
 		endedAfter = new(UndoFinalRoundCutoff(time.Now()))
 	}
-	return s.gameRepo.UndoLastRound(ctx, gameID, logSize, endedAfter)
+	return s.gameRepo.UndoLastRound(ctx, gameID, logSize, undoneBy, endedAfter)
 }
 
 // UndoFinalRoundCutoff returns the time a game must have ended after, as of

@@ -16,6 +16,27 @@ export interface GameRoundLogs {
   id: number;
   players: Player[];
   round_logs: RoundLog[];
+  // undone: the entries undone so far, in the order they were undone; the
+  // log shows each one at the time of its undo.
+  undone: UndoneEntry[];
+}
+
+// LogUser is who entered or undid an entry: a player or a referee. null when
+// unknown (an entry from before authors were recorded, a deleted account).
+export type LogUser = { id: number; name: string } | null;
+
+// UndoneEntry mirrors models.UndoneEntry: an undone round log entry.
+export interface UndoneEntry {
+  round: number;
+  outcome: Outcome;
+  winner: number;
+  loser: number;
+  value: number;
+  force_next_round: boolean;
+  entered_by: LogUser;
+  entered_at: string;
+  undone_by: LogUser;
+  undone_at: string;
 }
 
 export interface RoundLog {
@@ -29,6 +50,8 @@ export interface RoundLog {
   south_score: number;
   west_score: number;
   north_score: number;
+  created_at: string;
+  entered_by: LogUser;
 }
 
 export interface PreparedGameRoundLogs {

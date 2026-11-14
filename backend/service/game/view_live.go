@@ -34,6 +34,11 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 		})
 	}
 
+	undone, err := s.gameRepo.UndoneEntries(ctx, game.ID())
+	if err != nil {
+		return models.GameView{}, err
+	}
+
 	view := models.GameView{
 		ID:      game.ID(),
 		Status:  game.Status(),
@@ -44,7 +49,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 			Kanji: models.RoundKanji(round),
 		},
 		PlayerScores: playerScores,
-		Log:          gameLog(game, log, names),
+		Log:          gameLog(game, log, undone, names),
 	}
 
 	return view, nil

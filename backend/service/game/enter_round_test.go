@@ -42,7 +42,8 @@ func TestEnterRound(t *testing.T) {
 						data.WinnerID == 1 &&
 						data.LoserID == 2 &&
 						data.Value == 8 &&
-						data.LogSize == 0
+						data.LogSize == 0 &&
+						data.EnteredBy == 1 // the player entering it
 				})).Return(nil)
 				expectPlayerGets(mp)
 			},
@@ -209,6 +210,7 @@ func TestEnterRound(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().UndoneEntries(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 

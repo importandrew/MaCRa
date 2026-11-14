@@ -562,6 +562,19 @@ const en = {
   logs: {
     legend: 'Legend',
     noData: 'No data available',
+    entryDetails: 'Who entered it',
+    enteredBy: 'Entered by {{name}} at {{time}}',
+    enteredAt: 'Entered at {{time}}',
+    undoneEntry: 'Round {{round}}: {{what}}',
+    undoneBy: 'Undone by {{name}} at {{time}}',
+    undoneAt: 'Undone at {{time}}',
+    undoneOutcome: {
+      draw: 'Draw',
+      self: 'Self {{value}}: {{winner}}',
+      'deal-in': 'Deal-in {{value}}: {{winner}} from {{loser}}',
+      penalty: 'Penalty {{value}}: {{loser}}',
+      'false mahjong': 'False mahjong {{value}}: {{loser}}',
+    },
   },
   result: {
     table: 'Game results table',

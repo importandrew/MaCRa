@@ -23,10 +23,13 @@ import (
 // models.ErrLogChanged if the log has changed since, so two referees pressing
 // Undo at once remove one entry, not two.
 //
+// The deleted entry is kept in undone_rounds with undoneBy (the user undoing
+// it) and the time, for the game's log.
+//
 // Reviving an ended game takes the same advisory locks as NewGame and refuses
 // with models.ErrPlayerInAnotherGame if one of its players has started
 // another live game in the event: a player can't have two live games.
-func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfter *time.Time) error {
+func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize, undoneBy int, endedAfter *time.Time) error {
 	return r.InTx(ctx, func(tx *Repo) error {
 		if err := tx.lockUnchangedLog(ctx, gameID, logSize); err != nil {
 			return err
@@ -57,7 +60,7 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfte
 			return fmt.Errorf("undo in a %s game: %w", game.Status, models.ErrGameNotLive)
 		}
 
-		return tx.deleteLastRound(ctx, gameID)
+		return tx.deleteLastRound(ctx, gameID, undoneBy)
 	})
 }
 
@@ -116,9 +119,9 @@ func (r *Repo) reviveGame(ctx context.Context, gameID, eventID int, seating [4]i
 	return nil
 }
 
-// deleteLastRound deletes the game's last round log entry, or returns
-// models.ErrNoRounds if the log is empty.
-func (r *Repo) deleteLastRound(ctx context.Context, gameID int) error {
+// deleteLastRound moves the game's last round log entry to undone_rounds,
+// undone by undoneBy now, or returns models.ErrNoRounds if the log is empty.
+func (r *Repo) deleteLastRound(ctx context.Context, gameID, undoneBy int) error {
 	rows, err := r.db.Query(ctx, `
 		SELECT id FROM rounds
 		WHERE game_id = $1
@@ -138,7 +141,21 @@ func (r *Repo) deleteLastRound(ctx context.Context, gameID int) error {
 		return fmt.Errorf("find last round: %w", err)
 	}
 
-	if _, err := r.db.Exec(ctx, `DELETE FROM rounds WHERE id = $1`, roundID); err != nil {
+	// round_scores rows go with the round (ON DELETE CASCADE).
+	if _, err := r.db.Exec(ctx, `
+		WITH gone AS (
+			DELETE FROM rounds WHERE id = $1
+			RETURNING game_id, round_number, outcome, winner_id, loser_id, value,
+				force_next_round, entered_by, created_at
+		)
+		INSERT INTO undone_rounds (
+			game_id, round_number, outcome, winner_id, loser_id, value,
+			force_next_round, entered_by, entered_at, undone_by, undone_at)
+		SELECT game_id, round_number, outcome, winner_id, loser_id, value,
+			force_next_round, entered_by, created_at, $2, $3
+		FROM gone`,
+		roundID, nullIfZero(undoneBy), time.Now().UTC(),
+	); err != nil {
 		return fmt.Errorf("delete round: %w", err)
 	}
 

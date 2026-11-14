@@ -33,12 +33,12 @@ func (r *Repo) SaveRoundOutcome(ctx context.Context, gameID int, data models.Rou
 		// Zero values are stored as NULL (winner_id and loser_id are foreign keys)
 		rows, err := tx.db.Query(ctx, `
 			INSERT INTO rounds(
-				game_id, round_number, event_sequence, outcome, winner_id, loser_id, 
-				value, force_next_round, created_at)
-			VALUES($1, $2, NULL, $3, $4, $5, $6, $7, $8)
+				game_id, round_number, event_sequence, outcome, winner_id, loser_id,
+				value, force_next_round, created_at, entered_by)
+			VALUES($1, $2, NULL, $3, $4, $5, $6, $7, $8, $9)
 			RETURNING id, event_sequence`,
 			gameID, data.Round, data.Outcome, nullIfZero(data.WinnerID), nullIfZero(data.LoserID),
-			nullIfZero(data.Value), data.ForceNextRound, time.Now().UTC())
+			nullIfZero(data.Value), data.ForceNextRound, time.Now().UTC(), nullIfZero(data.EnteredBy))
 		if err != nil {
 			return fmt.Errorf("insert round: %w", err)
 		}

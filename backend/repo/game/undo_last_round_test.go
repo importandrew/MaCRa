@@ -160,7 +160,7 @@ func TestUndoLastRound(t *testing.T) {
 			if testCase.withoutReviving {
 				endedAfter = nil
 			}
-			err = repo.UndoLastRound(ctx, 1, testCase.logSize, endedAfter)
+			err = repo.UndoLastRound(ctx, 1, testCase.logSize, 1, endedAfter)
 
 			if testCase.expectedErr != nil {
 				assert.ErrorIs(t, err, testCase.expectedErr)
@@ -209,7 +209,7 @@ func TestUndoLastRound_Concurrent(t *testing.T) {
 		errs := make(chan error, attempts)
 		var wg sync.WaitGroup
 		for range attempts {
-			wg.Go(func() { errs <- repo.UndoLastRound(ctx, 1, 3, new(time.Now().Add(-models.UndoFinalRoundTimeout))) })
+			wg.Go(func() { errs <- repo.UndoLastRound(ctx, 1, 3, 1, new(time.Now().Add(-models.UndoFinalRoundTimeout))) })
 		}
 		wg.Wait()
 		close(errs)

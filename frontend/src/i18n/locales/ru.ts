@@ -562,6 +562,19 @@ const ru: Messages = {
   logs: {
     legend: 'Обозначения',
     noData: 'Нет данных',
+    entryDetails: 'Кто внёс запись',
+    enteredBy: 'Внёс {{name}} в {{time}}',
+    enteredAt: 'Внесено в {{time}}',
+    undoneEntry: 'Раунд {{round}}: {{what}}',
+    undoneBy: 'Отменил {{name}} в {{time}}',
+    undoneAt: 'Отменено в {{time}}',
+    undoneOutcome: {
+      draw: 'Ничья',
+      self: 'Со стены {{value}}: {{winner}}',
+      'deal-in': 'Наброс {{value}}: {{winner}} от {{loser}}',
+      penalty: 'Штраф {{value}}: {{loser}}',
+      'false mahjong': 'Ложный маджонг {{value}}: {{loser}}',
+    },
   },
   result: {
     table: 'Результаты игры',
