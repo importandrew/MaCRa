@@ -107,11 +107,11 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Event settings
 
-Game rules and permissions are in place; display settings are planned. Two kinds, set by the owner in Manage → Settings, each kind in its own card (game rules also when creating the event), starting from a preset ("MCR standard": 16 hands, minimum 8; "Short": 8 hands, minimum 8) and adjusted value by value. The overview lists the settings that differ from the standard, so players know what they play.
+Game rules, permissions and the minimum games for the rating are in place; the hand input mode is planned. Two kinds, set by the owner in Manage → Settings, each kind in its own card (game rules also when creating the event), starting from a preset ("MCR standard": 16 hands, minimum 8; "Short": 8 hands, minimum 8) and adjusted value by value. The overview lists the settings that differ from the standard, so players know what they play.
 
 - **Game rules** affect the score: number of hands (16, 8, 4 or 1; 16 = East, South, West, North rounds), minimum hand value (8 by default). False mahjong is always 30 or 60, not a setting. They can be changed only while the event has no games (aborted games don't count); after the first game they are frozen, so all games of one rating follow the same rules. Each game also stores a copy of the rules it started with and is always replayed by them.
 - **Permissions** don't affect the score and can be changed at any time (not after the event is finished): who may finish a game early (seated players and referees / referees only), abort it (referees / also seated players before the first round / also seated players at any time). Referees always may. Defaults are the ones in area 1. Planned: undo a round (referees / also seated players, once undos are audited). Creating games by referees for other players' tables comes with tournament seating (area 8), not as a regular-event setting.
-- **Display and input** (can be changed at any time): minimum number of games to appear in the rating (the rating itself is computed the same way); hand input mode — total value (now) or picking fans, once fan-based input exists.
+- **Display and input** (can be changed at any time, not after the event is finished): minimum number of ended games for a place in the rating, 1–100, 1 by default (the rating itself is computed the same way; players with fewer are listed below it without a place); hand input mode — total value (now) or picking fans, once fan-based input exists.
 - Time limits per game are tournament-only (area 8). Not planned for regular events: a choice of who enters rounds, round confirmation by a second player, penalty switches, other rating methods or placement points, automatic seating.
 
 ## 4. Playing a game
@@ -167,7 +167,7 @@ Applies to regular events; tournament games follow area 8.
 - A table of players: place, name, games, TP, GP; sortable by any column. Only ended games count (not live or aborted ones). Members who left or were removed stay in it.
 - Order: total TP, then total GP, then the best single games by GP. Players equal in all of that share the place (5, 5, then 7).
 - The user's own row is highlighted; when it is far down, it stays pinned at the bottom of the screen.
-- Players with fewer games than the event's minimum (event settings) are listed in a separate block "Fewer than N games" below the table.
+- Players with fewer ended games than the event's minimum (event settings) get no place: they are listed in a separate block "Fewer than N games" below the table, in the same order. Places in the table count only the players above the minimum.
 - Tapping a row opens that player's history in the event (for users who can see the event's results; one's own always).
 
 ### History

@@ -25,7 +25,5 @@ func (h Handler) Ratings(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"ratings": ratings,
-	})
+	c.JSON(http.StatusOK, ratings)
 }

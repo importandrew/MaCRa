@@ -92,14 +92,24 @@ type UpdateEventParams struct {
 	GamesReach   *ContentReach
 }
 
-// EventRatingEntry is one row in the event standings table.
+// EventRatingEntry is one row in the event standings table. Rank is 0 (not
+// sent) for a player below the event's minimum games.
 type EventRatingEntry struct {
-	Rank     int     `json:"rank"`
+	Rank     int     `json:"rank,omitempty"`
 	PlayerID int     `json:"player_id"`
 	Name     string  `json:"name"`
 	Games    int     `json:"games"`
 	TP       float32 `json:"tp"`
 	GP       int     `json:"gp"`
+}
+
+// EventRatings is an event's rating: the players with at least MinGames
+// ended games, ranked, and below them, without a place, the players with
+// fewer, in the same order.
+type EventRatings struct {
+	Ratings      []EventRatingEntry `json:"ratings"`
+	BelowMinimum []EventRatingEntry `json:"below_minimum"`
+	MinGames     int                `json:"min_games"`
 }
 
 // EventPlayerResultRow is a per-game result used to build event ratings.

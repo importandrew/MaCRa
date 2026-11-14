@@ -19,7 +19,7 @@ func TestUpdateSettings(t *testing.T) {
 	db.Test(t, "update settings", func(t *testing.T) {
 		ctx := context.Background()
 		eventID := createTestEvent(t, db)
-		settings := models.EventSettings{FinishGame: models.FinishByReferees, AbortGame: models.AbortBySeated}
+		settings := models.EventSettings{FinishGame: models.FinishByReferees, AbortGame: models.AbortBySeated, MinRatingGames: 5}
 
 		require.NoError(t, NewRepo(db).UpdateSettings(ctx, eventID, settings))
 

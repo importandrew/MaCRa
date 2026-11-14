@@ -6,7 +6,14 @@ export type AbortGameBy = 'referees' | 'seated_before_first_round' | 'seated';
 export type EventSettings = {
   finish_game: FinishGameBy;
   abort_game: AbortGameBy;
+  // min_rating_games: ended games a player needs for a place in the rating;
+  // players with fewer are listed below it. 1 lists everyone.
+  min_rating_games: number;
 };
+
+// Limits of min_rating_games, as the backend checks them.
+export const MIN_MIN_RATING_GAMES = 1;
+export const MAX_MIN_RATING_GAMES = 100;
 
 // The options in the order the form shows them, from referees only to the
 // most open; referees always may.
@@ -20,8 +27,21 @@ export const ABORT_GAME_OPTIONS: AbortGameBy[] = [
 export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   finish_game: 'seated',
   abort_game: 'seated_before_first_round',
+  min_rating_games: 1,
 };
 
 export function sameSettings(a: EventSettings, b: EventSettings): boolean {
-  return a.finish_game === b.finish_game && a.abort_game === b.abort_game;
+  return (
+    a.finish_game === b.finish_game &&
+    a.abort_game === b.abort_game &&
+    a.min_rating_games === b.min_rating_games
+  );
+}
+
+export function isValidSettings(settings: EventSettings): boolean {
+  return (
+    Number.isInteger(settings.min_rating_games) &&
+    settings.min_rating_games >= MIN_MIN_RATING_GAMES &&
+    settings.min_rating_games <= MAX_MIN_RATING_GAMES
+  );
 }

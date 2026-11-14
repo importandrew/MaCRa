@@ -2084,24 +2084,22 @@ func (_c *MockEventService_PlayerGameHistory_Call) RunAndReturn(run func(ctx con
 }
 
 // Ratings provides a mock function for the type MockEventService
-func (_mock *MockEventService) Ratings(ctx context.Context, eventID int) ([]models.EventRatingEntry, error) {
+func (_mock *MockEventService) Ratings(ctx context.Context, eventID int) (models.EventRatings, error) {
 	ret := _mock.Called(ctx, eventID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Ratings")
 	}
 
-	var r0 []models.EventRatingEntry
+	var r0 models.EventRatings
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) ([]models.EventRatingEntry, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.EventRatings, error)); ok {
 		return returnFunc(ctx, eventID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int) []models.EventRatingEntry); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.EventRatings); ok {
 		r0 = returnFunc(ctx, eventID)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.EventRatingEntry)
-		}
+		r0 = ret.Get(0).(models.EventRatings)
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
 		r1 = returnFunc(ctx, eventID)
@@ -2141,12 +2139,12 @@ func (_c *MockEventService_Ratings_Call) Run(run func(ctx context.Context, event
 	return _c
 }
 
-func (_c *MockEventService_Ratings_Call) Return(eventRatingEntrys []models.EventRatingEntry, err error) *MockEventService_Ratings_Call {
-	_c.Call.Return(eventRatingEntrys, err)
+func (_c *MockEventService_Ratings_Call) Return(eventRatings models.EventRatings, err error) *MockEventService_Ratings_Call {
+	_c.Call.Return(eventRatings, err)
 	return _c
 }
 
-func (_c *MockEventService_Ratings_Call) RunAndReturn(run func(ctx context.Context, eventID int) ([]models.EventRatingEntry, error)) *MockEventService_Ratings_Call {
+func (_c *MockEventService_Ratings_Call) RunAndReturn(run func(ctx context.Context, eventID int) (models.EventRatings, error)) *MockEventService_Ratings_Call {
 	_c.Call.Return(run)
 	return _c
 }

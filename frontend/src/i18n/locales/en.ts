@@ -269,8 +269,8 @@ const en = {
     finishedReadOnly:
       'The event is finished: its settings can no longer change.',
     permissions: 'Permissions',
-    permissionsHint:
-      'Can change at any time. Referees can always finish and abort games.',
+    hint: 'Can change at any time.',
+    permissionsHint: 'Referees can always finish and abort games.',
     finishGame: 'Finish a game early',
     finish: {
       referees: 'Referees only',
@@ -283,6 +283,13 @@ const en = {
         'Also players at the table, before the first round',
       seated: 'Also players at the table, at any time',
     },
+    rating: 'Rating',
+    ratingHint:
+      'Players with fewer ended games are listed below the rating, without a place.',
+    minRatingGames: 'Minimum games for a place',
+    minRatingGamesRange: 'From {{min}} to {{max}}',
+    minRatingGamesValue_one: 'a rating place after {{count}} game',
+    minRatingGamesValue_other: 'a rating place after {{count}} games',
     save: 'Save settings',
     saved: 'Settings saved',
     finishByReferees: 'only referees finish games',
@@ -311,6 +318,8 @@ const en = {
     tp: 'TP',
     gp: 'GP',
     noGames: 'No games played yet',
+    belowMinimum_one: 'Fewer than {{count}} game',
+    belowMinimum_other: 'Fewer than {{count}} games',
   },
   games: {
     gameNumber: 'Game #{{id}}',

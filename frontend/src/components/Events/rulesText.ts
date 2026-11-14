@@ -15,9 +15,9 @@ export function rulesDifferences(rules: GameRules, t: TFunction): string[] {
   return differences;
 }
 
-// permissionDifferences lists, as texts, the permissions that differ from
-// the defaults; empty for the defaults.
-export function permissionDifferences(
+// settingsDifferences lists, as texts, the settings that differ from the
+// defaults; empty for the defaults.
+export function settingsDifferences(
   settings: EventSettings,
   t: TFunction
 ): string[] {
@@ -29,6 +29,13 @@ export function permissionDifferences(
     differences.push(t('eventSettings.abortByReferees'));
   } else if (settings.abort_game === 'seated') {
     differences.push(t('eventSettings.abortBySeated'));
+  }
+  if (settings.min_rating_games > 1) {
+    differences.push(
+      t('eventSettings.minRatingGamesValue', {
+        count: settings.min_rating_games,
+      })
+    );
   }
   return differences;
 }

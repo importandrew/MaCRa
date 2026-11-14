@@ -12,10 +12,12 @@ func TestEventSettingsValidate(t *testing.T) {
 		valid    bool
 	}{
 		"default":                  {DefaultEventSettings(), true},
-		"referees only":            {EventSettings{FinishGame: FinishByReferees, AbortGame: AbortByReferees}, true},
-		"seated abort at any time": {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated}, true},
-		"unknown finish":           {EventSettings{FinishGame: "anyone", AbortGame: AbortByReferees}, false},
-		"unknown abort":            {EventSettings{FinishGame: FinishBySeated, AbortGame: "anyone"}, false},
+		"referees only":            {EventSettings{FinishGame: FinishByReferees, AbortGame: AbortByReferees, MinRatingGames: 1}, true},
+		"seated abort at any time": {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, MinRatingGames: 100}, true},
+		"unknown finish":           {EventSettings{FinishGame: "anyone", AbortGame: AbortByReferees, MinRatingGames: 1}, false},
+		"unknown abort":            {EventSettings{FinishGame: FinishBySeated, AbortGame: "anyone", MinRatingGames: 1}, false},
+		"min rating games 0":       {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, MinRatingGames: 0}, false},
+		"min rating games 101":     {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, MinRatingGames: 101}, false},
 		"empty":                    {EventSettings{}, false},
 	}
 

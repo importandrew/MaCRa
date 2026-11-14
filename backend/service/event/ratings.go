@@ -16,16 +16,42 @@ type playerAgg struct {
 	sessionGP []int // sorted descending
 }
 
-func (s *Service) Ratings(ctx context.Context, eventID int) ([]models.EventRatingEntry, error) {
-	rows, err := s.repo.ListEndedPlayerResults(ctx, eventID)
+// Ratings returns the event's rating: the players with at least the event's
+// minimum of ended games ranked, the others below without a place. Both are
+// ordered the same way (orderedPlayers).
+func (s *Service) Ratings(ctx context.Context, eventID int) (models.EventRatings, error) {
+	event, err := s.repo.Get(ctx, eventID)
 	if err != nil {
-		return nil, err
+		return models.EventRatings{}, err
 	}
 
-	return buildEventRatings(rows), nil
+	rows, err := s.repo.ListEndedPlayerResults(ctx, eventID)
+	if err != nil {
+		return models.EventRatings{}, err
+	}
+
+	minGames := event.Settings.MinRatingGames
+	ratings := models.EventRatings{
+		Ratings:      []models.EventRatingEntry{},
+		BelowMinimum: []models.EventRatingEntry{},
+		MinGames:     minGames,
+	}
+	for _, p := range orderedPlayers(rows) {
+		entry := models.EventRatingEntry{PlayerID: p.playerID, Name: p.name, Games: p.games, TP: p.tp, GP: p.gp}
+		if p.games < minGames {
+			ratings.BelowMinimum = append(ratings.BelowMinimum, entry)
+			continue
+		}
+		entry.Rank = len(ratings.Ratings) + 1
+		ratings.Ratings = append(ratings.Ratings, entry)
+	}
+
+	return ratings, nil
 }
 
-func buildEventRatings(rows []models.EventPlayerResultRow) []models.EventRatingEntry {
+// orderedPlayers sums the results by player and orders the players by total
+// TP, then total GP, then their best games by GP, then by player ID.
+func orderedPlayers(rows []models.EventPlayerResultRow) []*playerAgg {
 	byPlayer := make(map[int]*playerAgg)
 	for _, row := range rows {
 		agg, ok := byPlayer[row.PlayerID]
@@ -67,18 +93,7 @@ func buildEventRatings(rows []models.EventPlayerResultRow) []models.EventRatingE
 		return a.playerID < b.playerID
 	})
 
-	out := make([]models.EventRatingEntry, len(players))
-	for i, p := range players {
-		out[i] = models.EventRatingEntry{
-			Rank:     i + 1,
-			PlayerID: p.playerID,
-			Name:     p.name,
-			Games:    p.games,
-			TP:       p.tp,
-			GP:       p.gp,
-		}
-	}
-	return out
+	return players
 }
 
 // compareSessionGPs compares descending GP lists lexicographically.

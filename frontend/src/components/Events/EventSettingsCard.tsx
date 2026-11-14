@@ -6,12 +6,26 @@ import {
   ABORT_GAME_OPTIONS,
   type EventSettings,
   FINISH_GAME_OPTIONS,
+  isValidSettings,
+  MAX_MIN_RATING_GAMES,
+  MIN_MIN_RATING_GAMES,
   sameSettings,
 } from '../../models/EventSettings';
+import ValueStepper from '../ValueStepper';
 import { updateEventSettings } from '../../providers/event/eventApi';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
+
+// SectionHeading starts a section of the card: its heading and a hint.
+function SectionHeading({ title, hint }: { title: string; hint: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <h2 className="font-medium">{title}</h2>
+      <p className="text-sm text-muted">{hint}</p>
+    </div>
+  );
+}
 
 // SettingRadios is one setting: a vertical list of its options (the labels
 // are too long for a SegmentedPicker on a phone).
@@ -55,8 +69,8 @@ function SettingRadios<T extends string>({
 
 // EventSettingsCard is the card under the game rules in Manage → Settings:
 // the event's settings that don't affect the score, in sections with their
-// own headings (Permissions: who may finish or abort a game; more sections
-// join it as settings are added). They can change at any time, except in a
+// own headings (Permissions: who may finish or abort a game; Rating: the
+// minimum games for a place). They can change at any time, except in a
 // finished event, and are saved together.
 export default function EventSettingsCard({
   event,
@@ -88,22 +102,21 @@ export default function EventSettingsCard({
     <>
       <Card>
         <Card.Content className="gap-4">
+          <p className="text-sm text-muted">
+            {isFinished
+              ? t('eventSettings.finishedReadOnly')
+              : t('eventSettings.hint')}
+          </p>
           <Form
             id="event-settings-form"
             onSubmit={handleSave}
             className="flex flex-col gap-4"
           >
             <section className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <h2 className="font-medium">
-                  {t('eventSettings.permissions')}
-                </h2>
-                <p className="text-sm text-muted">
-                  {isFinished
-                    ? t('eventSettings.finishedReadOnly')
-                    : t('eventSettings.permissionsHint')}
-                </p>
-              </div>
+              <SectionHeading
+                title={t('eventSettings.permissions')}
+                hint={t('eventSettings.permissionsHint')}
+              />
               <SettingRadios
                 label={t('eventSettings.finishGame')}
                 options={FINISH_GAME_OPTIONS}
@@ -123,6 +136,41 @@ export default function EventSettingsCard({
                 optionLabel={(option) => t(`eventSettings.abort.${option}`)}
               />
             </section>
+            <section className="flex flex-col gap-4">
+              <SectionHeading
+                title={t('eventSettings.rating')}
+                hint={t('eventSettings.ratingHint')}
+              />
+              <div className="flex flex-col gap-1.5">
+                <p className="text-sm">{t('eventSettings.minRatingGames')}</p>
+                {isFinished ? (
+                  <p>{settings.min_rating_games}</p>
+                ) : (
+                  <>
+                    <ValueStepper
+                      label={t('eventSettings.minRatingGames')}
+                      value={settings.min_rating_games}
+                      min={MIN_MIN_RATING_GAMES}
+                      onChange={(min_rating_games) =>
+                        setDraft({ ...settings, min_rating_games })
+                      }
+                    />
+                    <p
+                      className={`text-xs text-center ${
+                        settings.min_rating_games > MAX_MIN_RATING_GAMES
+                          ? 'text-danger'
+                          : 'text-muted'
+                      }`}
+                    >
+                      {t('eventSettings.minRatingGamesRange', {
+                        min: MIN_MIN_RATING_GAMES,
+                        max: MAX_MIN_RATING_GAMES,
+                      })}
+                    </p>
+                  </>
+                )}
+              </div>
+            </section>
           </Form>
         </Card.Content>
       </Card>
@@ -132,7 +180,9 @@ export default function EventSettingsCard({
           form="event-settings-form"
           variant="primary"
           isPending={isPending}
-          isDisabled={sameSettings(settings, event.settings)}
+          isDisabled={
+            !isValidSettings(settings) || sameSettings(settings, event.settings)
+          }
           className="w-3/4 self-center"
         >
           {t('eventSettings.save')}
