@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Form, Spinner, useOverlayState } from '@heroui/react';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import LazyAccordion from '../LazyAccordion';
 import SegmentedPicker from '../SegmentedPicker';
-import { Player } from '../../models/Player';
 import type { EventMember, EventRole } from '../../models/EventRole';
 import {
   addEventMember,
@@ -15,10 +14,10 @@ import {
 } from '../../providers/event/eventApi';
 import { useEventPage } from '../../providers/event/eventLayoutContext';
 import { CrownIcon } from '../Icons/CrownIcon';
-import { GetRequest, authFetch } from '../Request';
 import { showToast } from '../Toast';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import PlayerAutocomplete from '../PlayerAutocomplete';
+import { usePlayerSearch } from '../../providers/player/playerApi';
 import PendingButton from '../PendingButton';
 import Confirm from '../Confirm';
 import EventSettingsFields from './EventSettingsFields';
@@ -65,7 +64,8 @@ export default function EventManage() {
   const isFinished = Boolean(event?.finished_at);
   const { isPending: isSaving, run: runSave } = useSubmitOnce();
 
-  const [players, setPlayers] = useState<Player[]>([]);
+  // The add-member picker searches the server as the user types.
+  const { players, search: searchPlayers } = usePlayerSearch();
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [selectedRoles, setSelectedRoles] = useState<EventRole[]>([]);
   const { isPending: isAddingMember, run: runAddMember } = useSubmitOnce();
@@ -79,16 +79,6 @@ export default function EventManage() {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'settings' | 'members'
   >(canManageEvent ? 'overview' : 'members');
-
-  useEffect(() => {
-    if (!canManageMembers) return;
-    const fetchPlayers = async () => {
-      const request = GetRequest('/api/players');
-      const data = await authFetch<Player[]>(request);
-      if (data) setPlayers(data);
-    };
-    fetchPlayers();
-  }, [canManageMembers]);
 
   const handleSave = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -269,6 +259,8 @@ export default function EventManage() {
                           <PlayerAutocomplete
                             label={t('members.user')}
                             items={players}
+                            onSearch={searchPlayers}
+                            description={t('members.searchHint')}
                             selectedKey={selectedUserId || null}
                             onSelectionChange={(id) =>
                               setSelectedUserId(id != null ? String(id) : '')

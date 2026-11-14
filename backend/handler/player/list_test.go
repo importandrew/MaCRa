@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/importandrew/MaCRa/config"
 	"github.com/importandrew/MaCRa/models"
@@ -19,157 +20,52 @@ func TestHandler_List(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	testData := map[string]struct {
-		queryParams  map[string]string
+		url          string
 		mockSetup    func(*MockPlayerService)
 		expectedCode int
-		expectedBody func(*testing.T, *httptest.ResponseRecorder)
+		want         []models.Player
 	}{
-		"ok with name and limit": {
-			queryParams: map[string]string{
-				"name":  "test",
-				"limit": "5",
-			},
+		"the query reaches the search": {
+			url: "/players?q=Iv",
 			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().ListByNameLimit(
-					mock.Anything,
-					"test",
-					5,
-				).Return([]models.Player{
-					{ID: 1, Name: "Test User 1"},
-					{ID: 2, Name: "Test User 2"},
-				}, nil)
+				m.EXPECT().Search(mock.Anything, "Iv").Return([]models.Player{{ID: 42, Name: "Ivan"}}, nil)
 			},
 			expectedCode: http.StatusOK,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var players []models.Player
-				err := json.Unmarshal(w.Body.Bytes(), &players)
-				assert.NoError(t, err)
-				assert.Len(t, players, 2)
-				assert.Equal(t, 1, players[0].ID)
-				assert.Equal(t, "Test User 1", players[0].Name)
-				assert.Equal(t, 2, players[1].ID)
-				assert.Equal(t, "Test User 2", players[1].Name)
-			},
+			want:         []models.Player{{ID: 42, Name: "Ivan"}},
 		},
-		"ok with name only": {
-			queryParams: map[string]string{
-				"name": "john",
-			},
+		"no query": {
+			url: "/players",
 			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().ListByNameLimit(
-					mock.Anything,
-					"john",
-					0,
-				).Return([]models.Player{
-					{ID: 3, Name: "John Doe"},
-				}, nil)
+				m.EXPECT().Search(mock.Anything, "").Return([]models.Player{}, nil)
 			},
 			expectedCode: http.StatusOK,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var players []models.Player
-				err := json.Unmarshal(w.Body.Bytes(), &players)
-				assert.NoError(t, err)
-				assert.Len(t, players, 1)
-				assert.Equal(t, 3, players[0].ID)
-				assert.Equal(t, "John Doe", players[0].Name)
-			},
-		},
-		"ok with limit only": {
-			queryParams: map[string]string{
-				"limit": "10",
-			},
-			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().ListByNameLimit(
-					mock.Anything,
-					"",
-					10,
-				).Return([]models.Player{}, nil)
-			},
-			expectedCode: http.StatusOK,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var players []models.Player
-				err := json.Unmarshal(w.Body.Bytes(), &players)
-				assert.NoError(t, err)
-				assert.Empty(t, players)
-			},
-		},
-		"ok empty query": {
-			queryParams: map[string]string{},
-			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().ListByNameLimit(
-					mock.Anything,
-					"",
-					0,
-				).Return([]models.Player{}, nil)
-			},
-			expectedCode: http.StatusOK,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var players []models.Player
-				err := json.Unmarshal(w.Body.Bytes(), &players)
-				assert.NoError(t, err)
-				assert.Empty(t, players)
-			},
-		},
-		"invalid limit": {
-			queryParams: map[string]string{
-				"name":  "test",
-				"limit": "not-a-number",
-			},
-			mockSetup:    func(m *MockPlayerService) {},
-			expectedCode: http.StatusBadRequest,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				assert.NoError(t, err)
-				assert.Contains(t, response, "error")
-			},
+			want:         []models.Player{},
 		},
 		"service error": {
-			queryParams: map[string]string{
-				"name":  "test",
-				"limit": "5",
-			},
+			url: "/players?q=Ivan",
 			mockSetup: func(m *MockPlayerService) {
-				m.EXPECT().ListByNameLimit(
-					mock.Anything,
-					"test",
-					5,
-				).Return(nil, errors.New("database error"))
+				m.EXPECT().Search(mock.Anything, "Ivan").Return(nil, errors.New("service error"))
 			},
 			expectedCode: http.StatusInternalServerError,
-			expectedBody: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response map[string]string
-				err := json.Unmarshal(w.Body.Bytes(), &response)
-				assert.NoError(t, err)
-				assert.Contains(t, response, "error")
-				assert.Equal(t, "internal", response["error"])
-			},
 		},
 	}
 
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
-			mockPlayerService := NewMockPlayerService(t)
-			testCase.mockSetup(mockPlayerService)
+			mockPlayer := NewMockPlayerService(t)
+			testCase.mockSetup(mockPlayer)
+			handler := NewHandler(mockPlayer, config.Config{})
 
-			handler := NewHandler(mockPlayerService, config.Config{})
-
-			req := httptest.NewRequest(http.MethodGet, "/api/player/list", nil)
-			q := req.URL.Query()
-			for key, value := range testCase.queryParams {
-				q.Add(key, value)
-			}
-			req.URL.RawQuery = q.Encode()
-
+			router := gin.New()
+			router.GET("/players", handler.List)
 			w := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(w)
-			ctx.Request = req
-
-			handler.List(ctx)
+			router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, testCase.url, nil))
 
 			assert.Equal(t, testCase.expectedCode, w.Code)
-			if testCase.expectedBody != nil {
-				testCase.expectedBody(t, w)
+			if testCase.want != nil {
+				var players []models.Player
+				require.NoError(t, json.Unmarshal(w.Body.Bytes(), &players))
+				assert.Equal(t, testCase.want, players)
 			}
 		})
 	}

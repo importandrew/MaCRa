@@ -170,80 +170,6 @@ func (_c *MockPlayerService_Get_Call) RunAndReturn(run func(ctx context.Context,
 	return _c
 }
 
-// ListByNameLimit provides a mock function for the type MockPlayerService
-func (_mock *MockPlayerService) ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error) {
-	ret := _mock.Called(ctx, name, limit)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListByNameLimit")
-	}
-
-	var r0 []models.Player
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) ([]models.Player, error)); ok {
-		return returnFunc(ctx, name, limit)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) []models.Player); ok {
-		r0 = returnFunc(ctx, name, limit)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Player)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int) error); ok {
-		r1 = returnFunc(ctx, name, limit)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockPlayerService_ListByNameLimit_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListByNameLimit'
-type MockPlayerService_ListByNameLimit_Call struct {
-	*mock.Call
-}
-
-// ListByNameLimit is a helper method to define mock.On call
-//   - ctx context.Context
-//   - name string
-//   - limit int
-func (_e *MockPlayerService_Expecter) ListByNameLimit(ctx any, name any, limit any) *MockPlayerService_ListByNameLimit_Call {
-	return &MockPlayerService_ListByNameLimit_Call{Call: _e.mock.On("ListByNameLimit", ctx, name, limit)}
-}
-
-func (_c *MockPlayerService_ListByNameLimit_Call) Run(run func(ctx context.Context, name string, limit int)) *MockPlayerService_ListByNameLimit_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 int
-		if args[2] != nil {
-			arg2 = args[2].(int)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-		)
-	})
-	return _c
-}
-
-func (_c *MockPlayerService_ListByNameLimit_Call) Return(players []models.Player, err error) *MockPlayerService_ListByNameLimit_Call {
-	_c.Call.Return(players, err)
-	return _c
-}
-
-func (_c *MockPlayerService_ListByNameLimit_Call) RunAndReturn(run func(ctx context.Context, name string, limit int) ([]models.Player, error)) *MockPlayerService_ListByNameLimit_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // Login provides a mock function for the type MockPlayerService
 func (_mock *MockPlayerService) Login(ctx context.Context, email string, password string) (models.Player, error) {
 	ret := _mock.Called(ctx, email, password)
@@ -432,6 +358,74 @@ func (_c *MockPlayerService_ResetPassword_Call) Return(err error) *MockPlayerSer
 }
 
 func (_c *MockPlayerService_ResetPassword_Call) RunAndReturn(run func(ctx context.Context, token string, password string) error) *MockPlayerService_ResetPassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Search provides a mock function for the type MockPlayerService
+func (_mock *MockPlayerService) Search(ctx context.Context, query string) ([]models.Player, error) {
+	ret := _mock.Called(ctx, query)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Search")
+	}
+
+	var r0 []models.Player
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) ([]models.Player, error)); ok {
+		return returnFunc(ctx, query)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) []models.Player); ok {
+		r0 = returnFunc(ctx, query)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Player)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, query)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPlayerService_Search_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Search'
+type MockPlayerService_Search_Call struct {
+	*mock.Call
+}
+
+// Search is a helper method to define mock.On call
+//   - ctx context.Context
+//   - query string
+func (_e *MockPlayerService_Expecter) Search(ctx any, query any) *MockPlayerService_Search_Call {
+	return &MockPlayerService_Search_Call{Call: _e.mock.On("Search", ctx, query)}
+}
+
+func (_c *MockPlayerService_Search_Call) Run(run func(ctx context.Context, query string)) *MockPlayerService_Search_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerService_Search_Call) Return(players []models.Player, err error) *MockPlayerService_Search_Call {
+	_c.Call.Return(players, err)
+	return _c
+}
+
+func (_c *MockPlayerService_Search_Call) RunAndReturn(run func(ctx context.Context, query string) ([]models.Player, error)) *MockPlayerService_Search_Call {
 	_c.Call.Return(run)
 	return _c
 }
