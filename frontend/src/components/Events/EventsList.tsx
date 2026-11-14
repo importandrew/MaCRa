@@ -16,9 +16,16 @@ import { ScalesIcon } from '../Icons/ScalesIcon';
 import { TrophyIcon } from '../Icons/TrophyIcon';
 import { UsersIcon } from '../Icons/UsersIcon';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
+import SegmentedPicker from '../SegmentedPicker';
 import EventSearchField from './EventSearchField';
 import FinishedEvents from './FinishedEvents';
-import { matchesQuery, splitFinished } from './eventListFilters';
+import {
+  type EventsTab,
+  matchesQuery,
+  readEventsTab,
+  splitFinished,
+  storeEventsTab,
+} from './eventListFilters';
 
 const cardStyles = cardVariants();
 
@@ -130,25 +137,18 @@ function EventCard({ event }: { event: Event }) {
   );
 }
 
-// EventSection is a titled part of the list: its active events, then its
-// finished ones collapsed (open while searching).
-function EventSection({
-  title,
+// EventList is one tab of /events: its active events, then its finished
+// ones collapsed (open while searching).
+function EventList({
   events,
   isSearching,
-  empty,
 }: {
-  title: string;
   events: Event[];
   isSearching: boolean;
-  // empty is shown when the section has no events at all.
-  empty?: ReactNode;
 }) {
   const { active, finished } = splitFinished(events);
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-medium">{title}</h2>
-      {events.length === 0 && empty}
+    <div className="flex flex-col gap-3">
       {active.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}
@@ -157,19 +157,22 @@ function EventSection({
           <EventCard key={event.id} event={event} />
         ))}
       </FinishedEvents>
-    </section>
+    </div>
   );
 }
 
-// EventsList is /events: "My events" (where the user is a member) and
-// "Public events", each with its finished events collapsed, and a search by
-// name over both.
+// EventsList is /events: two tabs, "My events" (where the user is a member)
+// and "Public events", each with its finished events collapsed, and a search
+// by name over both (the tabs count the matches). A visitor sees the public
+// events only, without tabs.
 export default function EventsList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
   const { data, isLoading, isError, refetch } = useFetchVisibleEvents();
   const [query, setQuery] = useState('');
+  // chosenTab: the tab the user picked here or last time on this device.
+  const [chosenTab, setChosenTab] = useState<EventsTab | null>(readEventsTab);
 
   // handleCreate: a visitor signs in first and comes back to the form.
   const handleCreate = () => {
@@ -185,6 +188,16 @@ export default function EventsList() {
   const found = events.filter((event) => matchesQuery(event, query));
   const mine = found.filter((event) => event.is_participating);
   const others = found.filter((event) => !event.is_participating);
+  // Without a choice: "My events" if the user has any, else "Public".
+  const hasOwn = events.some((event) => event.is_participating);
+  const tab: EventsTab = !isAuthenticated
+    ? 'public'
+    : (chosenTab ?? (hasOwn ? 'mine' : 'public'));
+  const pickTab = (next: EventsTab) => {
+    setChosenTab(next);
+    storeEventsTab(next);
+  };
+  const shown = tab === 'mine' ? mine : others;
 
   return (
     <LoadingTemplate
@@ -215,32 +228,35 @@ export default function EventsList() {
           ) : (
             <>
               <EventSearchField value={query} onChange={setQuery} />
-              {isSearching && found.length === 0 ? (
+              {isAuthenticated && (
+                <SegmentedPicker
+                  ariaLabel={t('events.title')}
+                  options={[
+                    {
+                      value: 'mine' as const,
+                      label: t('events.myEventsCount', { n: mine.length }),
+                    },
+                    {
+                      value: 'public' as const,
+                      label: t('events.publicEventsCount', {
+                        n: others.length,
+                      }),
+                    },
+                  ]}
+                  selectedKey={tab}
+                  onSelectionChange={pickTab}
+                />
+              )}
+              {shown.length === 0 ? (
                 <p className="text-center text-muted py-6">
-                  {t('events.nothingFound', { query: query.trim() })}
+                  {isSearching
+                    ? t('events.nothingFound', { query: query.trim() })
+                    : tab === 'mine'
+                      ? t('events.notParticipating')
+                      : t('events.noPublicEvents')}
                 </p>
               ) : (
-                <>
-                  {isAuthenticated && !(isSearching && mine.length === 0) && (
-                    <EventSection
-                      title={t('events.myEvents')}
-                      events={mine}
-                      isSearching={isSearching}
-                      empty={
-                        <p className="text-sm text-muted">
-                          {t('events.notParticipating')}
-                        </p>
-                      }
-                    />
-                  )}
-                  {others.length > 0 && (
-                    <EventSection
-                      title={t('events.publicEvents')}
-                      events={others}
-                      isSearching={isSearching}
-                    />
-                  )}
-                </>
+                <EventList events={shown} isSearching={isSearching} />
               )}
             </>
           )}

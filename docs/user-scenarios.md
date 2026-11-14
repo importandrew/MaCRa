@@ -85,7 +85,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Finding and choosing an event
 
-- **Events list** (`/events`): two sections, "My events" (where I'm a member) and "Public events" (a visitor sees only these). In each, active events come first, the ones played most recently on top (the start of their last game, or creation without games), and finished events are collapsed under "Finished (N)", the latest finished on top. A search field above filters both by part of the name, ignoring case; matching finished events show at once.
+- **Events list** (`/events`): two tabs, "My (N)" (events where I'm a member) and "Public (N)", so the public events are one tap away however many of my own there are. Without a choice it opens "My", or "Public" when I have no events; the last choice is remembered on the device. A visitor sees only the public events, without tabs. In each tab, active events come first, the ones played most recently on top (the start of their last game, or creation without games), and finished events are collapsed under "Finished (N)", the latest finished on top. A search field above filters both tabs by part of the name, ignoring case (the tab counts show the matches, so a match in the other tab is visible); matching finished events show at once.
 - **Select / switch event** (user menu): only events where I'm a member; active ones on top, in the same order as the list, finished ones in a collapsed section (still selectable, to see the last game and history); a search by name from 6 events on. The selected event is where `/new`, `/now`, `/last` and `/history` work.
 
 ### Creating an event
