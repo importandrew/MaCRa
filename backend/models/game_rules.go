@@ -29,6 +29,11 @@ var ValidHands = []int{1, 4, 8, 16}
 // players get a third each.
 var FalseMahjongAmounts = []int{30, 60}
 
+// PenaltyAmounts is what an in-game penalty may cost: the official MCR list.
+// It is taken from the offender only. Entries are checked against it; games
+// are replayed without it, so penalties entered before it keep their amount.
+var PenaltyAmounts = []int{5, 10, 20, 30, 40, 50, 60}
+
 // StandardGameRules returns the MCR standard rules: 16 hands, minimum hand 8.
 // Events start with them.
 //

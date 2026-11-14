@@ -11,7 +11,8 @@ import { SignIcon } from '../Icons/SignIcon';
 import PendingButton from '../PendingButton';
 import SegmentedPicker from '../SegmentedPicker';
 import ValueStepper from '../ValueStepper';
-import { EntryOutcome, MIN_FINE, RoundEntry } from './useRoundEntry';
+import { PENALTY_AMOUNTS } from '../../models/GameRules';
+import { EntryOutcome, RoundEntry } from './useRoundEntry';
 
 // OUTCOMES are the outcome buttons with their texts. The texts must not wrap
 // in the narrow center of the table: non-breaking hyphens and spaces there.
@@ -177,12 +178,31 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
       )}
 
       {entry.isPenalty && !entry.isFalseMahjong && (
-        <ValueStepper
-          label={t('roundEntry.fine')}
-          value={entry.fine}
-          min={MIN_FINE}
-          onChange={entry.setFine}
-        />
+        // The official amounts in two rows, like the outcomes: seven don't
+        // fit one line in the center of a 320px phone.
+        <ToggleButtonGroup
+          aria-label={t('roundEntry.fine')}
+          selectionMode="single"
+          disallowEmptySelection
+          isDetached
+          className="grid w-full grid-cols-4 gap-1.5"
+          selectedKeys={[String(entry.fine)]}
+          onSelectionChange={(keys) => {
+            const [key] = keys;
+            if (key != null) entry.setFine(Number(key));
+          }}
+        >
+          {PENALTY_AMOUNTS.map((amount) => (
+            <ToggleButton
+              key={amount}
+              id={String(amount)}
+              size="sm"
+              className={`w-full min-w-0 px-0 tabular-nums not-data-selected:text-foreground ${DESKTOP_BUTTON_CLASS}`}
+            >
+              {amount}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
       )}
 
       {entry.isFalseMahjong && (

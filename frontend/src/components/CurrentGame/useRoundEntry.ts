@@ -4,13 +4,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { GameData, Outcome } from '../../models/GameData';
-import { FALSE_MAHJONG_AMOUNTS, STANDARD_RULES } from '../../models/GameRules';
+import {
+  FALSE_MAHJONG_AMOUNTS,
+  PENALTY_AMOUNTS,
+  STANDARD_RULES,
+} from '../../models/GameRules';
 import { useEvent } from '../../providers/event/eventConstants';
 import { fetchWithStatus, PostRequest, eventPath } from '../Request';
 import { showToast } from '../Toast';
 
+// START_FINE: the penalty picked when the form opens, the most common one.
 const START_FINE = 10;
-export const MIN_FINE = 1;
 
 export type EntryOutcome =
   Outcome.Draw | Outcome.Self | Outcome.Deal | Outcome.Penalty;
@@ -65,7 +69,7 @@ export function useRoundEntry(
       hand >= minHand) ||
     (isPenalty &&
       loser !== null &&
-      (isFalseMahjong ? !!falseMahjongFine : fine >= MIN_FINE));
+      (isFalseMahjong ? !!falseMahjongFine : PENALTY_AMOUNTS.includes(fine)));
 
   // A Self winner and a Penalty loser can be the same player; Deal-in can't
   // have both on one player, so switching to it drops the − mark.
