@@ -78,6 +78,8 @@ type EventCreateParams struct {
 	Visibility   EventVisibility
 	RatingsReach *ContentReach
 	GamesReach   *ContentReach
+	// Rules are the event's game rules; nil for the MCR standard ones.
+	Rules *GameRules
 }
 
 type UpdateEventParams struct {

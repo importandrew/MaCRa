@@ -8,8 +8,9 @@ import (
 )
 
 // Create creates an event. Without a visibility it is private; reaches not
-// given follow the visibility (models.DefaultContentReach). Its game rules
-// are the MCR standard ones; the owner changes them before the first game.
+// given follow the visibility (models.DefaultContentReach). Without rules it
+// plays by the MCR standard ones; the owner may change them until the first
+// game.
 func (s *Service) Create(ctx context.Context, params models.EventCreateParams) (int, error) {
 	if !slices.Contains(models.ValidEventTypes, params.Type) {
 		return 0, models.ErrInvalidEventType
@@ -54,6 +55,13 @@ func (s *Service) Create(ctx context.Context, params models.EventCreateParams) (
 			return 0, err
 		}
 		event.GamesReach = *params.GamesReach
+	}
+
+	if params.Rules != nil {
+		if err := params.Rules.Validate(); err != nil {
+			return 0, err
+		}
+		event.Rules = *params.Rules
 	}
 
 	return s.repo.Create(ctx, event)

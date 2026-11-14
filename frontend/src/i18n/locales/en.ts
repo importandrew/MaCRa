@@ -249,18 +249,8 @@ const en = {
     standard: 'MCR standard',
     short: 'Short',
     hands: 'Hands',
-    hands16: '16: all four winds',
-    hands8: '8: East and South',
     minHand: 'Minimum hand',
     minHandRange: 'From {{min}} to {{max}}',
-    minHandOutOfRange: 'From {{min}} to {{max}}',
-    falseMahjong: 'False mahjong',
-    falseMahjongHint:
-      'Two amounts, each a multiple of 3: the other three players get a third each.',
-    falseMahjongSmall: 'Smaller',
-    falseMahjongBig: 'Larger',
-    falseMahjongInvalid: 'A multiple of 3, up to {{max}}',
-    falseMahjongOrder: 'Larger than the smaller amount',
     editableHint:
       'The rules can change only until the first game: all games of the rating follow the same rules.',
     frozen: 'The event already has games: its rules can no longer change.',
@@ -270,7 +260,6 @@ const en = {
     handsCount_one: '{{count}} hand',
     handsCount_other: '{{count}} hands',
     minHandValue: 'minimum hand {{value}}',
-    falseMahjongValue: 'false mahjong {{small}} or {{big}}',
   },
   members: {
     title: 'Members',

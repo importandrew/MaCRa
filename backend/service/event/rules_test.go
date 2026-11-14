@@ -12,7 +12,7 @@ import (
 
 func TestUpdateRules(t *testing.T) {
 	t.Run("valid rules are saved", func(t *testing.T) {
-		rules := models.GameRules{Hands: 8, MinHand: 24, FalseMahjong: [2]int{30, 60}}
+		rules := models.GameRules{Hands: 8, MinHand: 24}
 		repo := NewMockEventRepo(t)
 		repo.EXPECT().UpdateRules(mock.Anything, 1, rules).Return(models.ErrEventRulesFrozen)
 

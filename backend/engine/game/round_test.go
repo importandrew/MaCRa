@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -317,37 +318,30 @@ func TestGame_EnterRoundResult_InvalidPlayers(t *testing.T) {
 }
 
 // TestGame_ByRules checks that the game follows its rules: the number of
-// hands, the minimum hand and the false mahjong amounts.
+// hands and the minimum hand.
 func TestGame_ByRules(t *testing.T) {
-	short := models.GameRules{Hands: 8, MinHand: 24, FalseMahjong: [2]int{30, 90}}
-	newShort := func() *Game {
-		return NewGame(Config{ID: 100, Players: [4]int{1, 2, 3, 4}, Rules: short})
+	newGame := func(rules models.GameRules) *Game {
+		return NewGame(Config{ID: 100, Players: [4]int{1, 2, 3, 4}, Rules: rules})
 	}
 
-	t.Run("ends after its hands", func(t *testing.T) {
-		g := newShort()
-		for range 7 {
-			assert.NoError(t, g.EnterRoundResult(models.Draw, 0, 0, 0))
-		}
-		assert.True(t, g.IsLive())
-		assert.Equal(t, 8, g.Round())
+	for _, hands := range models.ValidHands {
+		t.Run(fmt.Sprintf("ends after %d hands", hands), func(t *testing.T) {
+			g := newGame(models.GameRules{Hands: hands, MinHand: 8})
+			for range hands - 1 {
+				assert.NoError(t, g.EnterRoundResult(models.Draw, 0, 0, 0))
+			}
+			assert.True(t, g.IsLive())
+			assert.Equal(t, hands, g.Round())
 
-		assert.NoError(t, g.EnterRoundResult(models.Draw, 0, 0, 0))
-		assert.Equal(t, models.GameEnded, g.Status())
-	})
+			assert.NoError(t, g.EnterRoundResult(models.Draw, 0, 0, 0))
+			assert.Equal(t, models.GameEnded, g.Status())
+		})
+	}
 
 	t.Run("minimum hand", func(t *testing.T) {
-		g := newShort()
+		g := newGame(models.GameRules{Hands: 16, MinHand: 24})
 		assert.ErrorIs(t, g.EnterRoundResult(models.Self, 23, 0, 1), models.ErrValidateEnterRoundResult)
 		assert.ErrorIs(t, g.EnterRoundResult(models.Deal, 23, 2, 1), models.ErrValidateEnterRoundResult)
 		assert.NoError(t, g.EnterRoundResult(models.Deal, 24, 2, 1))
-	})
-
-	t.Run("false mahjong amounts", func(t *testing.T) {
-		g := newShort()
-		assert.ErrorIs(t, g.FalseMahjong(1, 60, false), models.ErrValidatePenalty)
-		assert.NoError(t, g.FalseMahjong(1, 90, false))
-		assert.Equal(t, -90, g.Score()[1].GP)
-		assert.Equal(t, 30, g.Score()[2].GP)
 	})
 }

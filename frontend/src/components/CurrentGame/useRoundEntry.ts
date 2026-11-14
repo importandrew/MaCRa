@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { GameData, Outcome } from '../../models/GameData';
-import { STANDARD_RULES } from '../../models/GameRules';
+import { FALSE_MAHJONG_AMOUNTS, STANDARD_RULES } from '../../models/GameRules';
 import { useEvent } from '../../providers/event/eventConstants';
 import { fetchWithStatus, PostRequest, eventPath } from '../Request';
 import { showToast } from '../Toast';
@@ -169,7 +169,7 @@ export function useRoundEntry(
     hand,
     setHand: setHandInput,
     minHand,
-    falseMahjongAmounts: rules.false_mahjong,
+    falseMahjongAmounts: FALSE_MAHJONG_AMOUNTS,
     penaltyType,
     setPenaltyType,
     fine,

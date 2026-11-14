@@ -244,18 +244,8 @@ const ru: Messages = {
     standard: 'Стандарт MCR',
     short: 'Короткая',
     hands: 'Раздачи',
-    hands16: '16: все четыре ветра',
-    hands8: '8: Восток и Юг',
     minHand: 'Минимальная рука',
     minHandRange: 'От {{min}} до {{max}}',
-    minHandOutOfRange: 'От {{min}} до {{max}}',
-    falseMahjong: 'Ложный маджонг',
-    falseMahjongHint:
-      'Две суммы, каждая кратна 3: остальные трое игроков получают по трети.',
-    falseMahjongSmall: 'Меньшая',
-    falseMahjongBig: 'Большая',
-    falseMahjongInvalid: 'Кратно 3, не больше {{max}}',
-    falseMahjongOrder: 'Больше меньшей суммы',
     editableHint:
       'Правила можно менять только до первой игры: все игры рейтинга идут по одним правилам.',
     frozen: 'В событии уже есть игры: его правила больше нельзя менять.',
@@ -267,7 +257,6 @@ const ru: Messages = {
     handsCount_many: '{{count}} раздач',
     handsCount_other: '{{count}} раздачи',
     minHandValue: 'минимальная рука {{value}}',
-    falseMahjongValue: 'ложный маджонг {{small}} или {{big}}',
   },
   members: {
     title: 'Участники',

@@ -17,6 +17,7 @@ type CreateEventRequest struct {
 	Visibility   models.EventVisibility `json:"visibility"`
 	RatingsReach *models.ContentReach   `json:"ratings_reach"`
 	GamesReach   *models.ContentReach   `json:"games_reach"`
+	Rules        *models.GameRules      `json:"rules"`
 }
 
 func (h Handler) Create(c *gin.Context) {
@@ -36,6 +37,7 @@ func (h Handler) Create(c *gin.Context) {
 		Visibility:   req.Visibility,
 		RatingsReach: req.RatingsReach,
 		GamesReach:   req.GamesReach,
+		Rules:        req.Rules,
 	}
 
 	id, err := h.event.Create(c.Request.Context(), params)

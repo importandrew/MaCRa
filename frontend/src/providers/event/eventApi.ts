@@ -28,6 +28,7 @@ export type CreateEventPayload = {
   visibility?: EventVisibility;
   ratings_reach?: ContentReach;
   games_reach?: ContentReach;
+  rules?: GameRules;
 };
 
 export type UpdateEventPayload = {

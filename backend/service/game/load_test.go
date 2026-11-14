@@ -168,10 +168,10 @@ func TestLoad_InvalidLogError(t *testing.T) {
 }
 
 // TestLoad_ByGameRules checks that a game is replayed by the rules it
-// started with: a short game ends after 8 hands, and its log is valid only
-// by its own minimum hand and false mahjong amounts.
+// started with: an 8-hand game ends after 8 hands, and its log is valid only
+// by its own minimum hand.
 func TestLoad_ByGameRules(t *testing.T) {
-	short := models.GameRules{Hands: 8, MinHand: 24, FalseMahjong: [2]int{30, 90}}
+	short := models.GameRules{Hands: 8, MinHand: 24}
 
 	testData := map[string]struct {
 		logs        []models.RoundLog
@@ -192,8 +192,8 @@ func TestLoad_ByGameRules(t *testing.T) {
 			logs:        []models.RoundLog{{ID: 1, Round: 1, Outcome: models.Self, Winner: 1, Value: 16}},
 			expectedErr: assert.Error,
 		},
-		"false mahjong of the game's amounts": {
-			logs:        []models.RoundLog{{ID: 1, Round: 1, Outcome: models.FalseMahjong, Loser: 1, Value: 90}},
+		"hand at the game's minimum": {
+			logs:        []models.RoundLog{{ID: 1, Round: 1, Outcome: models.Self, Winner: 1, Value: 24}},
 			expectedErr: assert.NoError,
 			wantStatus:  models.GameLive,
 		},

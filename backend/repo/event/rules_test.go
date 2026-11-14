@@ -13,7 +13,7 @@ import (
 	"github.com/importandrew/MaCRa/repo/game"
 )
 
-var shortRules = models.GameRules{Hands: 8, MinHand: 24, FalseMahjong: [2]int{30, 60}}
+var shortRules = models.GameRules{Hands: 8, MinHand: 24}
 
 func TestUpdateRules(t *testing.T) {
 	db, err := database.NewTestDB()

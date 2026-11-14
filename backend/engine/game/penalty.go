@@ -16,9 +16,9 @@ func (g *Game) FalseMahjong(loser, value int, forceNextRound bool) error {
 		return fmt.Errorf("%w: false mahjong: player %d is not in the game", models.ErrValidatePenalty, loser)
 	}
 
-	if !slices.Contains(g.rules.FalseMahjong[:], value) {
+	if !slices.Contains(models.FalseMahjongAmounts, value) {
 		return fmt.Errorf("%w: false mahjong penalty should be one of %v, got: %d",
-			models.ErrValidatePenalty, g.rules.FalseMahjong, value)
+			models.ErrValidatePenalty, models.FalseMahjongAmounts, value)
 	}
 
 	for id, ps := range g.score {

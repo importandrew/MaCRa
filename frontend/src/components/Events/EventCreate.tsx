@@ -8,6 +8,12 @@ import { showToast } from '../Toast';
 import SegmentedPicker from '../SegmentedPicker';
 import PendingButton from '../PendingButton';
 import EventSettingsFields from './EventSettingsFields';
+import GameRulesFields from './GameRulesFields';
+import {
+  type GameRules,
+  isValidRules,
+  STANDARD_RULES,
+} from '../../models/GameRules';
 import { type EventSettings, isValidSettings } from './eventSettings';
 
 export default function EventCreate() {
@@ -22,6 +28,9 @@ export default function EventCreate() {
     ratingsReach: 'members',
     gamesReach: 'members',
   });
+  // Game rules start as the MCR standard; the owner can change them later,
+  // until the first game.
+  const [rules, setRules] = useState<GameRules>(STANDARD_RULES);
   const { isPending: isSubmitting, run } = useSubmitOnce();
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -37,6 +46,7 @@ export default function EventCreate() {
       visibility: settings.visibility,
       ratings_reach: settings.ratingsReach,
       games_reach: settings.gamesReach,
+      rules,
     });
 
     if (!id) return;
@@ -86,6 +96,14 @@ export default function EventCreate() {
         </Card.Content>
       </Card>
 
+      <Card>
+        <Card.Content className="gap-4">
+          <p className="text-muted">{t('rules.title')}</p>
+          <p className="text-sm text-muted">{t('rules.editableHint')}</p>
+          <GameRulesFields value={rules} onChange={setRules} />
+        </Card.Content>
+      </Card>
+
       <div className="flex gap-2 w-3/4 self-center">
         <Button
           type="button"
@@ -100,7 +118,7 @@ export default function EventCreate() {
           form="create-event-form"
           variant="primary"
           isPending={isSubmitting}
-          isDisabled={!isValidSettings(settings)}
+          isDisabled={!isValidSettings(settings) || !isValidRules(rules)}
           className="flex-1"
         >
           {t('events.create')}

@@ -11,12 +11,5 @@ export function rulesDifferences(rules: GameRules, t: TFunction): string[] {
   if (rules.min_hand !== STANDARD_RULES.min_hand) {
     differences.push(t('rules.minHandValue', { value: rules.min_hand }));
   }
-  const [small, big] = rules.false_mahjong;
-  if (
-    small !== STANDARD_RULES.false_mahjong[0] ||
-    big !== STANDARD_RULES.false_mahjong[1]
-  ) {
-    differences.push(t('rules.falseMahjongValue', { small, big }));
-  }
   return differences;
 }
