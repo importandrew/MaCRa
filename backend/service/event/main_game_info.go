@@ -15,7 +15,8 @@ func (s *Service) MainGameInfo(ctx context.Context, eventID, userID int) (models
 		return models.MainGameInfo{}, fmt.Errorf("last game: %w", err)
 	}
 
-	_, err = s.gameService.CurrentGameID(ctx, userID, eventID)
+	// A published tour's game counts: the player sees their table.
+	_, err = s.gameService.SeatedGameID(ctx, userID, eventID)
 	hasCurrent, err := gameFound(err)
 	if err != nil {
 		return models.MainGameInfo{}, fmt.Errorf("current game: %w", err)

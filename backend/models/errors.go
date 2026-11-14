@@ -115,6 +115,21 @@ var (
 	// ErrNotParticipant means the user has no participant number in the
 	// tournament (or has withdrawn already).
 	ErrNotParticipant = errors.New("not a participant")
+	// ErrNotDrawn means the participant numbers aren't drawn for the current
+	// players: the draw comes before the seating.
+	ErrNotDrawn = errors.New("participant numbers not drawn")
+	// ErrTourInProgress means a tour is published or live: the next one
+	// waits until it is finished.
+	ErrTourInProgress = errors.New("a tour is in progress")
+	// ErrAllToursPlayed means every tour of the tournament has been played.
+	ErrAllToursPlayed = errors.New("all tours played")
+	// ErrTablesIncomplete means the active participants don't fill whole
+	// tables; sent with "missing", the players lacking.
+	ErrTablesIncomplete = errors.New("tables incomplete")
+	// ErrTourNotFound means there is no such tour, or not in that state.
+	ErrTourNotFound = errors.New("tour not found")
+	// ErrInvalidSeating means a seating method isn't one of the known ones.
+	ErrInvalidSeating = errors.New("invalid seating method")
 	// ErrNotTournament means the action is for tournaments only.
 	ErrNotTournament = errors.New("not a tournament")
 	// ErrPlayerAndSubstitute means a member would be both a player and a
@@ -174,6 +189,7 @@ var Errors = map[error]APIError{
 	ErrInvalidRole:               {http.StatusBadRequest, "invalid_role"},
 	ErrInvalidEventSettings:      {http.StatusBadRequest, "invalid_event_settings"},
 	ErrInvalidPlayerLimit:        {http.StatusBadRequest, "invalid_player_limit"},
+	ErrInvalidSeating:            {http.StatusBadRequest, "invalid_seating"},
 	ErrInvalidTournamentSettings: {http.StatusBadRequest, "invalid_tournament_settings"},
 	ErrNotTournament:             {http.StatusBadRequest, "not_tournament"},
 	ErrInvalidAuthToken:          {http.StatusBadRequest, "invalid_auth_token"},
@@ -196,6 +212,7 @@ var Errors = map[error]APIError{
 	ErrInviteNotFound:  {http.StatusNotFound, "invite_not_found"},
 	ErrRequestNotFound: {http.StatusNotFound, "request_not_found"},
 	ErrNotParticipant:  {http.StatusNotFound, "not_participant"},
+	ErrTourNotFound:    {http.StatusNotFound, "tour_not_found"},
 
 	// 409
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},
@@ -215,6 +232,10 @@ var Errors = map[error]APIError{
 	ErrParticipantsClosed:   {http.StatusConflict, "participants_closed"},
 	ErrTournamentNotStarted: {http.StatusConflict, "tournament_not_started"},
 	ErrNoPlayers:            {http.StatusConflict, "no_players"},
+	ErrNotDrawn:             {http.StatusConflict, "not_drawn"},
+	ErrTourInProgress:       {http.StatusConflict, "tour_in_progress"},
+	ErrAllToursPlayed:       {http.StatusConflict, "all_tours_played"},
+	ErrTablesIncomplete:     {http.StatusConflict, "tables_incomplete"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

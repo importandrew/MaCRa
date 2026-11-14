@@ -86,7 +86,9 @@ func (r *Repo) tournamentState(ctx context.Context, eventID int, forUpdate bool)
 // Draw gives the tournament's current players the numbers 1 to N in a random
 // order, replacing an earlier draw. It refuses a regular event
 // (models.ErrNotTournament), a tournament whose first tour has started
-// (models.ErrParticipantsClosed) or without players (models.ErrNoPlayers).
+// (models.ErrParticipantsClosed), one with a published seating
+// (models.ErrTourInProgress: cancel it first) or without players
+// (models.ErrNoPlayers).
 // The event row is locked FOR UPDATE, so two draws don't mix.
 func (r *Repo) Draw(ctx context.Context, eventID int) error {
 	return r.InTx(ctx, func(tx *Repo) error {
@@ -98,6 +100,10 @@ func (r *Repo) Draw(ctx context.Context, eventID int) error {
 			return models.ErrNotTournament
 		case startedAt != nil:
 			return models.ErrParticipantsClosed
+		}
+		// A published seating is by the current numbers: cancel it first.
+		if err := tx.checkNoPublishedTour(ctx, eventID); err != nil {
+			return err
 		}
 
 		if _, err := tx.db.Exec(ctx, `DELETE FROM tournament_participants WHERE event_id = $1`, eventID); err != nil {
@@ -165,6 +171,25 @@ func (r *Repo) checkPlayersOpen(ctx context.Context, eventID int) error {
 	}
 	if closed {
 		return models.ErrParticipantsClosed
+	}
+	return nil
+}
+
+// checkNoPublishedTour returns models.ErrTourInProgress if a tour's seating
+// is published (or the tour is live).
+func (r *Repo) checkNoPublishedTour(ctx context.Context, eventID int) error {
+	rows, err := r.db.Query(ctx, `
+		SELECT EXISTS (SELECT 1 FROM tours WHERE event_id = $1 AND status IN ($2, $3))`,
+		eventID, models.TourPublished, models.TourLive)
+	if err != nil {
+		return err
+	}
+	busy, err := pgx.CollectOneRow(rows, pgx.RowTo[bool])
+	if err != nil {
+		return err
+	}
+	if busy {
+		return models.ErrTourInProgress
 	}
 	return nil
 }

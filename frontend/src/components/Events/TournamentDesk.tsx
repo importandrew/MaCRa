@@ -9,8 +9,10 @@ import { useEventPage } from '../../providers/event/eventLayoutContext';
 import {
   drawNumbers,
   useFetchParticipants,
+  useFetchTours,
   withdrawParticipant,
 } from '../../providers/event/tournamentApi';
+import ToursCard from './ToursCard';
 import Confirm from '../Confirm';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import PendingButton from '../PendingButton';
@@ -28,6 +30,10 @@ export default function TournamentDesk() {
   const canRun = hasCapability('run_tournament');
   const { data, isLoading, isError, isForbidden, refetch } =
     useFetchParticipants(canView ? eventId : null);
+  const tours = useFetchTours(canView ? eventId : null);
+  // An action on the desk may change both: e.g. a draw lets a tour be
+  // published.
+  const refetchAll = () => Promise.all([refetch(), tours.refetch()]);
   const { isPending: isDrawing, run: runDraw } = useSubmitOnce();
   const { run: runWithdraw } = useSubmitOnce();
   const drawConfirm = useOverlayState();
@@ -38,7 +44,11 @@ export default function TournamentDesk() {
 
   const status = event ? eventStatus(event) : null;
   const participants = data?.participants ?? [];
-  const canDraw = canRun && status === 'preparation' && participants.length > 0;
+  // A published seating goes by the numbers: it is cancelled before a new
+  // draw.
+  const isSeated = tours.data?.current?.status === 'published';
+  const canDraw =
+    canRun && status === 'preparation' && participants.length > 0 && !isSeated;
   const canWithdraw = canRun && status === 'in_progress';
 
   const draw = () =>
@@ -47,7 +57,7 @@ export default function TournamentDesk() {
       if (await drawNumbers(eventId)) {
         showToast({ title: t('tournamentDesk.drawn'), variant: 'success' });
       }
-      await refetch();
+      await refetchAll();
     });
 
   const withdraw = () =>
@@ -65,10 +75,10 @@ export default function TournamentDesk() {
 
   return (
     <LoadingTemplate
-      isLoading={isLoading}
-      isError={isError}
+      isLoading={isLoading || tours.isLoading}
+      isError={isError || tours.isError}
       isForbidden={!canView || isForbidden}
-      onRefresh={refetch}
+      onRefresh={refetchAll}
       onGoHome={() => navigate(`/event/${eventId}`)}
     >
       {event && data && (
@@ -76,6 +86,15 @@ export default function TournamentDesk() {
           <h1 className="text-2xl font-semibold truncate min-w-0">
             {t('tournamentDesk.title', { name: event.name })}
           </h1>
+          {tours.data && (
+            <ToursCard
+              eventId={eventId}
+              state={tours.data}
+              isDrawn={data.drawn}
+              canRun={canRun}
+              onChanged={refetchAll}
+            />
+          )}
           <Card>
             <Card.Content className="gap-3">
               <h2 className="font-medium">

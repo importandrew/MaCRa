@@ -21,7 +21,7 @@ func TestNow(t *testing.T) {
 		"ok": {
 			playerID: 1,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				expectCurrentGame(mg, 1, 100, nil, 1)
+				expectTableLoad(mg, 1, 100, nil)
 				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
@@ -35,7 +35,7 @@ func TestNow(t *testing.T) {
 		"log of the same state, players in starting seat order": {
 			playerID: 3,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				expectCurrentGame(mg, 3, 100, drawRoundLogs(3), 1)
+				expectTableLoad(mg, 3, 100, drawRoundLogs(3))
 				expectPlayerGets(mp)
 			},
 			expectedErr: assert.NoError,
@@ -50,14 +50,14 @@ func TestNow(t *testing.T) {
 		"player not in game": {
 			playerID: 999,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				mg.EXPECT().CurrentGame(mock.Anything, 999, testEventID).Return(0, models.ErrGameNotFound)
+				mg.EXPECT().SeatedGame(mock.Anything, 999, testEventID).Return(0, models.ErrGameNotFound)
 			},
 			expectedErr: assert.Error,
 		},
 		"player repo error": {
 			playerID: 1,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo) {
-				expectCurrentGame(mg, 1, 100, nil, 1)
+				expectTableLoad(mg, 1, 100, nil)
 				mp.On("Get", mock.Anything, 1).Return(models.Player{}, errors.New("player not found"))
 			},
 			expectedErr: assert.Error,

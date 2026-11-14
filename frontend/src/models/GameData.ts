@@ -16,6 +16,8 @@ export interface GameData {
   status: 'created' | 'live' | 'ended' | 'aborted';
   // log is the round log of the same state as the table.
   log: GameRoundLogs;
+  // tour: the tour and table of a tournament game; missing otherwise.
+  tour?: { tour: number; table: number };
 }
 
 export interface PlayerScore {

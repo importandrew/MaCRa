@@ -2,12 +2,28 @@ package game
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/importandrew/MaCRa/models"
 )
 
+// Now returns the player's table: their live game, or a tournament game
+// whose tour is published but not started (status created; no rounds can be
+// entered yet), with its tour and table.
 func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNow, error) {
-	game, log, err := s.CurrentGame(ctx, playerID, eventID)
+	gameID, err := s.gameRepo.SeatedGame(ctx, playerID, eventID)
+	if err != nil {
+		return models.GameNow{}, err
+	}
+	status, err := s.gameRepo.Status(ctx, gameID)
+	if err != nil {
+		return models.GameNow{}, err
+	}
+	game, log, err := s.load(ctx, gameID)
+	if err != nil {
+		return models.GameNow{}, fmt.Errorf("load game %d: %w", gameID, err)
+	}
+	tour, err := s.gameRepo.TourSeat(ctx, gameID)
 	if err != nil {
 		return models.GameNow{}, err
 	}
@@ -87,7 +103,11 @@ func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNo
 			Wind:  leftWind.Kanji(),
 			Score: leftScore,
 		},
-		Log: gameLog(game, log, undone, names),
+		Log:  gameLog(game, log, undone, names),
+		Tour: tour,
+	}
+	if status == models.GameCreated {
+		now.Status = models.GameCreated
 	}
 
 	return now, nil
