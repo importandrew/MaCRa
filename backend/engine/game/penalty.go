@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -15,8 +16,9 @@ func (g *Game) FalseMahjong(loser, value int, forceNextRound bool) error {
 		return fmt.Errorf("%w: false mahjong: player %d is not in the game", models.ErrValidatePenalty, loser)
 	}
 
-	if value != 30 && value != 60 {
-		return fmt.Errorf("%w: false mahjong penalty should be 30 or 60, got: %d", models.ErrValidatePenalty, value)
+	if !slices.Contains(models.FalseMahjongAmounts, value) {
+		return fmt.Errorf("%w: false mahjong penalty should be one of %v, got: %d",
+			models.ErrValidatePenalty, models.FalseMahjongAmounts, value)
 	}
 
 	for id, ps := range g.score {

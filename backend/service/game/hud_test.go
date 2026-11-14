@@ -49,6 +49,7 @@ func TestHUD(t *testing.T) {
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
 				mg.EXPECT().Status(mock.Anything, gameID).Return(models.GameLive, nil).Times(2)
 				mg.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil).Times(3)
+				mg.EXPECT().Rules(mock.Anything, gameID).Return(models.StandardGameRules(), nil).Once()
 				mg.EXPECT().GameLog(mock.Anything, gameID).Return([]models.RoundLog{}, nil).Twice()
 				expectPlayerGets(mp)
 			},
@@ -82,6 +83,7 @@ func TestHUD(t *testing.T) {
 				}
 				mg.EXPECT().Status(mock.Anything, gameID).Return(models.GameLive, nil).Times(2)
 				mg.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil).Times(3)
+				mg.EXPECT().Rules(mock.Anything, gameID).Return(models.StandardGameRules(), nil).Once()
 				mg.EXPECT().GameLog(mock.Anything, gameID).Return(logs, nil).Twice()
 				expectPlayerGets(mp)
 			},

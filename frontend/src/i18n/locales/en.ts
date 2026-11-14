@@ -117,6 +117,9 @@ const en = {
       'A round has been entered: only a referee can abort the game now.',
     event_has_ongoing_games:
       'The event has games in progress. Finish or abort them first.',
+    invalid_game_rules: 'The rules are invalid',
+    event_rules_frozen:
+      'The event already has games: its rules can no longer change.',
   },
   auth: {
     tabs: 'Authentication',
@@ -238,6 +241,25 @@ const en = {
     referees: 'Referees',
     observers: 'Observers',
     createdAt: 'Created',
+    rules: 'Rules',
+  },
+  rules: {
+    title: 'Rules',
+    preset: 'Start from',
+    standard: 'MCR standard',
+    short: 'Short',
+    hands: 'Hands',
+    minHand: 'Minimum hand',
+    minHandRange: 'From {{min}} to {{max}}',
+    editableHint:
+      'The rules can change only until the first game: all games of the rating follow the same rules.',
+    frozen: 'The event already has games: its rules can no longer change.',
+    finishedReadOnly: 'The event is finished: its rules can no longer change.',
+    save: 'Save rules',
+    saved: 'Rules saved',
+    handsCount_one: '{{count}} hand',
+    handsCount_other: '{{count}} hands',
+    minHandValue: 'minimum hand {{value}}',
   },
   members: {
     title: 'Members',

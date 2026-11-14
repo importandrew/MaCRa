@@ -2333,3 +2333,66 @@ func (_c *MockEventService_Update_Call) RunAndReturn(run func(ctx context.Contex
 	_c.Call.Return(run)
 	return _c
 }
+
+// UpdateRules provides a mock function for the type MockEventService
+func (_mock *MockEventService) UpdateRules(ctx context.Context, eventID int, rules models.GameRules) error {
+	ret := _mock.Called(ctx, eventID, rules)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateRules")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameRules) error); ok {
+		r0 = returnFunc(ctx, eventID, rules)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventService_UpdateRules_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateRules'
+type MockEventService_UpdateRules_Call struct {
+	*mock.Call
+}
+
+// UpdateRules is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - rules models.GameRules
+func (_e *MockEventService_Expecter) UpdateRules(ctx any, eventID any, rules any) *MockEventService_UpdateRules_Call {
+	return &MockEventService_UpdateRules_Call{Call: _e.mock.On("UpdateRules", ctx, eventID, rules)}
+}
+
+func (_c *MockEventService_UpdateRules_Call) Run(run func(ctx context.Context, eventID int, rules models.GameRules)) *MockEventService_UpdateRules_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.GameRules
+		if args[2] != nil {
+			arg2 = args[2].(models.GameRules)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_UpdateRules_Call) Return(err error) *MockEventService_UpdateRules_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventService_UpdateRules_Call) RunAndReturn(run func(ctx context.Context, eventID int, rules models.GameRules) error) *MockEventService_UpdateRules_Call {
+	_c.Call.Return(run)
+	return _c
+}

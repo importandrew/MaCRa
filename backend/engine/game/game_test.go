@@ -17,7 +17,7 @@ func TestNewGame(t *testing.T) {
 			config: Config{
 				ID:      100,
 				Players: [4]int{1, 2, 3, 4},
-				Rules:   Rules{},
+				Rules:   models.StandardGameRules(),
 			},
 			check: func(t *testing.T, g *Game) {
 				assert.Equal(t, 100, g.ID())
@@ -58,7 +58,7 @@ func TestGame_End(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -73,7 +73,7 @@ func TestGame_End(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				g.End()
 				return g
@@ -104,7 +104,7 @@ func TestGame_IsLive(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	assert.True(t, g.IsLive())
@@ -117,7 +117,7 @@ func TestGame_ID(t *testing.T) {
 	g := NewGame(Config{
 		ID:      123,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	assert.Equal(t, 123, g.ID())
@@ -127,7 +127,7 @@ func TestGame_Status(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	assert.Equal(t, models.GameLive, g.Status())
@@ -140,7 +140,7 @@ func TestGame_Round(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	assert.Equal(t, 1, g.Round())
@@ -153,7 +153,7 @@ func TestGame_Score(t *testing.T) {
 	g := NewGame(Config{
 		ID:      100,
 		Players: [4]int{1, 2, 3, 4},
-		Rules:   Rules{},
+		Rules:   models.StandardGameRules(),
 	})
 
 	score := g.Score()

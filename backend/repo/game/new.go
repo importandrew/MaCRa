@@ -35,9 +35,10 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 			return err
 		}
 
+		// The game keeps a copy of the event's rules: it is replayed by them.
 		rows, err := tx.db.Query(ctx, `
-			INSERT INTO games(created_at, status, event_id) 
-			VALUES($1, $2, $3)
+			INSERT INTO games(created_at, status, event_id, rules)
+			SELECT $1, $2, id, rules FROM events WHERE id = $3
 			RETURNING id`,
 			time.Now().UTC(), models.GameLive, eventID)
 		if err != nil {

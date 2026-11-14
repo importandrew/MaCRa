@@ -40,6 +40,7 @@ type Event struct {
 	Visibility   EventVisibility `db:"visibility" json:"visibility"`
 	RatingsReach ContentReach    `db:"ratings_reach" json:"ratings_reach"`
 	GamesReach   ContentReach    `db:"games_reach" json:"games_reach"`
+	Rules        GameRules       `db:"rules" json:"rules"`
 	CreatedAt    time.Time       `db:"created_at" json:"created_at"`
 	FinishedAt   *time.Time      `db:"finished_at" json:"finished_at"`
 }
@@ -51,6 +52,8 @@ type EventDetails struct {
 	Event
 
 	PlayerCount int `json:"player_count"`
+	// RulesFrozen: the event has games, so its game rules can't change.
+	RulesFrozen bool `json:"rules_frozen"`
 }
 
 type EventListItem struct {
@@ -75,6 +78,8 @@ type EventCreateParams struct {
 	Visibility   EventVisibility
 	RatingsReach *ContentReach
 	GamesReach   *ContentReach
+	// Rules are the event's game rules; nil for the MCR standard ones.
+	Rules *GameRules
 }
 
 type UpdateEventParams struct {

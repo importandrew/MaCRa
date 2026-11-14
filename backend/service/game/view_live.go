@@ -38,6 +38,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 		ID:      game.ID(),
 		Status:  game.Status(),
 		LogSize: game.LogSize(),
+		Rules:   game.Rules(),
 		Round: models.Round{
 			Num:   round,
 			Kanji: models.RoundKanji(round),

@@ -12,6 +12,7 @@ type GameRepo interface {
 	Abort(ctx context.Context, gameID int, onlyWithoutRounds bool) error
 	Summary(ctx context.Context, gameID int) (models.GameSummary, error)
 	Players(ctx context.Context, gameID int) (models.StartingPlayers, error)
+	Rules(ctx context.Context, gameID int) (models.GameRules, error)
 	GameLog(ctx context.Context, gameID int) ([]models.RoundLog, error)
 	SaveRoundOutcome(ctx context.Context, gameID int, data models.RoundData) error
 	UndoLastRound(ctx context.Context, gameID, logSize int, endedAfter time.Time) error
@@ -38,6 +39,7 @@ type GameEngine interface {
 	End() error
 	NextRound() error
 	Score() models.GameScore
+	Rules() models.GameRules
 
 	EnterRoundResult(outcome models.Outcome, hand int, loser int, winner int) error
 	FalseMahjong(loser int, value int, forceNextRound bool) error

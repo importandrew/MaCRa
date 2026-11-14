@@ -183,6 +183,7 @@ export default function CurrentGame() {
             onClose={() => setIsDeltaOpen(false)}
             selectedPlayerId={deltaPlayerId}
             players={deltaPlayers}
+            minHand={roundData.rules.min_hand}
             onSelectPlayer={setDeltaPlayerId}
           />
         </>

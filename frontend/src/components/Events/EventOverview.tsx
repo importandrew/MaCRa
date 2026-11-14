@@ -13,6 +13,8 @@ import { ScalesIcon } from '../Icons/ScalesIcon';
 import { TrophyIcon } from '../Icons/TrophyIcon';
 import { UsersIcon } from '../Icons/UsersIcon';
 import { MahjongTileIcon } from '../Icons/MahjongTileIcon';
+import { BookIcon } from '../Icons/BookIcon';
+import { rulesDifferences } from './rulesText';
 
 const iconClass = 'w-6 h-6';
 
@@ -73,6 +75,7 @@ export default function EventOverview() {
   if (!event) return null;
 
   const isFinished = Boolean(event.finished_at);
+  const differences = rulesDifferences(event.rules, t);
   const typeLabel = t(`eventType.${event.type}`);
 
   return (
@@ -121,6 +124,14 @@ export default function EventOverview() {
           label={t('events.players')}
         >
           {event.player_count ?? '—'}
+        </DetailRow>
+        <DetailRow
+          icon={<BookIcon className={iconClass} />}
+          label={t('events.rules')}
+        >
+          {differences.length > 0
+            ? differences.join(', ')
+            : t('rules.standard')}
         </DetailRow>
         <DetailRow
           icon={<ScalesIcon className={iconClass} />}

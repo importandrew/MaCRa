@@ -53,6 +53,7 @@ func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNo
 		ID:      game.ID(),
 		Status:  game.Status(),
 		LogSize: game.LogSize(),
+		Rules:   game.Rules(),
 		Round: models.Round{
 			Num:   round,
 			Kanji: models.RoundKanji(round),

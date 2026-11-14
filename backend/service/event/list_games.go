@@ -95,6 +95,7 @@ func (s *Service) listLiveGames(
 			ID:      view.ID,
 			Status:  view.Status,
 			Round:   &round,
+			Hands:   view.Rules.Hands,
 			Players: playerScores,
 		})
 	}

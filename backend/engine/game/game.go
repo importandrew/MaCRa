@@ -14,7 +14,7 @@ type Game struct {
 	roundSeating   Seating // at the round start (after 4, 8, 12 reseats). dont confuse with 'round' field
 	status         models.GameStatus
 	round          int
-	rules          Rules
+	rules          models.GameRules
 	score          models.GameScore
 	logSize        int // round log entries applied: results and penalties
 }
@@ -22,7 +22,7 @@ type Game struct {
 type Config struct {
 	ID      int
 	Players [4]int
-	Rules   Rules
+	Rules   models.GameRules
 }
 
 func NewGame(cfg Config) *Game {
@@ -75,6 +75,11 @@ func (g *Game) Round() int {
 // so that an entry made from an outdated table is refused.
 func (g *Game) LogSize() int {
 	return g.logSize
+}
+
+// Rules returns the rules the game is played by.
+func (g *Game) Rules() models.GameRules {
+	return g.rules
 }
 
 func (g *Game) Score() models.GameScore {

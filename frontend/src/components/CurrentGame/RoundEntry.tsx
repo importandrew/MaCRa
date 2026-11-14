@@ -11,7 +11,7 @@ import { SignIcon } from '../Icons/SignIcon';
 import PendingButton from '../PendingButton';
 import SegmentedPicker from '../SegmentedPicker';
 import ValueStepper from '../ValueStepper';
-import { EntryOutcome, MIN_FINE, MIN_HAND, RoundEntry } from './useRoundEntry';
+import { EntryOutcome, MIN_FINE, RoundEntry } from './useRoundEntry';
 
 // OUTCOMES are the outcome buttons with their texts. The texts must not wrap
 // in the narrow center of the table: non-breaking hyphens and spaces there.
@@ -171,7 +171,7 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
         <ValueStepper
           label={t('roundEntry.handValue')}
           value={entry.hand}
-          min={MIN_HAND}
+          min={entry.minHand}
           onChange={entry.setHand}
         />
       )}
@@ -188,10 +188,10 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
       {entry.isFalseMahjong && (
         <SegmentedPicker
           ariaLabel={t('roundEntry.fine')}
-          options={[
-            { value: '30', label: '30' },
-            { value: '60', label: '60' },
-          ]}
+          options={entry.falseMahjongAmounts.map((amount) => ({
+            value: String(amount),
+            label: String(amount),
+          }))}
           selectedKey={
             entry.falseMahjongFine ? String(entry.falseMahjongFine) : null
           }

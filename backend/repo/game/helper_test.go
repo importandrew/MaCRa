@@ -52,10 +52,10 @@ func createTestEvent(t *testing.T, conn *pgxpool.Conn) {
 	ctx := context.Background()
 	createTestUser(t, conn, 1)
 	_, err := conn.Exec(ctx, `
-		INSERT INTO events(id, type, name, owner_user_id, visibility, ratings_reach, games_reach, created_at)
-		VALUES($1, 'regular', $2, 1, 'public', 'public', 'public', now())
+		INSERT INTO events(id, type, name, owner_user_id, visibility, ratings_reach, games_reach, rules, created_at)
+		VALUES($1, 'regular', $2, 1, 'public', 'public', 'public', $3, now())
 		ON CONFLICT (id) DO NOTHING`,
-		testEventID, "Test Event",
+		testEventID, "Test Event", models.StandardGameRules(),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create test event: %v", err)
@@ -84,9 +84,9 @@ func createTestGame(t *testing.T, conn *pgxpool.Conn, gameID int) {
 	createTestEvent(t, conn)
 	ctx := context.Background()
 	_, err := conn.Exec(ctx, `
-		INSERT INTO games(id, created_at, status, event_id)
-		VALUES($1, CURRENT_TIMESTAMP, 'live', $2)
-		RETURNING id`, gameID, testEventID,
+		INSERT INTO games(id, created_at, status, event_id, rules)
+		VALUES($1, CURRENT_TIMESTAMP, 'live', $2, $3)
+		RETURNING id`, gameID, testEventID, models.StandardGameRules(),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create test game: %v", err)
@@ -119,9 +119,9 @@ func createTestGameWithStatus(t *testing.T, conn *pgxpool.Conn, gameID int, stat
 	ctx := context.Background()
 	var id int
 	err := conn.QueryRow(ctx, `
-		INSERT INTO games(id, created_at, status, event_id)
-		VALUES($1, CURRENT_TIMESTAMP, $2, $3)
-		RETURNING id`, gameID, string(status), testEventID,
+		INSERT INTO games(id, created_at, status, event_id, rules)
+		VALUES($1, CURRENT_TIMESTAMP, $2, $3, $4)
+		RETURNING id`, gameID, string(status), testEventID, models.StandardGameRules(),
 	).Scan(&id)
 	if err != nil {
 		t.Fatalf("Failed to create test game: %v", err)

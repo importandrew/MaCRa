@@ -12,6 +12,9 @@ func (g *Game) NextRound() error {
 	if !g.IsLive() {
 		return models.ErrGameNotLive
 	}
+	if g.round == g.rules.Hands {
+		return g.End()
+	}
 	switch g.round {
 	case 4:
 		g.roundSeating.ApplySouthNorthSeating()
@@ -22,8 +25,6 @@ func (g *Game) NextRound() error {
 	case 12:
 		g.roundSeating.ApplySouthNorthSeating()
 		g.currentSeating = g.roundSeating
-	case 16:
-		return g.End()
 	default:
 		g.currentSeating.NextRoundSeating()
 	}
@@ -88,8 +89,8 @@ func (g *Game) draw() {
 }
 
 func (g *Game) validateSelf(hand, loser, winner int) error {
-	if hand < 8 {
-		return errors.New("hand score should be 8 or higher")
+	if hand < g.rules.MinHand {
+		return fmt.Errorf("hand score should be %d or higher", g.rules.MinHand)
 	}
 
 	if winner == 0 {
@@ -124,8 +125,8 @@ func (g *Game) self(hand, winner int) {
 }
 
 func (g *Game) validateDeal(hand, loser, winner int) error {
-	if hand < 8 {
-		return errors.New("hand score should be 8 or higher")
+	if hand < g.rules.MinHand {
+		return fmt.Errorf("hand score should be %d or higher", g.rules.MinHand)
 	}
 
 	if winner == 0 {

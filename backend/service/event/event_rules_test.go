@@ -24,7 +24,23 @@ func TestCreate_validatesAndDefaultsToPrivate(t *testing.T) {
 			want: models.Event{
 				Type: models.EventRegular, Name: "Club", Description: "d", OwnerUserID: 7,
 				Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers,
+				Rules: models.StandardGameRules(),
 			},
+		},
+		"given rules": {
+			params: models.EventCreateParams{
+				Type: models.EventRegular, Name: "Club", OwnerID: 7,
+				Rules: &models.GameRules{Hands: 8, MinHand: 8},
+			},
+			want: models.Event{
+				Type: models.EventRegular, Name: "Club", OwnerUserID: 7,
+				Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers,
+				Rules: models.GameRules{Hands: 8, MinHand: 8},
+			},
+		},
+		"invalid rules": {
+			params:  models.EventCreateParams{Type: models.EventRegular, Name: "Club", Rules: &models.GameRules{Hands: 12, MinHand: 8}},
+			wantErr: models.ErrInvalidGameRules,
 		},
 		"empty name after trimming": {
 			params:  models.EventCreateParams{Type: models.EventRegular, Name: "   "},

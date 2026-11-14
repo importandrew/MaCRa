@@ -75,6 +75,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			event := required.Group("/event/:eventId", middleware.RequireEvent, h.event.HasAccess)
 			{
 				event.PATCH("", h.event.Update)
+				event.PUT("/rules", h.event.UpdateRules)
 				event.POST("/finish", h.event.FinishEvent)
 
 				event.POST("/members", h.event.AddMembers)

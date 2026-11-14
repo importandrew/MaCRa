@@ -105,11 +105,11 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 - **Deleting**: the owner can delete an event only while it has no games (created by mistake); otherwise it can only be finished.
 - **Finishing**: the owner, after a confirmation, when no game is live. It can't be undone: the rating is final. After that only the visibility can change; members are read-only.
 
-### Event settings (planned)
+### Event settings
 
-Two kinds, set by the owner in Manage → Rules, starting from a preset ("MCR standard": 16 hands, minimum 8; "Short": 8 hands, minimum 24) and adjusted value by value. The overview lists the settings that differ from the standard, so players know what they play.
+Game rules are in place; permissions and display settings are planned. Two kinds, set by the owner when creating the event or later in Manage → Rules, starting from a preset ("MCR standard": 16 hands, minimum 8; "Short": 8 hands, minimum 8) and adjusted value by value. The overview lists the settings that differ from the standard, so players know what they play.
 
-- **Game rules** affect the score: number of hands (16 = East, South, West, North rounds; 8 = East and South), minimum hand value (8 by default), false mahjong amounts (30/60 by default). They can be changed only while the event has no games; after the first game they are frozen, so all games of one rating follow the same rules. Each game also stores a copy of the rules it started with and is always replayed by them.
+- **Game rules** affect the score: number of hands (16, 8, 4 or 1; 16 = East, South, West, North rounds), minimum hand value (8 by default). False mahjong is always 30 or 60, not a setting. They can be changed only while the event has no games (aborted games don't count); after the first game they are frozen, so all games of one rating follow the same rules. Each game also stores a copy of the rules it started with and is always replayed by them.
 - **Permissions** don't affect the score and can be changed at any time: who may finish a game early (seated players and referees / referees only), abort it (referees / also seated players before the first round / also seated players at any time), undo a round (referees / also seated players, once undos are audited), create games (players / referees only). Defaults are the ones in area 1.
 - **Display and input** (can be changed at any time): minimum number of games to appear in the rating (the rating itself is computed the same way); hand input mode — total value (now) or picking fans, once fan-based input exists.
 - Time limits per game are tournament-only (area 8). Not planned for regular events: a choice of who enters rounds, round confirmation by a second player, penalty switches, other rating methods or placement points, automatic seating.
@@ -128,7 +128,7 @@ Applies to regular events; tournament games follow area 8.
 
 - Shows the four seats in seating order, the scores and the round (東1…北4).
 - Usually one player at the table keeps the score; any of the four may enter.
-- **Entering a round**: tap the round kanji; pick the outcome (draw, self-draw, deal-in, penalty), 👍/👎 next to the seats, the hand value (stepper from 8, or type the number) or the fine (from 1; false mahjong 30 or 60; optionally move to the next round). While filling it in, each seat shows the score change the entry will make, so mistakes are seen before OK. After OK the scores update and the entry resets.
+- **Entering a round**: tap the round kanji; pick the outcome (draw, self-draw, deal-in, penalty), 👍/👎 next to the seats, the hand value (stepper from the game's minimum hand, 8 by default, or type the number) or the fine (from 1; false mahjong 30 or 60; optionally move to the next round). While filling it in, each seat shows the score change the entry will make, so mistakes are seen before OK. After OK the scores update and the entry resets.
 - **What a round holds**: exactly one main outcome (draw, self-draw or deal-in), which ends the round, and any number of penalties and false mahjongs, before it or instead of it (a penalty with "move to the next round" ends the round without a main outcome).
 - **No silent duplicates**: an entry carries the number of entries in the game's round log as the player's table shows it (results and penalties alike, so a penalty tapped twice is caught too, though it doesn't change the round). If the log has changed since, the entry is refused, the table refreshes, and the message says what changed: "Round 東3 has already been entered", "A penalty has just been entered", or, after a referee's undo, "The last round has been undone" / "The last entry has been undone". The player decides whether to enter it again. Entering two forgotten rounds in a row still works.
 - **Refreshing**: scores never change on their own, so a player's picture of the game isn't disturbed. The app checks every 10–15 seconds whether the table changed and then highlights the Refresh button; the player refreshes when ready.
@@ -136,7 +136,7 @@ Applies to regular events; tournament games follow area 8.
 
 ### The end of a game
 
-- After the 16th round the game ends by itself and the result page (`/last`) opens: final scores, chart, log, "Play again".
+- After the last round (the 16th by default, or as the event's rules set) the game ends by itself and the result page (`/last`) opens: final scores, chart, log, "Play again".
 - If the game has ended while a player's table was still open (another player entered the last round, or it was finished), their next entry or Refresh shows "The game has ended" and opens the result page; if it was aborted, "The game was aborted" and the home page.
 - A referee can undo the last round within an hour after the end; the game becomes live again. After that the result is final. The undo is refused if one of the players has already started another game ("Cannot undo the final round: <Name> has already started another game"): a player can't have two live games.
 - **The log in the table menu matches the table**: it reloads together with the table (on Refresh, after an entry or an undo), not when the menu opens, so the referee never undoes an entry their table doesn't show yet.
@@ -323,7 +323,7 @@ Planned: none of this is built yet. Until it is, tournaments are a stub (no game
 
 | Setting | Can change |
 |---|---|
-| Game rules (number of hands, minimum hand, false Mahjong amounts) | until the first game |
+| Game rules (number of hands, minimum hand) | until the first game |
 | What happens when time is up | until the first tour starts |
 | Number of tours | until the last tour starts; prepared future tours are recomputed |
 | Tour length | until that tour starts; during it, only adding time to a table |

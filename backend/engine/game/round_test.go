@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,7 @@ func TestGame_NextRound(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -37,7 +38,7 @@ func TestGame_NextRound(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				for range 3 {
 					g.NextRound()
@@ -58,7 +59,7 @@ func TestGame_NextRound(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				for range 7 {
 					g.NextRound()
@@ -79,7 +80,7 @@ func TestGame_NextRound(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				for range 11 {
 					g.NextRound()
@@ -96,7 +97,7 @@ func TestGame_NextRound(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				for range 15 {
 					g.NextRound()
@@ -114,7 +115,7 @@ func TestGame_NextRound(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				g.End()
 				return g
@@ -153,7 +154,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -176,7 +177,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -199,7 +200,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -222,7 +223,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -243,7 +244,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				return g
 			},
@@ -263,7 +264,7 @@ func TestGame_EnterRoundResult(t *testing.T) {
 				g := NewGame(Config{
 					ID:      100,
 					Players: [4]int{1, 2, 3, 4},
-					Rules:   Rules{},
+					Rules:   models.StandardGameRules(),
 				})
 				g.End()
 				return g
@@ -314,4 +315,33 @@ func TestGame_EnterRoundResult_InvalidPlayers(t *testing.T) {
 			assert.Equal(t, 1, g.Round())
 		})
 	}
+}
+
+// TestGame_ByRules checks that the game follows its rules: the number of
+// hands and the minimum hand.
+func TestGame_ByRules(t *testing.T) {
+	newGame := func(rules models.GameRules) *Game {
+		return NewGame(Config{ID: 100, Players: [4]int{1, 2, 3, 4}, Rules: rules})
+	}
+
+	for _, hands := range models.ValidHands {
+		t.Run(fmt.Sprintf("ends after %d hands", hands), func(t *testing.T) {
+			g := newGame(models.GameRules{Hands: hands, MinHand: 8})
+			for range hands - 1 {
+				assert.NoError(t, g.EnterRoundResult(models.Draw, 0, 0, 0))
+			}
+			assert.True(t, g.IsLive())
+			assert.Equal(t, hands, g.Round())
+
+			assert.NoError(t, g.EnterRoundResult(models.Draw, 0, 0, 0))
+			assert.Equal(t, models.GameEnded, g.Status())
+		})
+	}
+
+	t.Run("minimum hand", func(t *testing.T) {
+		g := newGame(models.GameRules{Hands: 16, MinHand: 24})
+		assert.ErrorIs(t, g.EnterRoundResult(models.Self, 23, 0, 1), models.ErrValidateEnterRoundResult)
+		assert.ErrorIs(t, g.EnterRoundResult(models.Deal, 23, 2, 1), models.ErrValidateEnterRoundResult)
+		assert.NoError(t, g.EnterRoundResult(models.Deal, 24, 2, 1))
+	})
 }
