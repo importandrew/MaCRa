@@ -64,7 +64,7 @@ export default function SelectEventModal({
         }`}
       >
         <div
-          className={`font-medium break-words ${isFinished ? 'text-muted' : ''}`}
+          className={`font-medium break-words ${isFinished ? 'text-muted' : 'text-foreground'}`}
         >
           {event.name}
         </div>

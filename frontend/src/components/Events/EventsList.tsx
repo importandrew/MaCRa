@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Drawer } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { cardVariants } from '@heroui/styles';
 import { type ReactNode, useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import type { Event } from '../../models/Event';
 import type { EventRole } from '../../models/EventRole';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { useFetchVisibleEvents } from '../../providers/event/eventApi';
-import ContextMenu from '../ContextMenu/ContextMenu';
+import { SignIcon } from '../Icons/SignIcon';
 import { CrownIcon } from '../Icons/CrownIcon';
 import { EyeIcon } from '../Icons/EyeIcon';
 import { CheckInCircleIcon } from '../Icons/CheckInCircleIcon';
@@ -169,13 +169,10 @@ export default function EventsList() {
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
   const { data, isLoading, isError, refetch } = useFetchVisibleEvents();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [query, setQuery] = useState('');
 
-  const closeDrawer = () => setIsDrawerOpen(false);
-
+  // handleCreate: a visitor signs in first and comes back to the form.
   const handleCreate = () => {
-    closeDrawer();
     if (!isAuthenticated) {
       navigate('/login', { state: { from: { pathname: '/events/new' } } });
       return;
@@ -195,23 +192,19 @@ export default function EventsList() {
       isError={isError}
       onRefresh={refetch}
     >
-      <div className="relative flex flex-col w-full max-w-full px-3 py-6 gap-4 min-w-0 overflow-x-hidden items-stretch">
+      <div className="relative flex flex-col w-full max-w-full px-3 pt-6 pb-24 gap-4 min-w-0 overflow-x-hidden items-stretch">
         <div className="flex flex-col w-full max-w-[600px] mx-auto gap-4 min-w-0">
-          <ContextMenu
-            isOpen={isDrawerOpen}
-            onOpen={() => setIsDrawerOpen(true)}
-            onClose={closeDrawer}
-            buttonClassName="fixed bottom-4 right-4 z-10"
+          {/* The one action of this page: a round (+) in the corner, no ≡
+              menu (docs/user-scenarios.md, "Menus and overlays"). */}
+          <Button
+            isIconOnly
+            variant="primary"
+            aria-label={t('events.newEvent')}
+            onPress={handleCreate}
+            className="fixed bottom-4 right-4 z-10 size-14 rounded-full shadow-lg"
           >
-            <Drawer.Header>
-              <Drawer.Heading>{t('events.title')}</Drawer.Heading>
-            </Drawer.Header>
-            <Drawer.Body className="flex flex-col gap-3">
-              <Button variant="primary" fullWidth onPress={handleCreate}>
-                {t('events.newEvent')}
-              </Button>
-            </Drawer.Body>
-          </ContextMenu>
+            <SignIcon sign="plus" className="size-7 [&_path]:stroke-2" />
+          </Button>
 
           <h1 className="text-2xl font-semibold">{t('events.title')}</h1>
 
