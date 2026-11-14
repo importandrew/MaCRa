@@ -63,10 +63,11 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
   const { eventId, gameId } = useRouteIds();
   const { data, isLoading, isError, isForbidden, refetch, mutate } =
     useFetchLiveGameData(eventId, gameId);
-  // A referee (or a seated player, as the event's settings allow) enters
-  // penalties here: the round kanji opens the entry, penalties only.
+  // A referee enters penalties here, into any live game of the event, also
+  // one they play in (referee_entry): the round kanji opens the entry,
+  // penalties only. Others, the seated players included, see the kanji.
   const { hasCapability } = useGameCapabilities(eventId, gameId);
-  const canEnterPenalty = hasCapability('enter_penalty');
+  const canEnterPenalty = hasCapability('referee_entry');
   const [isEntryOpen, setIsEntryOpen] = useState(false);
   const entry = useRoundEntry({
     table: data,

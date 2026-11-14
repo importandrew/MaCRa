@@ -32,7 +32,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 - **Create a game**: a player of a regular, unfinished event, who is one of the four players; all four must be players of the event.
 - **Enter round results**: any of the four players seated in the game.
-- **Enter penalties and false mahjongs**: referees always, in any live game of the event, from the game's view; the seated players at their table too, unless the event's permissions leave it to referees (area 3).
+- **Enter penalties and false mahjongs**: referees always, in any live game of the event, from the game's view (also a game they play in); at the table, the seated players, unless the event's permissions leave it to referees (area 3), and a seated referee.
 - **Undo the last round**: by default referees only (the owner too when they have the referee role): a dishonest player could quietly undo a round and enter a better one, and undos don't leave a visible trail yet. The owner may let the seated players undo too, while the game is live (area 3, "Event settings"), for an event whose players they trust. Undoing the final round of an ended game stays with referees: it changes the rating.
 - **Abort a game** (regular events): referees at any time; by default also the seated players while no round has been entered (a game started by mistake). The event's permissions can leave it to referees or let the seated players abort at any time (area 3, "Event settings").
 - **Finish a game early** (regular events): a referee, and by default a seated player; the event's permissions can leave it to referees.
@@ -156,7 +156,7 @@ Applies to regular events; tournament games follow area 8.
 - The page shows the live table or, for an ended game, the result (same as `/last`). Opening one's own game from the list shows it the same way; one's own table to play is reached from the home page.
 - The live table can be rotated (who is at the bottom) and refreshed; Refresh keeps the rotation. Like at the table, scores change only on Refresh by default, and the Refresh button lights up when the game moved on; an **Auto-refresh** switch (remembered on the device) updates the scores by itself, e.g. for a club screen.
 - The table menu (log, fans, Finish, Abort, Undo) follows the user's rights for that game: this is where referees manage other people's games.
-- **Penalties from the view**: for a user who may enter penalties into the game (a referee), the round kanji in the center is a button. It opens the same entry as at the table, with only Penalty and False mahjong active (the other outcomes are shown disabled, so the layout is the same); the penalized player is marked with − at their seat. Others see the kanji as text.
+- **Penalties from the view**: for a referee of the event, the round kanji in the center is a button, in any live game, also one they play in: that is where a referee hands out penalties. It's the referee's own entry into a game, and other referee entries (e.g. round results) may join it later. It opens the same entry as at the table, with only Penalty and False mahjong active (the other outcomes are shown disabled, so the layout is the same); the penalized player is marked with − at their seat. Others, the seated players included, see the kanji as text.
 - At the table, when the event leaves penalties to referees, Penalty is shown disabled in the round entry, in its usual place.
 
 ### Stream overlay (HUD)

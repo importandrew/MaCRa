@@ -23,6 +23,7 @@ export type GameCapability =
   | 'view_game'
   | 'enter_round'
   | 'enter_penalty'
+  | 'referee_entry'
   | 'undo_round'
   | 'abort_game'
   | 'finish_game';

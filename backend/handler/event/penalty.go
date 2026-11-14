@@ -32,8 +32,8 @@ func (h Handler) FalseMahjong(c *gin.Context) {
 	h.penaltyAtTable(c, models.FalseMahjong)
 }
 
-// GamePenalty enters a penalty into the game, as a referee does from the
-// game's view (POST /event/:id/game/:gameId/penalty).
+// GamePenalty enters a penalty into the game, as a referee from the game's
+// view (POST /event/:id/game/:gameId/penalty).
 func (h Handler) GamePenalty(c *gin.Context) {
 	h.penaltyInGame(c, models.Penalty)
 }
@@ -77,8 +77,8 @@ func (h Handler) penaltyAtTable(c *gin.Context, penaltyType models.Outcome) {
 }
 
 // penaltyInGame enters the penalty into the game of the URL and answers with
-// its live view. It needs models.CapEnterPenalty: a referee in any live game
-// of the event, or a seated player as the event's settings allow.
+// its live view. It needs models.CapRefereeEntry: a referee, in any live game
+// of the event.
 func (h Handler) penaltyInGame(c *gin.Context, penaltyType models.Outcome) {
 	callerID := reqctx.GetUserID(c)
 	eventID := reqctx.GetEventID(c)
@@ -90,7 +90,7 @@ func (h Handler) penaltyInGame(c *gin.Context, penaltyType models.Outcome) {
 		return
 	}
 
-	if err := h.event.HasCapability(c.Request.Context(), eventID, callerID, gameID, models.CapEnterPenalty); err != nil {
+	if err := h.event.HasCapability(c.Request.Context(), eventID, callerID, gameID, models.CapRefereeEntry); err != nil {
 		httperr.Error(c, err)
 		return
 	}

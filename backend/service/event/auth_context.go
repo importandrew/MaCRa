@@ -122,7 +122,7 @@ func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool
 		}
 		return authCtx.hasRole(models.EventPlayer)
 	case models.CapAbortGame, models.CapFinishGame, models.CapUndoRound,
-		models.CapEnterRound, models.CapEnterPenalty, models.CapViewGame:
+		models.CapEnterRound, models.CapEnterPenalty, models.CapRefereeEntry, models.CapViewGame:
 		return authCtx.hasGameCapability(capability)
 	case models.CapWatchLive, models.CapWatchResults:
 		// A seated player always sees their own game, whatever the games reach.
@@ -150,6 +150,10 @@ func (authCtx EventAuthContext) hasGameCapability(capability models.Capability) 
 		return authCtx.IsSeatedInGame && authCtx.isGameLive()
 	case models.CapEnterPenalty:
 		return authCtx.canEnterPenalty()
+	case models.CapRefereeEntry:
+		// A referee enters from the game's view into any live game of the
+		// event, also one they play in.
+		return authCtx.hasRole(models.EventReferee) && authCtx.isGameLive()
 	case models.CapViewGame:
 		return authCtx.canViewGame()
 	default:
@@ -185,11 +189,12 @@ func (authCtx EventAuthContext) canUndoRound() bool {
 			authCtx.Event.Settings.UndoRound == models.UndoBySeated)
 }
 
-// canEnterPenalty: referees in any live game of the event; the seated players
-// at their table unless the event's settings leave it to referees.
+// canEnterPenalty: at one's own table, the seated players unless the event's
+// settings leave penalties to referees, and a seated referee. (A referee
+// enters into any game from its view: models.CapRefereeEntry.)
 func (authCtx EventAuthContext) canEnterPenalty() bool {
-	return authCtx.isGameLive() && (authCtx.hasRole(models.EventReferee) ||
-		(authCtx.IsSeatedInGame && authCtx.Event.Settings.Penalties == models.PenaltiesBySeated))
+	return authCtx.isGameLive() && authCtx.IsSeatedInGame &&
+		(authCtx.hasRole(models.EventReferee) || authCtx.Event.Settings.Penalties == models.PenaltiesBySeated)
 }
 
 // canViewGame: a seated player always sees their own game; others by the
