@@ -243,6 +243,12 @@ const en = {
     observers: 'Observers',
     createdAt: 'Created',
     rules: 'Rules',
+    myEvents: 'My events',
+    publicEvents: 'Public events',
+    finishedCount: 'Finished ({{n}})',
+    search: 'Search events',
+    clearSearch: 'Clear search',
+    nothingFound: 'No events match “{{query}}”',
   },
   rules: {
     title: 'Game rules',

@@ -238,6 +238,12 @@ const ru: Messages = {
     observers: 'Наблюдатели',
     createdAt: 'Создано',
     rules: 'Правила',
+    myEvents: 'Мои события',
+    publicEvents: 'Публичные события',
+    finishedCount: 'Завершённые ({{n}})',
+    search: 'Поиск событий',
+    clearSearch: 'Очистить поиск',
+    nothingFound: 'Нет событий с «{{query}}» в названии',
   },
   rules: {
     title: 'Правила игры',

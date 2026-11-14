@@ -31,32 +31,30 @@ func (s *Service) Details(ctx context.Context, eventID int) (models.EventDetails
 	return models.EventDetails{Event: event, PlayerCount: count, RulesFrozen: frozen}, nil
 }
 
+// ListVisible returns the events the user can open, with their roles, in
+// the repo's order: active ones by their last game, then finished ones.
 func (s *Service) ListVisible(ctx context.Context, userID int) ([]models.EventListItem, error) {
-	events, err := s.repo.List(ctx)
+	rows, err := s.repo.List(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	filtered := make([]models.EventListItem, 0, len(events))
-	for _, event := range events {
-		authCtx, err := s.buildAuthContext(ctx, event, userID, 0)
-		if err != nil {
-			return nil, err
-		}
-
+	visible := make([]models.EventListItem, 0, len(rows))
+	for _, row := range rows {
+		authCtx := eventAuthContext(row.Event, userID, row.Roles)
 		if !authCtx.canAccessEvent() {
 			continue
 		}
 
-		item := models.EventListItem{Event: event}
+		item := models.EventListItem{Event: row.Event, LastGameAt: row.LastGameAt}
 		if userID != 0 {
 			item.IsParticipating = authCtx.isParticipating()
 			item.IsOwner = authCtx.IsOwner
 			item.Roles = authCtx.Roles
 		}
 
-		filtered = append(filtered, item)
+		visible = append(visible, item)
 	}
 
-	return filtered, nil
+	return visible, nil
 }

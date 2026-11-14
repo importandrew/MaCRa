@@ -20,6 +20,8 @@ export type Event = {
   created_at: string;
   finished_at: string | null;
   is_participating?: boolean;
+  // last_game_at: when its last game (not aborted) started; lists only.
+  last_game_at?: string | null;
   is_owner?: boolean;
   roles?: EventRole[];
   // player_count comes only with GET /api/event/:id (the overview): non-members

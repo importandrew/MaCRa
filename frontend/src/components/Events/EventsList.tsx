@@ -16,6 +16,9 @@ import { ScalesIcon } from '../Icons/ScalesIcon';
 import { TrophyIcon } from '../Icons/TrophyIcon';
 import { UsersIcon } from '../Icons/UsersIcon';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
+import EventSearchField from './EventSearchField';
+import FinishedEvents from './FinishedEvents';
+import { matchesQuery, splitFinished } from './eventListFilters';
 
 const cardStyles = cardVariants();
 
@@ -89,12 +92,85 @@ function EventCardMeta({ event }: { event: Event }) {
   );
 }
 
+// EventCard is an event in the list: a link to it, with its name, type, the
+// user's roles and the start of its description. Finished events are dimmed.
+function EventCard({ event }: { event: Event }) {
+  const isFinished = Boolean(event.finished_at);
+  return (
+    // A real link: long-press and "open in new tab" work on phones.
+    <Link
+      to={`/event/${event.id}`}
+      className={cardStyles.base({
+        className: isFinished
+          ? 'opacity-60 bg-default/60 border border-border shadow-none'
+          : undefined,
+      })}
+    >
+      <div
+        className={cardStyles.header({
+          className: 'flex-row justify-between items-center gap-2 min-w-0',
+        })}
+      >
+        <span
+          className={`font-medium min-w-0 truncate text-lg ${
+            isFinished ? 'text-muted' : ''
+          }`}
+          title={event.name}
+        >
+          {event.name}
+        </span>
+        <EventCardMeta event={event} />
+      </div>
+      {event.description && (
+        <div className={cardStyles.content()}>
+          <p className="text-sm truncate text-muted">{event.description}</p>
+        </div>
+      )}
+    </Link>
+  );
+}
+
+// EventSection is a titled part of the list: its active events, then its
+// finished ones collapsed (open while searching).
+function EventSection({
+  title,
+  events,
+  isSearching,
+  empty,
+}: {
+  title: string;
+  events: Event[];
+  isSearching: boolean;
+  // empty is shown when the section has no events at all.
+  empty?: ReactNode;
+}) {
+  const { active, finished } = splitFinished(events);
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-lg font-medium">{title}</h2>
+      {events.length === 0 && empty}
+      {active.map((event) => (
+        <EventCard key={event.id} event={event} />
+      ))}
+      <FinishedEvents count={finished.length} isSearching={isSearching}>
+        {finished.map((event) => (
+          <EventCard key={event.id} event={event} />
+        ))}
+      </FinishedEvents>
+    </section>
+  );
+}
+
+// EventsList is /events: "My events" (where the user is a member) and
+// "Public events", each with its finished events collapsed, and a search by
+// name over both.
 export default function EventsList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
   const { data, isLoading, isError, refetch } = useFetchVisibleEvents();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
   const closeDrawer = () => setIsDrawerOpen(false);
 
@@ -106,6 +182,12 @@ export default function EventsList() {
     }
     navigate('/events/new');
   };
+
+  const events = data ?? [];
+  const isSearching = query.trim() !== '';
+  const found = events.filter((event) => matchesQuery(event, query));
+  const mine = found.filter((event) => event.is_participating);
+  const others = found.filter((event) => !event.is_participating);
 
   return (
     <LoadingTemplate
@@ -133,50 +215,41 @@ export default function EventsList() {
 
           <h1 className="text-2xl font-semibold">{t('events.title')}</h1>
 
-          {!data?.length ? (
+          {events.length === 0 ? (
             <p className="text-center text-muted text-xl py-8">
               {t('events.noEvents')}
             </p>
           ) : (
-            data.map((event) => {
-              const isFinished = Boolean(event.finished_at);
-              return (
-                // A real link: long-press and "open in new tab" work on phones.
-                <Link
-                  key={event.id}
-                  to={`/event/${event.id}`}
-                  className={cardStyles.base({
-                    className: isFinished
-                      ? 'opacity-60 bg-default/60 border border-border shadow-none'
-                      : undefined,
-                  })}
-                >
-                  <div
-                    className={cardStyles.header({
-                      className:
-                        'flex-row justify-between items-center gap-2 min-w-0',
-                    })}
-                  >
-                    <span
-                      className={`font-medium min-w-0 truncate text-lg ${
-                        isFinished ? 'text-muted' : ''
-                      }`}
-                      title={event.name}
-                    >
-                      {event.name}
-                    </span>
-                    <EventCardMeta event={event} />
-                  </div>
-                  {event.description && (
-                    <div className={cardStyles.content()}>
-                      <p className="text-sm truncate text-muted">
-                        {event.description}
-                      </p>
-                    </div>
+            <>
+              <EventSearchField value={query} onChange={setQuery} />
+              {isSearching && found.length === 0 ? (
+                <p className="text-center text-muted py-6">
+                  {t('events.nothingFound', { query: query.trim() })}
+                </p>
+              ) : (
+                <>
+                  {isAuthenticated && !(isSearching && mine.length === 0) && (
+                    <EventSection
+                      title={t('events.myEvents')}
+                      events={mine}
+                      isSearching={isSearching}
+                      empty={
+                        <p className="text-sm text-muted">
+                          {t('events.notParticipating')}
+                        </p>
+                      }
+                    />
                   )}
-                </Link>
-              );
-            })
+                  {others.length > 0 && (
+                    <EventSection
+                      title={t('events.publicEvents')}
+                      events={others}
+                      isSearching={isSearching}
+                    />
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
       </div>

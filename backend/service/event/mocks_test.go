@@ -616,27 +616,27 @@ func (_c *MockEventRepo_GetMemberRoles_Call) RunAndReturn(run func(ctx context.C
 }
 
 // List provides a mock function for the type MockEventRepo
-func (_mock *MockEventRepo) List(ctx context.Context) ([]models.Event, error) {
-	ret := _mock.Called(ctx)
+func (_mock *MockEventRepo) List(ctx context.Context, userID int) ([]models.EventListRow, error) {
+	ret := _mock.Called(ctx, userID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for List")
 	}
 
-	var r0 []models.Event
+	var r0 []models.EventListRow
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]models.Event, error)); ok {
-		return returnFunc(ctx)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) ([]models.EventListRow, error)); ok {
+		return returnFunc(ctx, userID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []models.Event); ok {
-		r0 = returnFunc(ctx)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) []models.EventListRow); ok {
+		r0 = returnFunc(ctx, userID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Event)
+			r0 = ret.Get(0).([]models.EventListRow)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -650,29 +650,35 @@ type MockEventRepo_List_Call struct {
 
 // List is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockEventRepo_Expecter) List(ctx any) *MockEventRepo_List_Call {
-	return &MockEventRepo_List_Call{Call: _e.mock.On("List", ctx)}
+//   - userID int
+func (_e *MockEventRepo_Expecter) List(ctx any, userID any) *MockEventRepo_List_Call {
+	return &MockEventRepo_List_Call{Call: _e.mock.On("List", ctx, userID)}
 }
 
-func (_c *MockEventRepo_List_Call) Run(run func(ctx context.Context)) *MockEventRepo_List_Call {
+func (_c *MockEventRepo_List_Call) Run(run func(ctx context.Context, userID int)) *MockEventRepo_List_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
 }
 
-func (_c *MockEventRepo_List_Call) Return(events []models.Event, err error) *MockEventRepo_List_Call {
-	_c.Call.Return(events, err)
+func (_c *MockEventRepo_List_Call) Return(eventListRows []models.EventListRow, err error) *MockEventRepo_List_Call {
+	_c.Call.Return(eventListRows, err)
 	return _c
 }
 
-func (_c *MockEventRepo_List_Call) RunAndReturn(run func(ctx context.Context) ([]models.Event, error)) *MockEventRepo_List_Call {
+func (_c *MockEventRepo_List_Call) RunAndReturn(run func(ctx context.Context, userID int) ([]models.EventListRow, error)) *MockEventRepo_List_Call {
 	_c.Call.Return(run)
 	return _c
 }

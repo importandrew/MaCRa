@@ -25,21 +25,14 @@ type EventAuthContext struct {
 }
 
 func (s *Service) buildAuthContext(ctx context.Context, event models.Event, callerID, gameID int) (EventAuthContext, error) {
-	authCtx := EventAuthContext{
-		Event:    event,
-		CallerID: callerID,
-		IsOwner:  event.OwnerUserID == callerID,
-		Now:      time.Now(),
-	}
-
+	var roles []models.EventRole
 	if callerID != 0 {
-		roles, err := s.repo.GetMemberRoles(ctx, event.ID, callerID)
-		if err != nil {
+		var err error
+		if roles, err = s.repo.GetMemberRoles(ctx, event.ID, callerID); err != nil {
 			return EventAuthContext{}, err
 		}
-		authCtx.Roles = roles
-		authCtx.IsMember = len(roles) > 0 || authCtx.IsOwner
 	}
+	authCtx := eventAuthContext(event, callerID, roles)
 
 	if gameID > 0 {
 		summary, err := s.gameService.Summary(ctx, gameID)
@@ -58,6 +51,22 @@ func (s *Service) buildAuthContext(ctx context.Context, event models.Event, call
 	}
 
 	return authCtx, nil
+}
+
+// eventAuthContext is the event-level auth context of a caller whose roles in
+// the event are known (none for a visitor, callerID 0).
+func eventAuthContext(event models.Event, callerID int, roles []models.EventRole) EventAuthContext {
+	authCtx := EventAuthContext{
+		Event:    event,
+		CallerID: callerID,
+		IsOwner:  callerID != 0 && event.OwnerUserID == callerID,
+		Now:      time.Now(),
+	}
+	if callerID != 0 {
+		authCtx.Roles = roles
+		authCtx.IsMember = len(roles) > 0 || authCtx.IsOwner
+	}
+	return authCtx
 }
 
 // isStaff is about seeing: referees, observers and the owner see everything
