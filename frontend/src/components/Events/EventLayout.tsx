@@ -52,9 +52,8 @@ export default function EventLayout() {
   // The server says the event doesn't exist (a bad id is handled below).
   const isNotFound = eventNotFound || meNotFound;
 
-  const refetch = useCallback(() => {
-    refetchEvent();
-    refetchMe();
+  const refetch = useCallback(async () => {
+    await Promise.all([refetchEvent(), refetchMe()]);
   }, [refetchEvent, refetchMe]);
 
   const contextValue = useMemo<EventLayoutContextValue | null>(() => {
