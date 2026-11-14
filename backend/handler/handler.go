@@ -94,6 +94,9 @@ func (h *Handler) registerEventActions(event *gin.RouterGroup) {
 	event.GET("/tours", h.event.Tours)
 	event.POST("/tours", h.event.PublishTour)
 	event.DELETE("/tours/current", h.event.CancelTour)
+	event.POST("/tours/current/start", h.event.StartTour)
+	event.POST("/tours/current/finish", h.event.FinishTour)
+	event.POST("/tours/current/abort", h.event.AbortTour)
 	event.POST("/finish", h.event.FinishEvent)
 
 	event.POST("/members", h.event.AddMembers)

@@ -107,3 +107,74 @@ func TestTours(t *testing.T) {
 		assert.ErrorIs(t, err, models.ErrAllToursPlayed)
 	})
 }
+
+func TestTourRun(t *testing.T) {
+	db, err := database.NewTestDB()
+	require.NoError(t, err)
+	defer db.Close()
+
+	db.Test(t, "tour run", func(t *testing.T) {
+		ctx := context.Background()
+		repo := NewRepo(db)
+		games := game.NewRepo(db)
+		eventID := createTestTournament(t, db) // players 2–5
+		require.NoError(t, repo.Draw(ctx, eventID))
+
+		assert.ErrorIs(t, repo.StartTour(ctx, eventID), models.ErrTourNotFound, "nothing published")
+		_, err := repo.PublishTour(ctx, eventID, models.SeatingRandom, inOrder)
+		require.NoError(t, err)
+		assert.ErrorIs(t, repo.FinishTour(ctx, eventID), models.ErrTourNotFound, "not started")
+
+		require.NoError(t, repo.StartTour(ctx, eventID))
+		event, err := repo.Get(ctx, eventID)
+		require.NoError(t, err)
+		assert.Equal(t, models.EventInProgress, event.Status(), "the first tour starts the tournament")
+		state, err := repo.TourState(ctx, eventID)
+		require.NoError(t, err)
+		assert.Equal(t, models.TourLive, state.Current.Status)
+		gameID := state.Tables[0].GameID
+		assert.Equal(t, models.GameLive, state.Tables[0].Status)
+		assert.ErrorIs(t, repo.CancelTour(ctx, eventID), models.ErrTourNotFound, "a started tour can't be cancelled")
+
+		err = repo.FinishTour(ctx, eventID)
+		assert.ErrorIs(t, err, models.ErrTablesStillPlaying)
+		var dataErr *models.DataError
+		require.ErrorAs(t, err, &dataErr)
+		assert.Equal(t, 1, dataErr.Data["playing"])
+
+		seats := state.Tables[0].Seats
+		result := func(i int, gp int, tp float32) models.FinalPlayerData {
+			return models.FinalPlayerData{ID: seats[i].UserID, GP: gp, TP: tp}
+		}
+		require.NoError(t, games.Finalize(ctx, models.FinalGameData{
+			GameID: gameID, East: result(0, 30, 4), South: result(1, 10, 2), West: result(2, -10, 1), North: result(3, -30, 0),
+		}))
+		rating, err := repo.ListEndedPlayerResults(ctx, eventID)
+		require.NoError(t, err)
+		assert.Empty(t, rating, "a tour's results count once it is finished")
+
+		require.NoError(t, repo.FinishTour(ctx, eventID))
+		rating, err = repo.ListEndedPlayerResults(ctx, eventID)
+		require.NoError(t, err)
+		assert.Len(t, rating, 4)
+
+		// Tour 2 is aborted: its games don't count, the number is played again.
+		_, err = repo.PublishTour(ctx, eventID, models.SeatingRandom, inOrder)
+		require.NoError(t, err)
+		require.NoError(t, repo.StartTour(ctx, eventID))
+		state, err = repo.TourState(ctx, eventID)
+		require.NoError(t, err)
+		require.Equal(t, 2, state.Current.Number)
+		aborted := state.Tables[0].GameID
+		require.NoError(t, repo.AbortTour(ctx, eventID))
+		status, err := games.Status(ctx, aborted)
+		require.NoError(t, err)
+		assert.Equal(t, models.GameAborted, status)
+		state, err = repo.TourState(ctx, eventID)
+		require.NoError(t, err)
+		assert.Equal(t, 1, state.Current.Number, "the current tour is the last one not aborted")
+		assert.Equal(t, 2, state.Next, "the aborted number is played again")
+		_, err = repo.PublishTour(ctx, eventID, models.SeatingRandom, inOrder)
+		require.NoError(t, err, "tour 2 again")
+	})
+}

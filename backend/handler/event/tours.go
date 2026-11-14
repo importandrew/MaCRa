@@ -1,6 +1,7 @@
 package event
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -66,6 +67,38 @@ func (h Handler) CancelTour(c *gin.Context) {
 	}
 
 	if err := h.event.CancelTour(c.Request.Context(), eventID); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// StartTour starts the published tour (POST /event/:id/tours/current/start).
+func (h Handler) StartTour(c *gin.Context) {
+	h.tourAction(c, h.event.StartTour)
+}
+
+// FinishTour finishes the live tour once all its games have ended
+// (POST /event/:id/tours/current/finish).
+func (h Handler) FinishTour(c *gin.Context) {
+	h.tourAction(c, h.event.FinishTour)
+}
+
+// AbortTour aborts the live tour (POST /event/:id/tours/current/abort).
+func (h Handler) AbortTour(c *gin.Context) {
+	h.tourAction(c, h.event.AbortTour)
+}
+
+// tourAction runs a referee's action on the current tour. It needs
+// models.CapRunTournament.
+func (h Handler) tourAction(c *gin.Context, action func(ctx context.Context, eventID int) error) {
+	eventID := reqctx.GetEventID(c)
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	if err := action(c.Request.Context(), eventID); err != nil {
 		httperr.Error(c, err)
 		return
 	}

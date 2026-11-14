@@ -23,6 +23,9 @@ export type TourSeat = {
 export type TourTable = {
   table: number;
   game_id: number;
+  // status: the table's game: created (tour not started), live, ended,
+  // aborted.
+  status: 'created' | 'live' | 'ended' | 'aborted';
   // seats: east first.
   seats: TourSeat[];
 };

@@ -126,6 +126,12 @@ var (
 	// ErrTablesIncomplete means the active participants don't fill whole
 	// tables; sent with "missing", the players lacking.
 	ErrTablesIncomplete = errors.New("tables incomplete")
+	// ErrTablesStillPlaying means a tour can't be finished while some of its
+	// games haven't ended; sent with "playing", the number of such tables.
+	ErrTablesStillPlaying = errors.New("tables still playing")
+	// ErrTourFinished means the game's tour is finished: its entries can't
+	// be undone any more.
+	ErrTourFinished = errors.New("tour finished")
 	// ErrTourNotFound means there is no such tour, or not in that state.
 	ErrTourNotFound = errors.New("tour not found")
 	// ErrInvalidSeating means a seating method isn't one of the known ones.
@@ -236,6 +242,8 @@ var Errors = map[error]APIError{
 	ErrTourInProgress:       {http.StatusConflict, "tour_in_progress"},
 	ErrAllToursPlayed:       {http.StatusConflict, "all_tours_played"},
 	ErrTablesIncomplete:     {http.StatusConflict, "tables_incomplete"},
+	ErrTablesStillPlaying:   {http.StatusConflict, "tables_still_playing"},
+	ErrTourFinished:         {http.StatusConflict, "tour_finished"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

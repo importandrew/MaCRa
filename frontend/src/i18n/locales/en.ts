@@ -148,6 +148,8 @@ const en = {
     tables_incomplete: '{{missing}} players are missing for whole tables',
     tour_not_found: 'No published seating to cancel',
     invalid_seating: 'Unknown seating method',
+    tables_still_playing: '{{playing}} tables are still playing',
+    tour_finished: 'The tour is finished: its entries can no longer be undone',
   },
   auth: {
     tabs: 'Authentication',
@@ -204,6 +206,29 @@ const en = {
     finished: 'Finished',
   },
   tours: {
+    start: 'Start tour {{n}}',
+    playing_one: '{{count}} table is still playing.',
+    playing_other: '{{count}} tables are still playing.',
+    allEnded: 'All games have ended: the tour can be finished.',
+    finish: 'Finish tour {{n}}',
+    finishTitle: 'Finish the tour',
+    finishPrompt:
+      'The tour’s results enter the rating and become final: no entry of the tour can be undone after this.',
+    abort: 'Abort tour',
+    abortTitle: 'Abort the tour',
+    abortPrompt:
+      'All the tour’s games are aborted and don’t count; the tour is played again from its seating. This can’t be undone.',
+    done: {
+      start: 'Tour {{n}} started',
+      finish: 'Tour {{n}} finished',
+      abort: 'Tour {{n}} aborted',
+    },
+    tableStatus: {
+      created: 'not started',
+      live: 'playing',
+      ended: 'ended',
+      aborted: 'aborted',
+    },
     title: 'Tours',
     current: 'Tour {{n}}: {{status}}',
     status: {

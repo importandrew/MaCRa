@@ -72,3 +72,18 @@ func shuffle(participants []models.Participant) error {
 	}
 	return nil
 }
+
+// StartTour starts the published tour: its games go live.
+func (s *Service) StartTour(ctx context.Context, eventID int) error {
+	return s.repo.StartTour(ctx, eventID)
+}
+
+// FinishTour finishes the live tour once all its games have ended.
+func (s *Service) FinishTour(ctx context.Context, eventID int) error {
+	return s.repo.FinishTour(ctx, eventID)
+}
+
+// AbortTour aborts the live tour: its games don't count.
+func (s *Service) AbortTour(ctx context.Context, eventID int) error {
+	return s.repo.AbortTour(ctx, eventID)
+}

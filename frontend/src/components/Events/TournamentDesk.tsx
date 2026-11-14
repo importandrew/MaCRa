@@ -25,15 +25,22 @@ import { showToast } from '../Toast';
 export default function TournamentDesk() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { eventId, event, hasCapability, canView } =
-    useEventPage('view_tournament');
+  const {
+    eventId,
+    event,
+    hasCapability,
+    canView,
+    refetch: refetchEvent,
+  } = useEventPage('view_tournament');
   const canRun = hasCapability('run_tournament');
   const { data, isLoading, isError, isForbidden, refetch } =
     useFetchParticipants(canView ? eventId : null);
   const tours = useFetchTours(canView ? eventId : null);
   // An action on the desk may change both: e.g. a draw lets a tour be
   // published.
-  const refetchAll = () => Promise.all([refetch(), tours.refetch()]);
+  const refetchAll = () =>
+    // The event too: starting the first tour changes its status.
+    Promise.all([refetch(), tours.refetch(), refetchEvent()]);
   const { isPending: isDrawing, run: runDraw } = useSubmitOnce();
   const { run: runWithdraw } = useSubmitOnce();
   const drawConfirm = useOverlayState();

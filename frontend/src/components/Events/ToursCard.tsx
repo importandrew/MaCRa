@@ -2,7 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { Card, useOverlayState } from '@heroui/react';
 import type { TourState } from '../../models/Tour';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
-import { cancelTour, publishTour } from '../../providers/event/tournamentApi';
+import {
+  cancelTour,
+  publishTour,
+  tourAction,
+} from '../../providers/event/tournamentApi';
 import Confirm from '../Confirm';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
@@ -33,6 +37,27 @@ export default function ToursCard({
   const cancelConfirm = useOverlayState();
   const current = state.current;
   const isPublished = current?.status === 'published';
+  const isLive = current?.status === 'live';
+  // playing: the live tour's tables whose game hasn't ended.
+  const playing = state.tables.filter(
+    (table) => table.status !== 'ended'
+  ).length;
+  const { isPending: isActing, run: runAct } = useSubmitOnce();
+  const finishConfirm = useOverlayState();
+  const abortConfirm = useOverlayState();
+
+  const act = (action: 'start' | 'finish' | 'abort') =>
+    runAct(async () => {
+      finishConfirm.close();
+      abortConfirm.close();
+      if (await tourAction(eventId, action)) {
+        showToast({
+          title: t(`tours.done.${action}`, { n: current?.number ?? 0 }),
+          variant: 'success',
+        });
+      }
+      await onChanged();
+    });
 
   const publish = () =>
     runPublish(async () => {
@@ -95,22 +120,64 @@ export default function ToursCard({
         )}
 
         {canRun && isPublished && (
-          <PendingButton
-            variant="danger-soft"
-            isPending={isCancelling}
-            onPress={cancelConfirm.open}
-            className="w-3/4 self-center"
-          >
-            {t('tours.cancel')}
-          </PendingButton>
+          <>
+            <PendingButton
+              variant="primary"
+              isPending={isActing}
+              onPress={() => act('start')}
+              className="w-3/4 self-center"
+            >
+              {t('tours.start', { n: current.number })}
+            </PendingButton>
+            <PendingButton
+              variant="danger-soft"
+              isPending={isCancelling}
+              onPress={cancelConfirm.open}
+              className="w-3/4 self-center"
+            >
+              {t('tours.cancel')}
+            </PendingButton>
+          </>
+        )}
+
+        {canRun && isLive && (
+          <>
+            <p className="text-sm text-muted">
+              {playing > 0
+                ? t('tours.playing', { count: playing })
+                : t('tours.allEnded')}
+            </p>
+            <PendingButton
+              variant="primary"
+              isPending={isActing}
+              isDisabled={playing > 0}
+              onPress={finishConfirm.open}
+              className="w-3/4 self-center"
+            >
+              {t('tours.finish', { n: current.number })}
+            </PendingButton>
+            <PendingButton
+              variant="danger-soft"
+              isPending={isActing}
+              onPress={abortConfirm.open}
+              className="w-3/4 self-center"
+            >
+              {t('tours.abort')}
+            </PendingButton>
+          </>
         )}
 
         {state.tables.length > 0 && (
           <ul aria-label={t('tours.tables')} className="flex flex-col gap-3">
             {state.tables.map((table) => (
               <li key={table.table} className="rounded-xl bg-default/50 p-2">
-                <p className="mb-1 text-sm font-medium">
+                <p className="mb-1 flex justify-between text-sm font-medium">
                   {t('tours.table', { n: table.table })}
+                  {isLive && (
+                    <span className="font-normal text-muted">
+                      {t(`tours.tableStatus.${table.status}`)}
+                    </span>
+                  )}
                 </p>
                 <ul>
                   {table.seats.map((seat) => (
@@ -130,6 +197,26 @@ export default function ToursCard({
           </ul>
         )}
       </Card.Content>
+      <Confirm
+        isOpen={finishConfirm.isOpen}
+        onClose={finishConfirm.close}
+        onConfirm={() => act('finish')}
+        headerText={t('tours.finishTitle')}
+        prompt={t('tours.finishPrompt')}
+        cancelText={t('common.cancel')}
+        confirmText={t('tours.finish', { n: current?.number ?? 0 })}
+        confirmVariant="primary"
+      />
+      <Confirm
+        isOpen={abortConfirm.isOpen}
+        onClose={abortConfirm.close}
+        onConfirm={() => act('abort')}
+        headerText={t('tours.abortTitle')}
+        prompt={t('tours.abortPrompt')}
+        cancelText={t('common.cancel')}
+        confirmText={t('tours.abort')}
+        confirmVariant="danger"
+      />
       <Confirm
         isOpen={cancelConfirm.isOpen}
         onClose={cancelConfirm.close}

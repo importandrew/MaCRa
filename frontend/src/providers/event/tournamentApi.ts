@@ -78,3 +78,14 @@ export async function cancelTour(eventId: number): Promise<boolean> {
   );
   return result !== null;
 }
+
+// tourAction starts the published tour, or finishes or aborts the live one.
+export async function tourAction(
+  eventId: number,
+  action: 'start' | 'finish' | 'abort'
+): Promise<boolean> {
+  const result = await authFetch<null>(
+    PostRequest(eventPath(eventId, `/tours/current/${action}`))
+  );
+  return result !== null;
+}

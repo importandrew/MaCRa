@@ -149,6 +149,63 @@ func (_m *MockEventRepo) EXPECT() *MockEventRepo_Expecter {
 	return &MockEventRepo_Expecter{mock: &_m.Mock}
 }
 
+// AbortTour provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) AbortTour(ctx context.Context, eventID int) error {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AbortTour")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_AbortTour_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AbortTour'
+type MockEventRepo_AbortTour_Call struct {
+	*mock.Call
+}
+
+// AbortTour is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) AbortTour(ctx any, eventID any) *MockEventRepo_AbortTour_Call {
+	return &MockEventRepo_AbortTour_Call{Call: _e.mock.On("AbortTour", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_AbortTour_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_AbortTour_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_AbortTour_Call) Return(err error) *MockEventRepo_AbortTour_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_AbortTour_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventRepo_AbortTour_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AcceptJoinRequest provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) AcceptJoinRequest(ctx context.Context, eventID int, userID int) error {
 	ret := _mock.Called(ctx, eventID, userID)
@@ -838,6 +895,63 @@ func (_c *MockEventRepo_Finish_Call) Return(err error) *MockEventRepo_Finish_Cal
 }
 
 func (_c *MockEventRepo_Finish_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventRepo_Finish_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// FinishTour provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) FinishTour(ctx context.Context, eventID int) error {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FinishTour")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_FinishTour_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FinishTour'
+type MockEventRepo_FinishTour_Call struct {
+	*mock.Call
+}
+
+// FinishTour is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) FinishTour(ctx any, eventID any) *MockEventRepo_FinishTour_Call {
+	return &MockEventRepo_FinishTour_Call{Call: _e.mock.On("FinishTour", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_FinishTour_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_FinishTour_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_FinishTour_Call) Return(err error) *MockEventRepo_FinishTour_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_FinishTour_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventRepo_FinishTour_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2167,6 +2281,63 @@ func (_c *MockEventRepo_SetMemberRoles_Call) Return(err error) *MockEventRepo_Se
 }
 
 func (_c *MockEventRepo_SetMemberRoles_Call) RunAndReturn(run func(ctx context.Context, eventID int, userID int, roles []models.EventRole) error) *MockEventRepo_SetMemberRoles_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// StartTour provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) StartTour(ctx context.Context, eventID int) error {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for StartTour")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_StartTour_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StartTour'
+type MockEventRepo_StartTour_Call struct {
+	*mock.Call
+}
+
+// StartTour is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) StartTour(ctx any, eventID any) *MockEventRepo_StartTour_Call {
+	return &MockEventRepo_StartTour_Call{Call: _e.mock.On("StartTour", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_StartTour_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_StartTour_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_StartTour_Call) Return(err error) *MockEventRepo_StartTour_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_StartTour_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventRepo_StartTour_Call {
 	_c.Call.Return(run)
 	return _c
 }

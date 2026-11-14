@@ -49,9 +49,11 @@ type Seat struct {
 
 // TourTable is a table of a tour: its game and the four seats, east first.
 type TourTable struct {
-	Table  int    `json:"table"`
-	GameID int    `json:"game_id"`
-	Seats  []Seat `json:"seats"`
+	Table  int `json:"table"`
+	GameID int `json:"game_id"`
+	// Status is the table's game status: created, live, ended or aborted.
+	Status GameStatus `json:"status"`
+	Seats  []Seat     `json:"seats"`
 }
 
 // TourState is a tournament's tours as its desk shows them: the current tour
