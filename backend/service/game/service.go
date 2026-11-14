@@ -20,6 +20,7 @@ type GameRepo interface {
 	SeatedGame(ctx context.Context, playerID, eventID int) (int, error)
 	TourSeat(ctx context.Context, gameID int) (*models.TourSeat, error)
 	TimeLimit(ctx context.Context, gameID int) (*models.GameTimeLimit, error)
+	TimedOutGames(ctx context.Context, now time.Time) ([]int, error)
 	NewGame(ctx context.Context, seating [4]int, eventID int) (int, error)
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)
 	GameResults(ctx context.Context, gameIDs []int) (map[int]models.GameResult, error)

@@ -56,3 +56,20 @@ func TestFinish(t *testing.T) {
 		})
 	}
 }
+
+func TestFinishTimedOut(t *testing.T) {
+	mockGameRepo := NewMockGameRepo(t)
+	mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
+	mockGameRepo.EXPECT().TimedOutGames(mock.Anything, mock.Anything).Return([]int{100, 101}, nil)
+	expectLiveGame(mockGameRepo, 100, nil)
+	mockGameRepo.EXPECT().Finalize(mock.Anything, mock.MatchedBy(func(data models.FinalGameData) bool {
+		return data.GameID == 100
+	})).Return(nil)
+	// Finished by its table meanwhile: skipped.
+	mockGameRepo.EXPECT().Status(mock.Anything, 101).Return(models.GameEnded, nil)
+
+	finished, err := NewService(mockGameRepo, NewMockPlayerRepo(t)).FinishTimedOut(context.Background())
+
+	assert.NoError(t, err)
+	assert.Equal(t, 1, finished)
+}

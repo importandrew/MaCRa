@@ -1191,6 +1191,74 @@ func (_c *MockGameRepo_TimeLimit_Call) RunAndReturn(run func(ctx context.Context
 	return _c
 }
 
+// TimedOutGames provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) TimedOutGames(ctx context.Context, now time.Time) ([]int, error) {
+	ret := _mock.Called(ctx, now)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TimedOutGames")
+	}
+
+	var r0 []int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, time.Time) ([]int, error)); ok {
+		return returnFunc(ctx, now)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, time.Time) []int); ok {
+		r0 = returnFunc(ctx, now)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]int)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, time.Time) error); ok {
+		r1 = returnFunc(ctx, now)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_TimedOutGames_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TimedOutGames'
+type MockGameRepo_TimedOutGames_Call struct {
+	*mock.Call
+}
+
+// TimedOutGames is a helper method to define mock.On call
+//   - ctx context.Context
+//   - now time.Time
+func (_e *MockGameRepo_Expecter) TimedOutGames(ctx any, now any) *MockGameRepo_TimedOutGames_Call {
+	return &MockGameRepo_TimedOutGames_Call{Call: _e.mock.On("TimedOutGames", ctx, now)}
+}
+
+func (_c *MockGameRepo_TimedOutGames_Call) Run(run func(ctx context.Context, now time.Time)) *MockGameRepo_TimedOutGames_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 time.Time
+		if args[1] != nil {
+			arg1 = args[1].(time.Time)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_TimedOutGames_Call) Return(ints []int, err error) *MockGameRepo_TimedOutGames_Call {
+	_c.Call.Return(ints, err)
+	return _c
+}
+
+func (_c *MockGameRepo_TimedOutGames_Call) RunAndReturn(run func(ctx context.Context, now time.Time) ([]int, error)) *MockGameRepo_TimedOutGames_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // TourSeat provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) TourSeat(ctx context.Context, gameID int) (*models.TourSeat, error) {
 	ret := _mock.Called(ctx, gameID)

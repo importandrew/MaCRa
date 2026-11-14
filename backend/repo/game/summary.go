@@ -94,3 +94,23 @@ func (r *Repo) TimeLimit(ctx context.Context, gameID int) (*models.GameTimeLimit
 	}
 	return &limit, nil
 }
+
+// TimedOutGames returns the live games of live tournament tours whose time
+// is up at now with the rule "the game ends at once": they have ended in the
+// replay and are to be finished.
+func (r *Repo) TimedOutGames(ctx context.Context, now time.Time) ([]int, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT g.id
+		FROM games g
+		JOIN tours t ON t.id = g.tour_id
+		JOIN events e ON e.id = g.event_id
+		WHERE g.status = $1 AND t.status = $2
+			AND e.tournament->>'time_up' = $3
+			AND t.started_at + make_interval(mins => t.minutes + g.extra_minutes) < $4
+		ORDER BY g.id`,
+		models.GameLive, models.TourLive, models.TimeUpStopNow, now)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(rows, pgx.RowTo[int])
+}

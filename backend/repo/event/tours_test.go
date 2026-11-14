@@ -273,6 +273,12 @@ func TestTourTimer(t *testing.T) {
 		summary, err = games.Summary(ctx, gameID)
 		require.NoError(t, err)
 		assert.True(t, summary.StoppedAtTime)
+		timedOut, err := games.TimedOutGames(ctx, time.Now())
+		require.NoError(t, err)
+		assert.Equal(t, []int{gameID}, timedOut, "the server finishes it")
+		timedOut, err = games.TimedOutGames(ctx, time.Now().Add(-3*time.Hour))
+		require.NoError(t, err)
+		assert.Empty(t, timedOut, "not before its time")
 	})
 }
 
