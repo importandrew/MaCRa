@@ -12,6 +12,7 @@ import Confirm from '../Confirm';
 import LoadingSpinner from '../LoadingTemplate/LoadingSpinner';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
+import { copyText } from '../../utils/copyText';
 
 // InviteLink is the invite link in Manage → Members: whoever opens it while
 // signed in becomes a player. The owner turns it on, shares it (copy, the
@@ -67,10 +68,9 @@ export default function InviteLink({ eventId }: { eventId: number }) {
 
   const url = inviteUrl(token);
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
+    if (await copyText(url)) {
       showToast({ title: t('invite.copied'), variant: 'success' });
-    } catch {
+    } else {
       showToast({ title: t('invite.copyFailed'), variant: 'warning' });
     }
   };
