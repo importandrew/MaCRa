@@ -14,6 +14,9 @@ type EventSettings struct {
 	// AbortGame is who may abort a live game (it doesn't count):
 	// AbortByReferees, AbortBySeatedBeforeFirstRound or AbortBySeated.
 	AbortGame string `json:"abort_game"`
+	// UndoRound is who may undo the last round log entry: UndoByReferees or
+	// UndoBySeated.
+	UndoRound string `json:"undo_round"`
 	// MinRatingGames is how many ended games a player needs for a place in
 	// the rating; players with fewer are listed below it without a place.
 	// 1 lists everyone who has played.
@@ -45,19 +48,31 @@ const (
 	AbortBySeated = "seated"
 )
 
+// Who may undo the last round. Referees always may, also the final round of
+// a game that ended less than UndoFinalRoundTimeout ago.
+const (
+	// UndoByReferees: referees only.
+	UndoByReferees = "referees"
+	// UndoBySeated: also the seated players, while the game is live (an
+	// ended game is undone by a referee only: that changes the rating).
+	UndoBySeated = "seated"
+)
+
 var (
 	ValidFinishGame = []string{FinishBySeated, FinishByReferees}
 	ValidAbortGame  = []string{AbortByReferees, AbortBySeatedBeforeFirstRound, AbortBySeated}
+	ValidUndoRound  = []string{UndoByReferees, UndoBySeated}
 )
 
 // DefaultEventSettings returns the settings events start with: seated
 // players and referees finish games, referees abort them, and the seated
-// players too before the first round; everyone who has played is in the
+// players too before the first round, referees undo rounds; everyone who has played is in the
 // rating.
 func DefaultEventSettings() EventSettings {
 	return EventSettings{
 		FinishGame:     FinishBySeated,
 		AbortGame:      AbortBySeatedBeforeFirstRound,
+		UndoRound:      UndoByReferees,
 		MinRatingGames: MinMinRatingGames,
 	}
 }
@@ -73,6 +88,11 @@ func (s EventSettings) Validate() error {
 	if !slices.Contains(ValidAbortGame, s.AbortGame) {
 		return fmt.Errorf("%w: abort_game should be one of %v, got %q",
 			ErrInvalidEventSettings, ValidAbortGame, s.AbortGame)
+	}
+
+	if !slices.Contains(ValidUndoRound, s.UndoRound) {
+		return fmt.Errorf("%w: undo_round should be one of %v, got %q",
+			ErrInvalidEventSettings, ValidUndoRound, s.UndoRound)
 	}
 
 	if s.MinRatingGames < MinMinRatingGames || s.MinRatingGames > MaxMinRatingGames {

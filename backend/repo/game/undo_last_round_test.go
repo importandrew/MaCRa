@@ -29,6 +29,8 @@ func TestUndoLastRound(t *testing.T) {
 		rounds  int
 		setup   func(t *testing.T, repo *Repo, conn *pgxpool.Conn)
 		logSize int
+		// withoutReviving passes no endedAfter: a seated player's undo.
+		withoutReviving bool
 
 		expectedErr    error
 		expectedName   string
@@ -62,6 +64,24 @@ func TestUndoLastRound(t *testing.T) {
 			},
 			expectedStatus: models.GameLive,
 			expectedRounds: 15,
+		},
+		"live game, without reviving": {
+			rounds:          3,
+			logSize:         3,
+			withoutReviving: true,
+			expectedStatus:  models.GameLive,
+			expectedRounds:  2,
+		},
+		"ended game, without reviving: refused": {
+			rounds:          16,
+			logSize:         16,
+			withoutReviving: true,
+			setup: func(t *testing.T, repo *Repo, _ *pgxpool.Conn) {
+				finalize(t, repo, 1)
+			},
+			expectedErr:    models.ErrGameNotLive,
+			expectedStatus: models.GameEnded,
+			expectedRounds: 16,
 		},
 		"ended game too late": {
 			rounds:  16,
@@ -136,7 +156,11 @@ func TestUndoLastRound(t *testing.T) {
 				testCase.setup(t, repo, conn)
 			}
 
-			err = repo.UndoLastRound(ctx, 1, testCase.logSize, time.Now().Add(-models.UndoFinalRoundTimeout))
+			endedAfter := new(time.Now().Add(-models.UndoFinalRoundTimeout))
+			if testCase.withoutReviving {
+				endedAfter = nil
+			}
+			err = repo.UndoLastRound(ctx, 1, testCase.logSize, endedAfter)
 
 			if testCase.expectedErr != nil {
 				assert.ErrorIs(t, err, testCase.expectedErr)
@@ -185,7 +209,7 @@ func TestUndoLastRound_Concurrent(t *testing.T) {
 		errs := make(chan error, attempts)
 		var wg sync.WaitGroup
 		for range attempts {
-			wg.Go(func() { errs <- repo.UndoLastRound(ctx, 1, 3, time.Now().Add(-models.UndoFinalRoundTimeout)) })
+			wg.Go(func() { errs <- repo.UndoLastRound(ctx, 1, 3, new(time.Now().Add(-models.UndoFinalRoundTimeout))) })
 		}
 		wg.Wait()
 		close(errs)

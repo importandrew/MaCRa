@@ -157,7 +157,11 @@ func (authCtx EventAuthContext) hasGameCapability(capability models.Capability) 
 		return authCtx.hasRole(models.EventReferee) ||
 			(authCtx.IsSeatedInGame && authCtx.Event.Settings.FinishGame == models.FinishBySeated)
 	case models.CapUndoRound:
-		return authCtx.hasRole(models.EventReferee) && authCtx.canUndoInGame()
+		// Referees, also the final round of a game that has just ended; the
+		// seated players while it is live, as the event's settings allow.
+		return (authCtx.hasRole(models.EventReferee) && authCtx.canUndoInGame()) ||
+			(authCtx.IsSeatedInGame && authCtx.isGameLive() &&
+				authCtx.Event.Settings.UndoRound == models.UndoBySeated)
 	case models.CapEnterRound:
 		return authCtx.IsSeatedInGame && authCtx.isGameLive()
 	case models.CapViewGame:

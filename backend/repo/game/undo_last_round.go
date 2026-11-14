@@ -14,7 +14,9 @@ import (
 // UndoLastRound deletes the last round log entry of a live game, or of a game
 // that ended after endedAfter; such a game becomes live again and loses its
 // results. An ended game that ended before endedAfter is refused with
-// models.ErrTooLate. Everything happens in one transaction.
+// models.ErrTooLate; with endedAfter nil every ended game is refused with
+// models.ErrGameNotLive (a seated player's undo: the game may have ended
+// since their check). Everything happens in one transaction.
 //
 // logSize is the number of log entries the caller saw: as with
 // SaveRoundOutcome, the game row is locked and the undo is refused with
@@ -24,7 +26,7 @@ import (
 // Reviving an ended game takes the same advisory locks as NewGame and refuses
 // with models.ErrPlayerInAnotherGame if one of its players has started
 // another live game in the event: a player can't have two live games.
-func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfter time.Time) error {
+func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfter *time.Time) error {
 	return r.InTx(ctx, func(tx *Repo) error {
 		if err := tx.lockUnchangedLog(ctx, gameID, logSize); err != nil {
 			return err
@@ -48,15 +50,7 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfte
 		switch game.Status {
 		case models.GameLive:
 		case models.GameEnded:
-			if game.FinishedAt != nil && game.FinishedAt.Before(endedAfter) {
-				return models.ErrTooLate
-			}
-			players, err := tx.Players(ctx, gameID)
-			if err != nil {
-				return fmt.Errorf("players: %w", err)
-			}
-			seating := [4]int{players.East, players.South, players.West, players.North}
-			if err := tx.reviveGame(ctx, gameID, game.EventID, seating); err != nil {
+			if err := tx.reviveEndedGame(ctx, gameID, game.EventID, game.FinishedAt, endedAfter); err != nil {
 				return err
 			}
 		default:
@@ -65,6 +59,26 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize int, endedAfte
 
 		return tx.deleteLastRound(ctx, gameID)
 	})
+}
+
+// reviveEndedGame makes the ended game live again for UndoLastRound, if it
+// ended after endedAfter (models.ErrTooLate otherwise); with endedAfter nil
+// it refuses with models.ErrGameNotLive. Call it on a Repo from InTx.
+func (r *Repo) reviveEndedGame(ctx context.Context, gameID, eventID int, finishedAt, endedAfter *time.Time) error {
+	if endedAfter == nil {
+		return fmt.Errorf("undo in an ended game without reviving: %w", models.ErrGameNotLive)
+	}
+	if finishedAt != nil && finishedAt.Before(*endedAfter) {
+		return models.ErrTooLate
+	}
+
+	players, err := r.Players(ctx, gameID)
+	if err != nil {
+		return fmt.Errorf("players: %w", err)
+	}
+	seating := [4]int{players.East, players.South, players.West, players.North}
+
+	return r.reviveGame(ctx, gameID, eventID, seating)
 }
 
 // reviveGame makes an ended game live again: it deletes the players' results

@@ -30,6 +30,27 @@ func (s *Service) AbortGame(ctx context.Context, eventID, callerID, gameID int) 
 	return s.gameService.Abort(ctx, gameID, onlyWithoutRounds)
 }
 
-func (s *Service) UndoLastRound(ctx context.Context, gameID, logSize int) error {
-	return s.gameService.UndoLastRound(ctx, gameID, logSize)
+// UndoLastRound undoes the last round log entry of the game: a referee at any
+// time (also the final round, within models.UndoFinalRoundTimeout, which
+// makes an ended game live again), a seated player while the game is live if
+// the event's settings allow it. The game may end between the check and the
+// undo, so a seated player's undo refuses an ended game in the same
+// transaction (models.ErrGameNotLive) instead of reviving it.
+func (s *Service) UndoLastRound(ctx context.Context, eventID, callerID, gameID, logSize int) error {
+	event, err := s.repo.Get(ctx, eventID)
+	if err != nil {
+		return err
+	}
+
+	authCtx, err := s.buildAuthContext(ctx, event, callerID, gameID)
+	if err != nil {
+		return err
+	}
+
+	if !authCtx.hasCapability(models.CapUndoRound) {
+		return fmt.Errorf("user %d: %w", callerID, models.ErrEventForbidden)
+	}
+
+	asReferee := authCtx.hasRole(models.EventReferee)
+	return s.gameService.UndoLastRound(ctx, gameID, logSize, asReferee)
 }
