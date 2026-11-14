@@ -49,7 +49,6 @@ export default function GameLogs({
 }) {
   const { t } = useTranslation();
   const { data, isError = false, isLoading = false, fetchData } = logs;
-  const tableRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLElement | null>(null);
   // openKey: the row whose author popover is open (log-<index>), or null.
   const [openKey, setOpenKey] = useState<string | null>(null);
@@ -278,7 +277,7 @@ export default function GameLogs({
     <Table.Row
       key={`log-${index}`}
       id={`log-${index}`}
-      className="even:bg-default/50"
+      className="cursor-pointer even:bg-default/50"
     >
       <Table.Cell className="text-end">{item.round}</Table.Cell>
       <Table.Cell className="text-end">
@@ -346,6 +345,15 @@ export default function GameLogs({
     </Table.Row>
   );
 
+  // openEntryPopover opens the author popover of the entry whose row holds
+  // target (an undone entry's row has no popover).
+  const openEntryPopover = (target: Element) => {
+    const row = target.closest<HTMLElement>('[data-key^="log-"]');
+    if (!row) return;
+    rowRef.current = row;
+    setOpenKey(row.dataset.key ?? null);
+  };
+
   // The entry tapped last: a popover under its row says who entered it.
   const openEntry =
     openKey != null && openKey.startsWith('log-')
@@ -358,7 +366,6 @@ export default function GameLogs({
 
       {isLogVisible ? (
         <div
-          ref={tableRef}
           className={
             'overflow-hidden flex flex-col justify-center mb-3 w-full ' +
             '[&_table]:w-full [&_table]:table-fixed [&_:is(th,td)]:box-border [&_:is(th,td)]:px-1 ' +
@@ -371,13 +378,16 @@ export default function GameLogs({
             <Table.ScrollContainer>
               <Table.Content
                 aria-label={t('game.logs')}
+                // A tap or click on an entry's row opens its author popover:
+                // a plain click caught before React Aria's own handlers,
+                // since its row action didn't fire for taps on an Android
+                // phone. onRowAction stays for the keyboard (Enter).
+                onClickCapture={(e) => openEntryPopover(e.target as Element)}
                 onRowAction={(key) => {
-                  const id = String(key);
-                  if (!id.startsWith('log-')) return;
-                  rowRef.current = tableRef.current?.querySelector(
-                    `[data-key="${id}"]`
-                  ) as HTMLElement | null;
-                  setOpenKey(id);
+                  const row = document.querySelector<HTMLElement>(
+                    `[data-key="${String(key)}"]`
+                  );
+                  if (row) openEntryPopover(row);
                 }}
               >
                 <Table.Header>
