@@ -22,6 +22,8 @@ type GameNow struct {
 	// Log is the round log of the same state as the table, so the table
 	// screen and its log can't disagree.
 	Log GameLog `json:"log"`
+	// Tour is the tour and table of a tournament game; nil otherwise.
+	Tour *TourSeat `json:"tour,omitempty"`
 }
 
 type Round struct {

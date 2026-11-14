@@ -141,6 +141,13 @@ const en = {
     tournament_not_started: 'The tournament hasn’t started yet',
     no_players: 'The tournament has no players yet',
     not_participant: 'This user has no participant number',
+    not_drawn: 'Draw the participant numbers first',
+    tour_in_progress:
+      'A tour is in progress: the next one waits until it is finished',
+    all_tours_played: 'All tours have been played',
+    tables_incomplete: '{{missing}} players are missing for whole tables',
+    tour_not_found: 'No published seating to cancel',
+    invalid_seating: 'Unknown seating method',
   },
   auth: {
     tabs: 'Authentication',
@@ -195,6 +202,32 @@ const en = {
     preparation: 'Preparation',
     in_progress: 'In progress',
     finished: 'Finished',
+  },
+  tours: {
+    title: 'Tours',
+    current: 'Tour {{n}}: {{status}}',
+    status: {
+      published: 'seating published',
+      live: 'in progress',
+      finished: 'finished',
+      aborted: 'aborted',
+    },
+    publishHint:
+      'Random seating of {{players}} players. Each player sees their table at once; rounds start with the tour.',
+    publish: 'Publish tour {{n}} seating',
+    published: 'Tour {{n}} seating published',
+    needsDraw: 'Draw the participant numbers first (below).',
+    missing_one:
+      '{{count}} player is missing for whole tables: add a player or a substitute.',
+    missing_other:
+      '{{count}} players are missing for whole tables: add players or substitutes.',
+    cancel: 'Cancel seating',
+    cancelTitle: 'Cancel the seating',
+    cancelPrompt:
+      'The tour’s tables are deleted and can be seated again. Continue?',
+    cancelled: 'Seating cancelled',
+    tables: 'Tables',
+    table: 'Table {{n}}',
   },
   tournamentDesk: {
     menu: 'Tournament',
@@ -570,6 +603,9 @@ const en = {
     fined: '{{name}} fined',
   },
   game: {
+    tourTable: 'Tour {{tour}} · Table {{table}}',
+    tourNotStarted:
+      'The tour hasn’t started yet. Tap Refresh when the referee starts it.',
     enterPenalty: 'Enter a penalty, round {{round}}',
     enterRound: 'Enter result of round {{round}}',
     tableMenu: 'Table menu',

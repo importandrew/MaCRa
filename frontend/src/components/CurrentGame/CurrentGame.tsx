@@ -151,21 +151,41 @@ export default function CurrentGame() {
               // The center of the table: the round kanji, and the round entry
               // under it while it's open. It must fit without scrolling.
               <div className="relative z-10 flex h-full min-h-0 w-full flex-col items-center justify-center gap-2 px-1">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className={
-                    isEntryOpen ? 'h-11 px-3 text-3xl' : 'p-4 h-16 text-5xl'
-                  }
-                  aria-label={t('game.enterRound', {
-                    round: roundData.round.kanji,
-                  })}
-                  aria-expanded={isEntryOpen}
-                  onPress={() => setIsEntryOpen(!isEntryOpen)}
-                >
-                  {roundData.round.kanji}
-                </Button>
-                {isEntryOpen && <RoundEntryPanel entry={entry} />}
+                {roundData.status === 'created' ? (
+                  // A published tour not started yet: the player sees their
+                  // table and opponents; rounds come after the start.
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    {roundData.tour && (
+                      <p className="font-medium">
+                        {t('game.tourTable', {
+                          tour: roundData.tour.tour,
+                          table: roundData.tour.table,
+                        })}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted">
+                      {t('game.tourNotStarted')}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className={
+                        isEntryOpen ? 'h-11 px-3 text-3xl' : 'p-4 h-16 text-5xl'
+                      }
+                      aria-label={t('game.enterRound', {
+                        round: roundData.round.kanji,
+                      })}
+                      aria-expanded={isEntryOpen}
+                      onPress={() => setIsEntryOpen(!isEntryOpen)}
+                    >
+                      {roundData.round.kanji}
+                    </Button>
+                    {isEntryOpen && <RoundEntryPanel entry={entry} />}
+                  </>
+                )}
               </div>
             }
             refresh={

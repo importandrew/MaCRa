@@ -37,10 +37,25 @@ func expectCurrentGameLoad(m *MockGameRepo, playerID, gameID int, logs []models.
 	expectLoadGame(m, gameID, logs)
 }
 
+// expectCurrentGameLoads expects the entry's load of the live game, then the
+// table's loads (Now) for the rest.
 func expectCurrentGameLoads(m *MockGameRepo, playerID, gameID int, logsPerLoad [][]models.RoundLog) {
-	for _, logs := range logsPerLoad {
-		expectCurrentGameLoad(m, playerID, gameID, logs)
+	for i, logs := range logsPerLoad {
+		if i == 0 {
+			expectCurrentGameLoad(m, playerID, gameID, logs)
+		} else {
+			expectTableLoad(m, playerID, gameID, logs)
+		}
 	}
+}
+
+// expectTableLoad expects Now's load of the player's live game: not a
+// tournament game.
+func expectTableLoad(m *MockGameRepo, playerID, gameID int, logs []models.RoundLog) {
+	m.EXPECT().SeatedGame(mock.Anything, playerID, testEventID).Return(gameID, nil)
+	m.EXPECT().Status(mock.Anything, gameID).Return(models.GameLive, nil)
+	expectLoadGame(m, gameID, logs)
+	m.EXPECT().TourSeat(mock.Anything, gameID).Return(nil, nil)
 }
 
 func expectLiveGame(m *MockGameRepo, gameID int, logs []models.RoundLog) {

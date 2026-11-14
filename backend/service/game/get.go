@@ -102,3 +102,9 @@ func (s *Service) CurrentGame(ctx context.Context, playerID, eventID int) (GameE
 func (s *Service) CurrentGameID(ctx context.Context, playerID, eventID int) (int, error) {
 	return s.gameRepo.CurrentGame(ctx, playerID, eventID)
 }
+
+// SeatedGameID returns the player's game that isn't over: live, or a
+// tournament game whose tour is published but not started.
+func (s *Service) SeatedGameID(ctx context.Context, playerID, eventID int) (int, error) {
+	return s.gameRepo.SeatedGame(ctx, playerID, eventID)
+}
