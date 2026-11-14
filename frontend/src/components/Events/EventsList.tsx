@@ -4,20 +4,17 @@ import { cardVariants } from '@heroui/styles';
 import { type ReactNode, useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { Event } from '../../models/Event';
-import type { EventRole } from '../../models/EventRole';
 import { AuthContext } from '../../providers/auth/authConstants';
 import { useFetchVisibleEvents } from '../../providers/event/eventApi';
 import { SignIcon } from '../Icons/SignIcon';
 import { CrownIcon } from '../Icons/CrownIcon';
-import { EyeIcon } from '../Icons/EyeIcon';
 import { CheckInCircleIcon } from '../Icons/CheckInCircleIcon';
-import { MahjongTileIcon } from '../Icons/MahjongTileIcon';
-import { ScalesIcon } from '../Icons/ScalesIcon';
 import { TrophyIcon } from '../Icons/TrophyIcon';
 import { UsersIcon } from '../Icons/UsersIcon';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import SegmentedPicker from '../SegmentedPicker';
 import EventSearchField from './EventSearchField';
+import { ALL_ROLES, ROLE_ICONS } from './roles';
 import FinishedEvents from './FinishedEvents';
 import {
   type EventsTab,
@@ -28,17 +25,6 @@ import {
 } from './eventListFilters';
 
 const cardStyles = cardVariants();
-
-const ROLE_ORDER: EventRole[] = ['player', 'referee', 'observer'];
-
-const ROLE_ICONS: Record<
-  EventRole,
-  (props: { className?: string }) => ReactNode
-> = {
-  player: (props) => <MahjongTileIcon {...props} />,
-  referee: (props) => <ScalesIcon {...props} />,
-  observer: (props) => <EyeIcon {...props} />,
-};
 
 function MetaItem({ icon, label }: { icon: ReactNode; label: string }) {
   return (
@@ -57,7 +43,7 @@ function EventCardMeta({ event }: { event: Event }) {
   const { t } = useTranslation();
   const isFinished = Boolean(event.finished_at);
   const roles = event.roles ?? [];
-  const orderedRoles = ROLE_ORDER.filter((role) => roles.includes(role));
+  const orderedRoles = ALL_ROLES.filter((role) => roles.includes(role));
   const iconClass = 'w-6 h-6';
 
   return (

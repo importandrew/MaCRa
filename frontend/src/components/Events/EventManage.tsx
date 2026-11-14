@@ -1,15 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Card,
-  Checkbox,
-  CheckboxGroup,
-  Form,
-  Label,
-  Spinner,
-  useOverlayState,
-} from '@heroui/react';
-import { FormEvent, type ReactNode, useEffect, useState } from 'react';
+import { Button, Card, Form, Spinner, useOverlayState } from '@heroui/react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import { useNavigate } from 'react-router-dom';
 import LazyAccordion from '../LazyAccordion';
@@ -24,9 +15,6 @@ import {
 } from '../../providers/event/eventApi';
 import { useEventPage } from '../../providers/event/eventLayoutContext';
 import { CrownIcon } from '../Icons/CrownIcon';
-import { EyeIcon } from '../Icons/EyeIcon';
-import { MahjongTileIcon } from '../Icons/MahjongTileIcon';
-import { ScalesIcon } from '../Icons/ScalesIcon';
 import { GetRequest, authFetch } from '../Request';
 import { showToast } from '../Toast';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
@@ -36,18 +24,10 @@ import Confirm from '../Confirm';
 import EventSettingsFields from './EventSettingsFields';
 import EventRulesForm from './EventRulesForm';
 import EventSettingsCard from './EventSettingsCard';
+import MemberRolesModal from './MemberRolesModal';
+import RoleCheckboxes from './RoleCheckboxes';
+import { ALL_ROLES, ROLE_ICONS } from './roles';
 import { type EventSettings, isValidSettings } from './eventSettings';
-
-const ALL_ROLES: EventRole[] = ['player', 'referee', 'observer'];
-
-const ROLE_ICONS: Record<
-  EventRole,
-  (props: { className?: string }) => ReactNode
-> = {
-  player: (props) => <MahjongTileIcon {...props} />,
-  referee: (props) => <ScalesIcon {...props} />,
-  observer: (props) => <EyeIcon {...props} />,
-};
 
 export default function EventManage() {
   const { t } = useTranslation();
@@ -94,6 +74,8 @@ export default function EventManage() {
   const [memberToRemove, setMemberToRemove] = useState<EventMember | null>(
     null
   );
+  // memberToEdit: the member whose roles are being switched (a tap on them).
+  const [memberToEdit, setMemberToEdit] = useState<EventMember | null>(null);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'settings' | 'members'
   >(canManageEvent ? 'overview' : 'members');
@@ -292,27 +274,10 @@ export default function EventManage() {
                               setSelectedUserId(id != null ? String(id) : '')
                             }
                           />
-                          <CheckboxGroup
+                          <RoleCheckboxes
                             value={selectedRoles}
-                            onChange={(v) => setSelectedRoles(v as EventRole[])}
-                          >
-                            <Label>{t('members.roles')}</Label>
-                            {ALL_ROLES.map((role) => (
-                              <Checkbox key={role} value={role}>
-                                <Checkbox.Content>
-                                  <Checkbox.Control>
-                                    <Checkbox.Indicator />
-                                  </Checkbox.Control>
-                                  <span className="flex items-center gap-2 leading-none">
-                                    {ROLE_ICONS[role]({
-                                      className: 'w-6 h-6 shrink-0',
-                                    })}
-                                    {t(`roles.${role}`)}
-                                  </span>
-                                </Checkbox.Content>
-                              </Checkbox>
-                            ))}
-                          </CheckboxGroup>
+                            onChange={setSelectedRoles}
+                          />
                           <PendingButton
                             type="submit"
                             variant="primary"
@@ -356,7 +321,17 @@ export default function EventManage() {
                           key={member.user_id}
                           className="col-span-2 grid grid-cols-subgrid items-center px-2 py-2 border-b border-separator text-foreground last:border-b-0"
                         >
-                          <div className="flex min-w-0 items-center justify-between gap-2">
+                          {/* A tap opens the role switcher; a finished
+                              event's members can't change. */}
+                          <button
+                            type="button"
+                            disabled={isFinished}
+                            aria-label={t('members.editRoles', {
+                              name: member.name,
+                            })}
+                            onClick={() => setMemberToEdit(member)}
+                            className="flex min-w-0 items-center justify-between gap-2 rounded-lg text-left enabled:cursor-pointer enabled:hover:bg-default"
+                          >
                             <span className="min-w-0 truncate">
                               {member.name}
                             </span>
@@ -375,7 +350,7 @@ export default function EventManage() {
                                 </span>
                               ))}
                             </div>
-                          </div>
+                          </button>
                           <div className="flex justify-center whitespace-nowrap">
                             {isFinished ? null : isOwner ? (
                               <span
@@ -405,6 +380,14 @@ export default function EventManage() {
           ]}
         />
       )}
+      <MemberRolesModal
+        eventId={eventId}
+        member={memberToEdit}
+        isOwner={memberToEdit?.user_id === event.owner_user_id}
+        onClose={() => setMemberToEdit(null)}
+        // The overview's player count and the capabilities may change too.
+        onSaved={() => Promise.all([refetchMembers(), refetch()])}
+      />
       <Confirm
         isOpen={removeConfirm.isOpen}
         onClose={removeConfirm.close}

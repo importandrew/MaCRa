@@ -13,8 +13,9 @@ import (
 )
 
 // NewGame creates a live game in the event with the given seating
-// (east, south, west, north). It returns models.ErrPlayerInAnotherGame if
-// any of the players already has a live game in the event.
+// (east, south, west, north). It returns models.ErrMissingPlayerRole if one
+// of the players doesn't have the player role in the event, and
+// models.ErrPlayerInAnotherGame if any of them already has a live game in it.
 //
 // Two concurrent requests could both pass a check made before the insert.
 // NewGame therefore takes a transaction-level advisory lock per (event,
@@ -28,6 +29,10 @@ func (r *Repo) NewGame(ctx context.Context, seating [4]int, eventID int) (int, e
 		}
 
 		if err := tx.lockPlayersInEvent(ctx, seating, eventID); err != nil {
+			return err
+		}
+
+		if err := tx.checkPlayerRoles(ctx, seating, eventID); err != nil {
 			return err
 		}
 
@@ -144,5 +149,41 @@ func (r *Repo) checkNoOtherLiveGame(ctx context.Context, seating [4]int, eventID
 		return nil
 	default:
 		return fmt.Errorf("check live games: %w", err)
+	}
+}
+
+// checkPlayerRoles returns models.ErrMissingPlayerRole, with the player's
+// name for the client, if a player of the seating doesn't have the player
+// role in the event. Call it on a Repo from InTx after lockPlayersInEvent:
+// repo/event takes the same locks before it drops a player role or removes
+// a member, so the answer holds until the transaction ends.
+func (r *Repo) checkPlayerRoles(ctx context.Context, seating [4]int, eventID int) error {
+	rows, err := r.db.Query(ctx, `
+		SELECT p.id AS player_id, COALESCE(u.name, '') AS name
+		FROM unnest($1::int[]) AS p(id)
+		LEFT JOIN users u ON u.id = p.id
+		WHERE NOT EXISTS (
+			SELECT 1 FROM event_user_roles r
+			WHERE r.event_id = $2 AND r.user_id = p.id AND r.role = $3)
+		ORDER BY u.name
+		LIMIT 1`,
+		seating[:], eventID, models.EventPlayer)
+	if err != nil {
+		return fmt.Errorf("check player roles: %w", err)
+	}
+
+	type noRole struct {
+		PlayerID int    `db:"player_id"`
+		Name     string `db:"name"`
+	}
+	player, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[noRole])
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return nil
+	case err != nil:
+		return fmt.Errorf("check player roles: %w", err)
+	default:
+		return fmt.Errorf("player %d in event %d: %w", player.PlayerID, eventID,
+			models.WithData(models.ErrMissingPlayerRole, models.ErrorData{"name": player.Name}))
 	}
 }

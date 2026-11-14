@@ -2,27 +2,12 @@ package event
 
 import (
 	"context"
-
-	"github.com/importandrew/MaCRa/models"
 )
 
-// NewGame checks if players belong to the event and calls game service to create new game.
-// Other validations are checked inside game service.
+// NewGame creates a game in the event with the seating. The game repo checks,
+// under its locks, that the event is open, that all four have the player
+// role (models.ErrMissingPlayerRole) and that none of them is in another
+// live game; the game service checks the seating itself.
 func (s *Service) NewGame(ctx context.Context, eventID int, playerIDs []int) (int, error) {
-	event, err := s.repo.Get(ctx, eventID)
-	if err != nil {
-		return 0, err
-	}
-
-	if event.FinishedAt != nil {
-		return 0, models.ErrEventAlreadyFinished
-	}
-
-	for _, playerID := range playerIDs {
-		if err := s.checkPlayerRole(ctx, eventID, playerID); err != nil {
-			return 0, err
-		}
-	}
-
 	return s.gameService.NewGame(ctx, playerIDs, eventID)
 }

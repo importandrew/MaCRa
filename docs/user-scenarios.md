@@ -100,7 +100,8 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 ### Managing an event (owner)
 
 - **Settings**: name, description, visibility, ratings/games reach. Changing visibility changes a reach only when it becomes invalid (public → members when the event turns private); a custom reach is kept otherwise.
-- **Members**: add a user (server-side search by name or ID) with roles; tap a member to switch their roles; remove a member after a confirmation. The owner can't be removed and may drop their own player role. A member in a live game can't be removed.
+- **Members**: add a user (server-side search by name or ID) with roles; tap a member to switch their roles (a member keeps at least one role: to take all of them away, remove the member); remove a member after a confirmation. The owner can't be removed and may drop any of their roles, even all of them; they stay in the member list and can take a role again. A member in a live game can't be removed, and their player role can't be taken away until the game ends.
+- **Overview**: players are a count; referees and observers are listed by name, the first five of a longer list with "N more" for the rest.
 - **Joining by invite**: the owner shares an invite link (or its QR code); a signed-in user who opens it becomes a player of the event. The owner can regenerate the link, which makes the old one stop working. (Planned.)
 - **Leaving**: a member who is not the owner and not in a live game can leave a regular event themselves. Leaving a tournament is not possible. Past games and rating rows of a member who left or was removed stay as they are.
 - **Deleting**: the owner can delete an event only while it has no games (created by mistake); otherwise it can only be finished.

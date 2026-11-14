@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Chip, Separator } from '@heroui/react';
-import { type ReactNode, useMemo } from 'react';
+import { Button, Chip, Separator } from '@heroui/react';
+import { type ReactNode, useMemo, useState } from 'react';
 import type { EventMember } from '../../models/EventRole';
 import { useFetchEventMembers } from '../../providers/event/eventApi';
 import { useEventLayout } from '../../providers/event/eventLayoutContext';
@@ -30,6 +30,37 @@ function namesWithRole(
     .filter((m) => m.roles.includes(role))
     .map((m) => m.name)
     .sort((a, b) => a.localeCompare(b));
+}
+
+// SHOWN_NAMES: how many staff names a row shows before "N more".
+const SHOWN_NAMES = 5;
+
+// StaffNames lists names, the first SHOWN_NAMES of a longer list with a
+// button that shows the rest, so a tournament's many referees don't push
+// the overview down.
+function StaffNames({ names }: { names: string[] }) {
+  const { t } = useTranslation();
+  const [isExpanded, setIsExpanded] = useState(false);
+  if (names.length === 0) return <>—</>;
+  const hidden = names.length - SHOWN_NAMES;
+  if (hidden <= 0) return <>{names.join(', ')}</>;
+
+  return (
+    <>
+      {(isExpanded ? names : names.slice(0, SHOWN_NAMES)).join(', ')}{' '}
+      <Button
+        size="sm"
+        variant="tertiary"
+        className="h-auto min-h-0 px-1.5 py-0.5"
+        aria-expanded={isExpanded}
+        onPress={() => setIsExpanded(!isExpanded)}
+      >
+        {isExpanded
+          ? t('events.fewerNames')
+          : t('events.moreNames', { n: hidden })}
+      </Button>
+    </>
+  );
 }
 
 function DetailRow({
@@ -147,13 +178,13 @@ export default function EventOverview() {
           icon={<ScalesIcon className={iconClass} />}
           label={t('events.referees')}
         >
-          {referees.length > 0 ? referees.join(', ') : '—'}
+          <StaffNames names={referees} />
         </DetailRow>
         <DetailRow
           icon={<EyeIcon className={iconClass} />}
           label={t('events.observers')}
         >
-          {observers.length > 0 ? observers.join(', ') : '—'}
+          <StaffNames names={observers} />
         </DetailRow>
         <DetailRow
           icon={<CalendarIcon className={iconClass} />}

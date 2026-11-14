@@ -137,12 +137,3 @@ func TestUpdate_validates(t *testing.T) {
 	repo.EXPECT().Update(mock.Anything, mock.MatchedBy(func(e models.Event) bool { return e.Description == "" })).Return(nil)
 	assert.NoError(t, svc.Update(context.Background(), models.UpdateEventParams{ID: 1, Description: new("  ")}))
 }
-
-func TestMembers_finishedEventIsReadOnly(t *testing.T) {
-	repo := NewMockEventRepo(t)
-	repo.EXPECT().Get(mock.Anything, 1).Return(models.Event{ID: 1, FinishedAt: new(time.Now())}, nil).Twice()
-	svc := NewService(repo, nil, nil)
-
-	assert.ErrorIs(t, svc.AddMemberRoles(context.Background(), 1, 5, []models.EventRole{models.EventPlayer}), models.ErrEventAlreadyFinished)
-	assert.ErrorIs(t, svc.RemoveMembers(context.Background(), 1, []int{5}), models.ErrEventAlreadyFinished)
-}

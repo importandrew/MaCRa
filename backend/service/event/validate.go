@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -53,4 +54,19 @@ func checkNotFinished(event models.Event) error {
 		return models.ErrEventAlreadyFinished
 	}
 	return nil
+}
+
+// memberRoles returns the roles without repeats, or models.ErrInvalidRole if
+// one isn't a member role.
+func memberRoles(roles []models.EventRole) ([]models.EventRole, error) {
+	out := make([]models.EventRole, 0, len(roles))
+	for _, role := range roles {
+		if !slices.Contains(models.ValidEventRoles, role) {
+			return nil, fmt.Errorf("%w: %q", models.ErrInvalidRole, role)
+		}
+		if !slices.Contains(out, role) {
+			out = append(out, role)
+		}
+	}
+	return out, nil
 }

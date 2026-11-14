@@ -61,6 +61,17 @@ var (
 	ErrEventHasOngoingGames = errors.New("event has ongoing games")
 	// ErrMemberInCurrentGame is sent with the member's name.
 	ErrMemberInCurrentGame = errors.New("cannot remove member who plays game right now")
+	// ErrPlayerRoleInGame means the player role can't be taken from a member
+	// who is in a live game. Sent with the member's name.
+	ErrPlayerRoleInGame = errors.New("cannot drop the player role of a member in a game")
+	// ErrOwnerNotRemovable means the owner can't be removed from their event
+	// (they may drop their roles).
+	ErrOwnerNotRemovable = errors.New("the owner can't be removed")
+	// ErrNotMember means the user isn't a member of the event.
+	ErrNotMember = errors.New("not a member of the event")
+	// ErrInvalidRole means a role isn't one of the member roles, or a member
+	// other than the owner was left without roles (remove them instead).
+	ErrInvalidRole = errors.New("invalid member roles")
 	// ErrMissingPlayerRole is sent with the player's name.
 	ErrMissingPlayerRole   = errors.New("missing 'player' role")
 	ErrGameNotInEvent      = errors.New("game not in event")
@@ -122,6 +133,7 @@ var Errors = map[error]APIError{
 	ErrLongDescription:          {http.StatusBadRequest, "long_description"},
 	ErrInvalidGameStatus:        {http.StatusBadRequest, "invalid_game_status"},
 	ErrInvalidGameRules:         {http.StatusBadRequest, "invalid_game_rules"},
+	ErrInvalidRole:              {http.StatusBadRequest, "invalid_role"},
 	ErrInvalidEventSettings:     {http.StatusBadRequest, "invalid_event_settings"},
 	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
 
@@ -139,6 +151,7 @@ var Errors = map[error]APIError{
 	ErrGameNotLive:    {http.StatusNotFound, "game_not_live"},
 	ErrGameNotEnded:   {http.StatusNotFound, "game_not_ended"},
 	ErrEventNotFound:  {http.StatusNotFound, "event_not_found"},
+	ErrNotMember:      {http.StatusNotFound, "not_member"},
 
 	// 409
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},
@@ -148,6 +161,8 @@ var Errors = map[error]APIError{
 	ErrEventHasOngoingGames: {http.StatusConflict, "event_has_ongoing_games"},
 	ErrGameHasRounds:        {http.StatusConflict, "game_has_rounds"},
 	ErrEventRulesFrozen:     {http.StatusConflict, "event_rules_frozen"},
+	ErrPlayerRoleInGame:     {http.StatusConflict, "player_role_in_game"},
+	ErrOwnerNotRemovable:    {http.StatusConflict, "owner_not_removable"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

@@ -88,6 +88,7 @@ func (h *Handler) registerEventActions(event *gin.RouterGroup) {
 
 	event.POST("/members", h.event.AddMembers)
 	event.DELETE("/members", h.event.RemoveMember)
+	event.PUT("/members/:playerId", middleware.RequirePlayer, h.event.SetMemberRoles)
 
 	// user relative game block
 	{
