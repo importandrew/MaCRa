@@ -57,3 +57,21 @@ func (r *Repo) RemoveMembers(ctx context.Context, eventID int, userIDs []int) er
 
 	return nil
 }
+
+// SetMemberRoles makes roles the member's roles in the event, in one
+// transaction: roles they hold and keep stay as they were (with their
+// creation time), the others are added or dropped. Empty roles leave the
+// user without roles.
+func (r *Repo) SetMemberRoles(ctx context.Context, eventID, userID int, roles []models.EventRole) error {
+	return r.InTx(ctx, func(tx *Repo) error {
+		if _, err := tx.db.Exec(ctx, `
+			DELETE FROM event_user_roles
+			WHERE event_id = $1 AND user_id = $2 AND NOT (role = ANY($3))`,
+			eventID, userID, roles,
+		); err != nil {
+			return err
+		}
+
+		return tx.AddMemberRoles(ctx, eventID, userID, roles)
+	})
+}

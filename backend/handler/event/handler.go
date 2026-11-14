@@ -20,6 +20,7 @@ type EventService interface {
 	HasCapability(ctx context.Context, eventID, userID, gameID int, capability models.Capability) error
 	AddMemberRoles(ctx context.Context, eventID, targetUserID int, roles []models.EventRole) error
 	RemoveMembers(ctx context.Context, eventID int, targetUserIDs []int) error
+	SetMemberRoles(ctx context.Context, eventID, targetUserID int, roles []models.EventRole) error
 	ListMembers(ctx context.Context, eventID, callerID int) ([]models.EventMember, error)
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)

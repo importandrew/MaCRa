@@ -2,15 +2,17 @@ package event
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/importandrew/MaCRa/models"
 )
 
-// RemoveMembers removes members from the event: not while one of them is in
-// a live game (models.ErrMemberInCurrentGame), and not in a finished event
-// (models.ErrEventAlreadyFinished), whose members can't change.
+// RemoveMembers removes members from the event: not the owner
+// (models.ErrOwnerNotRemovable; they may drop their roles instead), not
+// while one of them is in a live game (models.ErrMemberInCurrentGame), and
+// not in a finished event (models.ErrEventAlreadyFinished), whose members
+// can't change.
 func (s *Service) RemoveMembers(ctx context.Context, eventID int, targetUserIDs []int) error {
 	event, err := s.repo.Get(ctx, eventID)
 	if err != nil {
@@ -19,16 +21,14 @@ func (s *Service) RemoveMembers(ctx context.Context, eventID int, targetUserIDs 
 	if err := checkNotFinished(event); err != nil {
 		return err
 	}
+	if slices.Contains(targetUserIDs, event.OwnerUserID) {
+		return fmt.Errorf("user %d: %w", event.OwnerUserID, models.ErrOwnerNotRemovable)
+	}
 
 	for _, userID := range targetUserIDs {
-		_, err := s.gameService.CurrentGameID(ctx, userID, eventID)
-		if err != nil {
-			if !errors.Is(err, models.ErrGameNotFound) {
-				return fmt.Errorf("user %d current game: %w", userID, err)
-			}
-			continue
+		if err := s.checkNotInGame(ctx, eventID, userID, models.ErrMemberInCurrentGame); err != nil {
+			return err
 		}
-		return s.withPlayerName(ctx, userID, models.ErrMemberInCurrentGame)
 	}
 
 	return s.repo.RemoveMembers(ctx, eventID, targetUserIDs)

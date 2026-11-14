@@ -110,6 +110,11 @@ const en = {
       'The game has changed since you opened it. Check the log and try again.',
     player_in_another_game:
       '{{name}} is still in another game. Wait until it ends.',
+    invalid_role: 'The roles are invalid',
+    not_member: 'This user is not a member of the event',
+    player_role_in_game:
+      '{{name}} is playing a game right now. Change the player role after it ends.',
+    owner_not_removable: 'The owner can’t be removed from their event',
     member_in_current_game:
       '{{name}} is playing a game right now. Remove them after it ends.',
     event_already_finished: 'The event has already finished',
@@ -250,6 +255,8 @@ const en = {
     myEventsCount: 'My ({{n}})',
     publicEventsCount: 'Public ({{n}})',
     noPublicEvents: 'No public events yet',
+    moreNames: '{{n}} more',
+    fewerNames: 'Show less',
   },
   rules: {
     title: 'Game rules',
@@ -331,6 +338,12 @@ const en = {
     removeConfirmPrompt: 'Remove {{name}} from the event?',
     finishedReadOnly: 'The event is finished: members can no longer change.',
     none: 'No members yet',
+    rolesOf: 'Roles: {{name}}',
+    editRoles: 'Change roles of {{name}}',
+    rolesHint:
+      'A member keeps at least one role; to take all of them away, remove the member.',
+    ownerRolesHint: 'The owner may drop any role and still manages the event.',
+    rolesSaved: 'Roles saved',
   },
   rating: {
     name: 'Player',

@@ -138,6 +138,19 @@ export async function addEventMember(
   return result !== null;
 }
 
+// setMemberRoles makes roles the member's roles, all at once.
+export async function setMemberRoles(
+  eventId: number,
+  userId: number,
+  roles: EventRole[]
+): Promise<boolean> {
+  const request = PutRequest(eventPath(eventId, `/members/${userId}`), {
+    roles,
+  });
+  const result = await authFetch<null>(request);
+  return result !== null;
+}
+
 export async function removeEventMember(
   eventId: number,
   userId: number
