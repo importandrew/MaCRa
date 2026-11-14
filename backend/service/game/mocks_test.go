@@ -1052,16 +1052,16 @@ func (_c *MockGameRepo_Summary_Call) RunAndReturn(run func(ctx context.Context, 
 }
 
 // UndoLastRound provides a mock function for the type MockGameRepo
-func (_mock *MockGameRepo) UndoLastRound(ctx context.Context, gameID int, logSize int, endedAfter *time.Time) error {
-	ret := _mock.Called(ctx, gameID, logSize, endedAfter)
+func (_mock *MockGameRepo) UndoLastRound(ctx context.Context, gameID int, logSize int, undoneBy int, endedAfter *time.Time) error {
+	ret := _mock.Called(ctx, gameID, logSize, undoneBy, endedAfter)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UndoLastRound")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, *time.Time) error); ok {
-		r0 = returnFunc(ctx, gameID, logSize, endedAfter)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int, *time.Time) error); ok {
+		r0 = returnFunc(ctx, gameID, logSize, undoneBy, endedAfter)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1077,12 +1077,13 @@ type MockGameRepo_UndoLastRound_Call struct {
 //   - ctx context.Context
 //   - gameID int
 //   - logSize int
+//   - undoneBy int
 //   - endedAfter *time.Time
-func (_e *MockGameRepo_Expecter) UndoLastRound(ctx any, gameID any, logSize any, endedAfter any) *MockGameRepo_UndoLastRound_Call {
-	return &MockGameRepo_UndoLastRound_Call{Call: _e.mock.On("UndoLastRound", ctx, gameID, logSize, endedAfter)}
+func (_e *MockGameRepo_Expecter) UndoLastRound(ctx any, gameID any, logSize any, undoneBy any, endedAfter any) *MockGameRepo_UndoLastRound_Call {
+	return &MockGameRepo_UndoLastRound_Call{Call: _e.mock.On("UndoLastRound", ctx, gameID, logSize, undoneBy, endedAfter)}
 }
 
-func (_c *MockGameRepo_UndoLastRound_Call) Run(run func(ctx context.Context, gameID int, logSize int, endedAfter *time.Time)) *MockGameRepo_UndoLastRound_Call {
+func (_c *MockGameRepo_UndoLastRound_Call) Run(run func(ctx context.Context, gameID int, logSize int, undoneBy int, endedAfter *time.Time)) *MockGameRepo_UndoLastRound_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1096,15 +1097,20 @@ func (_c *MockGameRepo_UndoLastRound_Call) Run(run func(ctx context.Context, gam
 		if args[2] != nil {
 			arg2 = args[2].(int)
 		}
-		var arg3 *time.Time
+		var arg3 int
 		if args[3] != nil {
-			arg3 = args[3].(*time.Time)
+			arg3 = args[3].(int)
+		}
+		var arg4 *time.Time
+		if args[4] != nil {
+			arg4 = args[4].(*time.Time)
 		}
 		run(
 			arg0,
 			arg1,
 			arg2,
 			arg3,
+			arg4,
 		)
 	})
 	return _c
@@ -1115,7 +1121,75 @@ func (_c *MockGameRepo_UndoLastRound_Call) Return(err error) *MockGameRepo_UndoL
 	return _c
 }
 
-func (_c *MockGameRepo_UndoLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int, logSize int, endedAfter *time.Time) error) *MockGameRepo_UndoLastRound_Call {
+func (_c *MockGameRepo_UndoLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int, logSize int, undoneBy int, endedAfter *time.Time) error) *MockGameRepo_UndoLastRound_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UndoneEntries provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) UndoneEntries(ctx context.Context, gameID int) ([]models.UndoneEntry, error) {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UndoneEntries")
+	}
+
+	var r0 []models.UndoneEntry
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) ([]models.UndoneEntry, error)); ok {
+		return returnFunc(ctx, gameID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) []models.UndoneEntry); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.UndoneEntry)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, gameID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_UndoneEntries_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UndoneEntries'
+type MockGameRepo_UndoneEntries_Call struct {
+	*mock.Call
+}
+
+// UndoneEntries is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) UndoneEntries(ctx any, gameID any) *MockGameRepo_UndoneEntries_Call {
+	return &MockGameRepo_UndoneEntries_Call{Call: _e.mock.On("UndoneEntries", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_UndoneEntries_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_UndoneEntries_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_UndoneEntries_Call) Return(undoneEntrys []models.UndoneEntry, err error) *MockGameRepo_UndoneEntries_Call {
+	_c.Call.Return(undoneEntrys, err)
+	return _c
+}
+
+func (_c *MockGameRepo_UndoneEntries_Call) RunAndReturn(run func(ctx context.Context, gameID int) ([]models.UndoneEntry, error)) *MockGameRepo_UndoneEntries_Call {
 	_c.Call.Return(run)
 	return _c
 }

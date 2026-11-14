@@ -95,7 +95,7 @@ func (h Handler) penaltyInGame(c *gin.Context, penaltyType models.Outcome) {
 		return
 	}
 
-	view, err := h.game.PenaltyInGame(c.Request.Context(), penaltyType, gameID, req.LoserID, req.Value, req.ForceNextRound, *req.LogSize)
+	view, err := h.game.PenaltyInGame(c.Request.Context(), penaltyType, gameID, callerID, req.LoserID, req.Value, req.ForceNextRound, *req.LogSize)
 	if err != nil {
 		httperr.Error(c, err)
 		return

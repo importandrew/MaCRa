@@ -18,6 +18,11 @@ func (s *Service) Logs(ctx context.Context, id int) (models.GameLog, error) {
 		return models.GameLog{}, err
 	}
 
+	undone, err := s.gameRepo.UndoneEntries(ctx, id)
+	if err != nil {
+		return models.GameLog{}, err
+	}
+
 	playerHeaders := make([]models.PlayerHeader, 0, len(players.Players))
 	for _, player := range players.Players {
 		playerHeaders = append(playerHeaders, models.PlayerHeader(player))
@@ -27,15 +32,16 @@ func (s *Service) Logs(ctx context.Context, id int) (models.GameLog, error) {
 		ID:        id,
 		Players:   playerHeaders,
 		RoundLogs: roundLogs,
+		Undone:    undone,
 	}
 
 	return gameLog, nil
 }
 
 // gameLog is the round log of game as the client gets it: the players in
-// starting seat order (east, south, west, north) with their names, and the
-// entries. names maps each player's ID to the name.
-func gameLog(game GameEngine, log []models.RoundLog, names map[int]string) models.GameLog {
+// starting seat order (east, south, west, north) with their names, the
+// entries and the undone ones. names maps each player's ID to the name.
+func gameLog(game GameEngine, log []models.RoundLog, undone []models.UndoneEntry, names map[int]string) models.GameLog {
 	seating := game.Players()
 	players := make([]models.PlayerHeader, 0, len(seating))
 	for _, id := range seating {
@@ -46,5 +52,6 @@ func gameLog(game GameEngine, log []models.RoundLog, names map[int]string) model
 		ID:        game.ID(),
 		Players:   players,
 		RoundLogs: log,
+		Undone:    undone,
 	}
 }

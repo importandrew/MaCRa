@@ -206,6 +206,7 @@ func TestPenalty(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().UndoneEntries(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
@@ -252,17 +253,19 @@ func TestPenalty_ReplaysOldAmounts(t *testing.T) {
 func TestPenaltyInGame(t *testing.T) {
 	t.Run("returns the live view", func(t *testing.T) {
 		mockGameRepo := NewMockGameRepo(t)
+		mockGameRepo.EXPECT().UndoneEntries(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockPlayerRepo := NewMockPlayerRepo(t)
 		expectLiveGame(mockGameRepo, 100, nil)
 		mockGameRepo.EXPECT().SaveRoundOutcome(mock.Anything, 100, mock.MatchedBy(func(data models.RoundData) bool {
-			return data.Outcome == models.FalseMahjong && data.LoserID == 2 && data.Value == 30 && data.LogSize == 0
+			return data.Outcome == models.FalseMahjong && data.LoserID == 2 && data.Value == 30 && data.LogSize == 0 &&
+				data.EnteredBy == 9 // the referee
 		})).Return(nil)
 		penaltyLog := models.RoundLog{ID: 1, Round: 1, EventSequence: 1, Outcome: models.FalseMahjong, Loser: 2, Value: 30, CreatedAt: time.Now()}
 		expectLiveGame(mockGameRepo, 100, []models.RoundLog{penaltyLog})
 		expectPlayerGets(mockPlayerRepo)
 
 		view, err := NewService(mockGameRepo, mockPlayerRepo).
-			PenaltyInGame(context.Background(), models.FalseMahjong, 100, 2, 30, false, 0)
+			PenaltyInGame(context.Background(), models.FalseMahjong, 100, 9, 2, 30, false, 0)
 
 		require.NoError(t, err)
 		assert.Equal(t, 100, view.ID)
@@ -274,14 +277,14 @@ func TestPenaltyInGame(t *testing.T) {
 		mockGameRepo.EXPECT().Status(mock.Anything, 100).Return(models.GameEnded, nil)
 
 		_, err := NewService(mockGameRepo, NewMockPlayerRepo(t)).
-			PenaltyInGame(context.Background(), models.Penalty, 100, 2, 10, false, 0)
+			PenaltyInGame(context.Background(), models.Penalty, 100, 9, 2, 10, false, 0)
 
 		assert.ErrorIs(t, err, models.ErrGameNotLive)
 	})
 
 	t.Run("amount not in the official list", func(t *testing.T) {
 		_, err := NewService(NewMockGameRepo(t), NewMockPlayerRepo(t)).
-			PenaltyInGame(context.Background(), models.Penalty, 100, 2, 15, false, 0)
+			PenaltyInGame(context.Background(), models.Penalty, 100, 9, 2, 15, false, 0)
 
 		assert.ErrorIs(t, err, models.ErrValidatePenalty)
 	})

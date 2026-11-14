@@ -22,7 +22,7 @@ func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playe
 		return models.GameNow{}, err
 	}
 
-	if err := s.applyPenalty(ctx, game, penaltyType, penalizedID, value, forceNextRound, seenLogSize); err != nil {
+	if err := s.applyPenalty(ctx, game, playerID, penaltyType, penalizedID, value, forceNextRound, seenLogSize); err != nil {
 		return models.GameNow{}, err
 	}
 
@@ -34,9 +34,10 @@ func (s *Service) Penalty(ctx context.Context, penaltyType models.Outcome, playe
 }
 
 // PenaltyInGame enters a penalty or a false mahjong into the live game, as a
-// referee does from the game's view, and returns that view. The amounts are
-// checked as in Penalty; a game that isn't live is models.ErrGameNotLive.
-func (s *Service) PenaltyInGame(ctx context.Context, penaltyType models.Outcome, gameID, penalizedID, value int, forceNextRound bool, seenLogSize int) (models.GameView, error) {
+// referee (refereeID) does from the game's view, and returns that view. The
+// amounts are checked as in Penalty; a game that isn't live is
+// models.ErrGameNotLive.
+func (s *Service) PenaltyInGame(ctx context.Context, penaltyType models.Outcome, gameID, refereeID, penalizedID, value int, forceNextRound bool, seenLogSize int) (models.GameView, error) {
 	if err := validatePenaltyAmount(penaltyType, value); err != nil {
 		return models.GameView{}, err
 	}
@@ -46,7 +47,7 @@ func (s *Service) PenaltyInGame(ctx context.Context, penaltyType models.Outcome,
 		return models.GameView{}, err
 	}
 
-	if err := s.applyPenalty(ctx, game, penaltyType, penalizedID, value, forceNextRound, seenLogSize); err != nil {
+	if err := s.applyPenalty(ctx, game, refereeID, penaltyType, penalizedID, value, forceNextRound, seenLogSize); err != nil {
 		return models.GameView{}, err
 	}
 
@@ -70,7 +71,7 @@ func validatePenaltyAmount(penaltyType models.Outcome, value int) error {
 // applyPenalty enters the penalty into the loaded game, saves it as the next
 // log entry (refused with models.ErrLogChanged unless the game still has
 // seenLogSize entries) and finalizes the game if it has ended.
-func (s *Service) applyPenalty(ctx context.Context, game GameEngine, penaltyType models.Outcome, penalizedID, value int, forceNextRound bool, seenLogSize int) error {
+func (s *Service) applyPenalty(ctx context.Context, game GameEngine, enteredBy int, penaltyType models.Outcome, penalizedID, value int, forceNextRound bool, seenLogSize int) error {
 	logSize := game.LogSize()
 	if err := checkLogSize(logSize, seenLogSize); err != nil {
 		return err
@@ -103,6 +104,7 @@ func (s *Service) applyPenalty(ctx context.Context, game GameEngine, penaltyType
 		NorthStartScore: score[players[models.North]].GP,
 		ForceNextRound:  forceNextRound,
 		LogSize:         logSize,
+		EnteredBy:       enteredBy,
 	}
 
 	if err := s.gameRepo.SaveRoundOutcome(ctx, game.ID(), roundOutcome); err != nil {

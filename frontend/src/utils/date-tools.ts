@@ -20,3 +20,15 @@ export const getDateTimeFormatted = (dateISO: string): string => {
 
   return `${date}, ${time}`;
 };
+
+// getTimeFormatted formats the time of day (hours and minutes) in the app's
+// language, e.g. for entries of one game.
+export const getTimeFormatted = (dateISO: string): string => {
+  if (!dateISO) return '—';
+
+  return new Date(dateISO).toLocaleTimeString(currentLanguage(), {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+};

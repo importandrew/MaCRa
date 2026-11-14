@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS undone_rounds;
+ALTER TABLE rounds DROP COLUMN IF EXISTS entered_by;

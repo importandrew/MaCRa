@@ -562,6 +562,12 @@ const en = {
   logs: {
     legend: 'Legend',
     noData: 'No data available',
+    entryDetails: 'Who entered it',
+    enteredBy: 'Entered by {{name}} at {{time}}',
+    enteredAt: 'Entered at {{time}}',
+    undoneBy: 'Undone by {{name}} at {{time}}',
+    hideUndone: 'Hide undone entries',
+    undoneAt: 'Undone at {{time}}',
   },
   result: {
     table: 'Game results table',

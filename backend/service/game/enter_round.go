@@ -45,6 +45,7 @@ func (s *Service) EnterRound(
 		WestStartScore:  score[players[models.West]].GP,
 		NorthStartScore: score[players[models.North]].GP,
 		LogSize:         logSize,
+		EnteredBy:       playerID,
 	}
 
 	err = s.gameRepo.SaveRoundOutcome(ctx, game.ID(), roundOutcome)

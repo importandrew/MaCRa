@@ -562,6 +562,12 @@ const ru: Messages = {
   logs: {
     legend: 'Обозначения',
     noData: 'Нет данных',
+    entryDetails: 'Кто внёс запись',
+    enteredBy: 'Внёс {{name}} в {{time}}',
+    enteredAt: 'Внесено в {{time}}',
+    undoneBy: 'Отменил {{name}} в {{time}}',
+    hideUndone: 'Скрыть отменённые записи',
+    undoneAt: 'Отменено в {{time}}',
   },
   result: {
     table: 'Результаты игры',

@@ -52,5 +52,5 @@ func (s *Service) UndoLastRound(ctx context.Context, eventID, callerID, gameID, 
 	}
 
 	asReferee := authCtx.hasRole(models.EventReferee)
-	return s.gameService.UndoLastRound(ctx, gameID, logSize, asReferee)
+	return s.gameService.UndoLastRound(ctx, gameID, logSize, callerID, asReferee)
 }

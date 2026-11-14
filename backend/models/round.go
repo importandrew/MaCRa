@@ -14,4 +14,7 @@ type RoundData struct {
 	// LogSize is the number of round log entries the outcome was computed
 	// from; the repo refuses to save it if the log has changed since.
 	LogSize int
+	// EnteredBy is the user who entered it: a seated player, or a referee
+	// from the game's view.
+	EnteredBy int
 }

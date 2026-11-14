@@ -49,6 +49,11 @@ func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNo
 
 	names := map[int]string{playerID: me.Name, leftID: left.Name, rightID: right.Name, oppID: opp.Name}
 
+	undone, err := s.gameRepo.UndoneEntries(ctx, game.ID())
+	if err != nil {
+		return models.GameNow{}, err
+	}
+
 	now := models.GameNow{
 		ID:      game.ID(),
 		Status:  game.Status(),
@@ -82,7 +87,7 @@ func (s *Service) Now(ctx context.Context, playerID, eventID int) (models.GameNo
 			Wind:  leftWind.Kanji(),
 			Score: leftScore,
 		},
-		Log: gameLog(game, log, names),
+		Log: gameLog(game, log, undone, names),
 	}
 
 	return now, nil
