@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -20,7 +21,7 @@ import (
 // numbers not drawn for the current players (models.ErrNotDrawn) and active
 // participants that don't fill whole tables (models.ErrTablesIncomplete,
 // with the number missing).
-func (r *Repo) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error) {
+func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc) (models.Tour, error) {
 	var tour models.Tour
 	err := r.InTx(ctx, func(tx *Repo) error {
 		isTournament, _, err := tx.tournamentState(ctx, eventID, true)
@@ -51,24 +52,29 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, method models.Seat
 			return models.WithData(models.ErrTablesIncomplete, models.ErrorData{"missing": missing})
 		}
 
-		tables, err := makeTables(participants)
+		input, err := tx.SeatingHistory(ctx, eventID, 0)
+		if err != nil {
+			return err
+		}
+		input.Participants = participants
+		tables, err := makeTables(input)
 		if err != nil {
 			return err
 		}
 
-		tour, err = tx.insertDraftTour(ctx, eventID, next, method, tables)
+		tour, err = tx.insertDraftTour(ctx, eventID, next, seating, tables)
 		return err
 	})
 	return tour, err
 }
 
 // insertDraftTour inserts a drafted tour with its games, one per table.
-func (r *Repo) insertDraftTour(ctx context.Context, eventID, number int, method models.SeatingMethod, tables [][4]int) (models.Tour, error) {
+func (r *Repo) insertDraftTour(ctx context.Context, eventID, number int, seating models.Seating, tables [][4]int) (models.Tour, error) {
 	rows, err := r.db.Query(ctx, `
-		INSERT INTO tours (event_id, number, status, seating)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id, number, status, seating, published_at, minutes, started_at, finished_at`,
-		eventID, number, models.TourDraft, method)
+		INSERT INTO tours (event_id, number, status, seating, seating_step)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, number, status, seating, seating_step, published_at, minutes, started_at, finished_at`,
+		eventID, number, models.TourDraft, seating.Method, seating.Step)
 	if err != nil {
 		return models.Tour{}, fmt.Errorf("insert tour: %w", err)
 	}
@@ -223,7 +229,7 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 	state := models.TourState{Tables: []models.TourTable{}}
 	err := r.InTx(ctx, func(tx *Repo) error {
 		rows, err := tx.db.Query(ctx, `
-			SELECT id, number, status, seating, published_at, minutes, started_at, finished_at
+			SELECT id, number, status, seating, seating_step, published_at, minutes, started_at, finished_at
 			FROM tours WHERE event_id = $1 AND status <> $2
 			ORDER BY number DESC LIMIT 1`,
 			eventID, models.TourAborted)
@@ -444,4 +450,68 @@ func (r *Repo) AddTime(ctx context.Context, eventID, gameID, minutes int) error 
 		}
 		return nil
 	})
+}
+
+// SeatingHistory returns what a seating is made from, besides the
+// participants: how many times each pair has met in the tournament's live and
+// finished tours numbered below beforeNumber (aborted ones don't count), and
+// the totals from the finished ones among them. beforeNumber 0 takes all.
+func (r *Repo) SeatingHistory(ctx context.Context, eventID, beforeNumber int) (models.SeatingInput, error) {
+	input := models.SeatingInput{
+		Meetings:  map[models.SeatingPair]int{},
+		Standings: map[int]models.SeatingStanding{},
+	}
+	if beforeNumber == 0 {
+		beforeNumber = math.MaxInt32
+	}
+
+	rows, err := r.db.Query(ctx, `
+		SELECT a.player_id AS a, b.player_id AS b, count(*) AS meetings
+		FROM tours t
+		JOIN games g ON g.tour_id = t.id
+		JOIN game_players a ON a.game_id = g.id
+		JOIN game_players b ON b.game_id = g.id AND a.player_id < b.player_id
+		WHERE t.event_id = $1 AND t.status IN ($2, $3) AND t.number < $4
+		GROUP BY a.player_id, b.player_id`,
+		eventID, models.TourLive, models.TourFinished, beforeNumber)
+	if err != nil {
+		return input, fmt.Errorf("meetings: %w", err)
+	}
+	type meetingRow struct {
+		A        int `db:"a"`
+		B        int `db:"b"`
+		Meetings int `db:"meetings"`
+	}
+	meetings, err := pgx.CollectRows(rows, pgx.RowToStructByName[meetingRow])
+	if err != nil {
+		return input, fmt.Errorf("meetings: %w", err)
+	}
+	for _, m := range meetings {
+		input.Meetings[models.SeatingPair{m.A, m.B}] = m.Meetings
+	}
+
+	rows, err = r.db.Query(ctx, `
+		SELECT pr.player_id, sum(pr.tournament_points)::float8 AS tp, sum(pr.game_points)::int AS gp
+		FROM tours t
+		JOIN games g ON g.tour_id = t.id AND g.status = $3
+		JOIN player_results pr ON pr.game_id = g.id
+		WHERE t.event_id = $1 AND t.status = $2 AND t.number < $4
+		GROUP BY pr.player_id`,
+		eventID, models.TourFinished, models.GameEnded, beforeNumber)
+	if err != nil {
+		return input, fmt.Errorf("standings: %w", err)
+	}
+	type standingRow struct {
+		PlayerID int     `db:"player_id"`
+		TP       float64 `db:"tp"`
+		GP       int     `db:"gp"`
+	}
+	standings, err := pgx.CollectRows(rows, pgx.RowToStructByName[standingRow])
+	if err != nil {
+		return input, fmt.Errorf("standings: %w", err)
+	}
+	for _, s := range standings {
+		input.Standings[s.PlayerID] = models.SeatingStanding{TP: s.TP, GP: s.GP}
+	}
+	return input, nil
 }

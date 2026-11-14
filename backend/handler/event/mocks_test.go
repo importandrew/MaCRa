@@ -2012,8 +2012,8 @@ func (_c *MockEventService_GameHistory_Call) RunAndReturn(run func(ctx context.C
 }
 
 // GenerateTour provides a mock function for the type MockEventService
-func (_mock *MockEventService) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error) {
-	ret := _mock.Called(ctx, eventID, method)
+func (_mock *MockEventService) GenerateTour(ctx context.Context, eventID int, seating models.Seating) (models.Tour, error) {
+	ret := _mock.Called(ctx, eventID, seating)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GenerateTour")
@@ -2021,16 +2021,16 @@ func (_mock *MockEventService) GenerateTour(ctx context.Context, eventID int, me
 
 	var r0 models.Tour
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod) (models.Tour, error)); ok {
-		return returnFunc(ctx, eventID, method)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating) (models.Tour, error)); ok {
+		return returnFunc(ctx, eventID, seating)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingMethod) models.Tour); ok {
-		r0 = returnFunc(ctx, eventID, method)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating) models.Tour); ok {
+		r0 = returnFunc(ctx, eventID, seating)
 	} else {
 		r0 = ret.Get(0).(models.Tour)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.SeatingMethod) error); ok {
-		r1 = returnFunc(ctx, eventID, method)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Seating) error); ok {
+		r1 = returnFunc(ctx, eventID, seating)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2045,12 +2045,12 @@ type MockEventService_GenerateTour_Call struct {
 // GenerateTour is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
-//   - method models.SeatingMethod
-func (_e *MockEventService_Expecter) GenerateTour(ctx any, eventID any, method any) *MockEventService_GenerateTour_Call {
-	return &MockEventService_GenerateTour_Call{Call: _e.mock.On("GenerateTour", ctx, eventID, method)}
+//   - seating models.Seating
+func (_e *MockEventService_Expecter) GenerateTour(ctx any, eventID any, seating any) *MockEventService_GenerateTour_Call {
+	return &MockEventService_GenerateTour_Call{Call: _e.mock.On("GenerateTour", ctx, eventID, seating)}
 }
 
-func (_c *MockEventService_GenerateTour_Call) Run(run func(ctx context.Context, eventID int, method models.SeatingMethod)) *MockEventService_GenerateTour_Call {
+func (_c *MockEventService_GenerateTour_Call) Run(run func(ctx context.Context, eventID int, seating models.Seating)) *MockEventService_GenerateTour_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -2060,9 +2060,9 @@ func (_c *MockEventService_GenerateTour_Call) Run(run func(ctx context.Context, 
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
-		var arg2 models.SeatingMethod
+		var arg2 models.Seating
 		if args[2] != nil {
-			arg2 = args[2].(models.SeatingMethod)
+			arg2 = args[2].(models.Seating)
 		}
 		run(
 			arg0,
@@ -2078,7 +2078,7 @@ func (_c *MockEventService_GenerateTour_Call) Return(tour models.Tour, err error
 	return _c
 }
 
-func (_c *MockEventService_GenerateTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error)) *MockEventService_GenerateTour_Call {
+func (_c *MockEventService_GenerateTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, seating models.Seating) (models.Tour, error)) *MockEventService_GenerateTour_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -32,7 +32,7 @@ type EventService interface {
 	Draw(ctx context.Context, eventID int) error
 	Withdraw(ctx context.Context, eventID, userID int) error
 	Tours(ctx context.Context, eventID int) (models.TourState, error)
-	GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error)
+	GenerateTour(ctx context.Context, eventID int, seating models.Seating) (models.Tour, error)
 	PublishTour(ctx context.Context, eventID int) error
 	CancelTour(ctx context.Context, eventID int) error
 	StartTour(ctx context.Context, eventID int) error

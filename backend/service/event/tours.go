@@ -2,23 +2,22 @@ package event
 
 import (
 	"context"
-	"crypto/rand"
 	"fmt"
-	"math/big"
-	"slices"
+	"time"
 
 	"github.com/importandrew/MaCRa/models"
+	"github.com/importandrew/MaCRa/service/seating"
 )
 
 // GenerateTour drafts the tournament's next tour with tables made by the
 // seating method (games with status created, seen by the staff only),
 // replacing an earlier draft.
-func (s *Service) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error) {
-	makeTables, err := seatingFunc(method)
+func (s *Service) GenerateTour(ctx context.Context, eventID int, how models.Seating) (models.Tour, error) {
+	makeTables, err := seatingFunc(how)
 	if err != nil {
 		return models.Tour{}, err
 	}
-	return s.repo.GenerateTour(ctx, eventID, method, makeTables)
+	return s.repo.GenerateTour(ctx, eventID, how, makeTables)
 }
 
 // PublishTour publishes the drafted seating to the players.
@@ -34,49 +33,71 @@ func (s *Service) CancelTour(ctx context.Context, eventID int) error {
 // Tours returns the tournament's current tour with its tables and what the
 // next tour would be, for its desk.
 func (s *Service) Tours(ctx context.Context, eventID int) (models.TourState, error) {
-	return s.repo.TourState(ctx, eventID)
+	state, err := s.repo.TourState(ctx, eventID)
+	if err != nil || state.Current == nil || len(state.Tables) == 0 {
+		return state, err
+	}
+
+	// The seating's quality, against the tours before it.
+	input, err := s.repo.SeatingHistory(ctx, eventID, state.Current.Number)
+	if err != nil {
+		return state, err
+	}
+	tables := make([][4]int, 0, len(state.Tables))
+	for _, table := range state.Tables {
+		var seats [4]int
+		for i, seat := range table.Seats {
+			if i < len(seats) {
+				seats[i] = seat.UserID
+			}
+			input.Participants = append(input.Participants, models.Participant{UserID: seat.UserID, Number: seat.Number})
+		}
+		tables = append(tables, seats)
+	}
+	quality, summary := seating.Quality(tables, input)
+	for i := range state.Tables {
+		state.Tables[i].Repeats = quality[i].Repeats
+		state.Tables[i].RepeatPairs = quality[i].Pairs
+		state.Tables[i].Places = quality[i].Places
+	}
+	state.Repeats, state.MaxMet, state.PlayersWithRepeats = summary.Repeats, summary.MaxMet, summary.PlayersWithRepeats
+	return state, nil
 }
+
+// seatingSearchTime is how long a seating may search for fewer repeat
+// meetings.
+const seatingSearchTime = 2 * time.Second
 
 // seatingFunc returns the table maker of a seating method, or
-// models.ErrInvalidSeating.
-func seatingFunc(method models.SeatingMethod) (models.TablesFunc, error) {
-	switch method {
+// models.ErrInvalidSeating (also for an interval step below 1 or above the
+// number of tables, or a step with another method).
+func seatingFunc(how models.Seating) (models.TablesFunc, error) {
+	if how.Step != nil && how.Method != models.SeatingInterval {
+		return nil, fmt.Errorf("%w: a step is for the interval seating only", models.ErrInvalidSeating)
+	}
+	switch how.Method {
 	case models.SeatingRandom:
-		return randomTables, nil
+		return func(input models.SeatingInput) ([][4]int, error) {
+			return seating.Random(input, time.Now().Add(seatingSearchTime))
+		}, nil
+	case models.SeatingSwiss:
+		return func(input models.SeatingInput) ([][4]int, error) {
+			return seating.Swiss(input, time.Now().Add(seatingSearchTime))
+		}, nil
+	case models.SeatingInterval:
+		return func(input models.SeatingInput) ([][4]int, error) {
+			step := 0 // the number of tables
+			if how.Step != nil {
+				step = *how.Step
+				if tables := len(input.Participants) / models.SeatsPerTable; step < 1 || step > tables {
+					return nil, fmt.Errorf("%w: step %d, should be 1 to %d", models.ErrInvalidSeating, step, tables)
+				}
+			}
+			return seating.Interval(input, step), nil
+		}, nil
 	default:
-		return nil, fmt.Errorf("%w: %q", models.ErrInvalidSeating, method)
+		return nil, fmt.Errorf("%w: %q", models.ErrInvalidSeating, how.Method)
 	}
-}
-
-// randomTables shuffles the participants into tables of four. At a table the
-// winds go by participant number, east the lowest (area 8: table and wind by
-// participant number). The repo has checked that they fill whole tables.
-func randomTables(participants []models.Participant) ([][4]int, error) {
-	shuffled := slices.Clone(participants)
-	if err := shuffle(shuffled); err != nil {
-		return nil, err
-	}
-
-	tables := make([][4]int, 0, len(shuffled)/models.SeatsPerTable)
-	for start := 0; start+models.SeatsPerTable <= len(shuffled); start += models.SeatsPerTable {
-		table := slices.Clone(shuffled[start : start+models.SeatsPerTable])
-		slices.SortFunc(table, func(a, b models.Participant) int { return a.Number - b.Number })
-		tables = append(tables, [4]int{table[0].UserID, table[1].UserID, table[2].UserID, table[3].UserID})
-	}
-	return tables, nil
-}
-
-// shuffle puts the participants in a random order (Fisher–Yates) with
-// crypto/rand: nobody should be able to predict the seating.
-func shuffle(participants []models.Participant) error {
-	for i := len(participants) - 1; i > 0; i-- {
-		j, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
-		if err != nil {
-			return fmt.Errorf("shuffle: %w", err)
-		}
-		participants[i], participants[j.Int64()] = participants[j.Int64()], participants[i]
-	}
-	return nil
 }
 
 // StartTour starts the published tour: its games go live.

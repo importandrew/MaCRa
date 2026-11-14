@@ -1,7 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Card, useOverlayState } from '@heroui/react';
 import { useState } from 'react';
-import type { TourState } from '../../models/Tour';
+import {
+  SEATING_METHODS,
+  type SeatingMethod,
+  type TourState,
+  type TourTable,
+} from '../../models/Tour';
+import SegmentedPicker from '../SegmentedPicker';
+import ListStepper from '../ListStepper';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
   cancelTour,
@@ -13,6 +20,11 @@ import AddTimeModal from './AddTimeModal';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 import { getTimeFormatted } from '../../utils/date-tools';
+
+// seatName is the name of a player at the table.
+function seatName(table: TourTable, userId: number): string {
+  return table.seats.find((seat) => seat.user_id === userId)?.name ?? '?';
+}
 
 // WIND_KANJI: the starting seats as the table shows them.
 const WIND_KANJI = { east: '東', south: '南', west: '西', north: '北' };
@@ -77,9 +89,48 @@ export default function ToursCard({
       await onChanged();
     });
 
+  // method: the seating method the next generation uses.
+  const [method, setMethod] = useState<SeatingMethod>('random');
+  // step: an interval seating's step, 1 to the number of tables; null
+  // means the number of tables (the default).
+  const tableCount = Math.max(1, Math.floor(state.active / 4));
+  const [step, setStep] = useState<number | null>(null);
+  const methodPicker = (
+    <>
+      <SegmentedPicker
+        ariaLabel={t('tours.methodLabel')}
+        options={SEATING_METHODS.map((value) => ({
+          value,
+          label: t(`tours.method.${value}`),
+        }))}
+        selectedKey={method}
+        onSelectionChange={setMethod}
+      />
+      {method === 'interval' && tableCount > 1 && (
+        <>
+          <p className="text-sm">{t('tours.step')}</p>
+          <ListStepper
+            label={t('tours.step')}
+            values={Array.from({ length: tableCount }, (_, i) => i + 1)}
+            value={step ?? tableCount}
+            onChange={setStep}
+          />
+        </>
+      )}
+    </>
+  );
+
   const generate = () =>
     runGenerate(async () => {
-      if (await generateTour(eventId, 'random')) {
+      if (
+        await generateTour(
+          eventId,
+          method,
+          method === 'interval' && step != null && step !== tableCount
+            ? step
+            : undefined
+        )
+      ) {
         showToast({
           title: t('tours.generated', { n: state.next }),
           variant: 'success',
@@ -115,15 +166,36 @@ export default function ToursCard({
               })
             : t('tours.title')}
         </h2>
+        {current && current.status !== 'finished' && (
+          <div className="text-sm">
+            <p>
+              {current.seating_step
+                ? t('tours.methodWithStep', {
+                    method: t(`tours.method.${current.seating}`),
+                    step: current.seating_step,
+                  })
+                : t('tours.methodUsed', {
+                    method: t(`tours.method.${current.seating}`),
+                  })}
+            </p>
+            <p className={state.repeats > 0 ? 'text-warning' : 'text-muted'}>
+              {state.repeats > 0
+                ? t('tours.repeatsSummary', {
+                    count: state.repeats,
+                    maxMet: state.max_met,
+                    players: state.players_with_repeats,
+                  })
+                : t('tours.noRepeats')}
+            </p>
+          </div>
+        )}
 
         {canRun && state.next > 0 && !isDraft && (
           <>
+            {blocker == null && methodPicker}
             <p className="text-sm text-muted">
               {blocker ??
-                t('tours.generateHint', {
-                  n: state.next,
-                  players: state.active,
-                })}
+                t(`tours.methodHint.${method}`, { players: state.active })}
             </p>
             <PendingButton
               variant="primary"
@@ -140,6 +212,7 @@ export default function ToursCard({
         {canRun && isDraft && (
           <>
             <p className="text-sm text-muted">{t('tours.draftHint')}</p>
+            {methodPicker}
             <PendingButton
               variant="primary"
               isPending={isActing}
@@ -224,8 +297,19 @@ export default function ToursCard({
           <ul aria-label={t('tours.tables')} className="flex flex-col gap-3">
             {state.tables.map((table) => (
               <li key={table.table} className="rounded-xl bg-default/50 p-2">
-                <p className="mb-1 flex justify-between text-sm font-medium">
-                  {t('tours.table', { n: table.table })}
+                <p className="mb-1 flex justify-between gap-2 text-sm font-medium">
+                  <span>
+                    {t('tours.table', { n: table.table })}
+                    {table.places && (
+                      <span className="font-normal text-muted">
+                        {' · '}
+                        {t('tours.places', {
+                          from: table.places.from,
+                          to: table.places.to,
+                        })}
+                      </span>
+                    )}
+                  </span>
                   {isLive && (
                     <span className="font-normal text-muted">
                       {t(`tours.tableStatus.${table.status}`)}
@@ -259,6 +343,21 @@ export default function ToursCard({
                     </li>
                   ))}
                 </ul>
+                {table.repeats > 0 && (
+                  <p className="mt-1 text-sm text-warning">
+                    {t('tours.metBefore', {
+                      pairs: table.repeat_pairs
+                        .map((pair) =>
+                          t('tours.pair', {
+                            a: seatName(table, pair.a),
+                            b: seatName(table, pair.b),
+                            count: pair.met,
+                          })
+                        )
+                        .join(', '),
+                    })}
+                  </p>
+                )}
               </li>
             ))}
           </ul>

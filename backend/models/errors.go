@@ -142,7 +142,8 @@ var (
 	ErrInvalidExtraMinutes = errors.New("invalid extra minutes")
 	// ErrTourNotFound means there is no such tour, or not in that state.
 	ErrTourNotFound = errors.New("tour not found")
-	// ErrInvalidSeating means a seating method isn't one of the known ones.
+	// ErrInvalidSeating means a seating method isn't one of the known ones,
+	// or an interval step is out of range.
 	ErrInvalidSeating = errors.New("invalid seating method")
 	// ErrNotTournament means the action is for tournaments only.
 	ErrNotTournament = errors.New("not a tournament")
