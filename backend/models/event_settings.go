@@ -14,7 +14,17 @@ type EventSettings struct {
 	// AbortGame is who may abort a live game (it doesn't count):
 	// AbortByReferees, AbortBySeatedBeforeFirstRound or AbortBySeated.
 	AbortGame string `json:"abort_game"`
+	// MinRatingGames is how many ended games a player needs for a place in
+	// the rating; players with fewer are listed below it without a place.
+	// 1 lists everyone who has played.
+	MinRatingGames int `json:"min_rating_games"`
 }
+
+// Limits of MinRatingGames (the frontend mirrors them).
+const (
+	MinMinRatingGames = 1
+	MaxMinRatingGames = 100
+)
 
 // Who may finish a game early. Referees always may.
 const (
@@ -42,9 +52,14 @@ var (
 
 // DefaultEventSettings returns the settings events start with: seated
 // players and referees finish games, referees abort them, and the seated
-// players too before the first round.
+// players too before the first round; everyone who has played is in the
+// rating.
 func DefaultEventSettings() EventSettings {
-	return EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeatedBeforeFirstRound}
+	return EventSettings{
+		FinishGame:     FinishBySeated,
+		AbortGame:      AbortBySeatedBeforeFirstRound,
+		MinRatingGames: MinMinRatingGames,
+	}
 }
 
 // Validate returns an error wrapping ErrInvalidEventSettings if a value is
@@ -58,6 +73,11 @@ func (s EventSettings) Validate() error {
 	if !slices.Contains(ValidAbortGame, s.AbortGame) {
 		return fmt.Errorf("%w: abort_game should be one of %v, got %q",
 			ErrInvalidEventSettings, ValidAbortGame, s.AbortGame)
+	}
+
+	if s.MinRatingGames < MinMinRatingGames || s.MinRatingGames > MaxMinRatingGames {
+		return fmt.Errorf("%w: min_rating_games should be %d to %d, got %d",
+			ErrInvalidEventSettings, MinMinRatingGames, MaxMinRatingGames, s.MinRatingGames)
 	}
 
 	return nil

@@ -13,7 +13,7 @@ import (
 )
 
 func TestUpdateSettings(t *testing.T) {
-	referees := models.EventSettings{FinishGame: models.FinishByReferees, AbortGame: models.AbortByReferees}
+	referees := models.EventSettings{FinishGame: models.FinishByReferees, AbortGame: models.AbortByReferees, MinRatingGames: 3}
 
 	t.Run("saved", func(t *testing.T) {
 		repo := NewMockEventRepo(t)
