@@ -2,10 +2,13 @@
 // Unlike the game rules they can change at any time.
 export type FinishGameBy = 'seated' | 'referees';
 export type AbortGameBy = 'referees' | 'seated_before_first_round' | 'seated';
+// UndoRoundBy 'seated': the seated players undo while the game is live.
+export type UndoRoundBy = 'referees' | 'seated';
 
 export type EventSettings = {
   finish_game: FinishGameBy;
   abort_game: AbortGameBy;
+  undo_round: UndoRoundBy;
   // min_rating_games: ended games a player needs for a place in the rating;
   // players with fewer are listed below it. 1 lists everyone.
   min_rating_games: number;
@@ -18,6 +21,7 @@ export const MAX_MIN_RATING_GAMES = 100;
 // The options in the order the form shows them, from referees only to the
 // most open; referees always may.
 export const FINISH_GAME_OPTIONS: FinishGameBy[] = ['referees', 'seated'];
+export const UNDO_ROUND_OPTIONS: UndoRoundBy[] = ['referees', 'seated'];
 export const ABORT_GAME_OPTIONS: AbortGameBy[] = [
   'referees',
   'seated_before_first_round',
@@ -27,6 +31,7 @@ export const ABORT_GAME_OPTIONS: AbortGameBy[] = [
 export const DEFAULT_EVENT_SETTINGS: EventSettings = {
   finish_game: 'seated',
   abort_game: 'seated_before_first_round',
+  undo_round: 'referees',
   min_rating_games: 1,
 };
 
@@ -34,6 +39,7 @@ export function sameSettings(a: EventSettings, b: EventSettings): boolean {
   return (
     a.finish_game === b.finish_game &&
     a.abort_game === b.abort_game &&
+    a.undo_round === b.undo_round &&
     a.min_rating_games === b.min_rating_games
   );
 }

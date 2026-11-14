@@ -270,7 +270,8 @@ const en = {
       'The event is finished: its settings can no longer change.',
     permissions: 'Permissions',
     hint: 'Can change at any time.',
-    permissionsHint: 'Referees can always finish and abort games.',
+    permissionsHint:
+      'Referees can always finish and abort games and undo the last round.',
     finishGame: 'Finish a game early',
     finish: {
       referees: 'Referees only',
@@ -283,6 +284,12 @@ const en = {
         'Also players at the table, before the first round',
       seated: 'Also players at the table, at any time',
     },
+    undoRound: 'Undo the last round',
+    undo: {
+      referees: 'Referees only',
+      seated: 'Also players at the table, while the game is live',
+    },
+    undoBySeated: 'players undo rounds',
     rating: 'Rating',
     ratingHint:
       'Players with fewer ended games are listed below the rating, without a place.',

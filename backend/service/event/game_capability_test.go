@@ -93,6 +93,21 @@ func TestGameCapabilities(t *testing.T) {
 			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeated},
 			wantNot:  []models.Capability{models.CapAbortGame, models.CapFinishGame},
 		},
+		"settings, undo by seated: a seated player undoes in a live game": {
+			event: models.EventRegular, roles: player, seated: true, game: live(3),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeatedBeforeFirstRound, UndoRound: models.UndoBySeated},
+			want:     []models.Capability{models.CapUndoRound, models.CapEnterRound},
+		},
+		"settings, undo by seated: not after the game has ended": {
+			event: models.EventRegular, roles: player, seated: true, game: ended(10 * time.Minute),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeatedBeforeFirstRound, UndoRound: models.UndoBySeated},
+			wantNot:  []models.Capability{models.CapUndoRound},
+		},
+		"settings, undo by seated: not a player at another table": {
+			event: models.EventRegular, roles: player, game: live(3),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeatedBeforeFirstRound, UndoRound: models.UndoBySeated},
+			wantNot:  []models.Capability{models.CapUndoRound},
+		},
 		"no game: none of the game capabilities": {
 			event: models.EventRegular, roles: referee,
 			wantNot: []models.Capability{models.CapViewGame, models.CapUndoRound, models.CapAbortGame, models.CapFinishGame, models.CapEnterRound},

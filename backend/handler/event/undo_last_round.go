@@ -9,7 +9,6 @@ import (
 
 	"github.com/importandrew/MaCRa/handler/httperr"
 	"github.com/importandrew/MaCRa/handler/reqctx"
-	"github.com/importandrew/MaCRa/models"
 )
 
 func (h Handler) UndoLastRound(c *gin.Context) {
@@ -17,12 +16,7 @@ func (h Handler) UndoLastRound(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
 	gameID := reqctx.GetGameID(c)
 
-	if err := h.event.HasCapability(c.Request.Context(), eventID, callerID, gameID, models.CapUndoRound); err != nil {
-		httperr.Error(c, err)
-		return
-	}
-
-	// log_size is the number of round log entries the referee saw; the undo
+	// log_size is the number of round log entries the caller saw; the undo
 	// is refused if the log has changed since (see repo UndoLastRound).
 	logSize, err := strconv.Atoi(c.Query("log_size"))
 	if err != nil || logSize < 0 {
@@ -30,7 +24,9 @@ func (h Handler) UndoLastRound(c *gin.Context) {
 		return
 	}
 
-	err = h.event.UndoLastRound(c.Request.Context(), gameID, logSize)
+	// UndoLastRound checks the capability itself: a seated player's undo must
+	// not revive a game that has ended since, which it checks in the undo.
+	err = h.event.UndoLastRound(c.Request.Context(), eventID, callerID, gameID, logSize)
 	if err != nil {
 		httperr.Error(c, err)
 		return

@@ -72,7 +72,6 @@ func TestHandler_UndoLastRound_requiresLogSize(t *testing.T) {
 	for name, query := range map[string]string{"missing": "", "not a number": "?log_size=x", "negative": "?log_size=-1"} {
 		t.Run(name, func(t *testing.T) {
 			eventSvc := NewMockEventService(t)
-			eventSvc.EXPECT().HasCapability(mock.Anything, 1, 1, 100, models.CapUndoRound).Return(nil)
 			handler := NewHandler(eventSvc, NewMockGameService(t))
 
 			w := httptest.NewRecorder()
@@ -92,8 +91,7 @@ func TestHandler_UndoLastRound_passesLogSize(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	eventSvc := NewMockEventService(t)
-	eventSvc.EXPECT().HasCapability(mock.Anything, 1, 1, 100, models.CapUndoRound).Return(nil)
-	eventSvc.EXPECT().UndoLastRound(mock.Anything, 100, 7).Return(models.ErrLogChanged)
+	eventSvc.EXPECT().UndoLastRound(mock.Anything, 1, 1, 100, 7).Return(models.ErrLogChanged)
 	handler := NewHandler(eventSvc, NewMockGameService(t))
 
 	w := httptest.NewRecorder()

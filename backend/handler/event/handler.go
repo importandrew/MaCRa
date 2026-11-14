@@ -29,7 +29,7 @@ type EventService interface {
 	NewGame(ctx context.Context, eventID int, playerIDs []int) (int, error)
 	MainGameInfo(ctx context.Context, eventID, userID int) (models.MainGameInfo, error)
 	AbortGame(ctx context.Context, eventID, callerID, gameID int) error
-	UndoLastRound(ctx context.Context, gameID, logSize int) error
+	UndoLastRound(ctx context.Context, eventID, callerID, gameID, logSize int) error
 }
 
 type Handler struct {

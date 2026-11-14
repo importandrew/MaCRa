@@ -10,6 +10,7 @@ import {
   MAX_MIN_RATING_GAMES,
   MIN_MIN_RATING_GAMES,
   sameSettings,
+  UNDO_ROUND_OPTIONS,
 } from '../../models/EventSettings';
 import ValueStepper from '../ValueStepper';
 import { updateEventSettings } from '../../providers/event/eventApi';
@@ -69,7 +70,7 @@ function SettingRadios<T extends string>({
 
 // EventSettingsCard is the card under the game rules in Manage → Settings:
 // the event's settings that don't affect the score, in sections with their
-// own headings (Permissions: who may finish or abort a game; Rating: the
+// own headings (Permissions: who may finish, abort or undo in a game; Rating: the
 // minimum games for a place). They can change at any time, except in a
 // finished event, and are saved together.
 export default function EventSettingsCard({
@@ -136,6 +137,14 @@ export default function EventSettingsCard({
                 onChange={(abort_game) => setDraft({ ...settings, abort_game })}
                 isDisabled={isFinished}
                 optionLabel={(option) => t(`eventSettings.abort.${option}`)}
+              />
+              <SettingRadios
+                label={t('eventSettings.undoRound')}
+                options={UNDO_ROUND_OPTIONS}
+                value={settings.undo_round}
+                onChange={(undo_round) => setDraft({ ...settings, undo_round })}
+                isDisabled={isFinished}
+                optionLabel={(option) => t(`eventSettings.undo.${option}`)}
               />
             </section>
             <section className="flex flex-col gap-4">

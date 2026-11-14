@@ -30,6 +30,9 @@ export function settingsDifferences(
   } else if (settings.abort_game === 'seated') {
     differences.push(t('eventSettings.abortBySeated'));
   }
+  if (settings.undo_round === 'seated') {
+    differences.push(t('eventSettings.undoBySeated'));
+  }
   if (settings.min_rating_games > 1) {
     differences.push(
       t('eventSettings.minRatingGamesValue', {

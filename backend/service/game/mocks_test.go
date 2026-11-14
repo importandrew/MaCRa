@@ -1052,7 +1052,7 @@ func (_c *MockGameRepo_Summary_Call) RunAndReturn(run func(ctx context.Context, 
 }
 
 // UndoLastRound provides a mock function for the type MockGameRepo
-func (_mock *MockGameRepo) UndoLastRound(ctx context.Context, gameID int, logSize int, endedAfter time.Time) error {
+func (_mock *MockGameRepo) UndoLastRound(ctx context.Context, gameID int, logSize int, endedAfter *time.Time) error {
 	ret := _mock.Called(ctx, gameID, logSize, endedAfter)
 
 	if len(ret) == 0 {
@@ -1060,7 +1060,7 @@ func (_mock *MockGameRepo) UndoLastRound(ctx context.Context, gameID int, logSiz
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, time.Time) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, *time.Time) error); ok {
 		r0 = returnFunc(ctx, gameID, logSize, endedAfter)
 	} else {
 		r0 = ret.Error(0)
@@ -1077,12 +1077,12 @@ type MockGameRepo_UndoLastRound_Call struct {
 //   - ctx context.Context
 //   - gameID int
 //   - logSize int
-//   - endedAfter time.Time
+//   - endedAfter *time.Time
 func (_e *MockGameRepo_Expecter) UndoLastRound(ctx any, gameID any, logSize any, endedAfter any) *MockGameRepo_UndoLastRound_Call {
 	return &MockGameRepo_UndoLastRound_Call{Call: _e.mock.On("UndoLastRound", ctx, gameID, logSize, endedAfter)}
 }
 
-func (_c *MockGameRepo_UndoLastRound_Call) Run(run func(ctx context.Context, gameID int, logSize int, endedAfter time.Time)) *MockGameRepo_UndoLastRound_Call {
+func (_c *MockGameRepo_UndoLastRound_Call) Run(run func(ctx context.Context, gameID int, logSize int, endedAfter *time.Time)) *MockGameRepo_UndoLastRound_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1096,9 +1096,9 @@ func (_c *MockGameRepo_UndoLastRound_Call) Run(run func(ctx context.Context, gam
 		if args[2] != nil {
 			arg2 = args[2].(int)
 		}
-		var arg3 time.Time
+		var arg3 *time.Time
 		if args[3] != nil {
-			arg3 = args[3].(time.Time)
+			arg3 = args[3].(*time.Time)
 		}
 		run(
 			arg0,
@@ -1115,7 +1115,7 @@ func (_c *MockGameRepo_UndoLastRound_Call) Return(err error) *MockGameRepo_UndoL
 	return _c
 }
 
-func (_c *MockGameRepo_UndoLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int, logSize int, endedAfter time.Time) error) *MockGameRepo_UndoLastRound_Call {
+func (_c *MockGameRepo_UndoLastRound_Call) RunAndReturn(run func(ctx context.Context, gameID int, logSize int, endedAfter *time.Time) error) *MockGameRepo_UndoLastRound_Call {
 	_c.Call.Return(run)
 	return _c
 }
