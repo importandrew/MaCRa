@@ -90,6 +90,7 @@ func TestLoad(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
@@ -111,6 +112,7 @@ func TestLoad(t *testing.T) {
 
 func TestLoad_WithDifferentOutcomes(t *testing.T) {
 	mockGameRepo := NewMockGameRepo(t)
+	mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 	mockPlayerRepo := NewMockPlayerRepo(t)
 	service := NewService(mockGameRepo, mockPlayerRepo)
 
@@ -156,6 +158,7 @@ func TestLoad_WithDifferentOutcomes(t *testing.T) {
 
 func TestLoad_InvalidLogError(t *testing.T) {
 	mockGameRepo := NewMockGameRepo(t)
+	mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 	mockPlayerRepo := NewMockPlayerRepo(t)
 	service := NewService(mockGameRepo, mockPlayerRepo)
 
@@ -212,6 +215,7 @@ func TestLoad_ByGameRules(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockGameRepo.EXPECT().Players(mock.Anything, 100).Return(defaultStartingPlayers, nil)
 			mockGameRepo.EXPECT().Rules(mock.Anything, 100).Return(short, nil)
 			mockGameRepo.EXPECT().GameLog(mock.Anything, 100).Return(testCase.logs, nil)

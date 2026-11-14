@@ -3,6 +3,7 @@ package game
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 
@@ -19,11 +20,15 @@ func (r *Repo) Summary(ctx context.Context, gameID int) (models.GameSummary, err
 			g.status,
 			g.finished_at,
 			(SELECT count(*) FROM rounds WHERE game_id = g.id) AS log_size,
-			t.status AS tour_status
+			t.status AS tour_status,
+			COALESCE(t.status = 'live' AND e.tournament->>'time_up' = 'stop_now'
+				AND t.started_at + make_interval(mins => t.minutes + g.extra_minutes) < $2, false)
+				AS stopped_at_time
 		FROM games g
+		JOIN events e ON e.id = g.event_id
 		LEFT JOIN tours t ON t.id = g.tour_id
 		WHERE g.id = $1`,
-		gameID)
+		gameID, time.Now().UTC())
 	if err != nil {
 		return models.GameSummary{}, err
 	}
@@ -61,4 +66,31 @@ func (r *Repo) Abort(ctx context.Context, gameID int, onlyWithoutRounds bool) er
 		return models.ErrGameNotLive
 	}
 	return models.ErrGameHasRounds
+}
+
+// TimeLimit returns the time limit of a game of a started tournament tour:
+// when its time is up (the tour's start, plus its length, plus the time
+// added to the table) and the tournament's rule for then. It returns nil for
+// any other game.
+func (r *Repo) TimeLimit(ctx context.Context, gameID int) (*models.GameTimeLimit, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT t.started_at + make_interval(mins => t.minutes + g.extra_minutes) AS ends_at,
+			e.tournament->>'time_up' AS time_up,
+			(e.tournament->>'extra_hands')::int AS extra_hands
+		FROM games g
+		JOIN tours t ON t.id = g.tour_id
+		JOIN events e ON e.id = g.event_id
+		WHERE g.id = $1 AND t.started_at IS NOT NULL AND t.minutes IS NOT NULL`,
+		gameID)
+	if err != nil {
+		return nil, err
+	}
+	limit, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.GameTimeLimit])
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil //nolint:nilnil // no limit: not a started tournament game
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &limit, nil
 }

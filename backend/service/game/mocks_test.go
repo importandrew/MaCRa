@@ -1123,6 +1123,74 @@ func (_c *MockGameRepo_Summary_Call) RunAndReturn(run func(ctx context.Context, 
 	return _c
 }
 
+// TimeLimit provides a mock function for the type MockGameRepo
+func (_mock *MockGameRepo) TimeLimit(ctx context.Context, gameID int) (*models.GameTimeLimit, error) {
+	ret := _mock.Called(ctx, gameID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TimeLimit")
+	}
+
+	var r0 *models.GameTimeLimit
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (*models.GameTimeLimit, error)); ok {
+		return returnFunc(ctx, gameID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) *models.GameTimeLimit); ok {
+		r0 = returnFunc(ctx, gameID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.GameTimeLimit)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, gameID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameRepo_TimeLimit_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TimeLimit'
+type MockGameRepo_TimeLimit_Call struct {
+	*mock.Call
+}
+
+// TimeLimit is a helper method to define mock.On call
+//   - ctx context.Context
+//   - gameID int
+func (_e *MockGameRepo_Expecter) TimeLimit(ctx any, gameID any) *MockGameRepo_TimeLimit_Call {
+	return &MockGameRepo_TimeLimit_Call{Call: _e.mock.On("TimeLimit", ctx, gameID)}
+}
+
+func (_c *MockGameRepo_TimeLimit_Call) Run(run func(ctx context.Context, gameID int)) *MockGameRepo_TimeLimit_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameRepo_TimeLimit_Call) Return(gameTimeLimit *models.GameTimeLimit, err error) *MockGameRepo_TimeLimit_Call {
+	_c.Call.Return(gameTimeLimit, err)
+	return _c
+}
+
+func (_c *MockGameRepo_TimeLimit_Call) RunAndReturn(run func(ctx context.Context, gameID int) (*models.GameTimeLimit, error)) *MockGameRepo_TimeLimit_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // TourSeat provides a mock function for the type MockGameRepo
 func (_mock *MockGameRepo) TourSeat(ctx context.Context, gameID int) (*models.TourSeat, error) {
 	ret := _mock.Called(ctx, gameID)
@@ -1787,6 +1855,50 @@ func (_c *MockGameEngine_IsLive_Call) RunAndReturn(run func() bool) *MockGameEng
 	return _c
 }
 
+// LastHand provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) LastHand() int {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for LastHand")
+	}
+
+	var r0 int
+	if returnFunc, ok := ret.Get(0).(func() int); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	return r0
+}
+
+// MockGameEngine_LastHand_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LastHand'
+type MockGameEngine_LastHand_Call struct {
+	*mock.Call
+}
+
+// LastHand is a helper method to define mock.On call
+func (_e *MockGameEngine_Expecter) LastHand() *MockGameEngine_LastHand_Call {
+	return &MockGameEngine_LastHand_Call{Call: _e.mock.On("LastHand")}
+}
+
+func (_c *MockGameEngine_LastHand_Call) Run(run func()) *MockGameEngine_LastHand_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_LastHand_Call) Return(n int) *MockGameEngine_LastHand_Call {
+	_c.Call.Return(n)
+	return _c
+}
+
+func (_c *MockGameEngine_LastHand_Call) RunAndReturn(run func() int) *MockGameEngine_LastHand_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Left provides a mock function for the type MockGameEngine
 func (_mock *MockGameEngine) Left(id int) int {
 	ret := _mock.Called(id)
@@ -1835,6 +1947,46 @@ func (_c *MockGameEngine_Left_Call) Return(n int) *MockGameEngine_Left_Call {
 
 func (_c *MockGameEngine_Left_Call) RunAndReturn(run func(id int) int) *MockGameEngine_Left_Call {
 	_c.Call.Return(run)
+	return _c
+}
+
+// LimitHands provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) LimitHands(last int) {
+	_mock.Called(last)
+	return
+}
+
+// MockGameEngine_LimitHands_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LimitHands'
+type MockGameEngine_LimitHands_Call struct {
+	*mock.Call
+}
+
+// LimitHands is a helper method to define mock.On call
+//   - last int
+func (_e *MockGameEngine_Expecter) LimitHands(last any) *MockGameEngine_LimitHands_Call {
+	return &MockGameEngine_LimitHands_Call{Call: _e.mock.On("LimitHands", last)}
+}
+
+func (_c *MockGameEngine_LimitHands_Call) Run(run func(last int)) *MockGameEngine_LimitHands_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_LimitHands_Call) Return() *MockGameEngine_LimitHands_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockGameEngine_LimitHands_Call) RunAndReturn(run func(last int)) *MockGameEngine_LimitHands_Call {
+	_c.Run(run)
 	return _c
 }
 
@@ -2419,6 +2571,94 @@ func (_c *MockGameEngine_Status_Call) Return(gameStatus models.GameStatus) *Mock
 }
 
 func (_c *MockGameEngine_Status_Call) RunAndReturn(run func() models.GameStatus) *MockGameEngine_Status_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// StopAtTime provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) StopAtTime() error {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for StopAtTime")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func() error); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockGameEngine_StopAtTime_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StopAtTime'
+type MockGameEngine_StopAtTime_Call struct {
+	*mock.Call
+}
+
+// StopAtTime is a helper method to define mock.On call
+func (_e *MockGameEngine_Expecter) StopAtTime() *MockGameEngine_StopAtTime_Call {
+	return &MockGameEngine_StopAtTime_Call{Call: _e.mock.On("StopAtTime")}
+}
+
+func (_c *MockGameEngine_StopAtTime_Call) Run(run func()) *MockGameEngine_StopAtTime_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_StopAtTime_Call) Return(err error) *MockGameEngine_StopAtTime_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockGameEngine_StopAtTime_Call) RunAndReturn(run func() error) *MockGameEngine_StopAtTime_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// StoppedAtTime provides a mock function for the type MockGameEngine
+func (_mock *MockGameEngine) StoppedAtTime() bool {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for StoppedAtTime")
+	}
+
+	var r0 bool
+	if returnFunc, ok := ret.Get(0).(func() bool); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	return r0
+}
+
+// MockGameEngine_StoppedAtTime_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StoppedAtTime'
+type MockGameEngine_StoppedAtTime_Call struct {
+	*mock.Call
+}
+
+// StoppedAtTime is a helper method to define mock.On call
+func (_e *MockGameEngine_Expecter) StoppedAtTime() *MockGameEngine_StoppedAtTime_Call {
+	return &MockGameEngine_StoppedAtTime_Call{Call: _e.mock.On("StoppedAtTime")}
+}
+
+func (_c *MockGameEngine_StoppedAtTime_Call) Run(run func()) *MockGameEngine_StoppedAtTime_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockGameEngine_StoppedAtTime_Call) Return(b bool) *MockGameEngine_StoppedAtTime_Call {
+	_c.Call.Return(b)
+	return _c
+}
+
+func (_c *MockGameEngine_StoppedAtTime_Call) RunAndReturn(run func() bool) *MockGameEngine_StoppedAtTime_Call {
 	_c.Call.Return(run)
 	return _c
 }

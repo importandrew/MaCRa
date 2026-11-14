@@ -9,8 +9,11 @@ func (s *Service) Finish(ctx context.Context, gameID int) error {
 		return err
 	}
 
-	if err := game.End(); err != nil {
-		return err
+	// A game stopped at its tour's time has ended in the replay already.
+	if game.IsLive() {
+		if err := game.End(); err != nil {
+			return err
+		}
 	}
 
 	score := game.Score()

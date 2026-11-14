@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -205,4 +206,89 @@ func TestTourRun(t *testing.T) {
 		_, err = generateAndPublish(ctx, repo, eventID)
 		require.NoError(t, err, "tour 2 again")
 	})
+}
+
+func TestTourTimer(t *testing.T) {
+	db, err := database.NewTestDB()
+	require.NoError(t, err)
+	defer db.Close()
+
+	db.Test(t, "tour timer", func(t *testing.T) {
+		ctx := context.Background()
+		repo := NewRepo(db)
+		games := game.NewRepo(db)
+		eventID := createTestTournament(t, db)
+		require.NoError(t, repo.Draw(ctx, eventID))
+		_, err := generateAndPublish(ctx, repo, eventID)
+		require.NoError(t, err)
+		state, err := repo.TourState(ctx, eventID)
+		require.NoError(t, err)
+		gameID := state.Tables[0].GameID
+
+		limit, err := games.TimeLimit(ctx, gameID)
+		require.NoError(t, err)
+		assert.Nil(t, limit, "no time before the start")
+		assert.ErrorIs(t, repo.AddTime(ctx, eventID, gameID, 5), models.ErrTourNotFound, "no live tour")
+
+		require.NoError(t, repo.StartTour(ctx, eventID))
+		state, err = repo.TourState(ctx, eventID)
+		require.NoError(t, err)
+		require.NotNil(t, state.Current.Minutes)
+		assert.Equal(t, models.DefaultTourMinutes, *state.Current.Minutes, "the tour keeps its length")
+		limit, err = games.TimeLimit(ctx, gameID)
+		require.NoError(t, err)
+		require.NotNil(t, limit)
+		start := limit.EndsAt.Add(-models.DefaultTourMinutes * time.Minute)
+		assert.Equal(t, models.TimeUpFinishHand, limit.TimeUp)
+
+		require.NoError(t, repo.AddTime(ctx, eventID, gameID, 5))
+		limit, err = games.TimeLimit(ctx, gameID)
+		require.NoError(t, err)
+		assert.WithinDuration(t, start.Add((models.DefaultTourMinutes+5)*time.Minute), limit.EndsAt, time.Second)
+		state, err = repo.TourState(ctx, eventID)
+		require.NoError(t, err)
+		assert.Equal(t, 5, state.Tables[0].ExtraMinutes)
+
+		// The time-up rule is frozen once the tournament has started; the
+		// number of tours can't go below the tours started.
+		settings := models.DefaultTournamentSettings()
+		settings.TimeUp = models.TimeUpStopNow
+		assert.ErrorIs(t, repo.UpdateTournament(ctx, eventID, settings), models.ErrSettingFrozen)
+		settings = models.DefaultTournamentSettings()
+		settings.TourMinutes = 90
+		settings.Tours = 7
+		require.NoError(t, repo.UpdateTournament(ctx, eventID, settings), "length and more tours may change")
+
+		// A stopped game: the time is up with "the game ends at once".
+		conn, err := db.Acquire(ctx)
+		require.NoError(t, err)
+		defer conn.Release()
+		_, err = conn.Exec(ctx, `UPDATE tours SET started_at = now() - interval '3 hours' WHERE event_id = $1`, eventID)
+		require.NoError(t, err)
+		summary, err := games.Summary(ctx, gameID)
+		require.NoError(t, err)
+		assert.False(t, summary.StoppedAtTime, "time is up, but the rule finishes the hand")
+		_, err = conn.Exec(ctx, `UPDATE events SET tournament = tournament || '{"time_up": "stop_now"}' WHERE id = $1`, eventID)
+		require.NoError(t, err)
+		summary, err = games.Summary(ctx, gameID)
+		require.NoError(t, err)
+		assert.True(t, summary.StoppedAtTime)
+	})
+}
+
+func TestCheckFrozen(t *testing.T) {
+	old := models.DefaultTournamentSettings() // 5 tours
+	more := old
+	more.Tours = 6
+	fewer := old
+	fewer.Tours = 3
+	rule := old
+	rule.TimeUp, rule.ExtraHands = models.TimeUpExtraHands, 1
+
+	assert.NoError(t, checkFrozen(old, rule, false, 0), "before the start everything may change")
+	assert.ErrorIs(t, checkFrozen(old, rule, true, 1), models.ErrSettingFrozen)
+	assert.NoError(t, checkFrozen(old, fewer, true, 3), "down to the tours started")
+	assert.ErrorIs(t, checkFrozen(old, fewer, true, 4), models.ErrSettingFrozen, "below the tours started")
+	assert.ErrorIs(t, checkFrozen(old, more, true, 5), models.ErrSettingFrozen, "the last tour has started")
+	assert.NoError(t, checkFrozen(old, old, true, 5), "unchanged is fine")
 }

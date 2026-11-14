@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Card, useOverlayState } from '@heroui/react';
+import { Button, Card, useOverlayState } from '@heroui/react';
 import type { TourState } from '../../models/Tour';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
+  addTime,
   cancelTour,
   generateTour,
   tourAction,
@@ -10,6 +11,10 @@ import {
 import Confirm from '../Confirm';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
+import { getTimeFormatted } from '../../utils/date-tools';
+
+// EXTRA_MINUTES: the time a referee's tap adds to a table.
+const EXTRA_MINUTES = 5;
 
 // WIND_KANJI: the starting seats as the table shows them.
 const WIND_KANJI = { east: '東', south: '南', west: '西', north: '北' };
@@ -46,6 +51,26 @@ export default function ToursCard({
   const { isPending: isActing, run: runAct } = useSubmitOnce();
   const finishConfirm = useOverlayState();
   const abortConfirm = useOverlayState();
+
+  // tourEnds: when the live tour's time is up, before time added to a
+  // table.
+  const tourEnds =
+    isLive && current?.started_at && current.minutes
+      ? new Date(
+          new Date(current.started_at).getTime() + current.minutes * 60_000
+        ).toISOString()
+      : null;
+  const { run: runAddTime } = useSubmitOnce();
+  const addFive = (gameId: number, table: number) =>
+    runAddTime(async () => {
+      if (await addTime(eventId, gameId, EXTRA_MINUTES)) {
+        showToast({
+          title: t('tours.timeAdded', { n: EXTRA_MINUTES, table }),
+          variant: 'success',
+        });
+      }
+      await onChanged();
+    });
 
   const act = (action: 'publish' | 'start' | 'finish' | 'abort') =>
     runAct(async () => {
@@ -173,6 +198,11 @@ export default function ToursCard({
 
         {canRun && isLive && (
           <>
+            {tourEnds && (
+              <p className="text-sm">
+                {t('tours.endsAt', { time: getTimeFormatted(tourEnds) })}
+              </p>
+            )}
             <p className="text-sm text-muted">
               {playing > 0
                 ? t('tours.playing', { count: playing })
@@ -207,9 +237,21 @@ export default function ToursCard({
                   {isLive && (
                     <span className="font-normal text-muted">
                       {t(`tours.tableStatus.${table.status}`)}
+                      {table.extra_minutes > 0 &&
+                        ` · ${t('tours.extra', { n: table.extra_minutes })}`}
                     </span>
                   )}
                 </p>
+                {canRun && isLive && table.status === 'live' && (
+                  <Button
+                    size="sm"
+                    variant="tertiary"
+                    className="float-end"
+                    onPress={() => addFive(table.game_id, table.table)}
+                  >
+                    {t('tours.addTime', { n: EXTRA_MINUTES })}
+                  </Button>
+                )}
                 <ul>
                   {table.seats.map((seat) => (
                     <li key={seat.user_id} className="flex items-center gap-2">

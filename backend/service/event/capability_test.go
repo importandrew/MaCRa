@@ -373,3 +373,26 @@ func TestCanUndoInGame_tournament(t *testing.T) {
 		})
 	}
 }
+
+func TestCanFinishGame_tournament(t *testing.T) {
+	tournament := testEvent(models.EventTournament)
+	live := models.TourLive
+	for name, testCase := range map[string]struct {
+		stopped bool
+		seated  bool
+		roles   []models.EventRole
+		want    bool
+	}{
+		"seated, time not up":     {seated: true, roles: []models.EventRole{models.EventPlayer}},
+		"seated, stopped at time": {stopped: true, seated: true, roles: []models.EventRole{models.EventPlayer}, want: true},
+		"referee, stopped":        {stopped: true, roles: []models.EventRole{models.EventReferee}, want: true},
+		"another player, stopped": {stopped: true, roles: []models.EventRole{models.EventPlayer}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			authCtx := eventAuthContext(tournament, 5, testCase.roles)
+			authCtx.IsSeatedInGame = testCase.seated
+			authCtx.Game = &models.GameSummary{Status: models.GameLive, TourStatus: &live, StoppedAtTime: testCase.stopped}
+			assert.Equal(t, testCase.want, authCtx.canFinishGame())
+		})
+	}
+}

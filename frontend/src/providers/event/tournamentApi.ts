@@ -3,6 +3,7 @@ import {
   GetRequest,
   PostRequest,
   authFetch,
+  eventGamePath,
   eventPath,
   fetchWithStatus,
 } from '../../components/Request';
@@ -87,6 +88,18 @@ export async function tourAction(
 ): Promise<boolean> {
   const result = await authFetch<null>(
     PostRequest(eventPath(eventId, `/tours/current/${action}`))
+  );
+  return result !== null;
+}
+
+// addTime adds minutes to a table of the live tour.
+export async function addTime(
+  eventId: number,
+  gameId: number,
+  minutes: number
+): Promise<boolean> {
+  const result = await authFetch<null>(
+    PostRequest(eventGamePath(eventId, gameId, '/time'), { minutes })
   );
   return result !== null;
 }

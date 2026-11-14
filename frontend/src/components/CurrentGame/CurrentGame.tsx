@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import TourTimer from '../TourTimer';
 import { Button } from '@heroui/react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -169,6 +170,9 @@ export default function CurrentGame() {
                   </div>
                 ) : (
                   <>
+                    {roundData.timer && !isEntryOpen && (
+                      <TourTimer timer={roundData.timer} />
+                    )}
                     <Button
                       size="lg"
                       variant="secondary"

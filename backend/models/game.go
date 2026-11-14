@@ -24,6 +24,8 @@ type GameNow struct {
 	Log GameLog `json:"log"`
 	// Tour is the tour and table of a tournament game; nil otherwise.
 	Tour *TourSeat `json:"tour,omitempty"`
+	// Timer is the tour's timer of a started tournament game; nil otherwise.
+	Timer *GameTimer `json:"timer,omitempty"`
 }
 
 type Round struct {
@@ -71,6 +73,8 @@ type GameView struct {
 
 	// Log is the round log of the same state, as in GameNow.
 	Log GameLog `json:"log"`
+	// Timer is the tour's timer of a started tournament game; nil otherwise.
+	Timer *GameTimer `json:"timer,omitempty"`
 }
 
 type MainGameInfo struct {
@@ -116,6 +120,9 @@ type GameSummary struct {
 	// TourStatus is the status of a tournament game's tour; nil for a game
 	// of a regular event.
 	TourStatus *TourStatus `db:"tour_status"`
+	// StoppedAtTime: a tournament game whose time is up with the rule "the
+	// game ends at once": it is to be finished.
+	StoppedAtTime bool `db:"stopped_at_time"`
 }
 
 // GameMe is the caller's capabilities for one game

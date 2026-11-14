@@ -93,3 +93,12 @@ func (s *Service) FinishTour(ctx context.Context, eventID int) error {
 func (s *Service) AbortTour(ctx context.Context, eventID int) error {
 	return s.repo.AbortTour(ctx, eventID)
 }
+
+// AddTime adds minutes to a table of the live tour (a referee's action).
+func (s *Service) AddTime(ctx context.Context, eventID, gameID, minutes int) error {
+	if minutes < models.MinExtraMinutes || minutes > models.MaxExtraMinutes {
+		return fmt.Errorf("%w: %d minutes, should be %d to %d",
+			models.ErrInvalidExtraMinutes, minutes, models.MinExtraMinutes, models.MaxExtraMinutes)
+	}
+	return s.repo.AddTime(ctx, eventID, gameID, minutes)
+}

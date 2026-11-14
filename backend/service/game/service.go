@@ -19,6 +19,7 @@ type GameRepo interface {
 	UndoneEntries(ctx context.Context, gameID int) ([]models.UndoneEntry, error)
 	SeatedGame(ctx context.Context, playerID, eventID int) (int, error)
 	TourSeat(ctx context.Context, gameID int) (*models.TourSeat, error)
+	TimeLimit(ctx context.Context, gameID int) (*models.GameTimeLimit, error)
 	NewGame(ctx context.Context, seating [4]int, eventID int) (int, error)
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)
 	GameResults(ctx context.Context, gameIDs []int) (map[int]models.GameResult, error)
@@ -58,6 +59,11 @@ type GameEngine interface {
 	Players() [4]int
 
 	PlayerBySeatInRound(round int, seat models.Wind) int
+
+	LastHand() int
+	LimitHands(last int)
+	StopAtTime() error
+	StoppedAtTime() bool
 }
 
 type Service struct {

@@ -39,9 +39,16 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 		return models.GameView{}, err
 	}
 
+	limit, err := s.gameRepo.TimeLimit(ctx, game.ID())
+	if err != nil {
+		return models.GameView{}, err
+	}
+
 	view := models.GameView{
-		ID:      game.ID(),
-		Status:  game.Status(),
+		ID: game.ID(),
+		// LiveGame loaded a live game: one stopped at its tour's time has
+		// ended in the replay but stays live until it is finished.
+		Status:  models.GameLive,
 		LogSize: game.LogSize(),
 		Rules:   game.Rules(),
 		Round: models.Round{
@@ -50,6 +57,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 		},
 		PlayerScores: playerScores,
 		Log:          gameLog(game, log, undone, names),
+		Timer:        gameTimer(game, limit),
 	}
 
 	return view, nil

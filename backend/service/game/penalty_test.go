@@ -206,6 +206,7 @@ func TestPenalty(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockGameRepo.EXPECT().UndoneEntries(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
@@ -240,6 +241,7 @@ func TestPenalty(t *testing.T) {
 // checked against it.
 func TestPenalty_ReplaysOldAmounts(t *testing.T) {
 	mockGameRepo := NewMockGameRepo(t)
+	mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 	expectLoadGame(mockGameRepo, 100, []models.RoundLog{
 		{ID: 1, Round: 1, EventSequence: 1, Outcome: models.Penalty, Loser: 1, Value: 15, CreatedAt: time.Now()},
 	})
@@ -253,6 +255,7 @@ func TestPenalty_ReplaysOldAmounts(t *testing.T) {
 func TestPenaltyInGame(t *testing.T) {
 	t.Run("returns the live view", func(t *testing.T) {
 		mockGameRepo := NewMockGameRepo(t)
+		mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockGameRepo.EXPECT().UndoneEntries(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockPlayerRepo := NewMockPlayerRepo(t)
 		expectLiveGame(mockGameRepo, 100, nil)
@@ -274,6 +277,7 @@ func TestPenaltyInGame(t *testing.T) {
 
 	t.Run("game not live", func(t *testing.T) {
 		mockGameRepo := NewMockGameRepo(t)
+		mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockGameRepo.EXPECT().Status(mock.Anything, 100).Return(models.GameEnded, nil)
 
 		_, err := NewService(mockGameRepo, NewMockPlayerRepo(t)).

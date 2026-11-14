@@ -1388,6 +1388,75 @@ func (_c *MockEventService_AddMemberRoles_Call) RunAndReturn(run func(ctx contex
 	return _c
 }
 
+// AddTime provides a mock function for the type MockEventService
+func (_mock *MockEventService) AddTime(ctx context.Context, eventID int, gameID int, minutes int) error {
+	ret := _mock.Called(ctx, eventID, gameID, minutes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AddTime")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, int) error); ok {
+		r0 = returnFunc(ctx, eventID, gameID, minutes)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventService_AddTime_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddTime'
+type MockEventService_AddTime_Call struct {
+	*mock.Call
+}
+
+// AddTime is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - gameID int
+//   - minutes int
+func (_e *MockEventService_Expecter) AddTime(ctx any, eventID any, gameID any, minutes any) *MockEventService_AddTime_Call {
+	return &MockEventService_AddTime_Call{Call: _e.mock.On("AddTime", ctx, eventID, gameID, minutes)}
+}
+
+func (_c *MockEventService_AddTime_Call) Run(run func(ctx context.Context, eventID int, gameID int, minutes int)) *MockEventService_AddTime_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		var arg3 int
+		if args[3] != nil {
+			arg3 = args[3].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventService_AddTime_Call) Return(err error) *MockEventService_AddTime_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventService_AddTime_Call) RunAndReturn(run func(ctx context.Context, eventID int, gameID int, minutes int) error) *MockEventService_AddTime_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CanAccess provides a mock function for the type MockEventService
 func (_mock *MockEventService) CanAccess(ctx context.Context, eventID int, userID int) error {
 	ret := _mock.Called(ctx, eventID, userID)

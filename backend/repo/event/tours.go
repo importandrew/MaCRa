@@ -67,7 +67,7 @@ func (r *Repo) insertDraftTour(ctx context.Context, eventID, number int, method 
 	rows, err := r.db.Query(ctx, `
 		INSERT INTO tours (event_id, number, status, seating)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, number, status, seating, published_at, started_at, finished_at`,
+		RETURNING id, number, status, seating, published_at, minutes, started_at, finished_at`,
 		eventID, number, models.TourDraft, method)
 	if err != nil {
 		return models.Tour{}, fmt.Errorf("insert tour: %w", err)
@@ -223,7 +223,7 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 	state := models.TourState{Tables: []models.TourTable{}}
 	err := r.InTx(ctx, func(tx *Repo) error {
 		rows, err := tx.db.Query(ctx, `
-			SELECT id, number, status, seating, published_at, started_at, finished_at
+			SELECT id, number, status, seating, published_at, minutes, started_at, finished_at
 			FROM tours WHERE event_id = $1 AND status <> $2
 			ORDER BY number DESC LIMIT 1`,
 			eventID, models.TourAborted)
@@ -269,7 +269,7 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 // tourTables returns a tour's tables, each with its seats east to north.
 func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT g.table_number, g.id AS game_id, g.status, gp.player_id, u.name,
+		SELECT g.table_number, g.id AS game_id, g.status, g.extra_minutes, gp.player_id, u.name,
 			COALESCE(tp.number, 0) AS number, gp.starting_wind
 		FROM games g
 		JOIN game_players gp ON gp.game_id = g.id
@@ -284,13 +284,14 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 	}
 
 	type seatRow struct {
-		Table  int               `db:"table_number"`
-		GameID int               `db:"game_id"`
-		Status models.GameStatus `db:"status"`
-		UserID int               `db:"player_id"`
-		Name   string            `db:"name"`
-		Number int               `db:"number"`
-		Wind   string            `db:"starting_wind"`
+		Table        int               `db:"table_number"`
+		GameID       int               `db:"game_id"`
+		Status       models.GameStatus `db:"status"`
+		ExtraMinutes int               `db:"extra_minutes"`
+		UserID       int               `db:"player_id"`
+		Name         string            `db:"name"`
+		Number       int               `db:"number"`
+		Wind         string            `db:"starting_wind"`
 	}
 	seats, err := pgx.CollectRows(rows, pgx.RowToStructByName[seatRow])
 	if err != nil {
@@ -300,7 +301,7 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 	tables := []models.TourTable{}
 	for _, s := range seats {
 		if len(tables) == 0 || tables[len(tables)-1].Table != s.Table {
-			tables = append(tables, models.TourTable{Table: s.Table, GameID: s.GameID, Status: s.Status})
+			tables = append(tables, models.TourTable{Table: s.Table, GameID: s.GameID, Status: s.Status, ExtraMinutes: s.ExtraMinutes})
 		}
 		last := &tables[len(tables)-1]
 		last.Seats = append(last.Seats, models.Seat{UserID: s.UserID, Name: s.Name, Number: s.Number, Wind: s.Wind})
@@ -319,9 +320,13 @@ func (r *Repo) StartTour(ctx context.Context, eventID int) error {
 		}
 
 		now := time.Now().UTC()
+		// The tour keeps the length it starts with: a later change of the
+		// setting applies to the next tours.
 		if _, err := tx.db.Exec(ctx, `
-			UPDATE tours SET status = $1, started_at = $2 WHERE id = $3`,
-			models.TourLive, now, tourID); err != nil {
+			UPDATE tours SET status = $1, started_at = $2,
+				minutes = (SELECT (tournament->>'tour_minutes')::int FROM events WHERE id = $4)
+			WHERE id = $3`,
+			models.TourLive, now, tourID, eventID); err != nil {
 			return fmt.Errorf("start tour: %w", err)
 		}
 		if _, err := tx.db.Exec(ctx, `
@@ -416,4 +421,27 @@ func (r *Repo) lockTour(ctx context.Context, eventID int, status models.TourStat
 		return 0, models.ErrTourNotFound
 	}
 	return tourID, err
+}
+
+// AddTime adds minutes to a table of the live tour: the game's time is up
+// that much later. It refuses a game that isn't a live game of the live tour
+// (models.ErrTourNotFound).
+func (r *Repo) AddTime(ctx context.Context, eventID, gameID, minutes int) error {
+	return r.InTx(ctx, func(tx *Repo) error {
+		tourID, err := tx.lockTour(ctx, eventID, models.TourLive)
+		if err != nil {
+			return err
+		}
+		res, err := tx.db.Exec(ctx, `
+			UPDATE games SET extra_minutes = extra_minutes + $1
+			WHERE id = $2 AND tour_id = $3 AND status = $4`,
+			minutes, gameID, tourID, models.GameLive)
+		if err != nil {
+			return err
+		}
+		if res.RowsAffected() == 0 {
+			return fmt.Errorf("game %d: %w", gameID, models.ErrTourNotFound)
+		}
+		return nil
+	})
 }
