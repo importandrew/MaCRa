@@ -94,6 +94,12 @@ func (h *Handler) registerEventActions(event *gin.RouterGroup) {
 	event.GET("/invite", h.event.InviteToken)
 	event.POST("/invite", h.event.NewInviteToken)
 	event.DELETE("/invite", h.event.TurnOffInvite)
+	event.PUT("/joining", h.event.UpdateJoining)
+	event.GET("/requests", h.event.JoinRequests)
+	event.POST("/requests/:playerId/accept", middleware.RequirePlayer, h.event.AcceptJoinRequest)
+	event.POST("/requests/:playerId/decline", middleware.RequirePlayer, h.event.DeclineJoinRequest)
+	event.POST("/request", h.event.RequestToJoin)
+	event.DELETE("/request", h.event.WithdrawJoinRequest)
 
 	// user relative game block
 	{

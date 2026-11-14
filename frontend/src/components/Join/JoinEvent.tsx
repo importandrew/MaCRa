@@ -69,6 +69,8 @@ export default function JoinEvent() {
                       {t('invite.openEvent')}
                     </LinkButton>
                   </>
+                ) : invite.is_full ? (
+                  <p className="text-muted">{t('joinRequests.full')}</p>
                 ) : isAuthenticated ? (
                   <PendingButton
                     variant="primary"

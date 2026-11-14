@@ -38,11 +38,20 @@ func (s *Service) MyCapabilities(ctx context.Context, eventID, callerID int) (mo
 		return models.EventMe{}, err
 	}
 
-	return models.EventMe{
+	me := models.EventMe{
 		IsOwner:      authCtx.IsOwner,
 		Roles:        authCtx.Roles,
 		Capabilities: authCtx.allowed(models.EventCapabilities),
-	}, nil
+	}
+	if me.JoinRequest, err = s.joinRequestState(ctx, authCtx); err != nil {
+		return models.EventMe{}, err
+	}
+	if authCtx.hasCapability(models.CapManageMembers) && event.FinishedAt == nil {
+		if me.PendingRequests, err = s.repo.CountJoinRequests(ctx, eventID); err != nil {
+			return models.EventMe{}, err
+		}
+	}
+	return me, nil
 }
 
 // MyGameCapabilities returns the caller's capabilities for one game

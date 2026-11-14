@@ -22,8 +22,18 @@ func (r *Repo) AddMemberRoles(ctx context.Context, eventID, userID int, roles []
 	})
 }
 
-// insertRoles adds the roles the user doesn't hold yet.
+// insertRoles adds the roles the user doesn't hold yet. A member has no
+// pending request to join, so it deletes the user's one (a declined request
+// stays: the user still can't ask again after leaving).
 func (r *Repo) insertRoles(ctx context.Context, eventID, userID int, roles []models.EventRole) error {
+	if _, err := r.db.Exec(ctx, `
+		DELETE FROM event_join_requests
+		WHERE event_id = $1 AND user_id = $2 AND status = $3`,
+		eventID, userID, models.JoinRequestPending,
+	); err != nil {
+		return err
+	}
+
 	now := time.Now().UTC()
 	for _, role := range roles {
 		_, err := r.db.Exec(ctx, `

@@ -70,6 +70,22 @@ var (
 	// ErrInviteNotFound means the invite link is unknown or has been turned
 	// off or replaced.
 	ErrInviteNotFound = errors.New("invite not found")
+	// ErrRequestNotFound means the user has no pending request to join the
+	// event.
+	ErrRequestNotFound = errors.New("join request not found")
+	// ErrRequestsClosed means the event doesn't take requests to join: it is
+	// private, finished, or the owner hasn't switched requests on.
+	ErrRequestsClosed = errors.New("event doesn't take requests to join")
+	// ErrRequestDeclined means the owner declined the user's request to join;
+	// the user can't ask again.
+	ErrRequestDeclined = errors.New("join request declined")
+	// ErrAlreadyMember means the user is already a member of the event.
+	ErrAlreadyMember = errors.New("already a member of the event")
+	// ErrEventFull means the event has as many players as its player limit
+	// allows: no more by a request or the invite link.
+	ErrEventFull = errors.New("event is full")
+	// ErrInvalidPlayerLimit means a player limit isn't a positive number.
+	ErrInvalidPlayerLimit = errors.New("invalid player limit")
 	// ErrNotMember means the user isn't a member of the event.
 	ErrNotMember = errors.New("not a member of the event")
 	// ErrInvalidRole means a role isn't one of the member roles, or a member
@@ -138,6 +154,7 @@ var Errors = map[error]APIError{
 	ErrInvalidGameRules:         {http.StatusBadRequest, "invalid_game_rules"},
 	ErrInvalidRole:              {http.StatusBadRequest, "invalid_role"},
 	ErrInvalidEventSettings:     {http.StatusBadRequest, "invalid_event_settings"},
+	ErrInvalidPlayerLimit:       {http.StatusBadRequest, "invalid_player_limit"},
 	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
 
 	// 401
@@ -149,13 +166,14 @@ var Errors = map[error]APIError{
 	ErrEmailNotVerified: {http.StatusForbidden, "email_not_verified"},
 
 	// 404
-	ErrGameNotFound:   {http.StatusNotFound, "game_not_found"},
-	ErrPlayerNotFound: {http.StatusNotFound, "player_not_found"},
-	ErrGameNotLive:    {http.StatusNotFound, "game_not_live"},
-	ErrGameNotEnded:   {http.StatusNotFound, "game_not_ended"},
-	ErrEventNotFound:  {http.StatusNotFound, "event_not_found"},
-	ErrNotMember:      {http.StatusNotFound, "not_member"},
-	ErrInviteNotFound: {http.StatusNotFound, "invite_not_found"},
+	ErrGameNotFound:    {http.StatusNotFound, "game_not_found"},
+	ErrPlayerNotFound:  {http.StatusNotFound, "player_not_found"},
+	ErrGameNotLive:     {http.StatusNotFound, "game_not_live"},
+	ErrGameNotEnded:    {http.StatusNotFound, "game_not_ended"},
+	ErrEventNotFound:   {http.StatusNotFound, "event_not_found"},
+	ErrNotMember:       {http.StatusNotFound, "not_member"},
+	ErrInviteNotFound:  {http.StatusNotFound, "invite_not_found"},
+	ErrRequestNotFound: {http.StatusNotFound, "request_not_found"},
 
 	// 409
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},
@@ -167,6 +185,10 @@ var Errors = map[error]APIError{
 	ErrEventRulesFrozen:     {http.StatusConflict, "event_rules_frozen"},
 	ErrPlayerRoleInGame:     {http.StatusConflict, "player_role_in_game"},
 	ErrOwnerNotRemovable:    {http.StatusConflict, "owner_not_removable"},
+	ErrRequestsClosed:       {http.StatusConflict, "requests_closed"},
+	ErrRequestDeclined:      {http.StatusConflict, "request_declined"},
+	ErrAlreadyMember:        {http.StatusConflict, "already_member"},
+	ErrEventFull:            {http.StatusConflict, "event_full"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

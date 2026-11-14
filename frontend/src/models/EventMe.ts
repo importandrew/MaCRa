@@ -10,10 +10,20 @@ export type EventCapability =
   | 'watch_results'
   | 'view_ratings';
 
+// JoinRequestState is what the overview offers a non-member about joining by
+// a request: ask (a visitor signs in first), the pending request (it can be
+// withdrawn), a declined one, or no places left.
+export type JoinRequestState = 'available' | 'pending' | 'declined' | 'full';
+
 export type EventMe = {
   is_owner: boolean;
   roles: EventRole[];
   capabilities: EventCapability[];
+  // join_request is missing when the overview offers nothing about it.
+  join_request?: JoinRequestState;
+  // pending_requests: requests waiting for an answer, for whoever manages the
+  // members (missing when there are none).
+  pending_requests?: number;
 };
 
 // GameCapability is what the user may do with one game

@@ -16,6 +16,7 @@ import { MahjongTileIcon } from '../Icons/MahjongTileIcon';
 import { BookIcon } from '../Icons/BookIcon';
 import { UserIcon } from '../Icons/UserIcon';
 import { settingsDifferences, rulesDifferences } from './rulesText';
+import JoinRequestBox from './JoinRequestBox';
 
 const iconClass = 'w-6 h-6';
 
@@ -143,6 +144,8 @@ export default function EventOverview() {
         <p className="text-muted break-words">{event.description}</p>
       )}
 
+      <JoinRequestBox />
+
       <Separator />
 
       <dl className="flex flex-col gap-3 text-muted">
@@ -156,7 +159,14 @@ export default function EventOverview() {
           icon={<MahjongTileIcon className={iconClass} />}
           label={t('events.players')}
         >
-          {event.player_count ?? '—'}
+          {event.player_count == null
+            ? '—'
+            : event.player_limit == null
+              ? event.player_count
+              : t('events.playersOfLimit', {
+                  n: event.player_count,
+                  limit: event.player_limit,
+                })}
         </DetailRow>
         <DetailRow
           icon={<BookIcon className={iconClass} />}

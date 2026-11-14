@@ -90,7 +90,14 @@ export default function EventLayout() {
   const closeDrawer = () => setIsDrawerOpen(false);
 
   const menuItems = [
-    { label: t('events.manage'), path: '/manage', isAllowed: canManage },
+    {
+      // The owner sees how many requests to join wait for an answer.
+      label: me?.pending_requests
+        ? t('events.manageWithRequests', { n: me.pending_requests })
+        : t('events.manage'),
+      path: '/manage',
+      isAllowed: canManage,
+    },
     { label: t('events.rating'), path: '/rating', isAllowed: canRating },
     {
       label: t('events.liveGames'),

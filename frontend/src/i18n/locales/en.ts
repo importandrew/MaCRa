@@ -127,6 +127,12 @@ const en = {
     invalid_game_rules: 'The rules are invalid',
     event_rules_frozen:
       'The event already has games: its rules can no longer change.',
+    request_not_found: 'The request is gone: it was withdrawn or answered',
+    requests_closed: 'The event doesn’t take requests to join',
+    request_declined: 'Your request to join was declined',
+    already_member: 'You are already a member of this event',
+    event_full: 'The event has no places left',
+    invalid_player_limit: 'The player limit must be at least 1',
   },
   auth: {
     tabs: 'Authentication',
@@ -225,6 +231,7 @@ const en = {
     ratingsReach: 'Ratings',
     gamesReach: 'Live games & results',
     manage: 'Manage',
+    manageWithRequests: 'Manage ({{n}} requests)',
     manageTitle: 'Manage — {{name}}',
     manageSections: 'Manage event sections',
     overview: 'Overview',
@@ -245,6 +252,7 @@ const en = {
     finishedToast: 'Event finished',
     userNumber: 'User #{{id}}',
     players: 'Players',
+    playersOfLimit: '{{n}} / {{limit}}',
     referees: 'Referees',
     observers: 'Observers',
     createdAt: 'Created',
@@ -357,6 +365,38 @@ const en = {
     invalid: 'This invite link doesn’t work',
     invalidHint:
       'It may have been turned off or replaced. Ask the organizer for a new one.',
+  },
+  joinRequests: {
+    sectionWithCount: 'Requests to join [{{n}}]',
+    accept: 'Accept requests',
+    acceptHint:
+      'A signed-in user can ask to join on the event’s page; you accept or decline each request.',
+    privateHint:
+      'Requests work only while the event is public: make it public in Overview.',
+    limit: 'Limit players',
+    limitLabel: 'Most players',
+    limitHint:
+      'With a limit, a full event takes no requests and the invite link takes no new players. You can still add players by hand.',
+    save: 'Save',
+    saved: 'Saved',
+    pendingTitle: 'Pending requests',
+    loadFailed: 'Couldn’t load the requests.',
+    none: 'No requests',
+    acceptOne: 'Accept',
+    decline: 'Decline',
+    declineTitle: 'Decline the request',
+    declinePrompt:
+      'Decline {{name}}’s request? They won’t be able to ask again, but you can still invite or add them.',
+    accepted: '{{name}} is a player now',
+    declinedToast: '{{name}}’s request declined',
+    ask: 'Request to join',
+    signInToAsk: 'Sign in to request to join',
+    sent: 'Request sent',
+    pending: 'Your request to join is waiting for the organizer.',
+    withdraw: 'Withdraw the request',
+    withdrawn: 'Request withdrawn',
+    declined: 'Your request to join was declined.',
+    full: 'The event has no places left.',
   },
   members: {
     title: 'Members',

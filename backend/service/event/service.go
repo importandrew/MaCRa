@@ -31,6 +31,14 @@ type EventRepo interface {
 	SetInviteToken(ctx context.Context, eventID int, token *string) error
 	EventByInviteToken(ctx context.Context, token string) (models.Event, error)
 	JoinByInvite(ctx context.Context, token string, userID int) (int, error)
+	UpdateJoining(ctx context.Context, eventID int, settings models.JoiningSettings) error
+	JoinRequestStatus(ctx context.Context, eventID, userID int) (models.JoinRequestStatus, error)
+	CreateJoinRequest(ctx context.Context, eventID, userID int) error
+	WithdrawJoinRequest(ctx context.Context, eventID, userID int) error
+	ListJoinRequests(ctx context.Context, eventID int) ([]models.JoinRequest, error)
+	CountJoinRequests(ctx context.Context, eventID int) (int, error)
+	AcceptJoinRequest(ctx context.Context, eventID, userID int) error
+	DeclineJoinRequest(ctx context.Context, eventID, userID int) error
 	GetMemberRoles(ctx context.Context, eventID int, userID int) ([]models.EventRole, error)
 	ListMembers(ctx context.Context, eventID int) ([]models.EventMember, error)
 	CountPlayers(ctx context.Context, eventID int) (int, error)

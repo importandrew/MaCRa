@@ -25,6 +25,7 @@ import EventRulesForm from './EventRulesForm';
 import EventSettingsCard from './EventSettingsCard';
 import MemberRolesModal from './MemberRolesModal';
 import InviteLink from './InviteLink';
+import JoinRequests from './JoinRequests';
 import RoleCheckboxes from './RoleCheckboxes';
 import { ALL_ROLES, ROLE_ICONS } from './roles';
 import { type EventSettings, isValidSettings } from './eventSettings';
@@ -32,7 +33,7 @@ import { type EventSettings, isValidSettings } from './eventSettings';
 export default function EventManage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { eventId, event, hasCapability, refetch, canView } = useEventPage(
+  const { eventId, event, me, hasCapability, refetch, canView } = useEventPage(
     'manage_event',
     'manage_members'
   );
@@ -249,6 +250,20 @@ export default function EventManage() {
                     id: 'invite',
                     title: t('invite.section'),
                     content: () => <InviteLink eventId={eventId} />,
+                  },
+                  {
+                    id: 'requests',
+                    title: t('joinRequests.sectionWithCount', {
+                      n: me?.pending_requests ?? 0,
+                    }),
+                    content: () => (
+                      <JoinRequests
+                        event={event}
+                        onChanged={() =>
+                          Promise.all([refetchMembers(), refetch()])
+                        }
+                      />
+                    ),
                   },
                   {
                     id: 'add',
