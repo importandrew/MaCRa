@@ -49,6 +49,7 @@ type EventRepo interface {
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)
 	ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit, offset int) ([]models.EventGameItemRow, error)
 	ListEndedPlayerResults(ctx context.Context, eventID int) ([]models.EventPlayerResultRow, error)
+	PlayerStats(ctx context.Context, eventID, playerID int) (models.PlayerStats, error)
 }
 
 func NewService(repo EventRepo, playerRepo PlayerRepo, gameService *game.Service) *Service {

@@ -171,21 +171,22 @@ Applies to regular events; tournament games follow area 8.
 
 ### Event rating
 
-- A table of players: place, name, games, TP, GP; sortable by any column. A long name is cut with an ellipsis so rows keep one height; the full name shows on hover and on a tap. The table never scrolls sideways, also at 320 px. Only ended games count (not live or aborted ones). Members who left or were removed stay in it.
+- A table of players: place, name, games, TP, GP; sortable by any column. A long name is cut with an ellipsis so rows keep one height; the full name shows on hover and on the player's statistics, which a tap opens. The table never scrolls sideways, also at 320 px. Only ended games count (not live or aborted ones). Members who left or were removed stay in it.
 - Order: total TP, then total GP, then the best single games by GP. Players equal in all of that share the place (5, 5, then 7).
 - The user's own row is highlighted; when it is far down, it stays pinned at the bottom of the screen.
 - Players with fewer ended games than the event's minimum (event settings) get no place: in the same table, under a separator row "Fewer than N games", they follow the ranked players in grey, in the same order, with "—" for the place. Places count only the players above the minimum. Sorting by a column sorts each group on its own; the group without places stays under the separator. Members and staff also see there the event's players who haven't played yet (0 games, by name; the separator says "No games yet" when the minimum is 1), so players know who is in the event; others don't, as they don't get the member list.
-- Tapping a row opens that player's history in the event (for users who can see the event's results; one's own always).
+- Tapping a row (the name included) opens that player's statistics in the event (area 6, "Statistics"); their game history there is planned (for users who can see the event's results; one's own always).
 
 ### History
 
 - **History** (`/history`): the user's ended games in the selected event, newest first, 30 at a time with "Load more". On top, a summary for the event: number of games, total and average TP, how many times each place. Each game shows the place, TP, GP, date and the three opponents (exact look to be agreed on a mock-up first). One request returns a page of games with all of that.
 - **Across events** (planned): the user picks which of their events to include (events with different rules shouldn't be mixed blindly). Only one's own games: other players' games in events the viewer isn't part of aren't available.
 
-### Statistics (planned)
+### Statistics
 
-- **Player**: average / max / min TP and GP, hand values, number of wins (self-draw, deal-in), deal-ins, draws, points won and lost, and similar; for one event or a chosen set of the user's events.
-- **Event**: the same figures for the whole event.
+- **Player, in one event**: from the event's ended games. Per game: games, places 1st–4th (a tie in GP shares the better place), average TP and GP, best and worst game (GP). Per hand: hands played, wins (with self-draw and deal-in counts) and their share of the hands, average and biggest winning hand, deal-ins (the player dealt in to someone's win) and draws with their shares, penalties and false mahjongs.
+- **Where**: one's own on `/history`, tab "Statistics" next to "Games", for the selected event; anyone's from the event's rating: a tap on a player's row opens `/event/N/player/M` with their name and statistics. One's own statistics are always visible (while the user can open the event); other players' follow the event's ratings reach, as the rating does.
+- **Later**: the event's statistics as a whole (the same figures for all players, the biggest hand and who won it); a player's statistics over a chosen set of their events.
 
 ## 7. Landing and navigation
 
