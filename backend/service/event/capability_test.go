@@ -2,6 +2,7 @@ package event
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -350,6 +351,25 @@ func TestHasCapability_tournamentDesk(t *testing.T) {
 			authCtx := eventAuthContext(testCase.event, testCase.caller, testCase.roles)
 			assert.Equal(t, testCase.view, authCtx.hasCapability(models.CapViewTournament))
 			assert.Equal(t, testCase.run, authCtx.hasCapability(models.CapRunTournament))
+		})
+	}
+}
+
+func TestCanUndoInGame_tournament(t *testing.T) {
+	live, finished := models.TourLive, models.TourFinished
+	long := time.Now().Add(-24 * time.Hour)
+	for name, testCase := range map[string]struct {
+		game models.GameSummary
+		want bool
+	}{
+		"live game, live tour":        {models.GameSummary{Status: models.GameLive, TourStatus: &live}, true},
+		"ended long ago, live tour":   {models.GameSummary{Status: models.GameEnded, FinishedAt: &long, TourStatus: &live}, true},
+		"ended, tour finished":        {models.GameSummary{Status: models.GameEnded, FinishedAt: &long, TourStatus: &finished}, false},
+		"regular game ended long ago": {models.GameSummary{Status: models.GameEnded, FinishedAt: &long}, false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			authCtx := EventAuthContext{Game: &testCase.game, Now: time.Now()}
+			assert.Equal(t, testCase.want, authCtx.canUndoInGame())
 		})
 	}
 }

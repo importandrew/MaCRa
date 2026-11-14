@@ -49,8 +49,12 @@ type EventRepo interface {
 	ListParticipants(ctx context.Context, eventID int) (models.TournamentParticipants, error)
 	Draw(ctx context.Context, eventID int) error
 	Withdraw(ctx context.Context, eventID, userID int) error
-	PublishTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error)
+	GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error)
+	PublishTour(ctx context.Context, eventID int) error
 	CancelTour(ctx context.Context, eventID int) error
+	StartTour(ctx context.Context, eventID int) error
+	FinishTour(ctx context.Context, eventID int) error
+	AbortTour(ctx context.Context, eventID int) error
 	TourState(ctx context.Context, eventID int) (models.TourState, error)
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)

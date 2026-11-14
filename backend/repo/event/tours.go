@@ -11,15 +11,16 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// PublishTour publishes the next tour of a tournament: it creates the tour
-// and its games (status created), one per table that makeTables returns.
-// The event row is locked FOR UPDATE, so tours are published one at a time.
-// It refuses a regular or finished event, a tour still published or live
+// GenerateTour generates the next tour's seating as a draft, seen only by
+// the tournament's staff: it creates the tour and its games (status
+// created), one per table that makeTables returns, replacing an earlier
+// draft. The event row is locked FOR UPDATE, so tours are made one at a
+// time. It refuses a regular or finished event, a tour published or live
 // (models.ErrTourInProgress), all tours played (models.ErrAllToursPlayed),
 // numbers not drawn for the current players (models.ErrNotDrawn) and active
 // participants that don't fill whole tables (models.ErrTablesIncomplete,
 // with the number missing).
-func (r *Repo) PublishTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error) {
+func (r *Repo) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod, makeTables models.TablesFunc) (models.Tour, error) {
 	var tour models.Tour
 	err := r.InTx(ctx, func(tx *Repo) error {
 		isTournament, _, err := tx.tournamentState(ctx, eventID, true)
@@ -28,6 +29,13 @@ func (r *Repo) PublishTour(ctx context.Context, eventID int, method models.Seati
 			return err
 		case !isTournament:
 			return models.ErrNotTournament
+		}
+
+		// A new draft replaces the old one (its games go with it).
+		if _, err := tx.db.Exec(ctx, `
+			DELETE FROM tours WHERE event_id = $1 AND status = $2`,
+			eventID, models.TourDraft); err != nil {
+			return fmt.Errorf("delete old draft: %w", err)
 		}
 
 		next, err := tx.nextTourNumber(ctx, eventID)
@@ -48,27 +56,34 @@ func (r *Repo) PublishTour(ctx context.Context, eventID int, method models.Seati
 			return err
 		}
 
-		now := time.Now().UTC()
-		rows, err := tx.db.Query(ctx, `
-			INSERT INTO tours (event_id, number, status, seating, published_at)
-			VALUES ($1, $2, $3, $4, $5)
-			RETURNING id, number, status, seating, published_at, started_at, finished_at`,
-			eventID, next, models.TourPublished, method, now)
-		if err != nil {
-			return fmt.Errorf("insert tour: %w", err)
-		}
-		if tour, err = pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Tour]); err != nil {
-			return fmt.Errorf("insert tour: %w", err)
-		}
-
-		for i, seats := range tables {
-			if err := tx.insertTourGame(ctx, eventID, tour.ID, i+1, seats, now); err != nil {
-				return err
-			}
-		}
-		return nil
+		tour, err = tx.insertDraftTour(ctx, eventID, next, method, tables)
+		return err
 	})
 	return tour, err
+}
+
+// insertDraftTour inserts a drafted tour with its games, one per table.
+func (r *Repo) insertDraftTour(ctx context.Context, eventID, number int, method models.SeatingMethod, tables [][4]int) (models.Tour, error) {
+	rows, err := r.db.Query(ctx, `
+		INSERT INTO tours (event_id, number, status, seating)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, number, status, seating, published_at, started_at, finished_at`,
+		eventID, number, models.TourDraft, method)
+	if err != nil {
+		return models.Tour{}, fmt.Errorf("insert tour: %w", err)
+	}
+	tour, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Tour])
+	if err != nil {
+		return models.Tour{}, fmt.Errorf("insert tour: %w", err)
+	}
+
+	now := time.Now().UTC()
+	for i, seats := range tables {
+		if err := r.insertTourGame(ctx, eventID, tour.ID, i+1, seats, now); err != nil {
+			return models.Tour{}, err
+		}
+	}
+	return tour, nil
 }
 
 // missingPlayers is how many players the active participants lack for whole
@@ -80,8 +95,9 @@ func missingPlayers(active int) int {
 	return (models.SeatsPerTable - active%models.SeatsPerTable) % models.SeatsPerTable
 }
 
-// nextTourNumber returns the number of the tour to publish, refusing while a
-// tour is published or live and when all tours are played.
+// nextTourNumber returns the number of the next tour, refusing while a tour
+// is published or live (a draft doesn't count: it is to be replaced or
+// published) and when all tours are played.
 func (r *Repo) nextTourNumber(ctx context.Context, eventID int) (int, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT
@@ -158,9 +174,24 @@ func (r *Repo) insertTourGame(ctx context.Context, eventID, tourID, table int, s
 	return nil
 }
 
-// CancelTour cancels the published seating of a tour not started yet: the
-// tour and its games are deleted, so it can be seated again. It refuses when
-// no tour is published (models.ErrTourNotFound).
+// PublishTour publishes the drafted seating: the players see their tables
+// from now on. It refuses without a draft (models.ErrTourNotFound).
+func (r *Repo) PublishTour(ctx context.Context, eventID int) error {
+	return r.InTx(ctx, func(tx *Repo) error {
+		tourID, err := tx.lockTour(ctx, eventID, models.TourDraft)
+		if err != nil {
+			return err
+		}
+		_, err = tx.db.Exec(ctx, `
+			UPDATE tours SET status = $1, published_at = $2 WHERE id = $3`,
+			models.TourPublished, time.Now().UTC(), tourID)
+		return err
+	})
+}
+
+// CancelTour cancels the seating of a tour not started yet, drafted or
+// published: the tour and its games are deleted, so it can be seated again.
+// It refuses when there is none (models.ErrTourNotFound).
 func (r *Repo) CancelTour(ctx context.Context, eventID int) error {
 	return r.InTx(ctx, func(tx *Repo) error {
 		isTournament, _, err := tx.tournamentState(ctx, eventID, true)
@@ -174,8 +205,8 @@ func (r *Repo) CancelTour(ctx context.Context, eventID int) error {
 		// The games go with the tour (ON DELETE CASCADE), their players with
 		// them.
 		res, err := tx.db.Exec(ctx, `
-			DELETE FROM tours WHERE event_id = $1 AND status = $2`,
-			eventID, models.TourPublished)
+			DELETE FROM tours WHERE event_id = $1 AND status IN ($2, $3)`,
+			eventID, models.TourDraft, models.TourPublished)
 		if err != nil {
 			return err
 		}
@@ -238,7 +269,7 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 // tourTables returns a tour's tables, each with its seats east to north.
 func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT g.table_number, g.id AS game_id, gp.player_id, u.name,
+		SELECT g.table_number, g.id AS game_id, g.status, gp.player_id, u.name,
 			COALESCE(tp.number, 0) AS number, gp.starting_wind
 		FROM games g
 		JOIN game_players gp ON gp.game_id = g.id
@@ -253,12 +284,13 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 	}
 
 	type seatRow struct {
-		Table  int    `db:"table_number"`
-		GameID int    `db:"game_id"`
-		UserID int    `db:"player_id"`
-		Name   string `db:"name"`
-		Number int    `db:"number"`
-		Wind   string `db:"starting_wind"`
+		Table  int               `db:"table_number"`
+		GameID int               `db:"game_id"`
+		Status models.GameStatus `db:"status"`
+		UserID int               `db:"player_id"`
+		Name   string            `db:"name"`
+		Number int               `db:"number"`
+		Wind   string            `db:"starting_wind"`
 	}
 	seats, err := pgx.CollectRows(rows, pgx.RowToStructByName[seatRow])
 	if err != nil {
@@ -268,10 +300,120 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 	tables := []models.TourTable{}
 	for _, s := range seats {
 		if len(tables) == 0 || tables[len(tables)-1].Table != s.Table {
-			tables = append(tables, models.TourTable{Table: s.Table, GameID: s.GameID})
+			tables = append(tables, models.TourTable{Table: s.Table, GameID: s.GameID, Status: s.Status})
 		}
 		last := &tables[len(tables)-1]
 		last.Seats = append(last.Seats, models.Seat{UserID: s.UserID, Name: s.Name, Number: s.Number, Wind: s.Wind})
 	}
 	return tables, nil
+}
+
+// StartTour starts the published tour: it and its games become live, and the
+// tournament is in progress from its first tour (events.started_at). It
+// refuses when no tour is published (models.ErrTourNotFound).
+func (r *Repo) StartTour(ctx context.Context, eventID int) error {
+	return r.InTx(ctx, func(tx *Repo) error {
+		tourID, err := tx.lockTour(ctx, eventID, models.TourPublished)
+		if err != nil {
+			return err
+		}
+
+		now := time.Now().UTC()
+		if _, err := tx.db.Exec(ctx, `
+			UPDATE tours SET status = $1, started_at = $2 WHERE id = $3`,
+			models.TourLive, now, tourID); err != nil {
+			return fmt.Errorf("start tour: %w", err)
+		}
+		if _, err := tx.db.Exec(ctx, `
+			UPDATE games SET status = $1 WHERE tour_id = $2 AND status = $3`,
+			models.GameLive, tourID, models.GameCreated); err != nil {
+			return fmt.Errorf("start games: %w", err)
+		}
+		if _, err := tx.db.Exec(ctx, `
+			UPDATE events SET started_at = COALESCE(started_at, $1) WHERE id = $2`,
+			now, eventID); err != nil {
+			return fmt.Errorf("start tournament: %w", err)
+		}
+		return nil
+	})
+}
+
+// FinishTour finishes the live tour once all its games have ended: its
+// results count from then on and can't be undone any more. It refuses when
+// no tour is live (models.ErrTourNotFound) and while tables still play
+// (models.ErrTablesStillPlaying, with their number). The tour row is locked
+// FOR UPDATE: an undo in one of its games locks it FOR SHARE, so a game can't
+// be revived while the tour finishes.
+func (r *Repo) FinishTour(ctx context.Context, eventID int) error {
+	return r.InTx(ctx, func(tx *Repo) error {
+		tourID, err := tx.lockTour(ctx, eventID, models.TourLive)
+		if err != nil {
+			return err
+		}
+
+		rows, err := tx.db.Query(ctx, `
+			SELECT count(*) FROM games WHERE tour_id = $1 AND status <> $2`,
+			tourID, models.GameEnded)
+		if err != nil {
+			return err
+		}
+		playing, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
+		if err != nil {
+			return err
+		}
+		if playing > 0 {
+			return models.WithData(models.ErrTablesStillPlaying, models.ErrorData{"playing": playing})
+		}
+
+		_, err = tx.db.Exec(ctx, `
+			UPDATE tours SET status = $1, finished_at = $2 WHERE id = $3`,
+			models.TourFinished, time.Now().UTC(), tourID)
+		return err
+	})
+}
+
+// AbortTour aborts the live tour: all its games become aborted, the tour
+// doesn't count and its number is played again. It refuses when no tour is
+// live (models.ErrTourNotFound).
+func (r *Repo) AbortTour(ctx context.Context, eventID int) error {
+	return r.InTx(ctx, func(tx *Repo) error {
+		tourID, err := tx.lockTour(ctx, eventID, models.TourLive)
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.db.Exec(ctx, `
+			UPDATE games SET status = $1 WHERE tour_id = $2`,
+			models.GameAborted, tourID); err != nil {
+			return fmt.Errorf("abort games: %w", err)
+		}
+		_, err = tx.db.Exec(ctx, `
+			UPDATE tours SET status = $1, finished_at = $2 WHERE id = $3`,
+			models.TourAborted, time.Now().UTC(), tourID)
+		return err
+	})
+}
+
+// lockTour locks the tournament's event row and then its tour in the given
+// status FOR UPDATE, and returns the tour's ID, or models.ErrTourNotFound.
+func (r *Repo) lockTour(ctx context.Context, eventID int, status models.TourStatus) (int, error) {
+	isTournament, _, err := r.tournamentState(ctx, eventID, true)
+	switch {
+	case err != nil:
+		return 0, err
+	case !isTournament:
+		return 0, models.ErrNotTournament
+	}
+
+	rows, err := r.db.Query(ctx, `
+		SELECT id FROM tours WHERE event_id = $1 AND status = $2 FOR UPDATE`,
+		eventID, status)
+	if err != nil {
+		return 0, fmt.Errorf("lock tour: %w", err)
+	}
+	tourID, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
+	if errors.Is(err, pgx.ErrNoRows) {
+		return 0, models.ErrTourNotFound
+	}
+	return tourID, err
 }

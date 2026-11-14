@@ -10,14 +10,20 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// PublishTour publishes the tournament's next tour with tables made by the
-// seating method, creating its games (status created).
-func (s *Service) PublishTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error) {
+// GenerateTour drafts the tournament's next tour with tables made by the
+// seating method (games with status created, seen by the staff only),
+// replacing an earlier draft.
+func (s *Service) GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error) {
 	makeTables, err := seatingFunc(method)
 	if err != nil {
 		return models.Tour{}, err
 	}
-	return s.repo.PublishTour(ctx, eventID, method, makeTables)
+	return s.repo.GenerateTour(ctx, eventID, method, makeTables)
+}
+
+// PublishTour publishes the drafted seating to the players.
+func (s *Service) PublishTour(ctx context.Context, eventID int) error {
+	return s.repo.PublishTour(ctx, eventID)
 }
 
 // CancelTour cancels the published seating of the tour not started yet.
@@ -71,4 +77,19 @@ func shuffle(participants []models.Participant) error {
 		participants[i], participants[j.Int64()] = participants[j.Int64()], participants[i]
 	}
 	return nil
+}
+
+// StartTour starts the published tour: its games go live.
+func (s *Service) StartTour(ctx context.Context, eventID int) error {
+	return s.repo.StartTour(ctx, eventID)
+}
+
+// FinishTour finishes the live tour once all its games have ended.
+func (s *Service) FinishTour(ctx context.Context, eventID int) error {
+	return s.repo.FinishTour(ctx, eventID)
+}
+
+// AbortTour aborts the live tour: its games don't count.
+func (s *Service) AbortTour(ctx context.Context, eventID int) error {
+	return s.repo.AbortTour(ctx, eventID)
 }

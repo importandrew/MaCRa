@@ -113,6 +113,9 @@ type GameSummary struct {
 	Status     GameStatus `db:"status"`
 	FinishedAt *time.Time `db:"finished_at"`
 	LogSize    int        `db:"log_size"`
+	// TourStatus is the status of a tournament game's tour; nil for a game
+	// of a regular event.
+	TourStatus *TourStatus `db:"tour_status"`
 }
 
 // GameMe is the caller's capabilities for one game

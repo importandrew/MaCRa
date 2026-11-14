@@ -1,5 +1,8 @@
 // Tour models mirror models/tour.go (GET /api/event/:id/tours).
-export type TourStatus = 'published' | 'live' | 'finished' | 'aborted';
+// draft: generated, seen by the staff only; published: the players see
+// their tables.
+export type TourStatus =
+  'draft' | 'published' | 'live' | 'finished' | 'aborted';
 
 export type SeatingMethod = 'random';
 
@@ -8,7 +11,8 @@ export type Tour = {
   number: number;
   status: TourStatus;
   seating: SeatingMethod;
-  published_at: string;
+  // published_at: null while the seating is a draft.
+  published_at: string | null;
   started_at: string | null;
   finished_at: string | null;
 };
@@ -23,6 +27,9 @@ export type TourSeat = {
 export type TourTable = {
   table: number;
   game_id: number;
+  // status: the table's game: created (tour not started), live, ended,
+  // aborted.
+  status: 'created' | 'live' | 'ended' | 'aborted';
   // seats: east first.
   seats: TourSeat[];
 };

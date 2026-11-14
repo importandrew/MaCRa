@@ -10,15 +10,18 @@ import (
 )
 
 // Summary returns what the capability rules need to know about a game: its
-// status, when it ended and how many round log entries it has. It returns
+// status, when it ended, how many round log entries it has and, for a
+// tournament game, its tour's status. It returns
 // models.ErrGameNotFound for an unknown game.
 func (r *Repo) Summary(ctx context.Context, gameID int) (models.GameSummary, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT
 			g.status,
 			g.finished_at,
-			(SELECT count(*) FROM rounds WHERE game_id = g.id) AS log_size
+			(SELECT count(*) FROM rounds WHERE game_id = g.id) AS log_size,
+			t.status AS tour_status
 		FROM games g
+		LEFT JOIN tours t ON t.id = g.tour_id
 		WHERE g.id = $1`,
 		gameID)
 	if err != nil {

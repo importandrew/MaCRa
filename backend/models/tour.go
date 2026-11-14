@@ -2,12 +2,14 @@ package models
 
 import "time"
 
-// TourStatus is where a tour is: its seating published (games created),
-// live (started), finished, or aborted (it doesn't count; the number is
-// played again).
+// TourStatus is where a tour is: its seating generated as a draft (games
+// created, seen by the staff only), published (the players see their
+// tables), live (started), finished, or aborted (it doesn't count; the number
+// is played again).
 type TourStatus string
 
 const (
+	TourDraft     TourStatus = "draft"
 	TourPublished TourStatus = "published"
 	TourLive      TourStatus = "live"
 	TourFinished  TourStatus = "finished"
@@ -26,13 +28,14 @@ var ValidSeatingMethods = []SeatingMethod{SeatingRandom}
 
 // Tour is one tour of a tournament.
 type Tour struct {
-	ID          int           `db:"id" json:"id"`
-	Number      int           `db:"number" json:"number"`
-	Status      TourStatus    `db:"status" json:"status"`
-	Seating     SeatingMethod `db:"seating" json:"seating"`
-	PublishedAt time.Time     `db:"published_at" json:"published_at"`
-	StartedAt   *time.Time    `db:"started_at" json:"started_at"`
-	FinishedAt  *time.Time    `db:"finished_at" json:"finished_at"`
+	ID      int           `db:"id" json:"id"`
+	Number  int           `db:"number" json:"number"`
+	Status  TourStatus    `db:"status" json:"status"`
+	Seating SeatingMethod `db:"seating" json:"seating"`
+	// PublishedAt is nil while the seating is a draft.
+	PublishedAt *time.Time `db:"published_at" json:"published_at"`
+	StartedAt   *time.Time `db:"started_at" json:"started_at"`
+	FinishedAt  *time.Time `db:"finished_at" json:"finished_at"`
 }
 
 // SeatsPerTable is the number of players at a table.
@@ -49,9 +52,11 @@ type Seat struct {
 
 // TourTable is a table of a tour: its game and the four seats, east first.
 type TourTable struct {
-	Table  int    `json:"table"`
-	GameID int    `json:"game_id"`
-	Seats  []Seat `json:"seats"`
+	Table  int `json:"table"`
+	GameID int `json:"game_id"`
+	// Status is the table's game status: created, live, ended or aborted.
+	Status GameStatus `json:"status"`
+	Seats  []Seat     `json:"seats"`
 }
 
 // TourState is a tournament's tours as its desk shows them: the current tour

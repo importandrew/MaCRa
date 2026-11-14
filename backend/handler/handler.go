@@ -92,8 +92,12 @@ func (h *Handler) registerEventActions(event *gin.RouterGroup) {
 	event.POST("/draw", h.event.Draw)
 	event.POST("/participants/:playerId/withdraw", middleware.RequirePlayer, h.event.Withdraw)
 	event.GET("/tours", h.event.Tours)
-	event.POST("/tours", h.event.PublishTour)
+	event.POST("/tours", h.event.GenerateTour)
+	event.POST("/tours/current/publish", h.event.PublishTour)
 	event.DELETE("/tours/current", h.event.CancelTour)
+	event.POST("/tours/current/start", h.event.StartTour)
+	event.POST("/tours/current/finish", h.event.FinishTour)
+	event.POST("/tours/current/abort", h.event.AbortTour)
 	event.POST("/finish", h.event.FinishEvent)
 
 	event.POST("/members", h.event.AddMembers)

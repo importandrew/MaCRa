@@ -32,8 +32,12 @@ type EventService interface {
 	Draw(ctx context.Context, eventID int) error
 	Withdraw(ctx context.Context, eventID, userID int) error
 	Tours(ctx context.Context, eventID int) (models.TourState, error)
-	PublishTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error)
+	GenerateTour(ctx context.Context, eventID int, method models.SeatingMethod) (models.Tour, error)
+	PublishTour(ctx context.Context, eventID int) error
 	CancelTour(ctx context.Context, eventID int) error
+	StartTour(ctx context.Context, eventID int) error
+	FinishTour(ctx context.Context, eventID int) error
+	AbortTour(ctx context.Context, eventID int) error
 	RequestToJoin(ctx context.Context, eventID, userID int) error
 	WithdrawJoinRequest(ctx context.Context, eventID, userID int) error
 	JoinRequests(ctx context.Context, eventID int) ([]models.JoinRequest, error)

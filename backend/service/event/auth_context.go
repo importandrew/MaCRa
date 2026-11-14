@@ -90,6 +90,11 @@ func (authCtx EventAuthContext) canUndoInGame() bool {
 	switch {
 	case g == nil:
 		return false
+	case g.TourStatus != nil:
+		// A tournament game: while its tour is live, also after the game
+		// ended; never once the tour is finished (area 8).
+		return *g.TourStatus == models.TourLive &&
+			(g.Status == models.GameLive || g.Status == models.GameEnded)
 	case g.Status == models.GameLive:
 		return true
 	case g.Status == models.GameEnded && g.FinishedAt != nil:
