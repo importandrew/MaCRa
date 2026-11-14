@@ -38,22 +38,13 @@ function sortRatings(
 }
 
 // PlayerName is a name in the rating: one line with an ellipsis, so every row
-// has the same height. The full name shows on hover (title) and on a tap,
-// which toggles the name onto as many lines as it needs.
+// has the same height. The full name shows on hover (title) and as the title
+// of the player's statistics, which a tap on the row opens.
 function PlayerName({ name }: { name: string }) {
-  const [isExpanded, setIsExpanded] = useState(false);
   return (
-    <button
-      type="button"
-      title={name}
-      aria-expanded={isExpanded}
-      onClick={() => setIsExpanded(!isExpanded)}
-      className={`block w-full cursor-default text-center ${
-        isExpanded ? 'whitespace-normal break-words' : 'truncate'
-      }`}
-    >
+    <span title={name} className="block truncate text-center">
       {name}
-    </button>
+    </span>
   );
 }
 
@@ -87,12 +78,15 @@ function RatingTable({
   sortDescriptor,
   onSortChange,
   emptyText,
+  playerHref,
 }: {
   label: string;
   rows: RatingRow[];
   sortDescriptor: SortDescriptor;
   onSortChange: (descriptor: SortDescriptor) => void;
   emptyText: string;
+  // playerHref: the link of a player's statistics (a tap on their row).
+  playerHref: (playerId: number) => string;
 }) {
   const { t } = useTranslation();
   return (
@@ -149,7 +143,12 @@ function RatingTable({
               // each cell's background and text.
               const cell = `${CELL_CLASS} ${row.isBelow ? 'text-muted' : ''}`;
               return (
-                <Table.Row id={row.id} className="text-center">
+                // A tap opens the player's statistics in the event.
+                <Table.Row
+                  id={row.id}
+                  href={playerHref(row.entry.player_id)}
+                  className="cursor-pointer text-center"
+                >
                   <Table.Cell className={cell}>
                     {row.entry.rank ?? '—'}
                   </Table.Cell>
@@ -259,6 +258,7 @@ export default function EventRating() {
             sortDescriptor={sortDescriptor}
             onSortChange={setSortDescriptor}
             emptyText={t('rating.noGames')}
+            playerHref={(playerId) => `/event/${event.id}/player/${playerId}`}
           />
         </div>
       )}

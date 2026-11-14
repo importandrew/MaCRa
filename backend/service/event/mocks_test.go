@@ -1580,6 +1580,78 @@ func (_c *MockEventRepo_PlayerGameHistory_Call) RunAndReturn(run func(ctx contex
 	return _c
 }
 
+// PlayerStats provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) PlayerStats(ctx context.Context, eventID int, playerID int) (models.PlayerStats, error) {
+	ret := _mock.Called(ctx, eventID, playerID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PlayerStats")
+	}
+
+	var r0 models.PlayerStats
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (models.PlayerStats, error)); ok {
+		return returnFunc(ctx, eventID, playerID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) models.PlayerStats); ok {
+		r0 = returnFunc(ctx, eventID, playerID)
+	} else {
+		r0 = ret.Get(0).(models.PlayerStats)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, playerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_PlayerStats_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PlayerStats'
+type MockEventRepo_PlayerStats_Call struct {
+	*mock.Call
+}
+
+// PlayerStats is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - playerID int
+func (_e *MockEventRepo_Expecter) PlayerStats(ctx any, eventID any, playerID any) *MockEventRepo_PlayerStats_Call {
+	return &MockEventRepo_PlayerStats_Call{Call: _e.mock.On("PlayerStats", ctx, eventID, playerID)}
+}
+
+func (_c *MockEventRepo_PlayerStats_Call) Run(run func(ctx context.Context, eventID int, playerID int)) *MockEventRepo_PlayerStats_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_PlayerStats_Call) Return(playerStats models.PlayerStats, err error) *MockEventRepo_PlayerStats_Call {
+	_c.Call.Return(playerStats, err)
+	return _c
+}
+
+func (_c *MockEventRepo_PlayerStats_Call) RunAndReturn(run func(ctx context.Context, eventID int, playerID int) (models.PlayerStats, error)) *MockEventRepo_PlayerStats_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // RemoveMembers provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) RemoveMembers(ctx context.Context, eventID int, userIDs []int) error {
 	ret := _mock.Called(ctx, eventID, userIDs)

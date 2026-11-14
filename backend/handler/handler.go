@@ -51,6 +51,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			eventAccess.GET("/members", h.event.ListMembers)
 			eventAccess.GET("/game-history", h.event.GameHistory)
 			eventAccess.GET("/player/:playerId/game-history", middleware.RequirePlayer, h.event.PlayerGameHistory)
+			eventAccess.GET("/player/:playerId/stats", middleware.RequirePlayer, h.event.PlayerStats)
 
 			eventGame := eventAccess.Group("/game/:gameId", middleware.RequireGame, h.event.GameBelongsToEvent)
 			{
