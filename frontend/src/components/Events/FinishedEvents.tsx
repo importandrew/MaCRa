@@ -31,9 +31,9 @@ export default function FinishedEvents({
         </Disclosure.Trigger>
       </Disclosure.Heading>
       <Disclosure.Content>
-        <Disclosure.Body className="flex flex-col gap-3 pt-1">
-          {children}
-        </Disclosure.Body>
+        {/* Not Disclosure.Body: its p-2 wrapper made these cards narrower
+            than the active ones above. */}
+        <div className="flex flex-col gap-3 pt-1">{children}</div>
       </Disclosure.Content>
     </Disclosure>
   );
