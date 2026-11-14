@@ -23,17 +23,18 @@ func (r *Repo) Create(ctx context.Context, event models.Event) (int, error) {
 			"games_reach":   event.GamesReach,
 			"rules":         event.Rules,
 			"settings":      event.Settings,
+			"tournament":    event.Tournament,
 			"now":           now,
 		}
 
 		rows, err := tx.db.Query(ctx, `
 			INSERT INTO events (
 				type, name, description, owner_user_id,
-				visibility, ratings_reach, games_reach, rules, settings, created_at
+				visibility, ratings_reach, games_reach, rules, settings, tournament, created_at
 			)
 			VALUES (
 				@type, @name, @desc, @owner_id,
-				@visibility, @ratings_reach, @games_reach, @rules, @settings, @now
+				@visibility, @ratings_reach, @games_reach, @rules, @settings, @tournament, @now
 			)
 			RETURNING id`,
 			args,

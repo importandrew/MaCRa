@@ -9,7 +9,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 ### Who is who in an event
 
 - **Owner**: the user who created the event. Not a role. The owner always sees everything in their own event, as staff do, and manages it (settings, members, finishing), whatever roles they hold. Acting as a referee (undo, abort) takes the referee role, also for the owner: an organizer who isn't a referee can leave it out and can't press those by accident. In a regular event the owner gets the referee role at creation.
-- **Member roles**: player, referee, observer. One user can hold several.
+- **Member roles**: player, referee, observer; in a tournament also substitute, never together with player (area 8). One user can hold several.
 - **Member**: the owner or anyone with at least one role.
 - **Staff**: referees, observers and the owner.
 - When the owner creates a **regular** event, they also get the player and referee roles, so they can play and fix rounds right away. In a tournament the owner gets no roles by default (area 8).
@@ -90,7 +90,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Creating an event
 
-- Any signed-in user can create one: name (required, trimmed, at most 100 characters), description (optional, at most 1000), type (tournament not available until area 8 is built), visibility (private by default) and ratings/games reach with presets. The backend checks the same limits on create and edit.
+- Any signed-in user can create one: name (required, trimmed, at most 100 characters), description (optional, at most 1000), type (regular or tournament; a tournament starts with 5 tours of 120 minutes, the hand in progress finished when time is up, and its owner gets no roles), visibility (private by default) and ratings/games reach with presets. The backend checks the same limits on create and edit.
 
 ### Event page
 
@@ -225,7 +225,7 @@ Applies to regular events; tournament games follow area 8.
 
 ## 8. Tournaments
 
-Planned: none of this is built yet. Until it is, tournaments are a stub (no games can be created in one). The rules follow the official *Mahjong Competition Rules* (WMO / WMCC, 2021 edition) where they cover a question; where the rules are silent, these are the organizer's practice. A few questions are still open with referees; they are listed at the end.
+Being built in stages. So far: creating a tournament, its status (preparation until the first tour starts, then in progress, then finished), its settings in Manage → Settings (number of tours, tour length, what happens when time is up; the regular-event permissions to finish or abort a game and the rating's minimum games don't apply and are hidden), and the substitute role. No games can be played in a tournament yet. The rules follow the official *Mahjong Competition Rules* (WMO / WMCC, 2021 edition) where they cover a question; where the rules are silent, these are the organizer's practice. A few questions are still open with referees; they are listed at the end.
 
 ### Format
 

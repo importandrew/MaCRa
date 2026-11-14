@@ -87,6 +87,7 @@ func (h *Handler) registerEventActions(event *gin.RouterGroup) {
 	event.PATCH("", h.event.Update)
 	event.PUT("/rules", h.event.UpdateRules)
 	event.PUT("/settings", h.event.UpdateSettings)
+	event.PUT("/tournament", h.event.UpdateTournament)
 	event.POST("/finish", h.event.FinishEvent)
 
 	event.POST("/members", h.event.AddMembers)

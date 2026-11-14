@@ -58,6 +58,10 @@ func (s *Service) Create(ctx context.Context, params models.EventCreateParams) (
 		event.GamesReach = *params.GamesReach
 	}
 
+	if event.Type == models.EventTournament {
+		event.Tournament = new(models.DefaultTournamentSettings())
+	}
+
 	if params.Rules != nil {
 		if err := params.Rules.Validate(); err != nil {
 			return 0, err

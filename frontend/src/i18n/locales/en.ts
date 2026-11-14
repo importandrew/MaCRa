@@ -133,6 +133,9 @@ const en = {
     already_member: 'You are already a member of this event',
     event_full: 'The event has no places left',
     invalid_player_limit: 'The player limit must be at least 1',
+    invalid_tournament_settings: 'The tournament settings are invalid',
+    not_tournament: 'This is for tournaments only',
+    player_and_substitute: 'A member can’t be both a player and a substitute',
   },
   auth: {
     tabs: 'Authentication',
@@ -183,11 +186,43 @@ const en = {
     namePlaceholder: 'Enter your name',
     updated: 'Profile updated successfully',
   },
+  eventStatus: {
+    preparation: 'Preparation',
+    in_progress: 'In progress',
+    finished: 'Finished',
+  },
+  tournament: {
+    title: 'Tournament',
+    hint: 'Tours and their length, and what happens when a tour’s time is up.',
+    tours: 'Tours',
+    tourMinutes: 'Tour length, minutes',
+    tourMinutesRange: 'From {{min}} to {{max}} minutes',
+    timeUpLabel: 'When the time is up',
+    timeUp: {
+      finish_hand: 'The hand in progress is played to the end',
+      extra_hands: 'The hand in progress and a few more',
+      stop_now: 'The game ends at once; the hand in progress doesn’t count',
+    },
+    timeUpShort: {
+      finish_hand: 'the hand in progress is finished when time is up',
+      extra_hands_one:
+        'the hand in progress and {{count}} more when time is up',
+      extra_hands_other:
+        'the hand in progress and {{count}} more when time is up',
+      stop_now: 'the game ends when time is up',
+    },
+    extraHands: 'More hands after the one in progress',
+    summary_one: '{{count}} tour of {{minutes}} minutes',
+    summary_other: '{{count}} tours of {{minutes}} minutes',
+    save: 'Save',
+    saved: 'Tournament settings saved',
+  },
   roles: {
     owner: 'Owner',
     player: 'Player',
     referee: 'Referee',
     observer: 'Observer',
+    substitute: 'Substitute',
   },
   eventType: {
     regular: 'Regular',
@@ -293,6 +328,8 @@ const en = {
       'The event is finished: its settings can no longer change.',
     permissions: 'Permissions',
     hint: 'Can change at any time.',
+    permissionsHintTournament:
+      'Referees can always undo the last round and enter penalties, also from the game’s view.',
     permissionsHint:
       'Referees can always finish and abort games, undo the last round and enter penalties, also from the game’s view.',
     finishGame: 'Finish a game early',
@@ -402,6 +439,8 @@ const en = {
     title: 'Members',
     titleWithCount: 'Members [{{n}}]',
     addTitle: 'Add members',
+    substituteRoleHint:
+      'A substitute plays only where a referee seats them; a member is either a player or a substitute.',
     playerRoleHint: 'All 4 players need the player role to start a game.',
     user: 'User',
     roles: 'Roles',

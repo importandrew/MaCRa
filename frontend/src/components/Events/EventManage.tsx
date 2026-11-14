@@ -23,6 +23,7 @@ import Confirm from '../Confirm';
 import EventSettingsFields from './EventSettingsFields';
 import EventRulesForm from './EventRulesForm';
 import EventSettingsCard from './EventSettingsCard';
+import TournamentSettingsCard from './TournamentSettingsCard';
 import MemberRolesModal from './MemberRolesModal';
 import InviteLink from './InviteLink';
 import JoinRequests from './JoinRequests';
@@ -231,6 +232,9 @@ export default function EventManage() {
       {activeTab === 'settings' && canManageEvent && (
         <>
           <EventRulesForm event={event} onSaved={refetch} />
+          {event.type === 'tournament' && (
+            <TournamentSettingsCard event={event} onSaved={refetch} />
+          )}
           <EventSettingsCard event={event} onSaved={refetch} />
         </>
       )}
@@ -271,7 +275,9 @@ export default function EventManage() {
                     content: () => (
                       <>
                         <p className="text-sm text-muted mb-3">
-                          {t('members.playerRoleHint')}
+                          {event.type === 'tournament'
+                            ? t('members.substituteRoleHint')
+                            : t('members.playerRoleHint')}
                         </p>
                         <Form
                           onSubmit={handleAddMember}
@@ -290,6 +296,7 @@ export default function EventManage() {
                           <RoleCheckboxes
                             value={selectedRoles}
                             onChange={setSelectedRoles}
+                            eventType={event.type}
                           />
                           <PendingButton
                             type="submit"
@@ -395,6 +402,7 @@ export default function EventManage() {
       )}
       <MemberRolesModal
         eventId={eventId}
+        eventType={event.type}
         member={memberToEdit}
         isOwner={memberToEdit?.user_id === event.owner_user_id}
         onClose={() => setMemberToEdit(null)}

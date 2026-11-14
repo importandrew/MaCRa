@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import type { TournamentSettings } from '../../models/TournamentSettings';
 import {
   GetRequest,
   authFetch,
@@ -110,6 +111,16 @@ export async function updateEventRules(
   rules: GameRules
 ): Promise<boolean> {
   const request = PutRequest(eventPath(id, '/rules'), rules);
+  const result = await authFetch<null>(request);
+  return result !== null;
+}
+
+// updateTournament sets a tournament's own settings, all at once.
+export async function updateTournament(
+  id: number,
+  settings: TournamentSettings
+): Promise<boolean> {
+  const request = PutRequest(eventPath(id, '/tournament'), settings);
   const result = await authFetch<null>(request);
   return result !== null;
 }

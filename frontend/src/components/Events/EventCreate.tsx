@@ -83,7 +83,6 @@ export default function EventCreate() {
                       {
                         value: 'tournament',
                         label: t('eventType.tournament'),
-                        isDisabled: true,
                       },
                     ]}
                     selectedKey={type}
