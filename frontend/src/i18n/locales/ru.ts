@@ -312,7 +312,7 @@ const ru: Messages = {
     none: 'Участников пока нет',
   },
   rating: {
-    player: 'Игрок',
+    name: 'Игрок',
     games: 'Игры',
     tp: 'ТО',
     gp: 'ИО',

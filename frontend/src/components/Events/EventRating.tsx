@@ -58,8 +58,19 @@ function PlayerName({ name }: { name: string }) {
 }
 
 // CELL_CLASS: HeroUI's px-4 leaves too little room for five columns at 320px
-// with a fixed layout; the columns use the same padding.
-const CELL_CLASS = 'px-1.5';
+// with a fixed layout; the header uses the same padding.
+const CELL_CLASS = 'px-1';
+
+// RATING_COLUMNS: the numbers get fixed widths that fit their values and
+// their header with the sort arrow ("Игры ˄", "-123"); the name takes the
+// rest. Labels: rating.<id>.
+const RATING_COLUMNS: { id: RatingColumn; width: string }[] = [
+  { id: 'rank', width: 'w-8' },
+  { id: 'name', width: '' },
+  { id: 'games', width: 'w-[3.25rem]' },
+  { id: 'tp', width: 'w-11' },
+  { id: 'gp', width: 'w-12' },
+];
 
 // RatingRow is a row of the rating table: a player, or the separator above
 // the players without a place.
@@ -96,62 +107,24 @@ function RatingTable({
           onSortChange={onSortChange}
         >
           <Table.Header>
-            <Table.Column
-              id="rank"
-              allowsSorting
-              className="px-1.5 text-center w-[12%]"
-            >
-              {({ sortDirection }) => (
-                <Table.SortableColumnHeader sortDirection={sortDirection}>
-                  #
-                </Table.SortableColumnHeader>
-              )}
-            </Table.Column>
-            <Table.Column
-              id="name"
-              allowsSorting
-              isRowHeader
-              className="px-1.5 text-center"
-            >
-              {({ sortDirection }) => (
-                <Table.SortableColumnHeader sortDirection={sortDirection}>
-                  {t('rating.player')}
-                </Table.SortableColumnHeader>
-              )}
-            </Table.Column>
-            <Table.Column
-              id="games"
-              allowsSorting
-              className="px-1.5 text-center w-[16%]"
-            >
-              {({ sortDirection }) => (
-                <Table.SortableColumnHeader sortDirection={sortDirection}>
-                  {t('rating.games')}
-                </Table.SortableColumnHeader>
-              )}
-            </Table.Column>
-            <Table.Column
-              id="tp"
-              allowsSorting
-              className="px-1.5 text-center w-[16%]"
-            >
-              {({ sortDirection }) => (
-                <Table.SortableColumnHeader sortDirection={sortDirection}>
-                  {t('rating.tp')}
-                </Table.SortableColumnHeader>
-              )}
-            </Table.Column>
-            <Table.Column
-              id="gp"
-              allowsSorting
-              className="px-1.5 text-center w-[18%]"
-            >
-              {({ sortDirection }) => (
-                <Table.SortableColumnHeader sortDirection={sortDirection}>
-                  {t('rating.gp')}
-                </Table.SortableColumnHeader>
-              )}
-            </Table.Column>
+            {RATING_COLUMNS.map((column) => (
+              <Table.Column
+                key={column.id}
+                id={column.id}
+                allowsSorting
+                isRowHeader={column.id === 'name'}
+                className={`${CELL_CLASS} ${column.width}`}
+              >
+                {({ sortDirection }) => (
+                  <Table.SortableColumnHeader
+                    sortDirection={sortDirection}
+                    className="justify-center gap-0.5"
+                  >
+                    {column.id === 'rank' ? '#' : t(`rating.${column.id}`)}
+                  </Table.SortableColumnHeader>
+                )}
+              </Table.Column>
+            ))}
           </Table.Header>
           <Table.Body
             items={rows}

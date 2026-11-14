@@ -313,7 +313,7 @@ const en = {
     none: 'No members yet',
   },
   rating: {
-    player: 'Player',
+    name: 'Player',
     games: 'Games',
     tp: 'TP',
     gp: 'GP',
