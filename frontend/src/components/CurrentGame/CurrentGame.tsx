@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFetchGameData } from '../../providers/game/gameDataApi';
 import ContextMenu from '../ContextMenu/ContextMenu';
 import RefreshButton from '../RefreshButton';
@@ -12,6 +13,7 @@ import CurrentGameSeat from './CurrentGameSeat';
 import { useRoundEntry } from './useRoundEntry';
 import { useShowGameGone } from './useShowGameGone';
 import { useEvent } from '../../providers/event/eventConstants';
+import { useGameCapabilities } from '../../providers/game/useGameCapabilities';
 import TableLayout from '../Table/TableLayout';
 import { useScoreAnimation } from '../Table/useScoreAnimation';
 
@@ -45,14 +47,23 @@ export default function CurrentGame() {
     }
     return fresh;
   };
-  const entry = useRoundEntry(
-    roundData,
-    (next) => {
+  const navigate = useNavigate();
+  // The event's settings may leave penalties to referees: Penalty is then
+  // shown disabled (the game's /me says).
+  const { hasCapability } = useGameCapabilities(eventId, roundData?.id ?? null);
+  const entry = useRoundEntry({
+    table: roundData,
+    eventId,
+    canPenalize: hasCapability('enter_penalty'),
+    onSubmitted: (next) => {
       setRoundData(next);
       setIsEntryOpen(false);
     },
-    refreshTable
-  );
+    onStale: refreshTable,
+    // The refresh tells the player whether the game ended or was aborted.
+    onGone: refreshTable,
+    onEnded: () => navigate('/last'),
+  });
   const { previousScores, currentScores } = useScoreAnimation(
     roundData
       ? [roundData.me, roundData.right, roundData.opp, roundData.left]

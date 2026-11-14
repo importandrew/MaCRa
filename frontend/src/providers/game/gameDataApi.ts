@@ -237,5 +237,7 @@ export const useFetchLiveGameData = (
     isError: f.isError || f.isNotFound,
     isForbidden: f.isForbidden,
     refetch,
+    // mutate shows the view an entry answered with, without a request.
+    mutate: f.mutate,
   };
 };

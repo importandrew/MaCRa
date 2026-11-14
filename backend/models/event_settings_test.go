@@ -12,14 +12,16 @@ func TestEventSettingsValidate(t *testing.T) {
 		valid    bool
 	}{
 		"default":                  {DefaultEventSettings(), true},
-		"referees only":            {EventSettings{FinishGame: FinishByReferees, AbortGame: AbortByReferees, UndoRound: UndoByReferees, MinRatingGames: 1}, true},
-		"seated abort at any time": {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, MinRatingGames: 100}, true},
-		"unknown finish":           {EventSettings{FinishGame: "anyone", AbortGame: AbortByReferees, UndoRound: UndoByReferees, MinRatingGames: 1}, false},
-		"unknown abort":            {EventSettings{FinishGame: FinishBySeated, AbortGame: "anyone", UndoRound: UndoByReferees, MinRatingGames: 1}, false},
-		"min rating games 0":       {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, MinRatingGames: 0}, false},
-		"min rating games 101":     {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, MinRatingGames: 101}, false},
-		"undo by seated":           {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoBySeated, MinRatingGames: 1}, true},
-		"unknown undo":             {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: "anyone", MinRatingGames: 1}, false},
+		"referees only":            {EventSettings{FinishGame: FinishByReferees, AbortGame: AbortByReferees, UndoRound: UndoByReferees, Penalties: PenaltiesBySeated, MinRatingGames: 1}, true},
+		"seated abort at any time": {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, Penalties: PenaltiesBySeated, MinRatingGames: 100}, true},
+		"unknown finish":           {EventSettings{FinishGame: "anyone", AbortGame: AbortByReferees, UndoRound: UndoByReferees, Penalties: PenaltiesBySeated, MinRatingGames: 1}, false},
+		"unknown abort":            {EventSettings{FinishGame: FinishBySeated, AbortGame: "anyone", UndoRound: UndoByReferees, Penalties: PenaltiesBySeated, MinRatingGames: 1}, false},
+		"min rating games 0":       {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, Penalties: PenaltiesBySeated, MinRatingGames: 0}, false},
+		"min rating games 101":     {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, Penalties: PenaltiesBySeated, MinRatingGames: 101}, false},
+		"undo by seated":           {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoBySeated, Penalties: PenaltiesBySeated, MinRatingGames: 1}, true},
+		"unknown undo":             {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: "anyone", Penalties: PenaltiesBySeated, MinRatingGames: 1}, false},
+		"penalties by referees":    {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, Penalties: PenaltiesByReferees, MinRatingGames: 1}, true},
+		"unknown penalties":        {EventSettings{FinishGame: FinishBySeated, AbortGame: AbortBySeated, UndoRound: UndoByReferees, Penalties: "anyone", MinRatingGames: 1}, false},
 		"empty":                    {EventSettings{}, false},
 	}
 

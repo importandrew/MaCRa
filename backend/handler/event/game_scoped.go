@@ -16,6 +16,8 @@ type GameService interface {
 	LastGameResult(ctx context.Context, playerID, eventID int) (models.GameResult, error)
 	EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value, winnerID, loserID, eventID int, seenLogSize int) (models.GameNow, error)
 	Penalty(ctx context.Context, penaltyType models.Outcome, playerID, penalizedID, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error)
+	PenaltyInGame(ctx context.Context, penaltyType models.Outcome, gameID, penalizedID, value int, forceNextRound bool, seenLogSize int) (models.GameView, error)
+	CurrentGameID(ctx context.Context, playerID, eventID int) (int, error)
 	Finish(ctx context.Context, gameID int) error
 	ViewLive(ctx context.Context, gameID int) (models.GameView, error)
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)

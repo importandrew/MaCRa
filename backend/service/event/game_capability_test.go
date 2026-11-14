@@ -108,6 +108,29 @@ func TestGameCapabilities(t *testing.T) {
 			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeatedBeforeFirstRound, UndoRound: models.UndoBySeated},
 			wantNot:  []models.Capability{models.CapUndoRound},
 		},
+		"penalties by default: a seated player enters them": {
+			event: models.EventRegular, roles: player, seated: true, game: live(3),
+			want: []models.Capability{models.CapEnterPenalty},
+		},
+		"penalties: a referee not at the table enters them": {
+			event: models.EventRegular, roles: referee, game: live(3),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeatedBeforeFirstRound, UndoRound: models.UndoByReferees, Penalties: models.PenaltiesByReferees},
+			want:     []models.Capability{models.CapEnterPenalty},
+		},
+		"penalties by referees: a seated player can't": {
+			event: models.EventRegular, roles: player, seated: true, game: live(3),
+			settings: &models.EventSettings{FinishGame: models.FinishBySeated, AbortGame: models.AbortBySeatedBeforeFirstRound, UndoRound: models.UndoByReferees, Penalties: models.PenaltiesByReferees},
+			want:     []models.Capability{models.CapEnterRound},
+			wantNot:  []models.Capability{models.CapEnterPenalty},
+		},
+		"penalties: not a player at another table, not an ended game": {
+			event: models.EventRegular, roles: player, game: live(3),
+			wantNot: []models.Capability{models.CapEnterPenalty},
+		},
+		"penalties: a referee can't in an ended game": {
+			event: models.EventRegular, roles: referee, game: ended(10 * time.Minute),
+			wantNot: []models.Capability{models.CapEnterPenalty},
+		},
 		"no game: none of the game capabilities": {
 			event: models.EventRegular, roles: referee,
 			wantNot: []models.Capability{models.CapViewGame, models.CapUndoRound, models.CapAbortGame, models.CapFinishGame, models.CapEnterRound},

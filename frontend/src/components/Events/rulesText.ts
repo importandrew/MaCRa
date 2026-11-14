@@ -30,6 +30,9 @@ export function settingsDifferences(
   } else if (settings.abort_game === 'seated') {
     differences.push(t('eventSettings.abortBySeated'));
   }
+  if (settings.penalties === 'referees') {
+    differences.push(t('eventSettings.penaltiesByReferees'));
+  }
   if (settings.undo_round === 'seated') {
     differences.push(t('eventSettings.undoBySeated'));
   }

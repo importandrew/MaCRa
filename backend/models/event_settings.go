@@ -17,6 +17,9 @@ type EventSettings struct {
 	// UndoRound is who may undo the last round log entry: UndoByReferees or
 	// UndoBySeated.
 	UndoRound string `json:"undo_round"`
+	// Penalties is who may enter penalties and false mahjongs:
+	// PenaltiesBySeated or PenaltiesByReferees.
+	Penalties string `json:"penalties"`
 	// MinRatingGames is how many ended games a player needs for a place in
 	// the rating; players with fewer are listed below it without a place.
 	// 1 lists everyone who has played.
@@ -58,7 +61,17 @@ const (
 	UndoBySeated = "seated"
 )
 
+// Who may enter penalties and false mahjongs. Referees always may, in any
+// live game of the event (from the game's view).
+const (
+	// PenaltiesBySeated: also the seated players, at their table.
+	PenaltiesBySeated = "seated"
+	// PenaltiesByReferees: referees only.
+	PenaltiesByReferees = "referees"
+)
+
 var (
+	ValidPenalties  = []string{PenaltiesBySeated, PenaltiesByReferees}
 	ValidFinishGame = []string{FinishBySeated, FinishByReferees}
 	ValidAbortGame  = []string{AbortByReferees, AbortBySeatedBeforeFirstRound, AbortBySeated}
 	ValidUndoRound  = []string{UndoByReferees, UndoBySeated}
@@ -66,13 +79,15 @@ var (
 
 // DefaultEventSettings returns the settings events start with: seated
 // players and referees finish games, referees abort them, and the seated
-// players too before the first round, referees undo rounds; everyone who has played is in the
+// players too before the first round, referees undo rounds, everyone at the
+// table enters penalties; everyone who has played is in the
 // rating.
 func DefaultEventSettings() EventSettings {
 	return EventSettings{
 		FinishGame:     FinishBySeated,
 		AbortGame:      AbortBySeatedBeforeFirstRound,
 		UndoRound:      UndoByReferees,
+		Penalties:      PenaltiesBySeated,
 		MinRatingGames: MinMinRatingGames,
 	}
 }
@@ -93,6 +108,11 @@ func (s EventSettings) Validate() error {
 	if !slices.Contains(ValidUndoRound, s.UndoRound) {
 		return fmt.Errorf("%w: undo_round should be one of %v, got %q",
 			ErrInvalidEventSettings, ValidUndoRound, s.UndoRound)
+	}
+
+	if !slices.Contains(ValidPenalties, s.Penalties) {
+		return fmt.Errorf("%w: penalties should be one of %v, got %q",
+			ErrInvalidEventSettings, ValidPenalties, s.Penalties)
 	}
 
 	if s.MinRatingGames < MinMinRatingGames || s.MinRatingGames > MaxMinRatingGames {

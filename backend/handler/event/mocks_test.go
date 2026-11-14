@@ -47,6 +47,78 @@ func (_m *MockGameService) EXPECT() *MockGameService_Expecter {
 	return &MockGameService_Expecter{mock: &_m.Mock}
 }
 
+// CurrentGameID provides a mock function for the type MockGameService
+func (_mock *MockGameService) CurrentGameID(ctx context.Context, playerID int, eventID int) (int, error) {
+	ret := _mock.Called(ctx, playerID, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CurrentGameID")
+	}
+
+	var r0 int
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (int, error)); ok {
+		return returnFunc(ctx, playerID, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) int); ok {
+		r0 = returnFunc(ctx, playerID, eventID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, playerID, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameService_CurrentGameID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CurrentGameID'
+type MockGameService_CurrentGameID_Call struct {
+	*mock.Call
+}
+
+// CurrentGameID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - playerID int
+//   - eventID int
+func (_e *MockGameService_Expecter) CurrentGameID(ctx any, playerID any, eventID any) *MockGameService_CurrentGameID_Call {
+	return &MockGameService_CurrentGameID_Call{Call: _e.mock.On("CurrentGameID", ctx, playerID, eventID)}
+}
+
+func (_c *MockGameService_CurrentGameID_Call) Run(run func(ctx context.Context, playerID int, eventID int)) *MockGameService_CurrentGameID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameService_CurrentGameID_Call) Return(n int, err error) *MockGameService_CurrentGameID_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockGameService_CurrentGameID_Call) RunAndReturn(run func(ctx context.Context, playerID int, eventID int) (int, error)) *MockGameService_CurrentGameID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // EnterRound provides a mock function for the type MockGameService
 func (_mock *MockGameService) EnterRound(ctx context.Context, playerID int, outcome models.Outcome, value int, winnerID int, loserID int, eventID int, seenLogSize int) (models.GameNow, error) {
 	ret := _mock.Called(ctx, playerID, outcome, value, winnerID, loserID, eventID, seenLogSize)
@@ -718,6 +790,102 @@ func (_c *MockGameService_Penalty_Call) Return(gameNow models.GameNow, err error
 }
 
 func (_c *MockGameService_Penalty_Call) RunAndReturn(run func(ctx context.Context, penaltyType models.Outcome, playerID int, penalizedID int, value int, forceNextRound bool, eventID int, seenLogSize int) (models.GameNow, error)) *MockGameService_Penalty_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// PenaltyInGame provides a mock function for the type MockGameService
+func (_mock *MockGameService) PenaltyInGame(ctx context.Context, penaltyType models.Outcome, gameID int, penalizedID int, value int, forceNextRound bool, seenLogSize int) (models.GameView, error) {
+	ret := _mock.Called(ctx, penaltyType, gameID, penalizedID, value, forceNextRound, seenLogSize)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PenaltyInGame")
+	}
+
+	var r0 models.GameView
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int) (models.GameView, error)); ok {
+		return returnFunc(ctx, penaltyType, gameID, penalizedID, value, forceNextRound, seenLogSize)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, models.Outcome, int, int, int, bool, int) models.GameView); ok {
+		r0 = returnFunc(ctx, penaltyType, gameID, penalizedID, value, forceNextRound, seenLogSize)
+	} else {
+		r0 = ret.Get(0).(models.GameView)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, models.Outcome, int, int, int, bool, int) error); ok {
+		r1 = returnFunc(ctx, penaltyType, gameID, penalizedID, value, forceNextRound, seenLogSize)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGameService_PenaltyInGame_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PenaltyInGame'
+type MockGameService_PenaltyInGame_Call struct {
+	*mock.Call
+}
+
+// PenaltyInGame is a helper method to define mock.On call
+//   - ctx context.Context
+//   - penaltyType models.Outcome
+//   - gameID int
+//   - penalizedID int
+//   - value int
+//   - forceNextRound bool
+//   - seenLogSize int
+func (_e *MockGameService_Expecter) PenaltyInGame(ctx any, penaltyType any, gameID any, penalizedID any, value any, forceNextRound any, seenLogSize any) *MockGameService_PenaltyInGame_Call {
+	return &MockGameService_PenaltyInGame_Call{Call: _e.mock.On("PenaltyInGame", ctx, penaltyType, gameID, penalizedID, value, forceNextRound, seenLogSize)}
+}
+
+func (_c *MockGameService_PenaltyInGame_Call) Run(run func(ctx context.Context, penaltyType models.Outcome, gameID int, penalizedID int, value int, forceNextRound bool, seenLogSize int)) *MockGameService_PenaltyInGame_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 models.Outcome
+		if args[1] != nil {
+			arg1 = args[1].(models.Outcome)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		var arg3 int
+		if args[3] != nil {
+			arg3 = args[3].(int)
+		}
+		var arg4 int
+		if args[4] != nil {
+			arg4 = args[4].(int)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		var arg6 int
+		if args[6] != nil {
+			arg6 = args[6].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+			arg6,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameService_PenaltyInGame_Call) Return(gameView models.GameView, err error) *MockGameService_PenaltyInGame_Call {
+	_c.Call.Return(gameView, err)
+	return _c
+}
+
+func (_c *MockGameService_PenaltyInGame_Call) RunAndReturn(run func(ctx context.Context, penaltyType models.Outcome, gameID int, penalizedID int, value int, forceNextRound bool, seenLogSize int) (models.GameView, error)) *MockGameService_PenaltyInGame_Call {
 	_c.Call.Return(run)
 	return _c
 }
