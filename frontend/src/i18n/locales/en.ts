@@ -566,8 +566,7 @@ const en = {
     enteredBy: 'Entered by {{name}} at {{time}}',
     enteredAt: 'Entered at {{time}}',
     undoneBy: 'Undone by {{name}} at {{time}}',
-    hideUndone_one: 'Hide the undone entry',
-    hideUndone_other: 'Hide undone entries ({{count}})',
+    hideUndone: 'Hide undone entries',
     undoneAt: 'Undone at {{time}}',
   },
   result: {

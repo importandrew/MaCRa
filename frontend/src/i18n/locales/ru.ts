@@ -566,10 +566,7 @@ const ru: Messages = {
     enteredBy: 'Внёс {{name}} в {{time}}',
     enteredAt: 'Внесено в {{time}}',
     undoneBy: 'Отменил {{name}} в {{time}}',
-    hideUndone_one: 'Скрыть отменённую запись',
-    hideUndone_few: 'Скрыть отменённые записи ({{count}})',
-    hideUndone_many: 'Скрыть отменённые записи ({{count}})',
-    hideUndone_other: 'Скрыть отменённые записи ({{count}})',
+    hideUndone: 'Скрыть отменённые записи',
     undoneAt: 'Отменено в {{time}}',
   },
   result: {

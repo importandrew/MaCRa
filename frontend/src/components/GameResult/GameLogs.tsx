@@ -371,7 +371,7 @@ export default function GameLogs({
                 <Checkbox.Control>
                   <Checkbox.Indicator />
                 </Checkbox.Control>
-                {t('logs.hideUndone', { count: undone.length })}
+                {t('logs.hideUndone')}
               </Checkbox.Content>
             </Checkbox>
           )}
