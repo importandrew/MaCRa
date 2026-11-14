@@ -18,7 +18,7 @@ function compareRatings(
     case 'name':
       return a.name.localeCompare(b.name);
     case 'rank':
-      return a.rank - b.rank;
+      return (a.rank ?? 0) - (b.rank ?? 0);
     case 'games':
       return a.games - b.games;
     case 'tp':
@@ -26,6 +26,147 @@ function compareRatings(
     case 'gp':
       return a.gp - b.gp;
   }
+}
+
+function sortRatings(
+  ratings: EventRatingEntry[],
+  sortDescriptor: SortDescriptor
+): EventRatingEntry[] {
+  const column = (sortDescriptor.column as RatingColumn) || 'rank';
+  const direction = sortDescriptor.direction === 'descending' ? -1 : 1;
+  return [...ratings].sort((a, b) => compareRatings(a, b, column) * direction);
+}
+
+// PlayerName is a name in the rating: one line with an ellipsis, so every row
+// has the same height. The full name shows on hover (title) and on a tap,
+// which toggles the name onto as many lines as it needs.
+function PlayerName({ name }: { name: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  return (
+    <button
+      type="button"
+      title={name}
+      aria-expanded={isExpanded}
+      onClick={() => setIsExpanded(!isExpanded)}
+      className={`block w-full cursor-default text-center ${
+        isExpanded ? 'whitespace-normal break-words' : 'truncate'
+      }`}
+    >
+      {name}
+    </button>
+  );
+}
+
+// CELL_CLASS: HeroUI's px-4 leaves too little room for five columns at 320px
+// with a fixed layout; the header uses the same padding.
+const CELL_CLASS = 'px-1';
+
+// RATING_COLUMNS: the numbers get fixed widths that fit their values and
+// their header with the sort arrow ("Игры ˄", "-123"); the name takes the
+// rest. Labels: rating.<id>.
+const RATING_COLUMNS: { id: RatingColumn; width: string }[] = [
+  { id: 'rank', width: 'w-8' },
+  { id: 'name', width: '' },
+  { id: 'games', width: 'w-[3.25rem]' },
+  { id: 'tp', width: 'w-11' },
+  { id: 'gp', width: 'w-12' },
+];
+
+// RatingRow is a row of the rating table: a player, or the separator above
+// the players without a place.
+type RatingRow =
+  | { id: number; kind: 'player'; entry: EventRatingEntry; isBelow: boolean }
+  | { id: 'separator'; kind: 'separator'; label: string };
+
+// RatingTable is the rating: the ranked players, then a separator row and
+// the players below the event's minimum games, greyed, without a place
+// ("—").
+function RatingTable({
+  label,
+  rows,
+  sortDescriptor,
+  onSortChange,
+  emptyText,
+}: {
+  label: string;
+  rows: RatingRow[];
+  sortDescriptor: SortDescriptor;
+  onSortChange: (descriptor: SortDescriptor) => void;
+  emptyText: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Table className="z-0">
+      <Table.ScrollContainer>
+        {/* Fixed layout: the name column takes the room the others leave and
+            never widens the table past the screen. */}
+        <Table.Content
+          className="table-fixed"
+          aria-label={label}
+          sortDescriptor={sortDescriptor}
+          onSortChange={onSortChange}
+        >
+          <Table.Header>
+            {RATING_COLUMNS.map((column) => (
+              <Table.Column
+                key={column.id}
+                id={column.id}
+                allowsSorting
+                isRowHeader={column.id === 'name'}
+                className={`${CELL_CLASS} ${column.width}`}
+              >
+                {({ sortDirection }) => (
+                  <Table.SortableColumnHeader
+                    sortDirection={sortDirection}
+                    className="justify-center gap-0.5"
+                  >
+                    {column.id === 'rank' ? '#' : t(`rating.${column.id}`)}
+                  </Table.SortableColumnHeader>
+                )}
+              </Table.Column>
+            ))}
+          </Table.Header>
+          <Table.Body
+            items={rows}
+            renderEmptyState={() => (
+              <p className="py-6 text-center text-muted">{emptyText}</p>
+            )}
+          >
+            {(row: RatingRow) => {
+              if (row.kind === 'separator') {
+                return (
+                  <Table.Row id={row.id}>
+                    <Table.Cell
+                      colSpan={5}
+                      className={`${CELL_CLASS} bg-default py-1.5 text-start text-xs font-medium text-muted`}
+                    >
+                      {row.label}
+                    </Table.Cell>
+                  </Table.Row>
+                );
+              }
+              // The cells, not the row, carry the colors: HeroUI styles
+              // each cell's background and text.
+              const cell = `${CELL_CLASS} ${row.isBelow ? 'text-muted' : ''}`;
+              return (
+                <Table.Row id={row.id} className="text-center">
+                  <Table.Cell className={cell}>
+                    {row.entry.rank ?? '—'}
+                  </Table.Cell>
+                  <Table.Cell className={cell}>
+                    <PlayerName name={row.entry.name} />
+                  </Table.Cell>
+                  <Table.Cell className={cell}>{row.entry.games}</Table.Cell>
+                  <Table.Cell className={cell}>{row.entry.tp}</Table.Cell>
+                  <Table.Cell className={cell}>{row.entry.gp}</Table.Cell>
+                </Table.Row>
+              );
+            }}
+          </Table.Body>
+        </Table.Content>
+      </Table.ScrollContainer>
+    </Table>
+  );
 }
 
 export default function EventRating() {
@@ -58,14 +199,42 @@ export default function EventRating() {
   const isLoading = layoutLoading || (!!canViewRatings && ratingsLoading);
   const forbidden = !canViewRatings || ratingsForbidden;
 
-  const sortedRatings = useMemo(() => {
-    const ratings = data?.ratings ?? [];
-    const column = (sortDescriptor.column as RatingColumn) || 'rank';
-    const direction = sortDescriptor.direction === 'descending' ? -1 : 1;
-    return [...ratings].sort(
-      (a, b) => compareRatings(a, b, column) * direction
-    );
-  }, [data, sortDescriptor]);
+  // A column sorts each group on its own: the players below the minimum stay
+  // under the separator whatever the order. They have no place, so sorting
+  // by it keeps their order (the rating's). With a minimum of 1 the group
+  // holds only the players who haven't played yet.
+  const minGames = data?.min_games ?? 1;
+  const belowLabel =
+    minGames > 1
+      ? t('rating.belowMinimum', { count: minGames })
+      : t('rating.notPlayedYet');
+  const rows = useMemo((): RatingRow[] => {
+    const ranked = sortRatings(data?.ratings ?? [], sortDescriptor);
+    const below = sortRatings(data?.below_minimum ?? [], sortDescriptor);
+    return [
+      ...ranked.map((entry) => ({
+        id: entry.player_id,
+        kind: 'player' as const,
+        entry,
+        isBelow: false,
+      })),
+      ...(below.length > 0
+        ? [
+            {
+              id: 'separator' as const,
+              kind: 'separator' as const,
+              label: belowLabel,
+            },
+          ]
+        : []),
+      ...below.map((entry) => ({
+        id: entry.player_id,
+        kind: 'player' as const,
+        entry,
+        isBelow: true,
+      })),
+    ];
+  }, [data, sortDescriptor, belowLabel]);
 
   return (
     <LoadingTemplate
@@ -84,95 +253,13 @@ export default function EventRating() {
             {t('events.ratingTitle', { name: event.name })}
           </h1>
 
-          <Table className="z-0">
-            <Table.ScrollContainer>
-              <Table.Content
-                aria-label={t('events.rating')}
-                sortDescriptor={sortDescriptor}
-                onSortChange={setSortDescriptor}
-              >
-                <Table.Header>
-                  <Table.Column
-                    id="rank"
-                    allowsSorting
-                    className="text-center w-[10%]"
-                  >
-                    {({ sortDirection }) => (
-                      <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        #
-                      </Table.SortableColumnHeader>
-                    )}
-                  </Table.Column>
-                  <Table.Column
-                    id="name"
-                    allowsSorting
-                    isRowHeader
-                    className="text-center "
-                  >
-                    {({ sortDirection }) => (
-                      <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        {t('rating.player')}
-                      </Table.SortableColumnHeader>
-                    )}
-                  </Table.Column>
-                  <Table.Column
-                    id="games"
-                    allowsSorting
-                    className="text-center w-[15%]"
-                  >
-                    {({ sortDirection }) => (
-                      <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        {t('rating.games')}
-                      </Table.SortableColumnHeader>
-                    )}
-                  </Table.Column>
-                  <Table.Column
-                    id="tp"
-                    allowsSorting
-                    className="text-center w-[15%]"
-                  >
-                    {({ sortDirection }) => (
-                      <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        {t('rating.tp')}
-                      </Table.SortableColumnHeader>
-                    )}
-                  </Table.Column>
-                  <Table.Column
-                    id="gp"
-                    allowsSorting
-                    className="text-center w-[15%]"
-                  >
-                    {({ sortDirection }) => (
-                      <Table.SortableColumnHeader sortDirection={sortDirection}>
-                        {t('rating.gp')}
-                      </Table.SortableColumnHeader>
-                    )}
-                  </Table.Column>
-                </Table.Header>
-                <Table.Body
-                  items={sortedRatings}
-                  renderEmptyState={() => (
-                    <p className="py-6 text-center text-muted">
-                      {t('rating.noGames')}
-                    </p>
-                  )}
-                >
-                  {(item: EventRatingEntry) => (
-                    <Table.Row
-                      id={item.player_id}
-                      className="text-center even:bg-default/50"
-                    >
-                      <Table.Cell>{item.rank}</Table.Cell>
-                      <Table.Cell>{item.name}</Table.Cell>
-                      <Table.Cell>{item.games}</Table.Cell>
-                      <Table.Cell>{item.tp}</Table.Cell>
-                      <Table.Cell>{item.gp}</Table.Cell>
-                    </Table.Row>
-                  )}
-                </Table.Body>
-              </Table.Content>
-            </Table.ScrollContainer>
-          </Table>
+          <RatingTable
+            label={t('events.rating')}
+            rows={rows}
+            sortDescriptor={sortDescriptor}
+            onSortChange={setSortDescriptor}
+            emptyText={t('rating.noGames')}
+          />
         </div>
       )}
     </LoadingTemplate>

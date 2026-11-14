@@ -19,13 +19,11 @@ func (h Handler) Ratings(c *gin.Context) {
 		return
 	}
 
-	ratings, err := h.event.Ratings(c.Request.Context(), eventID)
+	ratings, err := h.event.Ratings(c.Request.Context(), eventID, userID)
 	if err != nil {
 		httperr.Error(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"ratings": ratings,
-	})
+	c.JSON(http.StatusOK, ratings)
 }

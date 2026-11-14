@@ -24,7 +24,7 @@ type EventService interface {
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)
 	ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit, offset int) (models.EventGames, error)
-	Ratings(ctx context.Context, eventID int) ([]models.EventRatingEntry, error)
+	Ratings(ctx context.Context, eventID, callerID int) (models.EventRatings, error)
 
 	NewGame(ctx context.Context, eventID int, playerIDs []int) (int, error)
 	MainGameInfo(ctx context.Context, eventID, userID int) (models.MainGameInfo, error)
