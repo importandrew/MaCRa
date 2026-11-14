@@ -21,9 +21,9 @@ export const TIME_UP_RULES: TimeUpRule[] = [
 ];
 
 // Limits, mirroring the backend (models/tournament.go).
-export const MIN_TOURS = 3;
+export const MIN_TOURS = 1;
 export const MAX_TOURS = 15;
-export const MIN_TOUR_MINUTES = 30;
+export const MIN_TOUR_MINUTES = 10;
 export const MAX_TOUR_MINUTES = 300;
 export const MIN_EXTRA_HANDS = 1;
 export const MAX_EXTRA_HANDS = 3;

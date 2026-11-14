@@ -39,9 +39,9 @@ var ValidTimeUp = []string{TimeUpFinishHand, TimeUpExtraHands, TimeUpStopNow}
 
 // Limits of the tournament settings (the frontend mirrors them).
 const (
-	MinTours       = 3
+	MinTours       = 1
 	MaxTours       = 15
-	MinTourMinutes = 30
+	MinTourMinutes = 10
 	MaxTourMinutes = 300
 	MinExtraHands  = 1
 	MaxExtraHands  = 3

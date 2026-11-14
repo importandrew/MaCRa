@@ -1,3 +1,4 @@
+import type { GameTimer } from './GameTimer';
 import type { GameRoundLogs } from './GameResult';
 import type { GameRules } from './GameRules';
 
@@ -18,6 +19,8 @@ export interface GameData {
   log: GameRoundLogs;
   // tour: the tour and table of a tournament game; missing otherwise.
   tour?: { tour: number; table: number };
+  // timer: a started tournament game's timer; missing otherwise.
+  timer?: GameTimer;
 }
 
 export interface PlayerScore {

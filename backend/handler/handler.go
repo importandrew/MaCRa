@@ -131,5 +131,6 @@ func (h *Handler) registerEventActions(event *gin.RouterGroup) {
 		eventGame.POST("/penalty", h.event.GamePenalty)
 		eventGame.POST("/false-mahjong", h.event.GameFalseMahjong)
 		eventGame.POST("/finish", h.event.FinishGame)
+		eventGame.POST("/time", h.event.AddTime)
 	}
 }

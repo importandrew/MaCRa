@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Card, useOverlayState } from '@heroui/react';
+import { Button, Card, useOverlayState } from '@heroui/react';
+import { useState } from 'react';
 import type { TourState } from '../../models/Tour';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
@@ -8,8 +9,10 @@ import {
   tourAction,
 } from '../../providers/event/tournamentApi';
 import Confirm from '../Confirm';
+import AddTimeModal from './AddTimeModal';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
+import { getTimeFormatted } from '../../utils/date-tools';
 
 // WIND_KANJI: the starting seats as the table shows them.
 const WIND_KANJI = { east: '東', south: '南', west: '西', north: '北' };
@@ -46,6 +49,20 @@ export default function ToursCard({
   const { isPending: isActing, run: runAct } = useSubmitOnce();
   const finishConfirm = useOverlayState();
   const abortConfirm = useOverlayState();
+
+  // tourEnds: when the live tour's time is up, before time added to a
+  // table.
+  const tourEnds =
+    isLive && current?.started_at && current.minutes
+      ? new Date(
+          new Date(current.started_at).getTime() + current.minutes * 60_000
+        ).toISOString()
+      : null;
+  // timeFor: the table a referee adds time to (the modal is open).
+  const [timeFor, setTimeFor] = useState<{
+    gameId: number;
+    number: number;
+  } | null>(null);
 
   const act = (action: 'publish' | 'start' | 'finish' | 'abort') =>
     runAct(async () => {
@@ -173,6 +190,11 @@ export default function ToursCard({
 
         {canRun && isLive && (
           <>
+            {tourEnds && (
+              <p className="text-sm">
+                {t('tours.endsAt', { time: getTimeFormatted(tourEnds) })}
+              </p>
+            )}
             <p className="text-sm text-muted">
               {playing > 0
                 ? t('tours.playing', { count: playing })
@@ -207,9 +229,23 @@ export default function ToursCard({
                   {isLive && (
                     <span className="font-normal text-muted">
                       {t(`tours.tableStatus.${table.status}`)}
+                      {table.extra_minutes > 0 &&
+                        ` · ${t('tours.extra', { n: table.extra_minutes })}`}
                     </span>
                   )}
                 </p>
+                {canRun && isLive && table.status === 'live' && (
+                  <Button
+                    size="sm"
+                    variant="tertiary"
+                    className="float-end"
+                    onPress={() =>
+                      setTimeFor({ gameId: table.game_id, number: table.table })
+                    }
+                  >
+                    {t('tours.addTime')}
+                  </Button>
+                )}
                 <ul>
                   {table.seats.map((seat) => (
                     <li key={seat.user_id} className="flex items-center gap-2">
@@ -228,6 +264,12 @@ export default function ToursCard({
           </ul>
         )}
       </Card.Content>
+      <AddTimeModal
+        eventId={eventId}
+        table={timeFor}
+        onClose={() => setTimeFor(null)}
+        onAdded={onChanged}
+      />
       <Confirm
         isOpen={finishConfirm.isOpen}
         onClose={finishConfirm.close}

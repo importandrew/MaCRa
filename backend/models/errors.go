@@ -132,6 +132,14 @@ var (
 	// ErrTourFinished means the game's tour is finished: its entries can't
 	// be undone any more.
 	ErrTourFinished = errors.New("tour finished")
+	// ErrTimeUp means the tour's time is up and its rule ends the game at
+	// once: no more entries; the game is to be finished.
+	ErrTimeUp = errors.New("time is up")
+	// ErrSettingFrozen means a tournament setting can no longer change (e.g.
+	// the time-up rule after the first tour started); sent with "setting".
+	ErrSettingFrozen = errors.New("setting frozen")
+	// ErrInvalidExtraMinutes means the time added to a table is out of range.
+	ErrInvalidExtraMinutes = errors.New("invalid extra minutes")
 	// ErrTourNotFound means there is no such tour, or not in that state.
 	ErrTourNotFound = errors.New("tour not found")
 	// ErrInvalidSeating means a seating method isn't one of the known ones.
@@ -196,6 +204,7 @@ var Errors = map[error]APIError{
 	ErrInvalidEventSettings:      {http.StatusBadRequest, "invalid_event_settings"},
 	ErrInvalidPlayerLimit:        {http.StatusBadRequest, "invalid_player_limit"},
 	ErrInvalidSeating:            {http.StatusBadRequest, "invalid_seating"},
+	ErrInvalidExtraMinutes:       {http.StatusBadRequest, "invalid_extra_minutes"},
 	ErrInvalidTournamentSettings: {http.StatusBadRequest, "invalid_tournament_settings"},
 	ErrNotTournament:             {http.StatusBadRequest, "not_tournament"},
 	ErrInvalidAuthToken:          {http.StatusBadRequest, "invalid_auth_token"},
@@ -244,6 +253,8 @@ var Errors = map[error]APIError{
 	ErrTablesIncomplete:     {http.StatusConflict, "tables_incomplete"},
 	ErrTablesStillPlaying:   {http.StatusConflict, "tables_still_playing"},
 	ErrTourFinished:         {http.StatusConflict, "tour_finished"},
+	ErrTimeUp:               {http.StatusConflict, "time_is_up"},
+	ErrSettingFrozen:        {http.StatusConflict, "setting_frozen"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

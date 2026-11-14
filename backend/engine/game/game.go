@@ -17,6 +17,12 @@ type Game struct {
 	rules          models.GameRules
 	score          models.GameScore
 	logSize        int // round log entries applied: results and penalties
+	// lastHand is the hand after which the game ends: rules.Hands, or fewer
+	// once a tournament tour's time is up (LimitHands); 0 means rules.Hands.
+	lastHand int
+	// stoppedAtTime: the tour's time ran out with the rule "the game ends at
+	// once" (StopAtTime); no more entries.
+	stoppedAtTime bool
 }
 
 type Config struct {
@@ -84,4 +90,52 @@ func (g *Game) Rules() models.GameRules {
 
 func (g *Game) Score() models.GameScore {
 	return g.score
+}
+
+// LastHand returns the hand after which the game ends.
+func (g *Game) LastHand() int {
+	if g.lastHand == 0 || g.lastHand > g.rules.Hands {
+		return g.rules.Hands
+	}
+	return g.lastHand
+}
+
+// LimitHands makes the game end after hand last at the latest (when a
+// tournament tour's time is up: the hand in progress, and maybe a few more).
+// It never moves the end later than the rules' number of hands, nor before
+// the hand in progress.
+func (g *Game) LimitHands(last int) {
+	last = max(last, g.round)
+	if last < g.LastHand() {
+		g.lastHand = last
+	}
+}
+
+// StopAtTime ends a live game at once because the tour's time is up with the
+// rule "the game ends at once": the hand in progress doesn't count, and later
+// entries are refused with models.ErrTimeUp.
+func (g *Game) StopAtTime() error {
+	if !g.IsLive() {
+		return nil
+	}
+	g.stoppedAtTime = true
+	return g.End()
+}
+
+// StoppedAtTime reports whether StopAtTime ended the game.
+func (g *Game) StoppedAtTime() bool {
+	return g.stoppedAtTime
+}
+
+// checkLive returns nil for a live game, models.ErrTimeUp for one stopped
+// at time and models.ErrGameNotLive otherwise.
+func (g *Game) checkLive() error {
+	switch {
+	case g.IsLive():
+		return nil
+	case g.stoppedAtTime:
+		return models.ErrTimeUp
+	default:
+		return models.ErrGameNotLive
+	}
 }

@@ -194,7 +194,16 @@ func (authCtx EventAuthContext) canAbortGame() bool {
 // canFinishGame: referees at any time; the seated players unless the event's
 // settings leave it to referees.
 func (authCtx EventAuthContext) canFinishGame() bool {
-	if !slices.Contains(models.AllowsFinishGameInEvent, authCtx.Event.Type) || !authCtx.isGameLive() {
+	if !authCtx.isGameLive() {
+		return false
+	}
+	// In a tournament nobody finishes a game early; a game stopped at its
+	// tour's time is finished by its table or a referee.
+	if authCtx.Event.Type == models.EventTournament {
+		return authCtx.Game.StoppedAtTime &&
+			(authCtx.IsSeatedInGame || authCtx.hasRole(models.EventReferee))
+	}
+	if !slices.Contains(models.AllowsFinishGameInEvent, authCtx.Event.Type) {
 		return false
 	}
 	return authCtx.hasRole(models.EventReferee) ||

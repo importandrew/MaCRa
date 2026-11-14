@@ -13,6 +13,8 @@ export type Tour = {
   seating: SeatingMethod;
   // published_at: null while the seating is a draft.
   published_at: string | null;
+  // minutes: the tour's length, set when it starts.
+  minutes: number | null;
   started_at: string | null;
   finished_at: string | null;
 };
@@ -30,6 +32,8 @@ export type TourTable = {
   // status: the table's game: created (tour not started), live, ended,
   // aborted.
   status: 'created' | 'live' | 'ended' | 'aborted';
+  // extra_minutes: time a referee added to the table.
+  extra_minutes: number;
   // seats: east first.
   seats: TourSeat[];
 };

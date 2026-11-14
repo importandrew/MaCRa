@@ -41,6 +41,8 @@ export default function TournamentSettingsCard({
   const settings = draft ?? saved;
   const { isPending, run } = useSubmitOnce();
   const isFinished = Boolean(event.finished_at);
+  // What happens when time is up is frozen once the first tour started.
+  const isStarted = Boolean(event.started_at);
 
   if (!saved || !settings) return null;
 
@@ -125,22 +127,29 @@ export default function TournamentSettingsCard({
                       : 0,
                 })
               }
-              isDisabled={isFinished}
+              isDisabled={isFinished || isStarted}
               optionLabel={(option) => t(`tournament.timeUp.${option}`)}
             />
-            {settings.time_up === 'extra_hands' && !isFinished && (
-              <>
-                <p className="text-sm">{t('tournament.extraHands')}</p>
-                <ListStepper
-                  label={t('tournament.extraHands')}
-                  values={range(MIN_EXTRA_HANDS, MAX_EXTRA_HANDS)}
-                  value={settings.extra_hands}
-                  onChange={(extra_hands) =>
-                    setDraft({ ...settings, extra_hands })
-                  }
-                />
-              </>
+            {isStarted && !isFinished && (
+              <p className="text-xs text-muted">
+                {t('tournament.timeUpFrozen')}
+              </p>
             )}
+            {settings.time_up === 'extra_hands' &&
+              !isFinished &&
+              !isStarted && (
+                <>
+                  <p className="text-sm">{t('tournament.extraHands')}</p>
+                  <ListStepper
+                    label={t('tournament.extraHands')}
+                    values={range(MIN_EXTRA_HANDS, MAX_EXTRA_HANDS)}
+                    value={settings.extra_hands}
+                    onChange={(extra_hands) =>
+                      setDraft({ ...settings, extra_hands })
+                    }
+                  />
+                </>
+              )}
           </Form>
         </Card.Content>
       </Card>

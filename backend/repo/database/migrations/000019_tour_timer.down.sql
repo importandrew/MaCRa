@@ -1,0 +1,2 @@
+ALTER TABLE games DROP COLUMN IF EXISTS extra_minutes;
+ALTER TABLE tours DROP COLUMN IF EXISTS minutes;

@@ -111,3 +111,31 @@ func (h Handler) tourAction(c *gin.Context, action func(ctx context.Context, eve
 	}
 	c.Status(http.StatusNoContent)
 }
+
+type addTimeRequest struct {
+	Minutes int `json:"minutes" binding:"required"`
+}
+
+// AddTime adds minutes to a table of the live tour
+// (POST /event/:id/game/:gameId/time, {"minutes": 5}). It needs
+// models.CapRunTournament.
+func (h Handler) AddTime(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+
+	var req addTimeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httperr.InvalidRequest(c, err)
+		return
+	}
+
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	if err := h.event.AddTime(c.Request.Context(), eventID, reqctx.GetGameID(c), req.Minutes); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}

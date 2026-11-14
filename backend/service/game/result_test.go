@@ -83,6 +83,7 @@ func TestGameResult(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 
@@ -118,6 +119,7 @@ func TestGameResults(t *testing.T) {
 
 	t.Run("sorted per game", func(t *testing.T) {
 		mockGameRepo := NewMockGameRepo(t)
+		mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockGameRepo.EXPECT().GameResults(mock.Anything, []int{100, 200}).Return(
 			map[int]models.GameResult{
 				100: {
@@ -148,6 +150,7 @@ func TestGameResults(t *testing.T) {
 
 	t.Run("repo error", func(t *testing.T) {
 		mockGameRepo := NewMockGameRepo(t)
+		mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 		mockGameRepo.EXPECT().GameResults(mock.Anything, []int{1}).
 			Return(nil, errors.New("database error"))
 

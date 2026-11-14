@@ -34,8 +34,10 @@ type Tour struct {
 	Seating SeatingMethod `db:"seating" json:"seating"`
 	// PublishedAt is nil while the seating is a draft.
 	PublishedAt *time.Time `db:"published_at" json:"published_at"`
-	StartedAt   *time.Time `db:"started_at" json:"started_at"`
-	FinishedAt  *time.Time `db:"finished_at" json:"finished_at"`
+	// Minutes is the tour's length, set when it starts; nil before.
+	Minutes    *int       `db:"minutes" json:"minutes"`
+	StartedAt  *time.Time `db:"started_at" json:"started_at"`
+	FinishedAt *time.Time `db:"finished_at" json:"finished_at"`
 }
 
 // SeatsPerTable is the number of players at a table.
@@ -56,7 +58,9 @@ type TourTable struct {
 	GameID int `json:"game_id"`
 	// Status is the table's game status: created, live, ended or aborted.
 	Status GameStatus `json:"status"`
-	Seats  []Seat     `json:"seats"`
+	// ExtraMinutes is the time a referee added to the table.
+	ExtraMinutes int    `json:"extra_minutes"`
+	Seats        []Seat `json:"seats"`
 }
 
 // TourState is a tournament's tours as its desk shows them: the current tour
@@ -89,3 +93,31 @@ type TourSeat struct {
 	Tour  int `json:"tour"`
 	Table int `json:"table"`
 }
+
+// GameTimeLimit is a tournament game's time: when its time is up (the
+// tour's start, plus its length, plus the time added to the table) and the
+// tournament's rule for what happens then.
+type GameTimeLimit struct {
+	EndsAt     time.Time `db:"ends_at"`
+	TimeUp     string    `db:"time_up"`
+	ExtraHands int       `db:"extra_hands"`
+}
+
+// GameTimer is a tournament game's timer as a table shows it.
+type GameTimer struct {
+	EndsAt time.Time `json:"ends_at"`
+	TimeUp string    `json:"time_up"`
+	// LastHand is the last hand to play once the time is up (with
+	// TimeUpFinishHand or TimeUpExtraHands); 0 before.
+	LastHand int `json:"last_hand,omitempty"`
+	// Stopped: the time is up with TimeUpStopNow; no more entries, the game
+	// is to be finished.
+	Stopped bool `json:"stopped,omitempty"`
+}
+
+// Limits of the time a referee adds to a table at once (the frontend
+// mirrors them).
+const (
+	MinExtraMinutes = 1
+	MaxExtraMinutes = 60
+)

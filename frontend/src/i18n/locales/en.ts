@@ -150,6 +150,10 @@ const en = {
     invalid_seating: 'Unknown seating method',
     tables_still_playing: '{{playing}} tables are still playing',
     tour_finished: 'The tour is finished: its entries can no longer be undone',
+    time_is_up:
+      'Time is up: the game ends at once. Finish it from the table menu.',
+    setting_frozen: 'This setting can no longer change',
+    invalid_extra_minutes: 'The time to add is out of range',
   },
   auth: {
     tabs: 'Authentication',
@@ -205,7 +209,21 @@ const en = {
     in_progress: 'In progress',
     finished: 'Finished',
   },
+  timer: {
+    left: 'Time left',
+    up: 'Time is up. Tap Refresh.',
+    lastHand: 'Time is up: {{hand}} is the last hand',
+    stopped: 'Time is up: the game is over. Finish it from the menu.',
+  },
   tours: {
+    endsAt: 'Time is up at {{time}}.',
+    addTime: 'Add time',
+    addTimeTitle: 'Add time to table {{table}}',
+    minutes: 'Minutes',
+    minutesRange: 'From {{min}} to {{max}} minutes',
+    addMinutes: 'Add {{n}} min',
+    timeAdded: '{{n}} minutes added to table {{table}}',
+    extra: '+{{n}} min',
     start: 'Start tour {{n}}',
     playing_one: '{{count}} table is still playing.',
     playing_other: '{{count}} tables are still playing.',
@@ -284,6 +302,7 @@ const en = {
     withdrewMark: 'withdrew',
   },
   tournament: {
+    timeUpFrozen: 'The first tour has started: this can no longer change.',
     title: 'Tournament',
     hint: 'Tours and their length, and what happens when a tour’s time is up.',
     tours: 'Tours',
