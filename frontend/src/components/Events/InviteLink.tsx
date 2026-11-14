@@ -14,6 +14,10 @@ import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 import { copyText } from '../../utils/copyText';
 
+// QR_SIZE and QR_LOGO_SIZE: the code and the logo in its middle, in px.
+const QR_SIZE = 192;
+const QR_LOGO_SIZE = 40;
+
 // InviteLink is the invite link in Manage → Members: whoever opens it while
 // signed in becomes a player. The owner turns it on, shares it (copy, the
 // phone's share sheet, or the QR code to scan), replaces it if it leaked
@@ -86,7 +90,21 @@ export default function InviteLink({ eventId }: { eventId: number }) {
       {/* White around the code: scanners need a quiet zone, also in dark
           mode. */}
       <div className="rounded-xl bg-white p-3">
-        <QRCodeSVG value={url} size={192} aria-label={t('invite.qr')} />
+        {/* The logo covers the middle of the code: level H (the code still
+            reads with ~30% of it hidden) and a logo ~20% wide, with the
+            modules under it cleared (excavate). */}
+        <QRCodeSVG
+          value={url}
+          size={QR_SIZE}
+          level="H"
+          imageSettings={{
+            src: '/makura.png',
+            height: QR_LOGO_SIZE,
+            width: QR_LOGO_SIZE,
+            excavate: true,
+          }}
+          aria-label={t('invite.qr')}
+        />
       </div>
       <p className="w-full break-all text-center text-sm">{url}</p>
       <div className="flex flex-wrap justify-center gap-2">
