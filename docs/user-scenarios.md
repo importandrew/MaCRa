@@ -184,7 +184,7 @@ Applies to regular events; tournament games follow area 8.
 
 ### Statistics
 
-- **Player, in one event**: from the event's ended games. Per game: games, places 1st–4th (a tie in GP shares the better place), average TP and GP, best and worst game (GP). Per hand: hands played, wins (with self-draw and deal-in counts) and their share of the hands, average and biggest winning hand, deal-ins (the player dealt in to someone's win) and draws with their shares, penalties and false mahjongs.
+- **Player, in one event**: from the event's ended games. Per game: games, places (the average place; a tap expands 1st–4th with their share of the games; a tie in GP shares the better place), average TP and GP, best and worst game (GP). Per hand: hands played, wins and their share of the hands (a tap expands self-draw and deal-in), average and biggest winning hand, deal-ins (the player dealt in to someone's win) and draws with their shares, penalties (a tap expands point penalties and false mahjongs).
 - **Where**: one's own on `/history`, tab "Statistics" next to "Games", for the selected event; anyone's from the event's rating: a tap on a player's row opens `/event/N/player/M` with their name and statistics. One's own statistics are always visible (while the user can open the event); other players' follow the event's ratings reach, as the rating does.
 - **Later**: the event's statistics as a whole (the same figures for all players, the biggest hand and who won it); a player's statistics over a chosen set of their events.
 
