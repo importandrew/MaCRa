@@ -59,11 +59,18 @@ export default function PlayerAutocomplete({
     (picked && String(picked.id) === selectedKey ? picked : null);
 
   // The text follows the selection when it changes from outside (Clear,
-  // Shuffle, a reset after adding).
-  const [shownKey, setShownKey] = useState<string | null>(selectedKey);
-  if (selectedKey !== shownKey) {
-    setShownKey(selectedKey);
-    setInputValue(selected?.name ?? '');
+  // Shuffle, a reset after adding), and when the selected player's name
+  // becomes known: seats filled before the items load (Play again fills
+  // /new at once, the event's members come later) get their names then.
+  // Typing changes neither, so it isn't overwritten.
+  const selectedName = selected?.name ?? '';
+  const [synced, setSynced] = useState<{ key: string | null; name: string }>({
+    key: null,
+    name: '',
+  });
+  if (selectedKey !== synced.key || selectedName !== synced.name) {
+    setSynced({ key: selectedKey, name: selectedName });
+    setInputValue(selectedName);
   }
 
   // Items are filtered here (controlled items get no filtering from the
@@ -76,7 +83,10 @@ export default function PlayerAutocomplete({
   const handleSelectionChange = (key: Key | null) => {
     const player = items.find((p) => String(p.id) === String(key)) ?? null;
     setPicked(player);
-    setShownKey(key == null ? null : String(key));
+    setSynced({
+      key: key == null ? null : String(key),
+      name: player?.name ?? '',
+    });
     setInputValue(player?.name ?? '');
     onSelectionChange(key == null ? null : Number(key));
     // React Aria keeps focus in the input after a pick (it returns focus there
