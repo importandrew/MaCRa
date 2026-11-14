@@ -37,9 +37,15 @@ func TestSearchByName(t *testing.T) {
 			return out
 		}
 
-		// Exact (any case) first, then prefixes, then the rest; by name and ID.
-		assert.Equal(t, []string{"Anna", "anna", "Annabel", "Joanna"}, names("anna", 20))
-		assert.Equal(t, []string{"Anna", "anna"}, names("anna", 2), "the limit")
+		// Exact (any case) first, then prefixes, then the rest. Within a group
+		// the order is the database's collation (CI's UTF-8 locale puts
+		// "anna" before "Anna", a C collation the other way), so the exact
+		// matches are compared as a set.
+		found := names("anna", 20)
+		require.Len(t, found, 4)
+		assert.ElementsMatch(t, []string{"Anna", "anna"}, found[:2])
+		assert.Equal(t, []string{"Annabel", "Joanna"}, found[2:])
+		assert.ElementsMatch(t, []string{"Anna", "anna"}, names("anna", 2), "the limit")
 		// LIKE's wildcards are searched as typed.
 		assert.Equal(t, []string{"Ann_a"}, names("n_a", 20))
 		assert.Equal(t, []string{"Ann%"}, names("n%", 20))
