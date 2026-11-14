@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -34,8 +35,20 @@ func (s *Service) CancelTour(ctx context.Context, eventID int) error {
 // next tour would be, for its desk.
 func (s *Service) Tours(ctx context.Context, eventID int) (models.TourState, error) {
 	state, err := s.repo.TourState(ctx, eventID)
-	if err != nil || state.Current == nil || len(state.Tables) == 0 {
+	if err != nil {
 		return state, err
+	}
+	plan, err := s.repo.SeatingPlan(ctx, eventID)
+	switch {
+	case errors.Is(err, models.ErrNoSeatingPlan):
+	case err != nil:
+		return state, err
+	default:
+		info := seating.PlanInfo(plan)
+		state.Plan = &info
+	}
+	if state.Current == nil || len(state.Tables) == 0 {
+		return state, nil
 	}
 
 	// The seating's quality, against the tours before it.
@@ -95,9 +108,57 @@ func seatingFunc(how models.Seating) (models.TablesFunc, error) {
 			}
 			return seating.Interval(input, step), nil
 		}, nil
+	case models.SeatingFixed:
+		return seating.Fixed, nil
 	default:
 		return nil, fmt.Errorf("%w: %q", models.ErrInvalidSeating, how.Method)
 	}
+}
+
+// planSearchTime is how long a seating for all tours may search for fewer
+// repeat meetings.
+const planSearchTime = 5 * time.Second
+
+// GenerateSeatingPlan prepares the seating for all the remaining tours at
+// once (from the one after the last published), with as few repeat meetings
+// as the search finds, replacing an earlier plan.
+func (s *Service) GenerateSeatingPlan(ctx context.Context, eventID int) (models.SeatingPlanInfo, error) {
+	input, first, last, err := s.repo.SeatingPlanInput(ctx, eventID)
+	if err != nil {
+		return models.SeatingPlanInfo{}, err
+	}
+	tours, err := seating.Plan(input, last-first+1, time.Now().Add(planSearchTime))
+	if err != nil {
+		return models.SeatingPlanInfo{}, err
+	}
+	plan := models.PlanTours{}
+	for i, tables := range tours {
+		plan[first+i] = tables
+	}
+	return s.savePlan(ctx, eventID, models.PlanGenerated, plan)
+}
+
+// ImportSeatingPlan stores a seating for several tours read from a CSV file
+// (seating.ParseCSV), replacing an earlier plan.
+func (s *Service) ImportSeatingPlan(ctx context.Context, eventID int, file string) (models.SeatingPlanInfo, error) {
+	plan, err := seating.ParseCSV(file)
+	if err != nil {
+		return models.SeatingPlanInfo{}, err
+	}
+	return s.savePlan(ctx, eventID, models.PlanImported, plan)
+}
+
+// savePlan stores a seating plan and describes it.
+func (s *Service) savePlan(ctx context.Context, eventID int, source models.SeatingPlanSource, plan models.PlanTours) (models.SeatingPlanInfo, error) {
+	if err := s.repo.SaveSeatingPlan(ctx, eventID, source, plan); err != nil {
+		return models.SeatingPlanInfo{}, err
+	}
+	return seating.PlanInfo(models.SeatingPlan{Source: source, CreatedAt: time.Now().UTC(), Tours: plan}), nil
+}
+
+// DeleteSeatingPlan deletes the seating prepared for all tours.
+func (s *Service) DeleteSeatingPlan(ctx context.Context, eventID int) error {
+	return s.repo.DeleteSeatingPlan(ctx, eventID)
 }
 
 // StartTour starts the published tour: its games go live.

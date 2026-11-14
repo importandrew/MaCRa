@@ -788,6 +788,63 @@ func (_c *MockEventRepo_DeclineJoinRequest_Call) RunAndReturn(run func(ctx conte
 	return _c
 }
 
+// DeleteSeatingPlan provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) DeleteSeatingPlan(ctx context.Context, eventID int) error {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteSeatingPlan")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_DeleteSeatingPlan_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteSeatingPlan'
+type MockEventRepo_DeleteSeatingPlan_Call struct {
+	*mock.Call
+}
+
+// DeleteSeatingPlan is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) DeleteSeatingPlan(ctx any, eventID any) *MockEventRepo_DeleteSeatingPlan_Call {
+	return &MockEventRepo_DeleteSeatingPlan_Call{Call: _e.mock.On("DeleteSeatingPlan", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_DeleteSeatingPlan_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_DeleteSeatingPlan_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_DeleteSeatingPlan_Call) Return(err error) *MockEventRepo_DeleteSeatingPlan_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_DeleteSeatingPlan_Call) RunAndReturn(run func(ctx context.Context, eventID int) error) *MockEventRepo_DeleteSeatingPlan_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Draw provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) Draw(ctx context.Context, eventID int) error {
 	ret := _mock.Called(ctx, eventID)
@@ -2279,6 +2336,75 @@ func (_c *MockEventRepo_RulesFrozen_Call) RunAndReturn(run func(ctx context.Cont
 	return _c
 }
 
+// SaveSeatingPlan provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) SaveSeatingPlan(ctx context.Context, eventID int, source models.SeatingPlanSource, tours models.PlanTours) error {
+	ret := _mock.Called(ctx, eventID, source, tours)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveSeatingPlan")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.SeatingPlanSource, models.PlanTours) error); ok {
+		r0 = returnFunc(ctx, eventID, source, tours)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockEventRepo_SaveSeatingPlan_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveSeatingPlan'
+type MockEventRepo_SaveSeatingPlan_Call struct {
+	*mock.Call
+}
+
+// SaveSeatingPlan is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - source models.SeatingPlanSource
+//   - tours models.PlanTours
+func (_e *MockEventRepo_Expecter) SaveSeatingPlan(ctx any, eventID any, source any, tours any) *MockEventRepo_SaveSeatingPlan_Call {
+	return &MockEventRepo_SaveSeatingPlan_Call{Call: _e.mock.On("SaveSeatingPlan", ctx, eventID, source, tours)}
+}
+
+func (_c *MockEventRepo_SaveSeatingPlan_Call) Run(run func(ctx context.Context, eventID int, source models.SeatingPlanSource, tours models.PlanTours)) *MockEventRepo_SaveSeatingPlan_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 models.SeatingPlanSource
+		if args[2] != nil {
+			arg2 = args[2].(models.SeatingPlanSource)
+		}
+		var arg3 models.PlanTours
+		if args[3] != nil {
+			arg3 = args[3].(models.PlanTours)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_SaveSeatingPlan_Call) Return(err error) *MockEventRepo_SaveSeatingPlan_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockEventRepo_SaveSeatingPlan_Call) RunAndReturn(run func(ctx context.Context, eventID int, source models.SeatingPlanSource, tours models.PlanTours) error) *MockEventRepo_SaveSeatingPlan_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SeatingHistory provides a mock function for the type MockEventRepo
 func (_mock *MockEventRepo) SeatingHistory(ctx context.Context, eventID int, beforeNumber int) (models.SeatingInput, error) {
 	ret := _mock.Called(ctx, eventID, beforeNumber)
@@ -2347,6 +2473,150 @@ func (_c *MockEventRepo_SeatingHistory_Call) Return(seatingInput models.SeatingI
 }
 
 func (_c *MockEventRepo_SeatingHistory_Call) RunAndReturn(run func(ctx context.Context, eventID int, beforeNumber int) (models.SeatingInput, error)) *MockEventRepo_SeatingHistory_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SeatingPlan provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) SeatingPlan(ctx context.Context, eventID int) (models.SeatingPlan, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SeatingPlan")
+	}
+
+	var r0 models.SeatingPlan
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.SeatingPlan, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.SeatingPlan); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Get(0).(models.SeatingPlan)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_SeatingPlan_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SeatingPlan'
+type MockEventRepo_SeatingPlan_Call struct {
+	*mock.Call
+}
+
+// SeatingPlan is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) SeatingPlan(ctx any, eventID any) *MockEventRepo_SeatingPlan_Call {
+	return &MockEventRepo_SeatingPlan_Call{Call: _e.mock.On("SeatingPlan", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_SeatingPlan_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_SeatingPlan_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_SeatingPlan_Call) Return(seatingPlan models.SeatingPlan, err error) *MockEventRepo_SeatingPlan_Call {
+	_c.Call.Return(seatingPlan, err)
+	return _c
+}
+
+func (_c *MockEventRepo_SeatingPlan_Call) RunAndReturn(run func(ctx context.Context, eventID int) (models.SeatingPlan, error)) *MockEventRepo_SeatingPlan_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SeatingPlanInput provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) SeatingPlanInput(ctx context.Context, eventID int) (models.SeatingInput, int, int, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SeatingPlanInput")
+	}
+
+	var r0 models.SeatingInput
+	var r1 int
+	var r2 int
+	var r3 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) (models.SeatingInput, int, int, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int) models.SeatingInput); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		r0 = ret.Get(0).(models.SeatingInput)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int) int); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Get(1).(int)
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, int) int); ok {
+		r2 = returnFunc(ctx, eventID)
+	} else {
+		r2 = ret.Get(2).(int)
+	}
+	if returnFunc, ok := ret.Get(3).(func(context.Context, int) error); ok {
+		r3 = returnFunc(ctx, eventID)
+	} else {
+		r3 = ret.Error(3)
+	}
+	return r0, r1, r2, r3
+}
+
+// MockEventRepo_SeatingPlanInput_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SeatingPlanInput'
+type MockEventRepo_SeatingPlanInput_Call struct {
+	*mock.Call
+}
+
+// SeatingPlanInput is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+func (_e *MockEventRepo_Expecter) SeatingPlanInput(ctx any, eventID any) *MockEventRepo_SeatingPlanInput_Call {
+	return &MockEventRepo_SeatingPlanInput_Call{Call: _e.mock.On("SeatingPlanInput", ctx, eventID)}
+}
+
+func (_c *MockEventRepo_SeatingPlanInput_Call) Run(run func(ctx context.Context, eventID int)) *MockEventRepo_SeatingPlanInput_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_SeatingPlanInput_Call) Return(seatingInput models.SeatingInput, n int, n1 int, err error) *MockEventRepo_SeatingPlanInput_Call {
+	_c.Call.Return(seatingInput, n, n1, err)
+	return _c
+}
+
+func (_c *MockEventRepo_SeatingPlanInput_Call) RunAndReturn(run func(ctx context.Context, eventID int) (models.SeatingInput, int, int, error)) *MockEventRepo_SeatingPlanInput_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -37,7 +37,8 @@ type generateTourRequest struct {
 
 // GenerateTour drafts the next tour's seating, replacing an earlier draft
 // (POST /event/:id/tours, {"seating": "interval", "step": 2}; the step only
-// for "interval"). It needs
+// for "interval"; "fixed" takes the tour from the seating prepared for all
+// tours). It needs
 // models.CapRunTournament.
 func (h Handler) GenerateTour(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
@@ -59,6 +60,75 @@ func (h Handler) GenerateTour(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, tour)
+}
+
+// GenerateSeatingPlan prepares the seating for all the remaining tours,
+// replacing an earlier plan (POST /event/:id/tours/plan). It needs
+// models.CapRunTournament.
+func (h Handler) GenerateSeatingPlan(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	info, err := h.event.GenerateSeatingPlan(c.Request.Context(), eventID)
+	if err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, info)
+}
+
+// maxSeatingFile bounds an imported seating file: 172 players for 15 tours
+// take about 20 KB.
+const maxSeatingFile = 256 << 10
+
+type importSeatingPlanRequest struct {
+	// CSV is the file's text: "tour,table,east,south,west,north" per table.
+	CSV string `json:"csv" binding:"required"`
+}
+
+// ImportSeatingPlan stores a seating for several tours from a CSV file,
+// replacing an earlier plan (PUT /event/:id/tours/plan, {"csv": "…"}). It
+// needs models.CapRunTournament.
+func (h Handler) ImportSeatingPlan(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxSeatingFile)
+	var req importSeatingPlanRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httperr.InvalidRequest(c, err)
+		return
+	}
+
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	info, err := h.event.ImportSeatingPlan(c.Request.Context(), eventID, req.CSV)
+	if err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, info)
+}
+
+// DeleteSeatingPlan deletes the seating prepared for all tours
+// (DELETE /event/:id/tours/plan). It needs models.CapRunTournament.
+func (h Handler) DeleteSeatingPlan(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	if err := h.event.DeleteSeatingPlan(c.Request.Context(), eventID); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
 
 // CancelTour cancels the drafted or published seating of the tour not started

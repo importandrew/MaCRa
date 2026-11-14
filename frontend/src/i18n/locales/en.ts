@@ -147,6 +147,21 @@ const en = {
     all_tours_played: 'All tours have been played',
     tables_incomplete: '{{missing}} players are missing for whole tables',
     tour_not_found: 'No published seating to cancel',
+    seating_file_empty: 'The file has no tables',
+    seating_file_row:
+      'Line {{line}}: expected six whole numbers from 1 — tour, table, east, south, west, north',
+    seating_file_table_twice:
+      'Line {{line}}: table {{table}} of tour {{tour}} comes twice',
+    seating_file_number_twice:
+      'Line {{line}}: number {{number}} is seated twice in tour {{tour}}',
+    seating_file_table_missing:
+      'Tour {{tour}} has no table {{table}}: tables go 1, 2, 3, …',
+    no_seating_plan: 'No seating is prepared for all tours',
+    seating_plan_no_tour: 'The prepared seating has no tour {{tour}}',
+    seating_plan_absent:
+      'Tour {{tour}} of the prepared seating seats numbers who don’t play (withdrew or no such participant): {{numbers}}. Pick another method for this tour.',
+    seating_plan_unseated:
+      'Tour {{tour}} of the prepared seating leaves out participants {{numbers}}',
     invalid_seating: 'Unknown seating method',
     tables_still_playing: '{{playing}} tables are still playing',
     tour_finished: 'The tour is finished: its entries can no longer be undone',
@@ -262,6 +277,7 @@ const en = {
       random: 'Random',
       swiss: 'Swiss',
       interval: 'Interval',
+      fixed: 'Prepared',
     },
     methodHint: {
       random:
@@ -270,6 +286,8 @@ const en = {
         'Neighbours in the current standings play together (places 1–4, 5–8, …), moved apart only to avoid repeat meetings. Only the staff see it until it is published.',
       interval:
         'By the current standings with a step of the number of tables: table 1 gets places 1, 1+k, 1+2k, 1+3k. Only the staff see it until it is published.',
+      fixed:
+        'Tour {{n}} from the seating prepared for all tours (below): its tables and winds. Only the staff see it until it is published.',
     },
     methodUsed: 'Seating: {{method}}',
     methodWithStep: 'Seating: {{method}}, step {{step}}',
@@ -301,6 +319,39 @@ const en = {
     cancelled: 'Seating cancelled',
     tables: 'Tables',
     table: 'Table {{n}}',
+  },
+  seatingPlan: {
+    title: 'Seating for all tours',
+    none: 'Prepare the seating of all tours at once: generate it with as few repeat meetings as possible, or import your own from a file. A tour then takes its tables from it with the method “Prepared”.',
+    source: {
+      generated: 'Generated {{date}}',
+      imported: 'Imported from a file {{date}}',
+    },
+    summary_one:
+      'Tour {{tours}} · {{tables}} tables · {{players}} participant numbers',
+    summary_other:
+      'Tours {{tours}} · up to {{tables}} tables · {{players}} participant numbers',
+    repeats_one:
+      '{{count}} repeat meeting · a pair meets up to {{maxMet}} times',
+    repeats_other:
+      '{{count}} repeat meetings · a pair meets up to {{maxMet}} times',
+    generateHint:
+      'Generating seats the current participants for all the remaining tours, avoiding repeat meetings with the tours played. It takes a few seconds.',
+    generate: 'Generate for all tours',
+    generated: 'Seating for all tours generated',
+    fileHint:
+      'A file: CSV, one row per table — tour, table, east, south, west, north, as participant numbers. Comma or semicolon; a header row is fine.',
+    import: 'Import a file',
+    imported: 'Seating imported',
+    tooLarge: 'The file is too large for a seating',
+    delete: 'Delete the seating',
+    deleted: 'Seating for all tours deleted',
+    replaceTitle: 'Replace the seating',
+    replacePrompt:
+      'A new seating for the remaining tours replaces the prepared one. Tours already seated stay as they are.',
+    deleteTitle: 'Delete the seating',
+    deletePrompt:
+      'The seating prepared for all tours is deleted. Tours already seated stay as they are.',
   },
   tournamentDesk: {
     menu: 'Tournament',

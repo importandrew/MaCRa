@@ -2,6 +2,7 @@ import {
   DeleteRequest,
   GetRequest,
   PostRequest,
+  PutRequest,
   authFetch,
   eventGamePath,
   eventPath,
@@ -70,6 +71,35 @@ export async function generateTour(
 ): Promise<boolean> {
   const result = await authFetch<unknown>(
     PostRequest(eventPath(eventId, '/tours'), { seating, step })
+  );
+  return result !== null;
+}
+
+// generateSeatingPlan prepares the seating for all the remaining tours,
+// replacing an earlier plan. The search takes a few seconds.
+export async function generateSeatingPlan(eventId: number): Promise<boolean> {
+  const result = await authFetch<unknown>(
+    PostRequest(eventPath(eventId, '/tours/plan'))
+  );
+  return result !== null;
+}
+
+// importSeatingPlan stores a seating for several tours from a CSV file's
+// text, replacing an earlier plan.
+export async function importSeatingPlan(
+  eventId: number,
+  csv: string
+): Promise<boolean> {
+  const result = await authFetch<unknown>(
+    PutRequest(eventPath(eventId, '/tours/plan'), { csv })
+  );
+  return result !== null;
+}
+
+// deleteSeatingPlan deletes the seating prepared for all tours.
+export async function deleteSeatingPlan(eventId: number): Promise<boolean> {
+  const result = await authFetch<null>(
+    DeleteRequest(eventPath(eventId, '/tours/plan'))
   );
   return result !== null;
 }

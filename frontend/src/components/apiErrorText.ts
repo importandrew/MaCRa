@@ -20,6 +20,7 @@ export function apiErrorText(
   }
 
   return t(`apiErrors.${code}`, {
+    ...apiError,
     name: apiError?.name ?? t('apiErrors.somePlayer'),
   });
 }

@@ -30,8 +30,9 @@ function seatName(table: TourTable, userId: number): string {
 const WIND_KANJI = { east: '東', south: '南', west: '西', north: '北' };
 
 // ToursCard is the tours part of the tournament's desk: the current tour and
-// its tables, and for a referee publishing the next tour's seating (random
-// for now) or cancelling a published one before it starts.
+// its tables, and for a referee generating the next tour's seating by the
+// method picked (or from the seating prepared for all tours), publishing it,
+// and running the tour.
 export default function ToursCard({
   eventId,
   state,
@@ -89,8 +90,18 @@ export default function ToursCard({
       await onChanged();
     });
 
-  // method: the seating method the next generation uses.
-  const [method, setMethod] = useState<SeatingMethod>('random');
+  // hasPlan: a seating is prepared for all tours (the "fixed" method).
+  const hasPlan = state.plan != null;
+  // picked: the seating method the referee picked; null until they do.
+  const [picked, setPicked] = useState<SeatingMethod | null>(null);
+  // shownMethod: the method the next generation uses: the one picked, else
+  // the prepared seating when it has the next tour, else random (also when
+  // "fixed" was picked and the plan is gone since).
+  const shownMethod: SeatingMethod =
+    picked === 'fixed' && !hasPlan
+      ? 'random'
+      : (picked ??
+        (state.plan?.tours.includes(state.next) ? 'fixed' : 'random'));
   // step: an interval seating's step, 1 to the number of tables; null
   // means the number of tables (the default).
   const tableCount = Math.max(1, Math.floor(state.active / 4));
@@ -99,14 +110,18 @@ export default function ToursCard({
     <>
       <SegmentedPicker
         ariaLabel={t('tours.methodLabel')}
-        options={SEATING_METHODS.map((value) => ({
+        // Four one-word labels don't fit a row at 320 px in Russian.
+        orientation="vertical"
+        options={SEATING_METHODS.filter(
+          (value) => value !== 'fixed' || hasPlan
+        ).map((value) => ({
           value,
           label: t(`tours.method.${value}`),
         }))}
-        selectedKey={method}
-        onSelectionChange={setMethod}
+        selectedKey={shownMethod}
+        onSelectionChange={setPicked}
       />
-      {method === 'interval' && tableCount > 1 && (
+      {shownMethod === 'interval' && tableCount > 1 && (
         <>
           <p className="text-sm">{t('tours.step')}</p>
           <ListStepper
@@ -125,8 +140,8 @@ export default function ToursCard({
       if (
         await generateTour(
           eventId,
-          method,
-          method === 'interval' && step != null && step !== tableCount
+          shownMethod,
+          shownMethod === 'interval' && step != null && step !== tableCount
             ? step
             : undefined
         )
@@ -195,7 +210,10 @@ export default function ToursCard({
             {blocker == null && methodPicker}
             <p className="text-sm text-muted">
               {blocker ??
-                t(`tours.methodHint.${method}`, { players: state.active })}
+                t(`tours.methodHint.${shownMethod}`, {
+                  players: state.active,
+                  n: state.next,
+                })}
             </p>
             <PendingButton
               variant="primary"

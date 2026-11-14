@@ -4,11 +4,17 @@
 export type TourStatus =
   'draft' | 'published' | 'live' | 'finished' | 'aborted';
 
-export type SeatingMethod = 'random' | 'swiss' | 'interval';
+// fixed: the tour's tables from the seating prepared for all tours (plan).
+export type SeatingMethod = 'random' | 'swiss' | 'interval' | 'fixed';
 
 // SEATING_METHODS in the order the desk offers them (labels:
-// tours.method.<method>).
-export const SEATING_METHODS: SeatingMethod[] = ['random', 'swiss', 'interval'];
+// tours.method.<method>); fixed only with a plan.
+export const SEATING_METHODS: SeatingMethod[] = [
+  'random',
+  'swiss',
+  'interval',
+  'fixed',
+];
 
 export type Tour = {
   id: number;
@@ -67,4 +73,19 @@ export type TourState = {
   // whole tables.
   active: number;
   missing: number;
+  // plan: the seating prepared for all tours; null when there is none.
+  plan: SeatingPlanInfo | null;
+};
+
+// SeatingPlanInfo mirrors models.SeatingPlanInfo: where the plan came from,
+// its tours, the most tables in a tour, the participant numbers it seats,
+// and its repeat meetings among its own tours.
+export type SeatingPlanInfo = {
+  source: 'generated' | 'imported';
+  created_at: string;
+  tours: number[];
+  tables: number;
+  players: number;
+  repeats: number;
+  max_met: number;
 };

@@ -13,6 +13,7 @@ import {
   withdrawParticipant,
 } from '../../providers/event/tournamentApi';
 import ToursCard from './ToursCard';
+import SeatingPlanCard from './SeatingPlanCard';
 import Confirm from '../Confirm';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 import PendingButton from '../PendingButton';
@@ -20,8 +21,8 @@ import { showToast } from '../Toast';
 
 // TournamentDesk is /event/:eventId/tournament, the tournament's desk for its
 // staff: the participants with their numbers and, for a referee, the draw
-// (before the first tour starts) and withdrawals (after). Tours come here
-// later.
+// (before the first tour starts) and withdrawals (after); the tours and the
+// seating prepared for all of them.
 export default function TournamentDesk() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -97,6 +98,15 @@ export default function TournamentDesk() {
           </h1>
           {tours.data && (
             <ToursCard
+              eventId={eventId}
+              state={tours.data}
+              isDrawn={data.drawn}
+              canRun={canRun}
+              onChanged={refetchAll}
+            />
+          )}
+          {tours.data && status !== 'finished' && (
+            <SeatingPlanCard
               eventId={eventId}
               state={tours.data}
               isDrawn={data.drawn}
