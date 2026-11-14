@@ -600,80 +600,6 @@ func (_c *MockPlayerRepo_IssueAuthToken_Call) RunAndReturn(run func(ctx context.
 	return _c
 }
 
-// ListByNameLimit provides a mock function for the type MockPlayerRepo
-func (_mock *MockPlayerRepo) ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error) {
-	ret := _mock.Called(ctx, name, limit)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListByNameLimit")
-	}
-
-	var r0 []models.Player
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) ([]models.Player, error)); ok {
-		return returnFunc(ctx, name, limit)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) []models.Player); ok {
-		r0 = returnFunc(ctx, name, limit)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]models.Player)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int) error); ok {
-		r1 = returnFunc(ctx, name, limit)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockPlayerRepo_ListByNameLimit_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListByNameLimit'
-type MockPlayerRepo_ListByNameLimit_Call struct {
-	*mock.Call
-}
-
-// ListByNameLimit is a helper method to define mock.On call
-//   - ctx context.Context
-//   - name string
-//   - limit int
-func (_e *MockPlayerRepo_Expecter) ListByNameLimit(ctx any, name any, limit any) *MockPlayerRepo_ListByNameLimit_Call {
-	return &MockPlayerRepo_ListByNameLimit_Call{Call: _e.mock.On("ListByNameLimit", ctx, name, limit)}
-}
-
-func (_c *MockPlayerRepo_ListByNameLimit_Call) Run(run func(ctx context.Context, name string, limit int)) *MockPlayerRepo_ListByNameLimit_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 int
-		if args[2] != nil {
-			arg2 = args[2].(int)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-		)
-	})
-	return _c
-}
-
-func (_c *MockPlayerRepo_ListByNameLimit_Call) Return(players []models.Player, err error) *MockPlayerRepo_ListByNameLimit_Call {
-	_c.Call.Return(players, err)
-	return _c
-}
-
-func (_c *MockPlayerRepo_ListByNameLimit_Call) RunAndReturn(run func(ctx context.Context, name string, limit int) ([]models.Player, error)) *MockPlayerRepo_ListByNameLimit_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // MarkAuthTokenUsed provides a mock function for the type MockPlayerRepo
 func (_mock *MockPlayerRepo) MarkAuthTokenUsed(ctx context.Context, id int) error {
 	ret := _mock.Called(ctx, id)
@@ -727,6 +653,80 @@ func (_c *MockPlayerRepo_MarkAuthTokenUsed_Call) Return(err error) *MockPlayerRe
 }
 
 func (_c *MockPlayerRepo_MarkAuthTokenUsed_Call) RunAndReturn(run func(ctx context.Context, id int) error) *MockPlayerRepo_MarkAuthTokenUsed_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SearchByName provides a mock function for the type MockPlayerRepo
+func (_mock *MockPlayerRepo) SearchByName(ctx context.Context, query string, limit int) ([]models.Player, error) {
+	ret := _mock.Called(ctx, query, limit)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SearchByName")
+	}
+
+	var r0 []models.Player
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) ([]models.Player, error)); ok {
+		return returnFunc(ctx, query, limit)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int) []models.Player); ok {
+		r0 = returnFunc(ctx, query, limit)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Player)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int) error); ok {
+		r1 = returnFunc(ctx, query, limit)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPlayerRepo_SearchByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SearchByName'
+type MockPlayerRepo_SearchByName_Call struct {
+	*mock.Call
+}
+
+// SearchByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - query string
+//   - limit int
+func (_e *MockPlayerRepo_Expecter) SearchByName(ctx any, query any, limit any) *MockPlayerRepo_SearchByName_Call {
+	return &MockPlayerRepo_SearchByName_Call{Call: _e.mock.On("SearchByName", ctx, query, limit)}
+}
+
+func (_c *MockPlayerRepo_SearchByName_Call) Run(run func(ctx context.Context, query string, limit int)) *MockPlayerRepo_SearchByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPlayerRepo_SearchByName_Call) Return(players []models.Player, err error) *MockPlayerRepo_SearchByName_Call {
+	_c.Call.Return(players, err)
+	return _c
+}
+
+func (_c *MockPlayerRepo_SearchByName_Call) RunAndReturn(run func(ctx context.Context, query string, limit int) ([]models.Player, error)) *MockPlayerRepo_SearchByName_Call {
 	_c.Call.Return(run)
 	return _c
 }

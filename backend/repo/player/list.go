@@ -2,7 +2,6 @@ package player
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
@@ -10,31 +9,34 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-func (r *Repo) ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error) {
-	nameFilter := ""
-	if name != "" {
-		nameFilter = " WHERE name ILIKE '%' || @name || '%'"
-	}
+// likeEscaper escapes LIKE's wildcards, so a name with % or _ is searched as
+// typed.
+var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
 
-	query := fmt.Sprintf(`SELECT id, name FROM users %s ORDER BY name`, nameFilter)
-	if limit > 0 {
-		query += ` LIMIT @limit`
-	}
-
-	rows, err := r.db.Query(ctx, query,
+// SearchByName returns up to limit users whose name contains query, ignoring
+// case: exact matches first, then names starting with it, then the rest;
+// within each, by name and ID.
+func (r *Repo) SearchByName(ctx context.Context, query string, limit int) ([]models.Player, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT id, name FROM users
+		WHERE name ILIKE '%' || @pattern || '%'
+		ORDER BY
+			CASE
+				WHEN lower(name) = lower(@query) THEN 0
+				WHEN name ILIKE @pattern || '%' THEN 1
+				ELSE 2
+			END,
+			name, id
+		LIMIT @limit`,
 		pgx.NamedArgs{
-			"name":  strings.TrimSpace(name),
-			"limit": limit,
+			"query":   query,
+			"pattern": likeEscaper.Replace(query),
+			"limit":   limit,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	players, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Player])
-	if err != nil {
-		return nil, err
-	}
-
-	return players, nil
+	return pgx.CollectRows(rows, pgx.RowToStructByName[models.Player])
 }

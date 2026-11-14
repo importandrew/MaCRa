@@ -343,6 +343,7 @@ const en = {
     rolesHint: 'A member must have at least one role.',
     ownerRolesHint: 'The owner may drop any role and still manages the event.',
     rolesSaved: 'Roles saved',
+    searchHint: 'A name (2+ letters) or a user ID',
   },
   rating: {
     name: 'Player',

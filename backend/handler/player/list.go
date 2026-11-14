@@ -8,19 +8,18 @@ import (
 	"github.com/importandrew/MaCRa/handler/httperr"
 )
 
-type ListNameLimit struct {
-	Name  string `form:"name"`
-	Limit int    `form:"limit"`
-}
-
+// List finds players for the player pickers (GET /api/players?q=): a user ID,
+// or part of a name (see Service.Search).
 func (h Handler) List(c *gin.Context) {
-	var req ListNameLimit
+	var req struct {
+		Query string `form:"q"`
+	}
 	if err := c.ShouldBindQuery(&req); err != nil {
 		httperr.InvalidRequest(c, err)
 		return
 	}
 
-	players, err := h.player.ListByNameLimit(c.Request.Context(), req.Name, req.Limit)
+	players, err := h.player.Search(c.Request.Context(), req.Query)
 	if err != nil {
 		httperr.Error(c, err)
 		return

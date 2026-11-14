@@ -12,7 +12,7 @@ type PlayerRepo interface {
 	GetByEmail(ctx context.Context, email string) (models.Player, error)
 	Get(ctx context.Context, id int) (models.Player, error)
 	GetPassByEmail(ctx context.Context, email string) (string, error)
-	ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error)
+	SearchByName(ctx context.Context, query string, limit int) ([]models.Player, error)
 	Update(ctx context.Context, id int, name string) error
 	IsEmailVerified(ctx context.Context, userID int) (bool, error)
 	SetEmailVerified(ctx context.Context, userID int) error

@@ -7,123 +7,69 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/importandrew/MaCRa/models"
 )
 
-func TestListByNameLimit(t *testing.T) {
+func TestSearch(t *testing.T) {
+	ivan := models.Player{ID: 42, Name: "Ivan"}
+
 	testData := map[string]struct {
-		name  string
-		limit int
-
-		mockSetup func(*MockPlayerRepo, string, int)
-
-		expectedErr     assert.ErrorAssertionFunc
-		expectedPlayers []models.Player
+		query     string
+		mockSetup func(*MockPlayerRepo)
+		want      []models.Player
+		wantErr   bool
 	}{
-		"ok": {
-			name:  "Alice",
-			limit: 10,
-			mockSetup: func(m *MockPlayerRepo, name string, limit int) {
-				m.On("ListByNameLimit", mock.Anything, name, limit).Return(
-					[]models.Player{
-						{ID: 1, Name: "Alice"},
-						{ID: 5, Name: "Alice Smith"},
-					},
-					nil,
-				)
-			},
-			expectedErr: assert.NoError,
-			expectedPlayers: []models.Player{
-				{ID: 1, Name: "Alice"},
-				{ID: 5, Name: "Alice Smith"},
-			},
+		"an ID matches exactly": {
+			query:     " 42 ",
+			mockSetup: func(m *MockPlayerRepo) { m.EXPECT().Get(mock.Anything, 42).Return(ivan, nil) },
+			want:      []models.Player{ivan},
 		},
-		"empty result": {
-			name:  "Nonexistent",
-			limit: 10,
-			mockSetup: func(m *MockPlayerRepo, name string, limit int) {
-				m.On("ListByNameLimit", mock.Anything, name, limit).Return(
-					[]models.Player{},
-					nil,
-				)
+		"an unknown ID finds nobody": {
+			query: "7",
+			mockSetup: func(m *MockPlayerRepo) {
+				m.EXPECT().Get(mock.Anything, 7).Return(models.Player{}, models.ErrPlayerNotFound)
 			},
-			expectedErr:     assert.NoError,
-			expectedPlayers: []models.Player{},
+			want: []models.Player{},
 		},
-		"limit zero": {
-			name:  "Alice",
-			limit: 0,
-			mockSetup: func(m *MockPlayerRepo, name string, limit int) {
-				m.On("ListByNameLimit", mock.Anything, name, limit).Return(
-					[]models.Player{},
-					nil,
-				)
+		"a name searches names, 20 at most": {
+			query: " Iv ",
+			mockSetup: func(m *MockPlayerRepo) {
+				m.EXPECT().SearchByName(mock.Anything, "Iv", 20).Return([]models.Player{ivan}, nil)
 			},
-			expectedErr:     assert.NoError,
-			expectedPlayers: []models.Player{},
+			want: []models.Player{ivan},
 		},
-		"limit one": {
-			name:  "Bob",
-			limit: 1,
-			mockSetup: func(m *MockPlayerRepo, name string, limit int) {
-				m.On("ListByNameLimit", mock.Anything, name, limit).Return(
-					[]models.Player{
-						{ID: 2, Name: "Bob"},
-					},
-					nil,
-				)
-			},
-			expectedErr: assert.NoError,
-			expectedPlayers: []models.Player{
-				{ID: 2, Name: "Bob"},
-			},
-		},
+		"one letter finds nobody": {query: "I", want: []models.Player{}},
+		"empty finds nobody":      {query: "  ", want: []models.Player{}},
+		"one Cyrillic letter":     {query: "И", want: []models.Player{}},
+		"a signed number is a name": {query: "+4", mockSetup: func(m *MockPlayerRepo) {
+			m.EXPECT().SearchByName(mock.Anything, "+4", 20).Return([]models.Player{}, nil)
+		}, want: []models.Player{}},
 		"repo error": {
-			name:  "Charlie",
-			limit: 10,
-			mockSetup: func(m *MockPlayerRepo, name string, limit int) {
-				m.On("ListByNameLimit", mock.Anything, name, limit).Return(
-					nil,
-					errors.New("database error"),
-				)
+			query: "Ivan",
+			mockSetup: func(m *MockPlayerRepo) {
+				m.EXPECT().SearchByName(mock.Anything, "Ivan", 20).Return(nil, errors.New("database error"))
 			},
-			expectedErr: assert.Error,
-		},
-		"empty name": {
-			name:  "",
-			limit: 10,
-			mockSetup: func(m *MockPlayerRepo, name string, limit int) {
-				m.On("ListByNameLimit", mock.Anything, name, limit).Return(
-					[]models.Player{},
-					nil,
-				)
-			},
-			expectedErr:     assert.NoError,
-			expectedPlayers: []models.Player{},
+			wantErr: true,
 		},
 	}
 
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
-			mockRepo := NewMockPlayerRepo(t)
-			testCase.mockSetup(mockRepo, testCase.name, testCase.limit)
+			repo := NewMockPlayerRepo(t)
+			if testCase.mockSetup != nil {
+				testCase.mockSetup(repo)
+			}
 
-			service := NewService(mockRepo, nil)
+			got, err := NewService(repo, nil).Search(context.Background(), testCase.query)
 
-			ctx := context.Background()
-			players, err := service.ListByNameLimit(ctx, testCase.name, testCase.limit)
-
-			testCase.expectedErr(t, err)
-			if err != nil {
+			if testCase.wantErr {
+				assert.Error(t, err)
 				return
 			}
-
-			assert.Len(t, players, len(testCase.expectedPlayers))
-			for i, expectedPlayer := range testCase.expectedPlayers {
-				assert.Equal(t, expectedPlayer.ID, players[i].ID)
-				assert.Equal(t, expectedPlayer.Name, players[i].Name)
-			}
+			require.NoError(t, err)
+			assert.Equal(t, testCase.want, got)
 		})
 	}
 }

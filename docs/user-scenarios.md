@@ -73,7 +73,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Finding players
 
-- Used when adding members and picking players. A numeric query matches a user ID exactly; otherwise names are searched (exact match first, then prefix, then substring), at least 2 characters, at most 20 results.
+- Used when adding members (a server search as the user types, with a hint "A name (2+ letters) or a user ID") and picking players (the event's players, filtered the same way on the device). A numeric query matches a user ID exactly; otherwise names are searched (exact match first, then prefix, then substring), at least 2 characters, at most 20 results.
 - Every player selector shows the user ID next to the name, so namesakes can be told apart. Email is never shown to other users.
 
 ### Abuse protection
@@ -122,7 +122,7 @@ Applies to regular events; tournament games follow area 8.
 
 ### Starting a game (`/new`)
 
-- A player of the selected event fills the four seats (East, South, West, North) from the event's players, IDs shown next to names; they must include themselves. Clear empties the seats, Shuffle mixes them.
+- A player of the selected event fills the four seats (East, South, West, North) from the event's players, typing part of a name or a user ID, IDs shown next to names; they must include themselves. Clear empties the seats, Shuffle mixes them.
 - Players still in a live game **can** be picked: the next table is often prepared while two of its players finish their game. Play then fails with a clear message ("Player X is still in a game — wait until it ends") and the form keeps its seats.
 - "Play again" on the result page opens the draft with the same players **in the same seats**; they shuffle themselves if they want.
 

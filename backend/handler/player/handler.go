@@ -10,7 +10,7 @@ import (
 type PlayerService interface {
 	SignUp(ctx context.Context, email, name, password string) error
 	Login(ctx context.Context, email, password string) (models.Player, error)
-	ListByNameLimit(ctx context.Context, name string, limit int) ([]models.Player, error)
+	Search(ctx context.Context, query string) ([]models.Player, error)
 	Get(ctx context.Context, id int) (models.Player, error)
 	Update(ctx context.Context, id int, name string) error
 	VerifyEmail(ctx context.Context, token string) error
