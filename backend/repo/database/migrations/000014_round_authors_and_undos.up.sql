@@ -17,7 +17,11 @@ CREATE TABLE undone_rounds (
     entered_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     entered_at TIMESTAMPTZ NOT NULL,
     undone_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    undone_at TIMESTAMPTZ NOT NULL
+    undone_at TIMESTAMPTZ NOT NULL,
+    -- The players' scores before and after the entry, by starting seat
+    -- (east, south, west, north), so the log shows it like any entry.
+    scores_before INTEGER[] NOT NULL CHECK (cardinality(scores_before) = 4),
+    scores_after INTEGER[] NOT NULL CHECK (cardinality(scores_after) = 4)
 );
 
 CREATE INDEX idx_undone_rounds_game_id ON undone_rounds(game_id);

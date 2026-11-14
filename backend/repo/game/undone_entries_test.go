@@ -43,7 +43,8 @@ func TestUndoneEntries(t *testing.T) {
 			EnteredBy: 2,
 		}))
 		// An entry from before authors were recorded has none.
-		createTestRound(t, conn, 1, preAddRound{roundNumber: 2, outcome: models.Draw})
+		createTestRound(t, conn, 1, preAddRound{roundNumber: 2, outcome: models.Draw,
+			scores: map[string]int{"east": -16, "south": 48, "west": -16, "north": -16}})
 
 		log, err := repo.GameLog(ctx, 1)
 		require.NoError(t, err)
@@ -64,6 +65,8 @@ func TestUndoneEntries(t *testing.T) {
 		assert.Equal(t, models.Draw, undone[0].Outcome, "in the order they were undone")
 		assert.Nil(t, undone[0].EnteredBy)
 		assert.Equal(t, &models.PlayerHeader{ID: 6, Name: "6"}, undone[0].UndoneBy)
+		assert.Equal(t, [4]int{-16, 48, -16, -16}, undone[0].ScoresBefore, "the self-draw's scores")
+		assert.Equal(t, [4]int{-16, 48, -16, -16}, undone[0].ScoresAfter, "a draw changes nothing")
 
 		self := undone[1]
 		assert.Equal(t, 1, self.Round)
@@ -72,6 +75,8 @@ func TestUndoneEntries(t *testing.T) {
 		assert.Equal(t, 8, self.Value)
 		assert.Equal(t, &models.PlayerHeader{ID: 2, Name: "2"}, self.EnteredBy)
 		assert.Equal(t, &models.PlayerHeader{ID: 1, Name: "1"}, self.UndoneBy)
+		assert.Equal(t, [4]int{}, self.ScoresBefore, "the first entry starts from zero")
+		assert.Equal(t, [4]int{-16, 48, -16, -16}, self.ScoresAfter, "by seat: east, south, west, north")
 		assert.True(t, self.EnteredAt.After(before))
 		assert.False(t, self.UndoneAt.Before(self.EnteredAt))
 	})

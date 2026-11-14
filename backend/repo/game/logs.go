@@ -121,12 +121,15 @@ func (r *Repo) UndoneEntries(ctx context.Context, gameID int) ([]models.UndoneEn
 		UndoneBy       *int           `db:"undone_by"`
 		UndoneByName   *string        `db:"undone_by_name"`
 		UndoneAt       time.Time      `db:"undone_at"`
+		ScoresBefore   []int          `db:"scores_before"`
+		ScoresAfter    []int          `db:"scores_after"`
 	}
 
 	rows, err := r.db.Query(ctx, `
 		SELECT u.round_number, u.outcome, u.winner_id, u.loser_id, u.value,
 			u.force_next_round, u.entered_by, eu.name AS entered_by_name, u.entered_at,
-			u.undone_by, uu.name AS undone_by_name, u.undone_at
+			u.undone_by, uu.name AS undone_by_name, u.undone_at,
+			u.scores_before, u.scores_after
 		FROM undone_rounds u
 		LEFT JOIN users eu ON eu.id = u.entered_by
 		LEFT JOIN users uu ON uu.id = u.undone_by
@@ -154,6 +157,8 @@ func (r *Repo) UndoneEntries(ctx context.Context, gameID int) ([]models.UndoneEn
 			EnteredAt:      row.EnteredAt,
 			UndoneBy:       playerHeader(row.UndoneBy, row.UndoneByName),
 			UndoneAt:       row.UndoneAt,
+			ScoresBefore:   [4]int(row.ScoresBefore),
+			ScoresAfter:    [4]int(row.ScoresAfter),
 		})
 	}
 	return entries, nil

@@ -2,7 +2,6 @@ package game
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -122,26 +121,35 @@ func (r *Repo) reviveGame(ctx context.Context, gameID, eventID int, seating [4]i
 // deleteLastRound moves the game's last round log entry to undone_rounds,
 // undone by undoneBy now, or returns models.ErrNoRounds if the log is empty.
 func (r *Repo) deleteLastRound(ctx context.Context, gameID, undoneBy int) error {
+	// The last entry and the one before it, whose scores are the last
+	// entry's scores before (none: all zero).
 	rows, err := r.db.Query(ctx, `
 		SELECT id FROM rounds
 		WHERE game_id = $1
 		ORDER BY round_number DESC, event_sequence DESC
-		LIMIT 1`,
+		LIMIT 2`,
 		gameID,
 	)
 	if err != nil {
 		return fmt.Errorf("find last round: %w", err)
 	}
 
-	roundID, err := pgx.CollectOneRow(rows, pgx.RowTo[int])
+	ids, err := pgx.CollectRows(rows, pgx.RowTo[int])
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return models.ErrNoRounds
-		}
 		return fmt.Errorf("find last round: %w", err)
 	}
+	if len(ids) == 0 {
+		return models.ErrNoRounds
+	}
+	roundID := ids[0]
+	var previousID *int
+	if len(ids) > 1 {
+		previousID = &ids[1]
+	}
 
-	// round_scores rows go with the round (ON DELETE CASCADE).
+	// round_scores rows go with the round (ON DELETE CASCADE); the scores
+	// subqueries still see them: every part of one statement reads the same
+	// snapshot, taken before the DELETE.
 	if _, err := r.db.Exec(ctx, `
 		WITH gone AS (
 			DELETE FROM rounds WHERE id = $1
@@ -150,14 +158,27 @@ func (r *Repo) deleteLastRound(ctx context.Context, gameID, undoneBy int) error 
 		)
 		INSERT INTO undone_rounds (
 			game_id, round_number, outcome, winner_id, loser_id, value,
-			force_next_round, entered_by, entered_at, undone_by, undone_at)
+			force_next_round, entered_by, entered_at, undone_by, undone_at,
+			scores_before, scores_after)
 		SELECT game_id, round_number, outcome, winner_id, loser_id, value,
-			force_next_round, entered_by, created_at, $2, $3
+			force_next_round, entered_by, created_at, $2, $3,
+			COALESCE(`+seatScores("$4")+`, '{0,0,0,0}'), `+seatScores("$1")+`
 		FROM gone`,
-		roundID, nullIfZero(undoneBy), time.Now().UTC(),
+		roundID, nullIfZero(undoneBy), time.Now().UTC(), previousID,
 	); err != nil {
 		return fmt.Errorf("delete round: %w", err)
 	}
 
 	return nil
+}
+
+// seatScores is an SQL subquery for the players' scores after the round log
+// entry whose ID is the parameter roundIDParam (e.g. "$1"), as an array by
+// starting seat: east, south, west, north. NULL when there's no such entry.
+func seatScores(roundIDParam string) string {
+	return `(SELECT array_agg(rs.score ORDER BY CASE gp.starting_wind
+			WHEN 'east' THEN 1 WHEN 'south' THEN 2 WHEN 'west' THEN 3 ELSE 4 END)
+		FROM round_scores rs
+		JOIN game_players gp ON gp.game_id = rs.game_id AND gp.player_id = rs.player_id
+		WHERE rs.round_id = ` + roundIDParam + `::int)`
 }

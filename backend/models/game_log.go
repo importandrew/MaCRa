@@ -27,6 +27,10 @@ type UndoneEntry struct {
 	EnteredAt      time.Time     `json:"entered_at"`
 	UndoneBy       *PlayerHeader `json:"undone_by"`
 	UndoneAt       time.Time     `json:"undone_at"`
+	// ScoresBefore and ScoresAfter are the players' scores before and after
+	// the entry, by starting seat (east, south, west, north).
+	ScoresBefore [4]int `json:"scores_before"`
+	ScoresAfter  [4]int `json:"scores_after"`
 }
 
 type PlayerHeader struct {

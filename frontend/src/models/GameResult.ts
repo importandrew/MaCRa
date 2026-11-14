@@ -37,6 +37,10 @@ export interface UndoneEntry {
   entered_at: string;
   undone_by: LogUser;
   undone_at: string;
+  // scores_before and scores_after: the players' scores before and after
+  // the entry, by starting seat (east, south, west, north).
+  scores_before: [number, number, number, number];
+  scores_after: [number, number, number, number];
 }
 
 export interface RoundLog {

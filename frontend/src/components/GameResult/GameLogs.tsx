@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Popover, Table } from '@heroui/react';
+import { Button, Checkbox, Popover, Table } from '@heroui/react';
 import { useCallback, useRef, useState } from 'react';
 import { popoverVariants } from '@heroui/styles';
 import { Outcome } from '../../models/GameData';
 import {
   GameRoundLogs,
+  LogUser,
   PreparedGameRoundLogs,
   PreparedRoundLog,
   UndoneEntry,
@@ -51,8 +52,11 @@ export default function GameLogs({
   const { data, isError = false, isLoading = false, fetchData } = logs;
   const tableRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLElement | null>(null);
-  // openKey: the row whose author popover is open (log-<index>), or null.
+  // openKey: the row whose author popover is open (log-<index> or
+  // undone-<index>), or null.
   const [openKey, setOpenKey] = useState<string | null>(null);
+  // hideUndone: the viewer hides the undone entries (they show by default).
+  const [hideUndone, setHideUndone] = useState(false);
 
   function getFinalScores() {
     if (!preparedData || !preparedData.rounds.length) {
@@ -262,23 +266,28 @@ export default function GameLogs({
     });
   }
 
-  const playerName = (id: number) =>
-    data.players.find((player) => player.id === id)?.name ?? '?';
+  // undoneItem shows an undone entry like any other: the scores before it
+  // and the change it made.
+  const undoneItem = (entry: UndoneEntry): PreparedRoundLog => ({
+    round: entry.round,
+    outcome: entry.outcome,
+    initial_scores: entry.scores_before,
+    result: entry.value,
+    score_changes: entry.scores_after.map(
+      (score, seat) => score - entry.scores_before[seat]
+    ) as [number, number, number, number],
+  });
 
-  // undoneText says what the undone entry was, e.g. "Deal-in 12: Vera from
-  // Borya".
-  const undoneText = (entry: UndoneEntry) =>
-    t(`logs.undoneOutcome.${entry.outcome}`, {
-      value: entry.value,
-      winner: playerName(entry.winner),
-      loser: playerName(entry.loser),
-    });
-
-  const entryRow = (item: PreparedRoundLog, index: number) => (
+  // A row of the log: an entry, or an undone one, struck through and dimmed.
+  // A tap opens the popover with who entered it (and who undid it).
+  const logRow = (item: PreparedRoundLog, key: string, isUndone: boolean) => (
     <Table.Row
-      key={`log-${index}`}
-      id={`log-${index}`}
-      className="even:bg-default/50"
+      key={key}
+      id={key}
+      className={
+        'cursor-pointer ' +
+        (isUndone ? 'line-through opacity-50' : 'even:bg-default/50')
+      }
     >
       <Table.Cell className="text-end">{item.round}</Table.Cell>
       <Table.Cell className="text-end">
@@ -319,38 +328,23 @@ export default function GameLogs({
     </Table.Row>
   );
 
-  // An undone entry spans the table, struck through, with who undid it and
-  // when: everyone who sees the log sees the undo.
-  const undoneRow = (entry: UndoneEntry, index: number) => (
-    <Table.Row
-      key={`undone-${index}`}
-      id={`undone-${index}`}
-      className="bg-warning-soft/40"
-    >
-      <Table.Cell colSpan={6} className="text-start">
-        <div className="text-sm text-muted line-through">
-          {t('logs.undoneEntry', {
-            round: entry.round,
-            what: undoneText(entry),
-          })}
-        </div>
-        <div className="text-xs text-muted">
-          {entry.undone_by
-            ? t('logs.undoneBy', {
-                name: entry.undone_by.name,
-                time: getTimeFormatted(entry.undone_at),
-              })
-            : t('logs.undoneAt', { time: getTimeFormatted(entry.undone_at) })}
-        </div>
-      </Table.Cell>
-    </Table.Row>
-  );
+  const shownRows = hideUndone
+    ? logRows.filter((row) => row.kind === 'entry')
+    : logRows;
 
-  // The entry tapped last: a popover under its row says who entered it.
-  const openEntry =
-    openKey != null && openKey.startsWith('log-')
-      ? data.round_logs[Number(openKey.slice(4))]
-      : undefined;
+  // The row tapped last (log-<index> or undone-<index>): a popover under it
+  // says who entered it, and for an undone entry who undid it.
+  const openIndex = openKey == null ? -1 : Number(openKey.split('-')[1]);
+  const openEntry = openKey?.startsWith('log-')
+    ? data.round_logs[openIndex]
+    : undefined;
+  const openUndone = openKey?.startsWith('undone-')
+    ? undone[openIndex]
+    : undefined;
+  const enteredText = (by: LogUser, at: string) =>
+    by
+      ? t('logs.enteredBy', { name: by.name, time: getTimeFormatted(at) })
+      : t('logs.enteredAt', { time: getTimeFormatted(at) });
 
   return (
     <>
@@ -367,13 +361,27 @@ export default function GameLogs({
             '[&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:w-[calc((100%-5rem)/4)] [&_:is(th,td):nth-child(n+2):nth-child(-n+5)]:min-w-0'
           }
         >
+          {undone.length > 0 && (
+            <Checkbox
+              isSelected={hideUndone}
+              onChange={setHideUndone}
+              className="mb-2 self-start"
+            >
+              <Checkbox.Content>
+                <Checkbox.Control>
+                  <Checkbox.Indicator />
+                </Checkbox.Control>
+                {t('logs.hideUndone', { count: undone.length })}
+              </Checkbox.Content>
+            </Checkbox>
+          )}
           <Table className="w-full self-center z-10">
             <Table.ScrollContainer>
               <Table.Content
                 aria-label={t('game.logs')}
                 onRowAction={(key) => {
                   const id = String(key);
-                  if (!id.startsWith('log-')) return;
+                  if (id === 'finalScores') return;
                   rowRef.current = tableRef.current?.querySelector(
                     `[data-key="${id}"]`
                   ) as HTMLElement | null;
@@ -424,10 +432,14 @@ export default function GameLogs({
                     // Keyed by position: round, outcome and scores can repeat
                     // (two equal penalties in one round), and React Aria
                     // throws on duplicate keys in a collection.
-                    ...logRows.map((row) =>
+                    ...shownRows.map((row) =>
                       row.kind === 'entry'
-                        ? entryRow(row.item, row.index)
-                        : undoneRow(row.entry, row.index)
+                        ? logRow(row.item, `log-${row.index}`, false)
+                        : logRow(
+                            undoneItem(row.entry),
+                            `undone-${row.index}`,
+                            true
+                          )
                     ),
                     ...(finalScores?.length === 4
                       ? [
@@ -462,7 +474,7 @@ export default function GameLogs({
           </Table>
           <Popover.Content
             triggerRef={rowRef}
-            isOpen={openEntry != null}
+            isOpen={openEntry != null || openUndone != null}
             onOpenChange={(isOpen) => {
               if (!isOpen) setOpenKey(null);
             }}
@@ -474,14 +486,24 @@ export default function GameLogs({
               className={popoverSlots.dialog()}
             >
               {openEntry &&
-                (openEntry.entered_by
-                  ? t('logs.enteredBy', {
-                      name: openEntry.entered_by.name,
-                      time: getTimeFormatted(openEntry.created_at),
-                    })
-                  : t('logs.enteredAt', {
-                      time: getTimeFormatted(openEntry.created_at),
-                    }))}
+                enteredText(openEntry.entered_by, openEntry.created_at)}
+              {openUndone && (
+                <>
+                  <div>
+                    {enteredText(openUndone.entered_by, openUndone.entered_at)}
+                  </div>
+                  <div>
+                    {openUndone.undone_by
+                      ? t('logs.undoneBy', {
+                          name: openUndone.undone_by.name,
+                          time: getTimeFormatted(openUndone.undone_at),
+                        })
+                      : t('logs.undoneAt', {
+                          time: getTimeFormatted(openUndone.undone_at),
+                        })}
+                  </div>
+                </>
+              )}
             </Popover.Dialog>
           </Popover.Content>
         </div>
