@@ -101,7 +101,12 @@ export default function PlayerAutocomplete({
   };
 
   return (
+    // The list may stay open without matches (allowsEmptyCollection), hidden
+    // meanwhile: the ComboBox decides to open on typing by the items of the
+    // render before (they're filtered here, not by it), so otherwise a query
+    // without matches opened an empty list and closed it again, a flash.
     <ComboBox
+      allowsEmptyCollection
       items={shown}
       inputValue={inputValue}
       onInputChange={handleInputChange}
@@ -129,7 +134,7 @@ export default function PlayerAutocomplete({
         <ComboBox.Trigger />
       </ComboBox.InputGroup>
       {description && <Description>{description}</Description>}
-      <ComboBox.Popover>
+      <ComboBox.Popover className={shown.length === 0 ? 'hidden' : undefined}>
         <ListBox>
           {(player: Player) => (
             <ListBox.Item id={String(player.id)} textValue={player.name}>
