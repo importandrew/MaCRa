@@ -11,19 +11,13 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// Fixed takes the tour's tables (input.Tour) from the seating prepared for
-// all tours (input.Plan), winds as there. It refuses without a plan
-// (models.ErrNoSeatingPlan) or the tour in it (models.ErrSeatingPlanNoTour),
-// and a tour that seats numbers who don't play
-// (models.ErrSeatingPlanAbsent) or leaves out participants
-// (models.ErrSeatingPlanUnseated).
+// Fixed seats the tour by its tables imported from a file (input.Tables),
+// winds as there. It refuses without them (models.ErrFileSeatingMissing),
+// and tables that seat numbers who don't play (models.ErrFileSeatingAbsent)
+// or leave out participants (models.ErrFileSeatingUnseated).
 func Fixed(input Input) ([][4]int, error) {
-	if input.Plan == nil {
-		return nil, models.ErrNoSeatingPlan
-	}
-	planned, ok := input.Plan[input.Tour]
-	if !ok {
-		return nil, models.WithData(models.ErrSeatingPlanNoTour, models.ErrorData{dataTour: input.Tour})
+	if input.Tables == nil {
+		return nil, models.WithData(models.ErrFileSeatingMissing, models.ErrorData{dataTour: input.Tour})
 	}
 
 	userByNumber := make(map[int]int, len(input.Participants))
@@ -32,8 +26,8 @@ func Fixed(input Input) ([][4]int, error) {
 	}
 	seated := map[int]bool{}
 	var absent []int
-	tables := make([][4]int, 0, len(planned))
-	for _, numbers := range planned {
+	tables := make([][4]int, 0, len(input.Tables))
+	for _, numbers := range input.Tables {
 		var table [4]int
 		for seat, number := range numbers {
 			userID, ok := userByNumber[number]
@@ -46,7 +40,7 @@ func Fixed(input Input) ([][4]int, error) {
 		tables = append(tables, table)
 	}
 	if len(absent) > 0 {
-		return nil, models.WithData(models.ErrSeatingPlanAbsent,
+		return nil, models.WithData(models.ErrFileSeatingAbsent,
 			models.ErrorData{dataTour: input.Tour, "numbers": numberList(absent)})
 	}
 
@@ -57,7 +51,7 @@ func Fixed(input Input) ([][4]int, error) {
 		}
 	}
 	if len(unseated) > 0 {
-		return nil, models.WithData(models.ErrSeatingPlanUnseated,
+		return nil, models.WithData(models.ErrFileSeatingUnseated,
 			models.ErrorData{dataTour: input.Tour, "numbers": numberList(unseated)})
 	}
 	return tables, nil
@@ -275,15 +269,15 @@ func numbersByNumber(tables [][]models.Participant) [][4]int {
 	return seated
 }
 
-// PlanInfo describes the seating prepared for all tours for the desk: its
-// tours in order, the most tables in a tour, how many numbers it seats, and
-// its repeat meetings among its own tours (each earlier meeting of each pair
-// seated together) and the most times one pair meets in it.
-func PlanInfo(plan models.SeatingPlan) models.SeatingPlanInfo {
-	info := models.SeatingPlanInfo{Source: plan.Source, CreatedAt: plan.CreatedAt, Tours: []int{}}
+// FileInfo describes tables imported from a file for the desk: their tours
+// in order, the most tables in a tour, how many numbers they seat, and their
+// repeat meetings among their own tours (each earlier meeting of each pair
+// seated together) and the most times one pair meets in them.
+func FileInfo(tours PlanTours) models.SeatingFileInfo {
+	info := models.SeatingFileInfo{Tours: []int{}}
 	numbers := map[int]bool{}
 	meetings := map[Pair]int{}
-	for tour, tables := range plan.Tours {
+	for tour, tables := range tours {
 		info.Tours = append(info.Tours, tour)
 		info.Tables = max(info.Tables, len(tables))
 		for _, table := range tables {

@@ -12,10 +12,10 @@ import (
 )
 
 // planOf numbers a generated plan's tours from 1.
-func planOf(tours [][][4]int) models.SeatingPlan {
-	plan := models.SeatingPlan{Tours: models.PlanTours{}}
+func planOf(tours [][][4]int) PlanTours {
+	plan := PlanTours{}
 	for i, tables := range tours {
-		plan.Tours[i+1] = tables
+		plan[i+1] = tables
 	}
 	return plan
 }
@@ -45,7 +45,7 @@ func TestPlan_noRepeatsWhenPossible(t *testing.T) {
 	for _, tables := range tours {
 		assertSeatsNumbersOnce(t, 16, tables)
 	}
-	assert.Zero(t, PlanInfo(planOf(tours)).Repeats)
+	assert.Zero(t, FileInfo(planOf(tours)).Repeats)
 }
 
 func TestPlan_beyondTheLimit(t *testing.T) {
@@ -57,7 +57,7 @@ func TestPlan_beyondTheLimit(t *testing.T) {
 	for _, tables := range tours {
 		assertSeatsNumbersOnce(t, 16, tables)
 	}
-	assert.GreaterOrEqual(t, PlanInfo(planOf(tours)).Repeats, 48)
+	assert.GreaterOrEqual(t, FileInfo(planOf(tours)).Repeats, 48)
 }
 
 func TestPlan_avoidsEarlierMeetings(t *testing.T) {
@@ -90,34 +90,28 @@ func TestPlan_oneTable(t *testing.T) {
 }
 
 func TestFixed(t *testing.T) {
-	plan := models.PlanTours{2: {{4, 3, 2, 1}, {5, 6, 7, 8}}}
-	input := Input{Participants: participants(8), Tour: 2, Plan: plan}
+	input := Input{Participants: participants(8), Tour: 2, Tables: [][4]int{{4, 3, 2, 1}, {5, 6, 7, 8}}}
 
 	tables, err := Fixed(input)
 	require.NoError(t, err)
-	assert.Equal(t, [][4]int{{104, 103, 102, 101}, {105, 106, 107, 108}}, tables, "winds as in the plan")
+	assert.Equal(t, [][4]int{{104, 103, 102, 101}, {105, 106, 107, 108}}, tables, "winds as in the file")
 
-	_, err = Fixed(Input{Participants: participants(8), Tour: 2})
-	require.ErrorIs(t, err, models.ErrNoSeatingPlan)
-
-	input.Tour = 3
-	_, err = Fixed(input)
-	require.ErrorIs(t, err, models.ErrSeatingPlanNoTour)
+	_, err = Fixed(Input{Participants: participants(8), Tour: 3})
+	require.ErrorIs(t, err, models.ErrFileSeatingMissing)
 	assertData(t, err, models.ErrorData{"tour": 3})
 
 	// Numbers 3 and 7 withdrew.
-	input.Tour = 2
 	input.Participants = slices.DeleteFunc(participants(8), func(p models.Participant) bool {
 		return p.Number == 3 || p.Number == 7
 	})
 	_, err = Fixed(input)
-	require.ErrorIs(t, err, models.ErrSeatingPlanAbsent)
+	require.ErrorIs(t, err, models.ErrFileSeatingAbsent)
 	assertData(t, err, models.ErrorData{"tour": 2, "numbers": "3, 7"})
 
-	// Numbers 9 to 12 joined after the plan.
+	// Numbers 9 to 12 joined after the file.
 	input.Participants = participants(12)
 	_, err = Fixed(input)
-	require.ErrorIs(t, err, models.ErrSeatingPlanUnseated)
+	require.ErrorIs(t, err, models.ErrFileSeatingUnseated)
 	assertData(t, err, models.ErrorData{"tour": 2, "numbers": "9, 10, 11, 12"})
 }
 
@@ -129,21 +123,15 @@ func assertData(t *testing.T, err error, want models.ErrorData) {
 	assert.Equal(t, want, dataErr.Data)
 }
 
-func TestPlanInfo(t *testing.T) {
-	created := time.Date(2026, 11, 14, 10, 0, 0, 0, time.UTC)
-	info := PlanInfo(models.SeatingPlan{
-		Source:    models.PlanImported,
-		CreatedAt: created,
-		Tours: models.PlanTours{
-			3: {{1, 2, 3, 4}, {5, 6, 7, 8}},
-			1: {{1, 2, 5, 6}, {3, 4, 7, 8}},
-			2: {{1, 2, 3, 4}},
-		},
+func TestFileInfo(t *testing.T) {
+	info := FileInfo(PlanTours{
+		3: {{1, 2, 3, 4}, {5, 6, 7, 8}},
+		1: {{1, 2, 5, 6}, {3, 4, 7, 8}},
+		2: {{1, 2, 3, 4}},
 	})
 	// 1–2 meet three times (3 repeats), 3–4 three times (3), 1–3, 1–4, 2–3,
 	// 2–4 twice (1 each), 5–6 and 7–8 twice (1 each).
-	assert.Equal(t, models.SeatingPlanInfo{
-		Source: models.PlanImported, CreatedAt: created,
+	assert.Equal(t, models.SeatingFileInfo{
 		Tours: []int{1, 2, 3}, Tables: 2, Players: 8, Repeats: 12, MaxMet: 3,
 	}, info)
 }

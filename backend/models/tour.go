@@ -28,18 +28,20 @@ const (
 	// SeatingInterval: by the current standings with a step of the number
 	// of tables: table i gets places i, i+k, i+2k, i+3k.
 	SeatingInterval SeatingMethod = "interval"
-	// SeatingFixed: the tour's tables from the seating prepared for all
-	// tours (SeatingPlan), winds as there.
+	// SeatingFixed: the tour's tables imported from a file (TourPlan.Tables),
+	// winds as there.
 	SeatingFixed SeatingMethod = "fixed"
 )
 
 var ValidSeatingMethods = []SeatingMethod{SeatingRandom, SeatingSwiss, SeatingInterval, SeatingFixed}
 
-// Seating is how a tour's tables are made: the method, and for an interval
-// seating its step (nil: the number of tables).
+// Seating is how a tour's tables are made: the method, for an interval
+// seating its step (nil: the number of tables), and for a Swiss or interval
+// seating whether it avoids repeat meetings (a random one always does).
 type Seating struct {
-	Method SeatingMethod
-	Step   *int
+	Method       SeatingMethod
+	Step         *int
+	AvoidRepeats bool
 }
 
 // Tour is one tour of a tournament.
@@ -50,6 +52,9 @@ type Tour struct {
 	Seating SeatingMethod `db:"seating" json:"seating"`
 	// Step is an interval seating's step; nil for the other methods.
 	Step *int `db:"seating_step" json:"seating_step"`
+	// AvoidRepeats: a Swiss or interval seating moved players apart to
+	// avoid repeat meetings.
+	AvoidRepeats bool `db:"avoid_repeats" json:"avoid_repeats"`
 	// PublishedAt is nil while the seating is a draft.
 	PublishedAt *time.Time `db:"published_at" json:"published_at"`
 	// Minutes is the tour's length, set when it starts; nil before.
@@ -120,43 +125,42 @@ type TourState struct {
 	// withdrawn); Missing how many players a whole number of tables lacks.
 	Active  int `json:"active"`
 	Missing int `json:"missing"`
-	// Plan is the seating prepared for all tours; nil when there is none.
-	Plan *SeatingPlanInfo `json:"plan"`
+	// Plan is the tournament's plan: each tour's seating method, 1 to the
+	// number of tours. File describes the tables imported from a file; nil
+	// without them.
+	Plan []TourPlan       `json:"plan"`
+	File *SeatingFileInfo `json:"file"`
 }
 
-// SeatingPlanSource is where a tournament's seating for all tours came from.
-type SeatingPlanSource string
+// TourPlan is the seating a tour is to have. A tour without a plan of its
+// own is random.
+type TourPlan struct {
+	Number       int           `db:"number" json:"number"`
+	Seating      SeatingMethod `db:"seating" json:"seating"`
+	Step         *int          `db:"seating_step" json:"seating_step"`
+	AvoidRepeats bool          `db:"avoid_repeats" json:"avoid_repeats"`
+	// Tables are the tour's tables imported from a file, participant
+	// numbers east to north; nil without them. FileTables is how many.
+	Tables     [][4]int `db:"tables" json:"-"`
+	FileTables int      `db:"-" json:"file_tables"`
+	// Seated: the tour's seating is published (or played); its plan no
+	// longer matters.
+	Seated bool `db:"-" json:"seated"`
+}
 
-const (
-	PlanGenerated SeatingPlanSource = "generated"
-	PlanImported  SeatingPlanSource = "imported"
-)
-
-// PlanTours is a seating prepared for several tours: per tour number, its
-// tables, each four participant numbers east to north.
+// PlanTours is a seating for several tours: per tour number, its tables,
+// each four participant numbers east to north.
 type PlanTours map[int][][4]int
 
-// SeatingPlan is a tournament's seating prepared for all tours at once,
-// generated or imported from a file. A tour seated SeatingFixed takes its
-// tables from it.
-type SeatingPlan struct {
-	Source    SeatingPlanSource `db:"source"`
-	CreatedAt time.Time         `db:"created_at"`
-	Tours     PlanTours         `db:"tours"`
-}
-
-// SeatingPlanInfo is the seating prepared for all tours as the desk shows
-// it: where it came from, its tours, the most tables in a tour, how many
-// participant numbers it seats, and its repeat meetings (as in TourState,
-// among its own tours).
-type SeatingPlanInfo struct {
-	Source    SeatingPlanSource `json:"source"`
-	CreatedAt time.Time         `json:"created_at"`
-	Tours     []int             `json:"tours"`
-	Tables    int               `json:"tables"`
-	Players   int               `json:"players"`
-	Repeats   int               `json:"repeats"`
-	MaxMet    int               `json:"max_met"`
+// SeatingFileInfo describes the tables imported from a file: their tours,
+// the most tables in a tour, how many participant numbers they seat, and
+// their repeat meetings among their own tours (as in TourState).
+type SeatingFileInfo struct {
+	Tours   []int `json:"tours"`
+	Tables  int   `json:"tables"`
+	Players int   `json:"players"`
+	Repeats int   `json:"repeats"`
+	MaxMet  int   `json:"max_met"`
 }
 
 // Participant is a seated-to-be participant: a numbered player who hasn't
@@ -178,14 +182,16 @@ type SeatingStanding struct {
 // SeatingInput is what a tour's seating is made from: the participants to
 // seat (numbered, not withdrawn; a multiple of four), how many times each
 // pair has already met in this tournament's tours, the standings so far
-// (missing ones count as zero), and for a fixed seating the tour's number
-// and the seating prepared for all tours (nil when there is none).
+// (missing ones count as zero), the tour's number, its tables imported from
+// a file (nil without them), and how many random tours the plan has after
+// it (a random seating avoids repeats with them too).
 type SeatingInput struct {
 	Participants []Participant
 	Meetings     map[SeatingPair]int
 	Standings    map[int]SeatingStanding
 	Tour         int
-	Plan         PlanTours
+	Tables       [][4]int
+	FutureRandom int
 }
 
 // TablesFunc makes a tour's tables: each table's four user IDs, east to

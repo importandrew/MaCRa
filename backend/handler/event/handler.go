@@ -33,9 +33,9 @@ type EventService interface {
 	Withdraw(ctx context.Context, eventID, userID int) error
 	Tours(ctx context.Context, eventID int) (models.TourState, error)
 	GenerateTour(ctx context.Context, eventID int, seating models.Seating) (models.Tour, error)
-	GenerateSeatingPlan(ctx context.Context, eventID int) (models.SeatingPlanInfo, error)
-	ImportSeatingPlan(ctx context.Context, eventID int, file string) (models.SeatingPlanInfo, error)
-	DeleteSeatingPlan(ctx context.Context, eventID int) error
+	SetTourPlan(ctx context.Context, eventID int, plan models.TourPlan) error
+	ImportSeatingFile(ctx context.Context, eventID int, file string) (models.SeatingFileInfo, error)
+	DeleteSeatingFile(ctx context.Context, eventID int) error
 	PublishTour(ctx context.Context, eventID int) error
 	CancelTour(ctx context.Context, eventID int) error
 	StartTour(ctx context.Context, eventID int) error

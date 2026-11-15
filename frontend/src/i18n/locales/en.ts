@@ -156,12 +156,15 @@ const en = {
       'Line {{line}}: number {{number}} is seated twice in tour {{tour}}',
     seating_file_table_missing:
       'Tour {{tour}} has no table {{table}}: tables go 1, 2, 3, …',
-    no_seating_plan: 'No seating is prepared for all tours',
-    seating_plan_no_tour: 'The prepared seating has no tour {{tour}}',
-    seating_plan_absent:
-      'Tour {{tour}} of the prepared seating seats numbers who don’t play (withdrew or no such participant): {{numbers}}. Pick another method for this tour.',
-    seating_plan_unseated:
-      'Tour {{tour}} of the prepared seating leaves out participants {{numbers}}',
+    file_seating_missing: 'Tour {{tour}} has no tables from a file',
+    file_seating_absent:
+      'Tour {{tour}} from the file seats numbers who don’t play (withdrew or no such participant): {{numbers}}. Pick another method for this tour.',
+    file_seating_unseated:
+      'Tour {{tour}} from the file leaves out participants {{numbers}}',
+    tour_already_seated:
+      'Tour {{tour}} is already seated: its plan can no longer change',
+    seating_file_tour:
+      'The file has tour {{tour}}, the tournament only {{tours}} tours',
     invalid_seating: 'Unknown seating method',
     tables_still_playing: '{{playing}} tables are still playing',
     tour_finished: 'The tour is finished: its entries can no longer be undone',
@@ -277,21 +280,23 @@ const en = {
       random: 'Random',
       swiss: 'Swiss',
       interval: 'Interval',
-      fixed: 'Prepared',
+      fixed: 'From file',
     },
     methodHint: {
       random:
-        'Random seating of {{players}} players with as few repeat meetings as possible. Only the staff see it until it is published.',
+        'Random seating of {{players}} players with as few repeat meetings as possible, planned together with the random tours after it. Only the staff see it until it is published.',
       swiss:
         'Neighbours in the current standings play together (places 1–4, 5–8, …), moved apart only to avoid repeat meetings. Only the staff see it until it is published.',
       interval:
         'By the current standings with a step of the number of tables: table 1 gets places 1, 1+k, 1+2k, 1+3k. Only the staff see it until it is published.',
       fixed:
-        'Tour {{n}} from the seating prepared for all tours (below): its tables and winds. Only the staff see it until it is published.',
+        'Tour {{n}} from the file (the tournament’s plan, below): its tables and winds as there. Only the staff see it until it is published.',
     },
     methodUsed: 'Seating: {{method}}',
-    methodWithStep: 'Seating: {{method}}, step {{step}}',
     step: 'Step (places i, i+k, …)',
+    stepPart: ', step {{step}}',
+    avoidPart: ', avoiding repeats',
+    avoidRepeats: 'Avoid repeat meetings',
     noRepeats: 'No repeat meetings',
     repeatsSummary_one:
       '{{count}} repeat meeting · a pair met up to {{maxMet}} times before · {{players}} players meet someone again',
@@ -320,38 +325,35 @@ const en = {
     tables: 'Tables',
     table: 'Table {{n}}',
   },
-  seatingPlan: {
-    title: 'Seating for all tours',
-    none: 'Prepare the seating of all tours at once: generate it with as few repeat meetings as possible, or import your own from a file. A tour then takes its tables from it with the method “Prepared”.',
-    source: {
-      generated: 'Generated {{date}}',
-      imported: 'Imported from a file {{date}}',
-    },
-    summary_one:
+  tourPlan: {
+    title: 'Tournament plan',
+    hint: 'How each tour is to be seated: generating a tour’s seating starts from it. Random tours are planned together, so that all of them have as few repeat meetings as possible.',
+    tour: 'Tour {{n}}',
+    seated: 'seated',
+    edit: 'Change',
+    editTour: 'Change tour {{n}}',
+    editTitle: 'Tour {{n}} seating',
+    saved: 'Tour {{n}} plan saved',
+    fileTitle: 'Seating from a file',
+    fileSummary_one:
       'Tour {{tours}} · {{tables}} tables · {{players}} participant numbers',
-    summary_other:
+    fileSummary_other:
       'Tours {{tours}} · up to {{tables}} tables · {{players}} participant numbers',
-    repeats_one:
+    fileRepeats_one:
       '{{count}} repeat meeting · a pair meets up to {{maxMet}} times',
-    repeats_other:
+    fileRepeats_other:
       '{{count}} repeat meetings · a pair meets up to {{maxMet}} times',
-    generateHint:
-      'Generating seats the current participants for all the remaining tours, avoiding repeat meetings with the tours played. It takes a few seconds.',
-    generate: 'Generate for all tours',
-    generated: 'Seating for all tours generated',
     fileHint:
-      'A file: CSV, one row per table — tour, table, east, south, west, north, as participant numbers. Comma or semicolon; a header row is fine.',
+      'Your own seating: a CSV file, one row per table — tour, table, east, south, west, north, as participant numbers. Comma or semicolon; a header row is fine. Its tours are planned “From file”.',
     import: 'Import a file',
+    reimport: 'Import another file',
     imported: 'Seating imported',
     tooLarge: 'The file is too large for a seating',
-    delete: 'Delete the seating',
-    deleted: 'Seating for all tours deleted',
-    replaceTitle: 'Replace the seating',
-    replacePrompt:
-      'A new seating for the remaining tours replaces the prepared one. Tours already seated stay as they are.',
-    deleteTitle: 'Delete the seating',
+    delete: 'Delete the file’s seating',
+    deleted: 'The file’s seating deleted',
+    deleteTitle: 'Delete the file’s seating',
     deletePrompt:
-      'The seating prepared for all tours is deleted. Tours already seated stay as they are.',
+      'The tables from the file are deleted; the tours planned “From file” become random. Tours already seated stay as they are.',
   },
   tournamentDesk: {
     menu: 'Tournament',

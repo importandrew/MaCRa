@@ -58,13 +58,8 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Sea
 		}
 		input.Participants = participants
 		input.Tour = next
-		plan, err := tx.SeatingPlan(ctx, eventID)
-		switch {
-		case errors.Is(err, models.ErrNoSeatingPlan):
-		case err != nil:
+		if input.Tables, input.FutureRandom, err = tx.planInput(ctx, eventID, next); err != nil {
 			return err
-		default:
-			input.Plan = plan.Tours
 		}
 		tables, err := makeTables(input)
 		if err != nil {
@@ -80,10 +75,10 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Sea
 // insertDraftTour inserts a drafted tour with its games, one per table.
 func (r *Repo) insertDraftTour(ctx context.Context, eventID, number int, seating models.Seating, tables [][4]int) (models.Tour, error) {
 	rows, err := r.db.Query(ctx, `
-		INSERT INTO tours (event_id, number, status, seating, seating_step)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, number, status, seating, seating_step, published_at, minutes, started_at, finished_at`,
-		eventID, number, models.TourDraft, seating.Method, seating.Step)
+		INSERT INTO tours (event_id, number, status, seating, seating_step, avoid_repeats)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, number, status, seating, seating_step, avoid_repeats, published_at, minutes, started_at, finished_at`,
+		eventID, number, models.TourDraft, seating.Method, seating.Step, seating.AvoidRepeats)
 	if err != nil {
 		return models.Tour{}, fmt.Errorf("insert tour: %w", err)
 	}
@@ -238,7 +233,7 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 	state := models.TourState{Tables: []models.TourTable{}}
 	err := r.InTx(ctx, func(tx *Repo) error {
 		rows, err := tx.db.Query(ctx, `
-			SELECT id, number, status, seating, seating_step, published_at, minutes, started_at, finished_at
+			SELECT id, number, status, seating, seating_step, avoid_repeats, published_at, minutes, started_at, finished_at
 			FROM tours WHERE event_id = $1 AND status <> $2
 			ORDER BY number DESC LIMIT 1`,
 			eventID, models.TourAborted)
@@ -276,7 +271,9 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 			}
 		}
 		state.Missing = missingPlayers(state.Active)
-		return nil
+
+		state.Plan, err = tx.planList(ctx, eventID)
+		return err
 	})
 	return state, err
 }

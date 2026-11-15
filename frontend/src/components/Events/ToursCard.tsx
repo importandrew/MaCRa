@@ -1,14 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Card, useOverlayState } from '@heroui/react';
 import { useState } from 'react';
-import {
-  SEATING_METHODS,
-  type SeatingMethod,
-  type TourState,
-  type TourTable,
-} from '../../models/Tour';
-import SegmentedPicker from '../SegmentedPicker';
-import ListStepper from '../ListStepper';
+import type { Seating, TourState, TourTable } from '../../models/Tour';
+import SeatingFields from './SeatingFields';
+import { seatingLabel } from './seatingLabel';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
   cancelTour,
@@ -90,67 +85,51 @@ export default function ToursCard({
       await onChanged();
     });
 
-  // hasPlan: a seating is prepared for all tours (the "fixed" method).
-  const hasPlan = state.plan != null;
-  // picked: the seating method the referee picked; null until they do.
-  const [picked, setPicked] = useState<SeatingMethod | null>(null);
-  // shownMethod: the method the next generation uses: the one picked, else
-  // the prepared seating when it has the next tour, else random (also when
-  // "fixed" was picked and the plan is gone since).
-  const shownMethod: SeatingMethod =
-    picked === 'fixed' && !hasPlan
-      ? 'random'
-      : (picked ??
-        (state.plan?.tours.includes(state.next) ? 'fixed' : 'random'));
-  // step: an interval seating's step, 1 to the number of tables; null
-  // means the number of tables (the default).
+  // nextPlan: the plan of the tour to seat next, if any.
+  const nextPlan = state.plan.find((plan) => plan.number === state.next);
+  const hasFile = (nextPlan?.file_tables ?? 0) > 0;
   const tableCount = Math.max(1, Math.floor(state.active / 4));
-  const [step, setStep] = useState<number | null>(null);
+  // picked: the seating the referee picked for the next tour; null until
+  // they do: the plan's then (fixed only while the tour has tables from a
+  // file).
+  const [picked, setPicked] = useState<Seating | null>(null);
+  const planned: Seating = nextPlan
+    ? {
+        seating: nextPlan.seating,
+        step: nextPlan.seating_step ?? undefined,
+        avoid_repeats: nextPlan.avoid_repeats,
+      }
+    : { seating: 'random', avoid_repeats: false };
+  const chosen = picked ?? planned;
+  const seating: Seating =
+    chosen.seating === 'fixed' && !hasFile
+      ? { seating: 'random', avoid_repeats: false }
+      : chosen;
   const methodPicker = (
-    <>
-      <SegmentedPicker
-        ariaLabel={t('tours.methodLabel')}
-        // Four one-word labels don't fit a row at 320 px in Russian.
-        orientation="vertical"
-        options={SEATING_METHODS.filter(
-          (value) => value !== 'fixed' || hasPlan
-        ).map((value) => ({
-          value,
-          label: t(`tours.method.${value}`),
-        }))}
-        selectedKey={shownMethod}
-        onSelectionChange={setPicked}
-      />
-      {shownMethod === 'interval' && tableCount > 1 && (
-        <>
-          <p className="text-sm">{t('tours.step')}</p>
-          <ListStepper
-            label={t('tours.step')}
-            values={Array.from({ length: tableCount }, (_, i) => i + 1)}
-            value={step ?? tableCount}
-            onChange={setStep}
-          />
-        </>
-      )}
-    </>
+    <SeatingFields
+      value={seating}
+      onChange={setPicked}
+      tableCount={tableCount}
+      hasFile={hasFile}
+    />
   );
 
   const generate = () =>
     runGenerate(async () => {
-      if (
-        await generateTour(
-          eventId,
-          shownMethod,
-          shownMethod === 'interval' && step != null && step !== tableCount
-            ? step
-            : undefined
-        )
-      ) {
+      const step =
+        seating.seating === 'interval' &&
+        seating.step != null &&
+        seating.step < tableCount
+          ? seating.step
+          : undefined;
+      if (await generateTour(eventId, { ...seating, step })) {
         showToast({
           title: t('tours.generated', { n: state.next }),
           variant: 'success',
         });
       }
+      // The next tour starts from its plan again.
+      setPicked(null);
       await onChanged();
     });
 
@@ -184,14 +163,14 @@ export default function ToursCard({
         {current && current.status !== 'finished' && (
           <div className="text-sm">
             <p>
-              {current.seating_step
-                ? t('tours.methodWithStep', {
-                    method: t(`tours.method.${current.seating}`),
-                    step: current.seating_step,
-                  })
-                : t('tours.methodUsed', {
-                    method: t(`tours.method.${current.seating}`),
-                  })}
+              {t('tours.methodUsed', {
+                method: seatingLabel(
+                  t,
+                  current.seating,
+                  current.seating_step,
+                  current.avoid_repeats
+                ),
+              })}
             </p>
             <p className={state.repeats > 0 ? 'text-warning' : 'text-muted'}>
               {state.repeats > 0
@@ -210,7 +189,7 @@ export default function ToursCard({
             {blocker == null && methodPicker}
             <p className="text-sm text-muted">
               {blocker ??
-                t(`tours.methodHint.${shownMethod}`, {
+                t(`tours.methodHint.${seating.seating}`, {
                   players: state.active,
                   n: state.next,
                 })}

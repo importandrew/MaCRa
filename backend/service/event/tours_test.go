@@ -41,38 +41,56 @@ func TestSeatingFunc_fixed(t *testing.T) {
 	makeTables, err := seatingFunc(models.Seating{Method: models.SeatingFixed})
 	require.NoError(t, err)
 	_, err = makeTables(models.SeatingInput{Tour: 1})
-	assert.ErrorIs(t, err, models.ErrNoSeatingPlan)
+	assert.ErrorIs(t, err, models.ErrFileSeatingMissing)
 }
 
-func TestImportSeatingPlan(t *testing.T) {
+func TestCheckSeating(t *testing.T) {
+	step := 2
+	for how, ok := range map[models.Seating]bool{
+		{Method: models.SeatingSwiss, AvoidRepeats: true}:                 true,
+		{Method: models.SeatingInterval, Step: &step, AvoidRepeats: true}: true,
+		{Method: models.SeatingRandom}:                                    true,
+		{Method: models.SeatingFixed}:                                     true,
+		{Method: models.SeatingRandom, AvoidRepeats: true}:                false,
+		{Method: models.SeatingFixed, AvoidRepeats: true}:                 false,
+		{Method: models.SeatingSwiss, Step: &step}:                        false,
+		{Method: "seat-by-height"}:                                        false,
+	} {
+		if ok {
+			assert.NoError(t, checkSeating(how), "%+v", how)
+		} else {
+			assert.ErrorIs(t, checkSeating(how), models.ErrInvalidSeating, "%+v", how)
+		}
+	}
+}
+
+func TestSetTourPlan(t *testing.T) {
 	ctx := context.Background()
 	repo := NewMockEventRepo(t)
 	service := NewService(repo, nil, nil)
 
-	_, err := service.ImportSeatingPlan(ctx, 1, "1,1,1,2,3\n")
+	zero := 0
+	err := service.SetTourPlan(ctx, 1, models.TourPlan{Number: 2, Seating: models.SeatingInterval, Step: &zero})
+	assert.ErrorIs(t, err, models.ErrInvalidSeating)
+	err = service.SetTourPlan(ctx, 1, models.TourPlan{Number: 2, Seating: models.SeatingRandom, AvoidRepeats: true})
+	assert.ErrorIs(t, err, models.ErrInvalidSeating)
+
+	plan := models.TourPlan{Number: 2, Seating: models.SeatingSwiss, AvoidRepeats: true}
+	repo.EXPECT().SetTourPlan(ctx, 1, plan).Return(nil).Once()
+	require.NoError(t, service.SetTourPlan(ctx, 1, plan))
+}
+
+func TestImportSeatingFile(t *testing.T) {
+	ctx := context.Background()
+	repo := NewMockEventRepo(t)
+	service := NewService(repo, nil, nil)
+
+	_, err := service.ImportSeatingFile(ctx, 1, "1,1,1,2,3\n")
 	assert.ErrorIs(t, err, models.ErrSeatingFileRow, "a bad file isn't stored")
 
 	tours := models.PlanTours{3: {{1, 2, 3, 4}}}
-	repo.EXPECT().SaveSeatingPlan(ctx, 1, models.PlanImported, tours).Return(nil).Once()
-	info, err := service.ImportSeatingPlan(ctx, 1, "3,1,1,2,3,4\n")
+	repo.EXPECT().ImportSeatingFile(ctx, 1, tours).Return(nil).Once()
+	info, err := service.ImportSeatingFile(ctx, 1, "3,1,1,2,3,4\n")
 	require.NoError(t, err)
 	assert.Equal(t, []int{3}, info.Tours)
-	assert.Equal(t, models.PlanImported, info.Source)
-}
-
-func TestGenerateSeatingPlan(t *testing.T) {
-	ctx := context.Background()
-	repo := NewMockEventRepo(t)
-	input := models.SeatingInput{}
-	for n := 1; n <= 4; n++ {
-		input.Participants = append(input.Participants, models.Participant{UserID: 100 + n, Number: n})
-	}
-	repo.EXPECT().SeatingPlanInput(ctx, 1).Return(input, 3, 4, nil).Once()
-	tours := models.PlanTours{3: {{1, 2, 3, 4}}, 4: {{1, 2, 3, 4}}}
-	repo.EXPECT().SaveSeatingPlan(ctx, 1, models.PlanGenerated, tours).Return(nil).Once()
-
-	info, err := NewService(repo, nil, nil).GenerateSeatingPlan(ctx, 1)
-	require.NoError(t, err)
-	assert.Equal(t, []int{3, 4}, info.Tours, "the remaining tours")
-	assert.Equal(t, 4, info.Players)
 }

@@ -147,19 +147,22 @@ var (
 	ErrInvalidSeating = errors.New("invalid seating method")
 	// ErrNotTournament means the action is for tournaments only.
 	ErrNotTournament = errors.New("not a tournament")
-	// ErrNoSeatingPlan means the tournament has no seating prepared for all
-	// tours (a "fixed" tour, deleting the plan).
-	ErrNoSeatingPlan = errors.New("no seating plan")
-	// ErrSeatingPlanNoTour means the prepared seating has no tables for the
-	// tour; sent with "tour".
-	ErrSeatingPlanNoTour = errors.New("seating plan has no such tour")
-	// ErrSeatingPlanAbsent means the prepared seating of a tour seats
-	// numbers that don't play (withdrew, or no such participant); sent with
-	// "tour" and "numbers".
-	ErrSeatingPlanAbsent = errors.New("seating plan seats absent numbers")
-	// ErrSeatingPlanUnseated means the prepared seating of a tour leaves
-	// out participants; sent with "tour" and "numbers".
-	ErrSeatingPlanUnseated = errors.New("seating plan leaves out participants")
+	// ErrFileSeatingMissing means the tour has no tables imported from a
+	// file (the "fixed" method); sent with "tour".
+	ErrFileSeatingMissing = errors.New("no file seating for the tour")
+	// ErrFileSeatingAbsent means a tour's tables from a file seat numbers
+	// that don't play (withdrew, or no such participant); sent with "tour"
+	// and "numbers".
+	ErrFileSeatingAbsent = errors.New("file seating seats absent numbers")
+	// ErrFileSeatingUnseated means a tour's tables from a file leave out
+	// participants; sent with "tour" and "numbers".
+	ErrFileSeatingUnseated = errors.New("file seating leaves out participants")
+	// ErrTourAlreadySeated means the tour's seating is published or played:
+	// its plan can't change any more; sent with "tour".
+	ErrTourAlreadySeated = errors.New("tour already seated")
+	// ErrSeatingFileTour means a seating file has a tour beyond the
+	// tournament's tours; sent with "line", "tour" and "tours".
+	ErrSeatingFileTour = errors.New("seating file tour out of range")
 	// ErrSeatingFileEmpty means an imported seating file has no tables.
 	ErrSeatingFileEmpty = errors.New("seating file empty")
 	// ErrSeatingFileRow means a row of an imported seating file isn't six
@@ -239,6 +242,7 @@ var Errors = map[error]APIError{
 	ErrInvalidTournamentSettings: {http.StatusBadRequest, "invalid_tournament_settings"},
 	ErrNotTournament:             {http.StatusBadRequest, "not_tournament"},
 	ErrSeatingFileEmpty:          {http.StatusBadRequest, "seating_file_empty"},
+	ErrSeatingFileTour:           {http.StatusBadRequest, "seating_file_tour"},
 	ErrSeatingFileRow:            {http.StatusBadRequest, "seating_file_row"},
 	ErrSeatingFileTableTwice:     {http.StatusBadRequest, "seating_file_table_twice"},
 	ErrSeatingFileNumberTwice:    {http.StatusBadRequest, "seating_file_number_twice"},
@@ -264,7 +268,6 @@ var Errors = map[error]APIError{
 	ErrRequestNotFound: {http.StatusNotFound, "request_not_found"},
 	ErrNotParticipant:  {http.StatusNotFound, "not_participant"},
 	ErrTourNotFound:    {http.StatusNotFound, "tour_not_found"},
-	ErrNoSeatingPlan:   {http.StatusNotFound, "no_seating_plan"},
 
 	// 409
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},
@@ -292,9 +295,10 @@ var Errors = map[error]APIError{
 	ErrTourFinished:         {http.StatusConflict, "tour_finished"},
 	ErrTimeUp:               {http.StatusConflict, "time_is_up"},
 	ErrSettingFrozen:        {http.StatusConflict, "setting_frozen"},
-	ErrSeatingPlanNoTour:    {http.StatusConflict, "seating_plan_no_tour"},
-	ErrSeatingPlanAbsent:    {http.StatusConflict, "seating_plan_absent"},
-	ErrSeatingPlanUnseated:  {http.StatusConflict, "seating_plan_unseated"},
+	ErrFileSeatingMissing:   {http.StatusConflict, "file_seating_missing"},
+	ErrFileSeatingAbsent:    {http.StatusConflict, "file_seating_absent"},
+	ErrFileSeatingUnseated:  {http.StatusConflict, "file_seating_unseated"},
+	ErrTourAlreadySeated:    {http.StatusConflict, "tour_already_seated"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's
