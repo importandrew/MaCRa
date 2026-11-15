@@ -135,6 +135,7 @@ const en = {
     invalid_tournament_settings: 'The tournament settings are invalid',
     not_tournament: 'This is for tournaments only',
     not_substitute: 'This member isn’t a substitute of the tournament',
+    too_many_substitutes: 'More substitutes than the tables need ({{missing}})',
     already_seated: 'They already sit at that seat',
     player_and_substitute: 'A member can’t be both a player and a substitute',
     participants_closed:
@@ -318,6 +319,13 @@ const en = {
       '{{count}} player is missing for whole tables: add a player or a substitute.',
     missing_other:
       '{{count}} players are missing for whole tables: add players or substitutes.',
+    substitutesLabel: 'Substitutes for this tour',
+    pickSubstitutes_one:
+      'Pick {{count}} more substitute to complete the tables.',
+    pickSubstitutes_other:
+      'Pick {{count}} more substitutes to complete the tables.',
+    substitutesHint:
+      'The substitutes complete the tables; their seats count for nobody.',
     cancel: 'Cancel seating',
     cancelTitle: 'Cancel the seating',
     cancelPrompt:
@@ -683,6 +691,7 @@ const en = {
     seated: 'Table {{table}}: substitute seated',
     backDone: '{{name}} is back at the table',
     for: 'for {{name}}',
+    substitute: 'substitute',
     forfeitMark: '0 / 0',
     change: 'Change who sits at {{name}}’s seat',
     changeShort: 'Seat…',

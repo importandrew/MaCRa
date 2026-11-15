@@ -21,7 +21,9 @@ import (
 // numbers not drawn for the current players (models.ErrNotDrawn) and active
 // participants that don't fill whole tables (models.ErrTablesIncomplete,
 // with the number missing).
-func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc) (models.Tour, error) {
+func (r *Repo) GenerateTour(
+	ctx context.Context, eventID int, seating models.Seating, substitutes []int, makeTables models.TablesFunc,
+) (models.Tour, error) {
 	var tour models.Tour
 	err := r.InTx(ctx, func(tx *Repo) error {
 		isTournament, _, err := tx.tournamentState(ctx, eventID, true)
@@ -44,12 +46,9 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Sea
 			return err
 		}
 
-		participants, err := tx.activeParticipants(ctx, eventID)
+		participants, err := tx.tourParticipants(ctx, eventID, substitutes)
 		if err != nil {
 			return err
-		}
-		if missing := missingPlayers(len(participants)); missing > 0 {
-			return models.WithData(models.ErrTablesIncomplete, models.ErrorData{"missing": missing})
 		}
 
 		input, err := tx.SeatingHistory(ctx, eventID, 0)
@@ -66,10 +65,94 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Sea
 			return err
 		}
 
-		tour, err = tx.insertDraftTour(ctx, eventID, next, seating, tables)
-		return err
+		if tour, err = tx.insertDraftTour(ctx, eventID, next, seating, tables); err != nil {
+			return err
+		}
+		// A substitute's seat counts for nobody (0 / 0, as a forfeit).
+		if _, err := tx.db.Exec(ctx, `
+			UPDATE game_players gp SET forfeit = TRUE
+			FROM games g WHERE g.id = gp.game_id AND g.tour_id = $1 AND gp.player_id = ANY($2)`,
+			tour.ID, substitutes); err != nil {
+			return fmt.Errorf("substitutes' seats: %w", err)
+		}
+		return nil
 	})
 	return tour, err
+}
+
+// tourParticipants returns whom a tour seats: the active participants and
+// the substitutes chosen to complete the tables, exactly as many as are
+// missing (else models.ErrTablesIncomplete or models.ErrTooManySubstitutes,
+// with the number missing).
+func (r *Repo) tourParticipants(ctx context.Context, eventID int, substitutes []int) ([]models.Participant, error) {
+	participants, err := r.activeParticipants(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+	switch missing := missingPlayers(len(participants)); {
+	case len(substitutes) > missing:
+		return nil, models.WithData(models.ErrTooManySubstitutes, models.ErrorData{dataMissing: missing})
+	case len(substitutes) < missing:
+		return nil, models.WithData(models.ErrTablesIncomplete, models.ErrorData{dataMissing: missing - len(substitutes)})
+	}
+	subs, err := r.tourSubstitutes(ctx, eventID, substitutes)
+	if err != nil {
+		return nil, err
+	}
+	return append(participants, subs...), nil
+}
+
+// tourSubstitutes returns the substitutes chosen for a tour as participants
+// with stand-in numbers (models.SubstituteNumber+i), refusing a user who
+// isn't a substitute of the event (models.ErrNotSubstitute), one chosen
+// twice, or one who sits at a table that isn't over
+// (models.ErrPlayerInAnotherGame). Call it under the event's lock.
+func (r *Repo) tourSubstitutes(ctx context.Context, eventID int, userIDs []int) ([]models.Participant, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	rows, err := r.db.Query(ctx, `
+		SELECT u.id, u.name,
+			EXISTS (SELECT 1 FROM event_user_roles r
+				WHERE r.event_id = $1 AND r.user_id = u.id AND r.role = $3) AS substitute,
+			EXISTS (SELECT 1 FROM game_sitters gs JOIN games g ON g.id = gs.game_id
+				WHERE gs.sitter_id = u.id AND g.event_id = $1 AND g.status IN ($4, $5)) AS seated
+		FROM users u WHERE u.id = ANY($2)`,
+		eventID, userIDs, models.EventSubstitute, models.GameCreated, models.GameLive)
+	if err != nil {
+		return nil, fmt.Errorf("substitutes: %w", err)
+	}
+	type subRow struct {
+		ID         int    `db:"id"`
+		Name       string `db:"name"`
+		Substitute bool   `db:"substitute"`
+		Seated     bool   `db:"seated"`
+	}
+	list, err := pgx.CollectRows(rows, pgx.RowToStructByName[subRow])
+	if err != nil {
+		return nil, fmt.Errorf("substitutes: %w", err)
+	}
+	if len(list) != len(userIDs) {
+		return nil, fmt.Errorf("substitutes %v, found %d: %w", userIDs, len(list), models.ErrNotSubstitute)
+	}
+	byID := make(map[int]subRow, len(list))
+	for _, sub := range list {
+		byID[sub.ID] = sub
+	}
+
+	subs := make([]models.Participant, 0, len(userIDs))
+	for i, id := range userIDs {
+		sub := byID[id]
+		switch {
+		case !sub.Substitute:
+			return nil, fmt.Errorf("user %d: %w", id, models.ErrNotSubstitute)
+		case sub.Seated:
+			return nil, fmt.Errorf("substitute %d sits at a table: %w", id,
+				models.WithData(models.ErrPlayerInAnotherGame, models.ErrorData{dataName: sub.Name}))
+		}
+		subs = append(subs, models.Participant{UserID: id, Number: models.SubstituteNumber + i, Substitute: true})
+	}
+	return subs, nil
 }
 
 // insertDraftTour inserts a drafted tour with its games, one per table.
@@ -285,7 +368,7 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT g.table_number, g.id AS game_id, g.status, g.extra_minutes, gp.player_id, u.name,
-			COALESCE(tp.number, 0) AS number, gp.starting_wind, gp.forfeit,
+			COALESCE(tp.number, 0) AS number, tp.number IS NULL AS substitute, gp.starting_wind, gp.forfeit,
 			gs.sitter_id, su.name AS sitter_name,
 			(SELECT count(*) FROM rounds r WHERE r.game_id = g.id) AS log_size
 		FROM games g
@@ -312,6 +395,7 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 		Number       int               `db:"number"`
 		Wind         string            `db:"starting_wind"`
 		Forfeit      bool              `db:"forfeit"`
+		Substitute   bool              `db:"substitute"`
 		SitterID     int               `db:"sitter_id"`
 		SitterName   string            `db:"sitter_name"`
 		LogSize      int               `db:"log_size"`
@@ -329,7 +413,9 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 			})
 		}
 		last := &tables[len(tables)-1]
-		seat := models.Seat{UserID: s.UserID, Name: s.Name, Number: s.Number, Wind: s.Wind, Forfeit: s.Forfeit}
+		seat := models.Seat{
+			UserID: s.UserID, Name: s.Name, Number: s.Number, Wind: s.Wind, Forfeit: s.Forfeit, Substitute: s.Substitute,
+		}
 		if s.SitterID != s.UserID {
 			seat.Sitter = &models.Player{ID: s.SitterID, Name: s.SitterName}
 		}

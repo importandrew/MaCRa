@@ -135,3 +135,36 @@ func TestFileInfo(t *testing.T) {
 		Tours: []int{1, 2, 3}, Tables: 2, Players: 8, Repeats: 12, MaxMet: 3,
 	}, info)
 }
+
+func TestFixed_substitutes(t *testing.T) {
+	// Number 3 withdrew; substitute 900 takes it, winds as in the file.
+	input := Input{Tour: 2, Tables: [][4]int{{4, 3, 2, 1}, {5, 6, 7, 8}}}
+	input.Participants = slices.DeleteFunc(participants(8), func(p models.Participant) bool { return p.Number == 3 })
+	input.Participants = append(input.Participants,
+		models.Participant{UserID: 900, Number: models.SubstituteNumber, Substitute: true})
+
+	tables, err := Fixed(input)
+	require.NoError(t, err)
+	assert.Equal(t, [][4]int{{104, 900, 102, 101}, {105, 106, 107, 108}}, tables)
+
+	// A second substitute has no seat.
+	input.Participants = append(input.Participants,
+		models.Participant{UserID: 901, Number: models.SubstituteNumber + 1, Substitute: true})
+	_, err = Fixed(input)
+	assert.ErrorIs(t, err, models.ErrTooManySubstitutes)
+}
+
+func TestSwiss_substitutesLast(t *testing.T) {
+	// Substitutes have stand-in numbers after the players: last in the
+	// standings, and after the players at a table's winds.
+	input := Input{Participants: participants(7), Standings: map[int]Standing{}}
+	input.Participants = append(input.Participants,
+		models.Participant{UserID: 900, Number: models.SubstituteNumber, Substitute: true})
+	for _, p := range participants(7) {
+		input.Standings[p.UserID] = Standing{TP: float64(10 - p.Number)} // place = number
+	}
+
+	tables, err := Swiss(input, false, time.Now())
+	require.NoError(t, err)
+	assert.Equal(t, [][4]int{{101, 102, 103, 104}, {105, 106, 107, 900}}, tables)
+}

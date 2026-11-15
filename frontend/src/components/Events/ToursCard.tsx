@@ -1,5 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Card, useOverlayState } from '@heroui/react';
+import {
+  Button,
+  Card,
+  ToggleButton,
+  ToggleButtonGroup,
+  useOverlayState,
+} from '@heroui/react';
 import { useState } from 'react';
 import type { Seating, TourState, TourTable } from '../../models/Tour';
 import SeatingFields from './SeatingFields';
@@ -134,7 +140,9 @@ export default function ToursCard({
         seating.step < tableCount
           ? seating.step
           : undefined;
-      if (await generateTour(eventId, { ...seating, step })) {
+      if (
+        await generateTour(eventId, { ...seating, step }, chosenSubstitutes)
+      ) {
         showToast({
           title: t('tours.generated', { n: state.next }),
           variant: 'success',
@@ -142,6 +150,7 @@ export default function ToursCard({
       }
       // The next tour starts from its plan again.
       setPicked(null);
+      setPickedSubstitutes(null);
       await onChanged();
     });
 
@@ -154,12 +163,70 @@ export default function ToursCard({
       await onChanged();
     });
 
-  // Why the next tour can't be published yet, if it can't.
+  // Substitutes complete the tables when players are missing: those who
+  // sit nowhere, or at a table of the draft (generating again replaces it).
+  const inDraft = new Set(
+    isDraft
+      ? state.tables.flatMap((table) => table.seats.map((s) => s.user_id))
+      : []
+  );
+  const freeSubstitutes = state.substitutes.filter(
+    (sub) => sub.table === 0 || inDraft.has(sub.id)
+  );
+  // pickedSubstitutes: the referee's choice; null until they choose: the
+  // draft's substitutes then.
+  const [pickedSubstitutes, setPickedSubstitutes] = useState<number[] | null>(
+    null
+  );
+  const chosenSubstitutes = (
+    pickedSubstitutes ??
+    freeSubstitutes.map((sub) => sub.id).filter((id) => inDraft.has(id))
+  )
+    .filter((id) => freeSubstitutes.some((sub) => sub.id === id))
+    .slice(0, state.missing);
+
+  // Why the next tour can't be seated yet, if it can't: no draw, or fewer
+  // players and free substitutes than whole tables need.
   const blocker = !isDrawn
     ? t('tours.needsDraw')
-    : state.missing > 0
-      ? t('tours.missing', { count: state.missing })
+    : state.missing > freeSubstitutes.length
+      ? t('tours.missing', { count: state.missing - freeSubstitutes.length })
       : null;
+  // Still to pick: substitutes for the missing players.
+  const toPick = blocker == null ? state.missing - chosenSubstitutes.length : 0;
+  const substitutePicker = blocker == null && state.missing > 0 && (
+    <>
+      <p className="text-sm">{t('tours.substitutesLabel')}</p>
+      <ToggleButtonGroup
+        aria-label={t('tours.substitutesLabel')}
+        selectionMode="multiple"
+        orientation="vertical"
+        fullWidth
+        className="w-full"
+        selectedKeys={chosenSubstitutes.map(String)}
+        onSelectionChange={(keys) =>
+          setPickedSubstitutes([...keys].map(Number).slice(0, state.missing))
+        }
+      >
+        {freeSubstitutes.map((sub, i) => (
+          <ToggleButton
+            key={sub.id}
+            id={String(sub.id)}
+            isDisabled={toPick === 0 && !chosenSubstitutes.includes(sub.id)}
+            className="h-auto min-h-11 w-full py-2 not-data-selected:text-foreground"
+          >
+            {i > 0 && <ToggleButtonGroup.Separator />}
+            {sub.name}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+      <p className={`text-sm ${toPick > 0 ? 'text-warning' : 'text-muted'}`}>
+        {toPick > 0
+          ? t('tours.pickSubstitutes', { count: toPick })
+          : t('tours.substitutesHint')}
+      </p>
+    </>
+  );
 
   return (
     <Card>
@@ -199,6 +266,7 @@ export default function ToursCard({
         {canRun && state.next > 0 && !isDraft && (
           <>
             {blocker == null && methodPicker}
+            {substitutePicker}
             <p className="text-sm text-muted">
               {blocker ??
                 t(`tours.methodHint.${seating.seating}`, {
@@ -209,7 +277,7 @@ export default function ToursCard({
             <PendingButton
               variant="primary"
               isPending={isGenerating}
-              isDisabled={blocker != null}
+              isDisabled={blocker != null || toPick > 0}
               onPress={generate}
               className="w-3/4 self-center"
             >
@@ -222,6 +290,7 @@ export default function ToursCard({
           <>
             <p className="text-sm text-muted">{t('tours.draftHint')}</p>
             {methodPicker}
+            {substitutePicker}
             <PendingButton
               variant="primary"
               isPending={isActing}
@@ -233,6 +302,7 @@ export default function ToursCard({
             <PendingButton
               variant="secondary"
               isPending={isGenerating}
+              isDisabled={blocker != null || toPick > 0}
               onPress={generate}
               className="w-3/4 self-center"
             >
@@ -334,7 +404,7 @@ export default function ToursCard({
                         {WIND_KANJI[seat.wind]}
                       </span>
                       <span className="w-7 shrink-0 text-end tabular-nums text-muted">
-                        {seat.number}
+                        {seat.substitute ? '—' : seat.number}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">
@@ -346,7 +416,11 @@ export default function ToursCard({
                           <span className="block truncate text-xs text-muted">
                             {[
                               seat.sitter && t('seat.for', { name: seat.name }),
-                              seat.forfeit && t('seat.forfeitMark'),
+                              // A substitute's own seat: "substitute", not
+                              // "0 / 0" (it counts for nobody anyway).
+                              seat.substitute
+                                ? t('seat.substitute')
+                                : seat.forfeit && t('seat.forfeitMark'),
                             ]
                               .filter(Boolean)
                               .join(' · ')}

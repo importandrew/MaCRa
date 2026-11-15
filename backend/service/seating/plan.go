@@ -12,36 +12,56 @@ import (
 )
 
 // Fixed seats the tour by its tables imported from a file (input.Tables),
-// winds as there. It refuses without them (models.ErrFileSeatingMissing),
-// and tables that seat numbers who don't play (models.ErrFileSeatingAbsent)
-// or leave out participants (models.ErrFileSeatingUnseated).
+// winds as there; the substitutes chosen for the tour take the numbers that
+// don't play. It refuses without tables (models.ErrFileSeatingMissing), and
+// tables that seat more numbers who don't play than there are substitutes
+// (models.ErrFileSeatingAbsent), leave out participants
+// (models.ErrFileSeatingUnseated), or leave a chosen substitute without a
+// seat (models.ErrTooManySubstitutes).
 func Fixed(input Input) ([][4]int, error) {
 	if input.Tables == nil {
 		return nil, models.WithData(models.ErrFileSeatingMissing, models.ErrorData{dataTour: input.Tour})
 	}
 
 	userByNumber := make(map[int]int, len(input.Participants))
+	var substitutes []int // in the order chosen
 	for _, p := range input.Participants {
+		if p.Substitute {
+			substitutes = append(substitutes, p.UserID)
+			continue
+		}
 		userByNumber[p.Number] = p.UserID
 	}
+	type spot struct{ table, seat, number int }
 	seated := map[int]bool{}
-	var absent []int
+	var absent []spot
 	tables := make([][4]int, 0, len(input.Tables))
-	for _, numbers := range input.Tables {
+	for t, numbers := range input.Tables {
 		var table [4]int
 		for seat, number := range numbers {
 			userID, ok := userByNumber[number]
 			if !ok {
-				absent = append(absent, number)
+				absent = append(absent, spot{t, seat, number})
 			}
 			table[seat] = userID
 			seated[number] = true
 		}
 		tables = append(tables, table)
 	}
-	if len(absent) > 0 {
+
+	// The substitutes take the numbers that don't play (withdrew, or no
+	// such participant), lowest number first.
+	slices.SortFunc(absent, func(a, b spot) int { return a.number - b.number })
+	if len(absent) > len(substitutes) {
+		numbers := make([]int, 0, len(absent))
+		for _, a := range absent[len(substitutes):] {
+			numbers = append(numbers, a.number)
+		}
 		return nil, models.WithData(models.ErrFileSeatingAbsent,
-			models.ErrorData{dataTour: input.Tour, "numbers": numberList(absent)})
+			models.ErrorData{dataTour: input.Tour, "numbers": numberList(numbers)})
+	}
+	for i, a := range absent {
+		tables[a.table][a.seat] = substitutes[i]
 	}
 
 	var unseated []int
@@ -53,6 +73,9 @@ func Fixed(input Input) ([][4]int, error) {
 	if len(unseated) > 0 {
 		return nil, models.WithData(models.ErrFileSeatingUnseated,
 			models.ErrorData{dataTour: input.Tour, "numbers": numberList(unseated)})
+	}
+	if len(absent) < len(substitutes) {
+		return nil, models.WithData(models.ErrTooManySubstitutes, models.ErrorData{"missing": len(absent)})
 	}
 	return tables, nil
 }

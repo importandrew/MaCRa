@@ -131,6 +131,7 @@ const ru: Messages = {
     invalid_tournament_settings: 'Неверные настройки турнира',
     not_tournament: 'Это только для турниров',
     not_substitute: 'Этот участник — не замена турнира',
+    too_many_substitutes: 'Замен больше, чем нужно столам ({{missing}})',
     already_seated: 'Он уже сидит на этом месте',
     player_and_substitute:
       'Участник не может быть одновременно игроком и заменой',
@@ -326,6 +327,16 @@ const ru: Messages = {
       'Для полных столов не хватает {{count}} игроков: добавьте игроков или замены.',
     missing_other:
       'Для полных столов не хватает {{count}} игроков: добавьте игроков или замены.',
+    substitutesLabel: 'Замены в этом туре',
+    pickSubstitutes_one:
+      'Выберите ещё {{count}} замену, чтобы столы были полными.',
+    pickSubstitutes_few:
+      'Выберите ещё {{count}} замены, чтобы столы были полными.',
+    pickSubstitutes_many:
+      'Выберите ещё {{count}} замен, чтобы столы были полными.',
+    pickSubstitutes_other:
+      'Выберите ещё {{count}} замены, чтобы столы были полными.',
+    substitutesHint: 'Замены дополняют столы; их места не идут в зачёт никому.',
     cancel: 'Отменить рассадку',
     cancelTitle: 'Отмена рассадки',
     cancelPrompt:
@@ -709,6 +720,7 @@ const ru: Messages = {
     seated: 'Стол {{table}}: замена посажена',
     backDone: '{{name}} вернулся за стол',
     for: 'за {{name}}',
+    substitute: 'замена',
     forfeitMark: '0 / 0',
     change: 'Изменить, кто сидит на месте {{name}}',
     changeShort: 'Замена…',

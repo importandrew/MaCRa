@@ -78,6 +78,10 @@ type Seat struct {
 	Sitter *Player `json:"sitter"`
 	// Forfeit: the player gets 0 TP and 0 GP for the game.
 	Forfeit bool `json:"forfeit"`
+	// Substitute: the seat is a substitute's own, seated for the tour to
+	// complete the table (no participant number; the seat counts for
+	// nobody).
+	Substitute bool `json:"substitute"`
 }
 
 // TourTable is a table of a tour: its game and the four seats, east first.
@@ -187,7 +191,16 @@ type SeatingFileInfo struct {
 type Participant struct {
 	UserID int `db:"user_id"`
 	Number int `db:"number"`
+	// Substitute: a substitute seated for this tour to complete the tables.
+	// They have no participant number: Number is SubstituteNumber+i, so
+	// they come after the players in the standings and at the table, and a
+	// fixed seating seats them at the numbers that don't play.
+	Substitute bool `db:"-"`
 }
+
+// SubstituteNumber is where the stand-in numbers of a tour's substitutes
+// start (Participant.Number).
+const SubstituteNumber = 1_000_000
 
 // SeatingPair is two players, the lower user ID first.
 type SeatingPair [2]int

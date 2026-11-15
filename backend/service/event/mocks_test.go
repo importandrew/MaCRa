@@ -1151,8 +1151,8 @@ func (_c *MockEventRepo_GameHistory_Call) RunAndReturn(run func(ctx context.Cont
 }
 
 // GenerateTour provides a mock function for the type MockEventRepo
-func (_mock *MockEventRepo) GenerateTour(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc) (models.Tour, error) {
-	ret := _mock.Called(ctx, eventID, seating, makeTables)
+func (_mock *MockEventRepo) GenerateTour(ctx context.Context, eventID int, seating models.Seating, substitutes []int, makeTables models.TablesFunc) (models.Tour, error) {
+	ret := _mock.Called(ctx, eventID, seating, substitutes, makeTables)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GenerateTour")
@@ -1160,16 +1160,16 @@ func (_mock *MockEventRepo) GenerateTour(ctx context.Context, eventID int, seati
 
 	var r0 models.Tour
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating, models.TablesFunc) (models.Tour, error)); ok {
-		return returnFunc(ctx, eventID, seating, makeTables)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating, []int, models.TablesFunc) (models.Tour, error)); ok {
+		return returnFunc(ctx, eventID, seating, substitutes, makeTables)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating, models.TablesFunc) models.Tour); ok {
-		r0 = returnFunc(ctx, eventID, seating, makeTables)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.Seating, []int, models.TablesFunc) models.Tour); ok {
+		r0 = returnFunc(ctx, eventID, seating, substitutes, makeTables)
 	} else {
 		r0 = ret.Get(0).(models.Tour)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Seating, models.TablesFunc) error); ok {
-		r1 = returnFunc(ctx, eventID, seating, makeTables)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.Seating, []int, models.TablesFunc) error); ok {
+		r1 = returnFunc(ctx, eventID, seating, substitutes, makeTables)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1185,12 +1185,13 @@ type MockEventRepo_GenerateTour_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - seating models.Seating
+//   - substitutes []int
 //   - makeTables models.TablesFunc
-func (_e *MockEventRepo_Expecter) GenerateTour(ctx any, eventID any, seating any, makeTables any) *MockEventRepo_GenerateTour_Call {
-	return &MockEventRepo_GenerateTour_Call{Call: _e.mock.On("GenerateTour", ctx, eventID, seating, makeTables)}
+func (_e *MockEventRepo_Expecter) GenerateTour(ctx any, eventID any, seating any, substitutes any, makeTables any) *MockEventRepo_GenerateTour_Call {
+	return &MockEventRepo_GenerateTour_Call{Call: _e.mock.On("GenerateTour", ctx, eventID, seating, substitutes, makeTables)}
 }
 
-func (_c *MockEventRepo_GenerateTour_Call) Run(run func(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc)) *MockEventRepo_GenerateTour_Call {
+func (_c *MockEventRepo_GenerateTour_Call) Run(run func(ctx context.Context, eventID int, seating models.Seating, substitutes []int, makeTables models.TablesFunc)) *MockEventRepo_GenerateTour_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1204,15 +1205,20 @@ func (_c *MockEventRepo_GenerateTour_Call) Run(run func(ctx context.Context, eve
 		if args[2] != nil {
 			arg2 = args[2].(models.Seating)
 		}
-		var arg3 models.TablesFunc
+		var arg3 []int
 		if args[3] != nil {
-			arg3 = args[3].(models.TablesFunc)
+			arg3 = args[3].([]int)
+		}
+		var arg4 models.TablesFunc
+		if args[4] != nil {
+			arg4 = args[4].(models.TablesFunc)
 		}
 		run(
 			arg0,
 			arg1,
 			arg2,
 			arg3,
+			arg4,
 		)
 	})
 	return _c
@@ -1223,7 +1229,7 @@ func (_c *MockEventRepo_GenerateTour_Call) Return(tour models.Tour, err error) *
 	return _c
 }
 
-func (_c *MockEventRepo_GenerateTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, seating models.Seating, makeTables models.TablesFunc) (models.Tour, error)) *MockEventRepo_GenerateTour_Call {
+func (_c *MockEventRepo_GenerateTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, seating models.Seating, substitutes []int, makeTables models.TablesFunc) (models.Tour, error)) *MockEventRepo_GenerateTour_Call {
 	_c.Call.Return(run)
 	return _c
 }

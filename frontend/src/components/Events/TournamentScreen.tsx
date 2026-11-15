@@ -101,7 +101,7 @@ function Seating({ state }: { state: TourState }) {
                   {WIND_KANJI[seat.wind]}
                 </span>
                 <span className="w-[1.8em] shrink-0 text-end tabular-nums text-muted">
-                  {seat.number}
+                  {seat.substitute ? '—' : seat.number}
                 </span>
                 <span className="min-w-0 truncate">
                   {seat.sitter ? seat.sitter.name : seat.name}

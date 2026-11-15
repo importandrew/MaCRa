@@ -36,6 +36,8 @@ type generateTourRequest struct {
 	Step *int `json:"step"`
 	// AvoidRepeats: a Swiss or interval seating avoids repeat meetings.
 	AvoidRepeats bool `json:"avoid_repeats"`
+	// Substitutes complete the tour's tables: as many as are missing.
+	Substitutes []int `json:"substitutes"`
 }
 
 // GenerateTour drafts the next tour's seating, replacing an earlier draft
@@ -57,7 +59,7 @@ func (h Handler) GenerateTour(c *gin.Context) {
 		return
 	}
 
-	tour, err := h.event.GenerateTour(c.Request.Context(), eventID, models.Seating{Method: req.Seating, Step: req.Step, AvoidRepeats: req.AvoidRepeats})
+	tour, err := h.event.GenerateTour(c.Request.Context(), eventID, models.Seating{Method: req.Seating, Step: req.Step, AvoidRepeats: req.AvoidRepeats}, req.Substitutes)
 	if err != nil {
 		httperr.Error(c, err)
 		return

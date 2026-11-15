@@ -13,12 +13,12 @@ import (
 // GenerateTour drafts the tournament's next tour with tables made by the
 // seating method (games with status created, seen by the staff only),
 // replacing an earlier draft.
-func (s *Service) GenerateTour(ctx context.Context, eventID int, how models.Seating) (models.Tour, error) {
+func (s *Service) GenerateTour(ctx context.Context, eventID int, how models.Seating, substitutes []int) (models.Tour, error) {
 	makeTables, err := seatingFunc(how)
 	if err != nil {
 		return models.Tour{}, err
 	}
-	return s.repo.GenerateTour(ctx, eventID, how, makeTables)
+	return s.repo.GenerateTour(ctx, eventID, how, substitutes, makeTables)
 }
 
 // PublishTour publishes the drafted seating to the players.

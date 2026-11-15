@@ -94,6 +94,6 @@ func (r *Repo) checkNotInLiveGame(ctx context.Context, eventID int, userIDs []in
 		return fmt.Errorf("check live games: %w", err)
 	default:
 		return fmt.Errorf("user %d: %w", player.PlayerID,
-			models.WithData(errInGame, models.ErrorData{"name": player.Name}))
+			models.WithData(errInGame, models.ErrorData{dataName: player.Name}))
 	}
 }
