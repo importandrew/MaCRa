@@ -61,6 +61,7 @@ type EventRepo interface {
 	AbortTour(ctx context.Context, eventID int) error
 	AddTime(ctx context.Context, eventID, gameID, minutes int) error
 	TourState(ctx context.Context, eventID int) (models.TourState, error)
+	TourResults(ctx context.Context, eventID int) ([]models.TourResultRow, int, error)
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)
 	ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit, offset int) ([]models.EventGameItemRow, error)

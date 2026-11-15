@@ -3,7 +3,11 @@ import { SortDescriptor, Table } from '@heroui/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventRatingEntry } from '../../models/EventRating';
-import { useFetchEventRatings } from '../../providers/event/eventApi';
+import {
+  useFetchEventRatings,
+  useFetchTourRating,
+} from '../../providers/event/eventApi';
+import TourRatingView from './TourRatingView';
 import { useEventPage } from '../../providers/event/eventLayoutContext';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
 
@@ -178,13 +182,21 @@ export default function EventRating() {
     canView: canViewRatings,
   } = useEventPage('view_ratings');
 
-  const {
-    data,
-    isLoading: ratingsLoading,
-    isError,
-    isForbidden: ratingsForbidden,
-    refetch,
-  } = useFetchEventRatings(canViewRatings ? eventId : null);
+  // A tournament has its rating by tour instead (area 8, "Rating").
+  const isTournament = event?.type === 'tournament';
+  const regular = useFetchEventRatings(
+    canViewRatings && event && !isTournament ? eventId : null
+  );
+  const byTour = useFetchTourRating(
+    canViewRatings && isTournament ? eventId : null
+  );
+  const { data } = regular;
+  const ratingsLoading = isTournament ? byTour.isLoading : regular.isLoading;
+  const isError = isTournament ? byTour.isError : regular.isError;
+  const ratingsForbidden = isTournament
+    ? byTour.isForbidden
+    : regular.isForbidden;
+  const refetch = isTournament ? byTour.refetch : regular.refetch;
 
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: 'rank',
@@ -252,14 +264,26 @@ export default function EventRating() {
             {t('events.ratingTitle', { name: event.name })}
           </h1>
 
-          <RatingTable
-            label={t('events.rating')}
-            rows={rows}
-            sortDescriptor={sortDescriptor}
-            onSortChange={setSortDescriptor}
-            emptyText={t('rating.noGames')}
-            playerHref={(playerId) => `/event/${event.id}/player/${playerId}`}
-          />
+          {isTournament ? (
+            byTour.data && (
+              <TourRatingView
+                rating={byTour.data}
+                eventName={event.name}
+                playerHref={(playerId) =>
+                  `/event/${event.id}/player/${playerId}`
+                }
+              />
+            )
+          ) : (
+            <RatingTable
+              label={t('events.rating')}
+              rows={rows}
+              sortDescriptor={sortDescriptor}
+              onSortChange={setSortDescriptor}
+              emptyText={t('rating.noGames')}
+              playerHref={(playerId) => `/event/${event.id}/player/${playerId}`}
+            />
+          )}
         </div>
       )}
     </LoadingTemplate>

@@ -1,0 +1,77 @@
+package event
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/importandrew/MaCRa/models"
+)
+
+func TestTourRating(t *testing.T) {
+	// Tours 1 and 2 finished, tour 4 live; Dan withdrew after tour 1, Eve
+	// took a seat in tour 2 (as a new player would), Fay hasn't played.
+	results := []models.TourResultRow{
+		{Tour: 1, PlayerID: 1, Name: "Ann", TP: 4, GP: 30, Table: 1},
+		{Tour: 1, PlayerID: 2, Name: "Bob", TP: 2, GP: 10, Table: 1},
+		{Tour: 1, PlayerID: 3, Name: "Cid", TP: 1, GP: -10, Table: 1},
+		{Tour: 1, PlayerID: 4, Name: "Dan", TP: 0, GP: -30, Table: 1},
+		{Tour: 2, PlayerID: 1, Name: "Ann", TP: 0, GP: -20, Table: 1},
+		{Tour: 2, PlayerID: 2, Name: "Bob", TP: 2, GP: 0, Table: 1},
+		{Tour: 2, PlayerID: 3, Name: "Cid", TP: 1, GP: 0, Table: 1},
+		{Tour: 2, PlayerID: 5, Name: "Eve", TP: 4, GP: 20, Table: 1},
+	}
+	participants := models.TournamentParticipants{Drawn: true, Participants: []models.TournamentParticipant{
+		{UserID: 1, Name: "Ann", Number: new(3)},
+		{UserID: 2, Name: "Bob", Number: new(1)},
+		{UserID: 3, Name: "Cid", Number: new(2)},
+		{UserID: 4, Name: "Dan", Number: new(4), Withdrawn: true},
+		{UserID: 5, Name: "Eve", Number: new(5)},
+		{UserID: 6, Name: "Fay", Number: new(6)},
+	}}
+
+	rating := tourRating(results, 4, participants, true)
+	assert.Equal(t, []int{1, 2}, rating.Tours)
+	assert.Equal(t, 4, rating.InProgress)
+
+	names := []string{}
+	ranks := []any{}
+	for _, row := range rating.Rows {
+		names = append(names, row.Name)
+		if row.Rank == nil {
+			ranks = append(ranks, nil)
+		} else {
+			ranks = append(ranks, *row.Rank)
+		}
+	}
+	// Bob 4 TP / +10, Ann 4 / +10 (equal: shared place, by number), Eve 4 /
+	// +20 first; Cid 2; Fay hasn't played; Dan withdrew.
+	assert.Equal(t, []string{"Eve", "Bob", "Ann", "Cid", "Fay", "Dan"}, names)
+	assert.Equal(t, []any{1, 2, 2, 4, nil, nil}, ranks)
+
+	ann := rating.Rows[2]
+	require.Len(t, ann.Tours, 2)
+	assert.Equal(t, &models.TourResult{TP: 4, GP: 30, Table: 1}, ann.Tours[0])
+	assert.Equal(t, &models.TourResult{TP: 0, GP: -20, Table: 1}, ann.Tours[1])
+	assert.Equal(t, new(3), ann.Number)
+	assert.Nil(t, rating.Rows[0].Tours[0], "Eve didn't play tour 1")
+	assert.True(t, rating.Rows[5].Withdrawn)
+	assert.Equal(t, -30, rating.Rows[5].GP, "Dan keeps his results")
+
+	// Without the member list, players without results aren't listed.
+	rating = tourRating(results, 0, participants, false)
+	assert.Len(t, rating.Rows, 5)
+
+	// Before the draw, no numbers.
+	participants.Drawn = false
+	rating = tourRating(nil, 0, participants, true)
+	assert.Empty(t, rating.Tours)
+	assert.Len(t, rating.Rows, 6)
+	for _, row := range rating.Rows {
+		assert.Nil(t, row.Number)
+		if !row.Withdrawn {
+			assert.Nil(t, row.Rank, "no place before a finished tour")
+		}
+	}
+}
