@@ -1,52 +1,71 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Table } from '@heroui/react';
 import { useState } from 'react';
-import type { TourRating, TourRatingRow } from '../../models/TourRating';
+import type { TourRating } from '../../models/TourRating';
 import SegmentedPicker from '../SegmentedPicker';
 import { downloadText, tourRatingCsv } from './tourRatingCsv';
 
 // CELL: the narrow padding of the rating's cells (as the event rating).
 const CELL = 'px-1';
 
-// signed writes GP with its sign: "+32", "-3", "0".
-function signed(gp: number): string {
-  return gp > 0 ? `+${gp}` : `${gp}`;
+// Line is a row of the table: a player's place (null: none), TP and GP, in
+// total or in one tour; isOut: at the bottom, greyed (withdrew, or no result
+// to rank).
+type Line = {
+  id: number;
+  name: string;
+  rank: number | null;
+  tp: number;
+  gp: number;
+  isOut: boolean;
+};
+
+// totalLines are the totals as the server ranks them; players without a
+// place (haven't played a finished tour, or withdrew) come last.
+function totalLines(rating: TourRating): Line[] {
+  return rating.rows.map((row) => ({
+    id: row.player_id,
+    name: row.name,
+    rank: row.rank,
+    tp: row.tp,
+    gp: row.gp,
+    isOut: row.rank == null,
+  }));
 }
 
-// Row is a row of the tables: a player, or a separator above the players
-// who haven't played yet or who withdrew.
-type Row =
-  | { id: number; kind: 'player'; row: TourRatingRow; isMuted: boolean }
-  | { id: string; kind: 'separator'; label: string };
-
-// ratingRows lists the players with separators before the ones who haven't
-// played a finished tour yet and the ones who withdrew (rows come grouped).
-function ratingRows(rating: TourRating, labels: [string, string]): Row[] {
-  const rows: Row[] = [];
-  let group = 0; // 0 ranked, 1 not played, 2 withdrew
+// tourLines ranks the players by their result in one tour (the index in
+// rating.tours): TP, then GP, equal in both sharing the place, so the best
+// result of the tour is on top. Players who didn't play it come last; those
+// who withdrew stay greyed.
+function tourLines(rating: TourRating, index: number): Line[] {
+  const played: Line[] = [];
+  const out: Line[] = [];
   for (const row of rating.rows) {
-    const rowGroup = row.withdrawn ? 2 : row.rank == null ? 1 : 0;
-    if (rowGroup > group) {
-      group = rowGroup;
-      rows.push({
-        id: `separator-${group}`,
-        kind: 'separator',
-        label: labels[group - 1],
-      });
-    }
-    rows.push({
+    const result = row.tours[index];
+    const line: Line = {
       id: row.player_id,
-      kind: 'player',
-      row,
-      isMuted: rowGroup > 0,
-    });
+      name: row.name,
+      rank: null,
+      tp: result?.tp ?? 0,
+      gp: result?.gp ?? 0,
+      isOut: row.withdrawn || result == null,
+    };
+    (result ? played : out).push(line);
   }
-  return rows;
+  played.sort((a, b) => b.tp - a.tp || b.gp - a.gp);
+  played.forEach((line, i) => {
+    const before = played[i - 1];
+    line.rank =
+      before && before.tp === line.tp && before.gp === line.gp
+        ? before.rank
+        : i + 1;
+  });
+  return [...played, ...out];
 }
 
 // TourRatingView is a tournament's rating (area 8, "Rating"): the totals, or
-// TP and GP of each finished tour (the place and name stay while the tours
-// scroll sideways), "Tour N in progress", and the CSV export.
+// one finished tour's results ranked (an organizer often rewards the best
+// result of a tour), "tour N in progress", and the CSV export.
 export default function TourRatingView({
   rating,
   eventName,
@@ -59,12 +78,17 @@ export default function TourRatingView({
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<'totals' | 'tours'>('totals');
-  const rows = ratingRows(rating, [
-    t('tourRating.notPlayed'),
-    t('tourRating.withdrew'),
-  ]);
-  const byTour = view === 'tours' && rating.tours.length > 0;
-  const columns = 2 + (byTour ? rating.tours.length : 0) + 2;
+  const lastTour = rating.tours[rating.tours.length - 1];
+  // pickedTour: the tour shown by tour; null: the last finished one.
+  const [pickedTour, setPickedTour] = useState<number | null>(null);
+  const tour =
+    pickedTour != null && rating.tours.includes(pickedTour)
+      ? pickedTour
+      : lastTour;
+  const byTour = view === 'tours' && tour != null;
+  const lines = byTour
+    ? tourLines(rating, rating.tours.indexOf(tour))
+    : totalLines(rating);
 
   const exportCsv = () =>
     downloadText(
@@ -73,22 +97,16 @@ export default function TourRatingView({
       'text/csv;charset=utf-8'
     );
 
-  // Sticky cells keep the place and the name in view while the tours
-  // scroll; they need a background of their own: the header's (the table's
-  // frame) or the rows'.
-  const stickyHead = byTour ? 'sticky z-10 bg-surface-secondary' : '';
-  const sticky = byTour ? 'sticky z-10 bg-surface' : '';
-
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-muted">
-        {rating.tours.length > 0
-          ? t('tourRating.after', { n: rating.tours[rating.tours.length - 1] })
+        {lastTour != null
+          ? t('tourRating.after', { n: lastTour })
           : t('tourRating.noTours')}
         {rating.in_progress > 0 &&
           ` · ${t('tourRating.inProgress', { n: rating.in_progress })}`}
       </p>
-      {rating.tours.length > 0 && (
+      {lastTour != null && (
         <SegmentedPicker
           ariaLabel={t('tourRating.viewLabel')}
           options={[
@@ -99,40 +117,37 @@ export default function TourRatingView({
           onSelectionChange={setView}
         />
       )}
+      {byTour && (
+        <SegmentedPicker
+          ariaLabel={t('tourRating.tourLabel')}
+          options={rating.tours.map((n) => ({
+            value: String(n),
+            label: String(n),
+          }))}
+          selectedKey={String(tour)}
+          onSelectionChange={(n) => setPickedTour(Number(n))}
+          optionClassName="px-0"
+        />
+      )}
 
       <Table className="z-0">
         <Table.ScrollContainer>
+          {/* Fixed layout: the name takes the room the others leave. */}
           <Table.Content
-            // Totals fit the screen (the name takes the room left); by tour
-            // the table is as wide as its columns and scrolls.
-            className={byTour ? 'min-w-max' : 'table-fixed'}
-            aria-label={t('events.rating')}
+            className="table-fixed"
+            aria-label={
+              byTour
+                ? t('tourRating.tourColumn', { n: tour })
+                : t('events.rating')
+            }
           >
             <Table.Header>
-              <Table.Column
-                id="rank"
-                className={`${CELL} w-8 left-0 ${stickyHead}`}
-              >
+              <Table.Column id="rank" className={`${CELL} w-8`}>
                 #
               </Table.Column>
-              <Table.Column
-                id="name"
-                isRowHeader
-                className={`${CELL} ${byTour ? 'left-8 w-28 max-w-28' : ''} ${stickyHead}`}
-              >
+              <Table.Column id="name" isRowHeader className={CELL}>
                 {t('rating.name')}
               </Table.Column>
-              {byTour
-                ? rating.tours.map((tour) => (
-                    <Table.Column
-                      key={tour}
-                      id={`tour-${tour}`}
-                      className={`${CELL} text-center`}
-                    >
-                      {t('tourRating.tourColumn', { n: tour })}
-                    </Table.Column>
-                  ))
-                : []}
               <Table.Column id="tp" className={`${CELL} w-11 text-center`}>
                 {t('rating.tp')}
               </Table.Column>
@@ -141,72 +156,34 @@ export default function TourRatingView({
               </Table.Column>
             </Table.Header>
             <Table.Body
-              items={rows}
+              items={lines}
               renderEmptyState={() => (
                 <p className="py-6 text-center text-muted">
                   {t('rating.noGames')}
                 </p>
               )}
             >
-              {(item: Row) => {
-                if (item.kind === 'separator') {
-                  return (
-                    <Table.Row id={item.id}>
-                      <Table.Cell
-                        colSpan={columns}
-                        className={`${CELL} bg-default py-1.5 text-start text-xs font-medium text-muted`}
-                      >
-                        {/* Sticky, so the label stays in view while the
-                            tours scroll. */}
-                        <span className="sticky left-1">{item.label}</span>
-                      </Table.Cell>
-                    </Table.Row>
-                  );
-                }
-                const { row } = item;
-                const cell = `${CELL} ${item.isMuted ? 'text-muted' : ''}`;
+              {(line: Line) => {
+                // The cells carry the colors: HeroUI styles each cell.
+                const cell = `${CELL} ${line.isOut ? 'bg-default text-muted' : ''}`;
+                const noResult = byTour && line.rank == null;
                 return (
                   <Table.Row
-                    id={item.id}
-                    href={playerHref(row.player_id)}
+                    id={line.id}
+                    href={playerHref(line.id)}
                     className="cursor-pointer text-center"
                   >
-                    <Table.Cell className={`${cell} left-0 ${sticky}`}>
-                      {row.rank ?? '—'}
-                    </Table.Cell>
-                    <Table.Cell className={`${cell} left-8 ${sticky}`}>
-                      <span
-                        title={row.name}
-                        className={`block truncate ${byTour ? 'max-w-28 text-start' : 'text-center'}`}
-                      >
-                        {row.name}
+                    <Table.Cell className={cell}>{line.rank ?? '—'}</Table.Cell>
+                    <Table.Cell className={cell}>
+                      <span title={line.name} className="block truncate">
+                        {line.name}
                       </span>
                     </Table.Cell>
-                    {byTour
-                      ? row.tours.map((result, i) => (
-                          <Table.Cell
-                            key={rating.tours[i]}
-                            className={`${cell} whitespace-nowrap tabular-nums`}
-                          >
-                            {result ? (
-                              <>
-                                {result.tp}
-                                <span className="text-muted">
-                                  {' / '}
-                                  {signed(result.gp)}
-                                </span>
-                              </>
-                            ) : (
-                              '—'
-                            )}
-                          </Table.Cell>
-                        ))
-                      : []}
                     <Table.Cell className={`${cell} tabular-nums`}>
-                      {row.tp}
+                      {noResult ? '—' : line.tp}
                     </Table.Cell>
                     <Table.Cell className={`${cell} tabular-nums`}>
-                      {row.gp}
+                      {noResult ? '—' : line.gp}
                     </Table.Cell>
                   </Table.Row>
                 );
@@ -215,9 +192,6 @@ export default function TourRatingView({
           </Table.Content>
         </Table.ScrollContainer>
       </Table>
-      {byTour && (
-        <p className="text-xs text-muted">{t('tourRating.byTourHint')}</p>
-      )}
 
       {rating.rows.length > 0 && (
         <Button

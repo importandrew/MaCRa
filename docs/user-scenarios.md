@@ -318,9 +318,9 @@ Being built in stages. So far: creating a tournament, its status (preparation un
 ### Rating
 
 - A tournament's rating (≡ → Rating, the same page as a regular event's) is by tour: it shows the standings after the last finished tour ("Standings after tour N", and "tour N in progress" while one is live). Only finished tours count; aborted ones don't.
-- Two views: **Totals** (place, name, TP, GP; it fits the screen) and **By tour** (TP / GP of each finished tour, then the totals; the place and the name stay in view while the tours scroll sideways — the one table that scrolls sideways). A tap on a row opens the player's statistics, as in any event.
-- Order: TP, then GP (official rules); players equal in both share the place (5, 5, then 7). TP for places are 4, 2, 1, 0, fixed. The event's minimum games doesn't apply.
-- Below the ranked players, under separators: those who haven't played a finished tour yet (no place; listed only for members and staff, as the member list is private), then those who withdrew (no place, their results kept).
+- Two views of one table (place, name, TP, GP; it fits the screen): **Totals**, and **By tour** with a picker of the finished tours: the players ranked by their result in that tour (TP, then GP; equal ones share the place), so the tour's best result is on top (organizers often reward it). A tap on a row opens the player's statistics, as in any event.
+- Order of the totals: TP, then GP (official rules); players equal in both share the place (5, 5, then 7). TP for places are 4, 2, 1, 0, fixed. The event's minimum games doesn't apply.
+- Players without a place come last on a grey background, without a caption: in the totals those who haven't played a finished tour yet (listed only for members and staff, as the member list is private) and those who withdrew (their results kept); in a tour, those who didn't play it. A player who withdrew stays grey also where they have a result.
 - **Download CSV**, for anyone who sees the rating: place, participant number, name, TP and GP of each tour, the totals, and whether the player withdrew (UTF-8 with a BOM, so spreadsheets read the names).
 
 ### Screens

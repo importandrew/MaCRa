@@ -691,11 +691,8 @@ const ru: Messages = {
     viewLabel: 'Вид рейтинга',
     totals: 'Итоги',
     byTour: 'По турам',
+    tourLabel: 'Тур',
     tourColumn: 'Тур {{n}}',
-    byTourHint:
-      'В каждом туре: ТО / ИО. Остальные туры — прокрутите таблицу вбок.',
-    notPlayed: 'Ещё не играли',
-    withdrew: 'Снялись',
     exportCsv: 'Скачать CSV',
     fileName: 'рейтинг',
     csv: {

@@ -664,10 +664,8 @@ const en = {
     viewLabel: 'Rating view',
     totals: 'Totals',
     byTour: 'By tour',
+    tourLabel: 'Tour',
     tourColumn: 'Tour {{n}}',
-    byTourHint: 'Each tour: TP / GP. Scroll the table sideways for more tours.',
-    notPlayed: 'Haven’t played yet',
-    withdrew: 'Withdrew',
     exportCsv: 'Download CSV',
     fileName: 'rating',
     csv: {
