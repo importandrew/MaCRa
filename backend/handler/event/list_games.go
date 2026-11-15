@@ -44,7 +44,7 @@ func (h Handler) ListGames(c *gin.Context) {
 		return
 	}
 
-	result, err := h.event.ListGamesByStatus(c.Request.Context(), eventID, status, limit, offset)
+	result, err := h.event.ListGamesByStatus(c.Request.Context(), eventID, userID, status, limit, offset)
 	if err != nil {
 		httperr.Error(c, err)
 		return

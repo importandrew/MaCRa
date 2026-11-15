@@ -32,16 +32,14 @@ const (
 )
 
 type Event struct {
-	ID           int             `db:"id" json:"id"`
-	Type         EventType       `db:"type" json:"type"`
-	Name         string          `db:"name" json:"name"`
-	Description  string          `db:"description" json:"description,omitempty"`
-	OwnerUserID  int             `db:"owner_user_id" json:"owner_user_id"`
-	Visibility   EventVisibility `db:"visibility" json:"visibility"`
-	RatingsReach ContentReach    `db:"ratings_reach" json:"ratings_reach"`
-	GamesReach   ContentReach    `db:"games_reach" json:"games_reach"`
-	Rules        GameRules       `db:"rules" json:"rules"`
-	Settings     EventSettings   `db:"settings" json:"settings"`
+	ID          int             `db:"id" json:"id"`
+	Type        EventType       `db:"type" json:"type"`
+	Name        string          `db:"name" json:"name"`
+	Description string          `db:"description" json:"description,omitempty"`
+	OwnerUserID int             `db:"owner_user_id" json:"owner_user_id"`
+	Visibility  EventVisibility `db:"visibility" json:"visibility"`
+	Rules       GameRules       `db:"rules" json:"rules"`
+	Settings    EventSettings   `db:"settings" json:"settings"`
 	// Tournament is a tournament's own settings; nil for a regular event.
 	Tournament *TournamentSettings `db:"tournament" json:"tournament"`
 	// StartedAt is when a tournament's first tour started; nil before.
@@ -104,24 +102,20 @@ type EventMe struct {
 }
 
 type EventCreateParams struct {
-	OwnerID      int
-	Type         EventType
-	Name         string
-	Description  string
-	Visibility   EventVisibility
-	RatingsReach *ContentReach
-	GamesReach   *ContentReach
+	OwnerID     int
+	Type        EventType
+	Name        string
+	Description string
+	Visibility  EventVisibility
 	// Rules are the event's game rules; nil for the MCR standard ones.
 	Rules *GameRules
 }
 
 type UpdateEventParams struct {
-	ID           int
-	Name         *string
-	Description  *string
-	Visibility   *EventVisibility
-	RatingsReach *ContentReach
-	GamesReach   *ContentReach
+	ID          int
+	Name        *string
+	Description *string
+	Visibility  *EventVisibility
 }
 
 // EventRatingEntry is one row in the event standings table. Rank is 0 (not

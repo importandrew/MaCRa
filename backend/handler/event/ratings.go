@@ -19,7 +19,7 @@ func (h Handler) Ratings(c *gin.Context) {
 		return
 	}
 
-	ratings, err := h.event.Ratings(c.Request.Context(), eventID, userID)
+	ratings, err := h.event.Ratings(c.Request.Context(), eventID)
 	if err != nil {
 		httperr.Error(c, err)
 		return
@@ -39,7 +39,7 @@ func (h Handler) TourRating(c *gin.Context) {
 		return
 	}
 
-	rating, err := h.event.TourRating(c.Request.Context(), eventID, userID)
+	rating, err := h.event.TourRating(c.Request.Context(), eventID)
 	if err != nil {
 		httperr.Error(c, err)
 		return

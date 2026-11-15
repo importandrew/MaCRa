@@ -92,15 +92,14 @@ var (
 	// other than the owner was left without roles (remove them instead).
 	ErrInvalidRole = errors.New("invalid member roles")
 	// ErrMissingPlayerRole is sent with the player's name.
-	ErrMissingPlayerRole   = errors.New("missing 'player' role")
-	ErrGameNotInEvent      = errors.New("game not in event")
-	ErrInvalidEventType    = errors.New("invalid event type")
-	ErrInvalidContentReach = errors.New("invalid content reach")
-	ErrInvalidVisibility   = errors.New("invalid event visibility")
-	ErrLongEventName       = errors.New("event name too long")
-	ErrLongDescription     = errors.New("event description too long")
-	ErrInvalidGameStatus   = errors.New("invalid game status")
-	ErrInvalidGameRules    = errors.New("invalid game rules")
+	ErrMissingPlayerRole = errors.New("missing 'player' role")
+	ErrGameNotInEvent    = errors.New("game not in event")
+	ErrInvalidEventType  = errors.New("invalid event type")
+	ErrInvalidVisibility = errors.New("invalid event visibility")
+	ErrLongEventName     = errors.New("event name too long")
+	ErrLongDescription   = errors.New("event description too long")
+	ErrInvalidGameStatus = errors.New("invalid game status")
+	ErrInvalidGameRules  = errors.New("invalid game rules")
 	// ErrInvalidTournamentSettings means a tournament setting is out of its
 	// range or not one of its options.
 	ErrInvalidTournamentSettings = errors.New("invalid tournament settings")
@@ -228,7 +227,6 @@ var Errors = map[error]APIError{
 	ErrMissingPlayerRole:         {http.StatusBadRequest, "missing_player_role"},
 	ErrGameNotInEvent:            {http.StatusBadRequest, "game_not_in_event"},
 	ErrInvalidEventType:          {http.StatusBadRequest, "invalid_event_type"},
-	ErrInvalidContentReach:       {http.StatusBadRequest, "invalid_content_reach"},
 	ErrInvalidVisibility:         {http.StatusBadRequest, "invalid_visibility"},
 	ErrLongEventName:             {http.StatusBadRequest, "long_event_name"},
 	ErrLongDescription:           {http.StatusBadRequest, "long_description"},

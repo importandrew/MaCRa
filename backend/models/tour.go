@@ -231,3 +231,12 @@ const (
 	MinExtraMinutes = 1
 	MaxExtraMinutes = 60
 )
+
+// LiveTour is a tournament's live tour as a player sees it: its ID and
+// number, and whether the player's own game in it has ended (they may watch
+// the other tables then).
+type LiveTour struct {
+	ID       int  `db:"id"`
+	Number   int  `db:"number"`
+	Finished bool `db:"finished"`
+}

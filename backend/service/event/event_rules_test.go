@@ -19,12 +19,12 @@ func TestCreate_validatesAndDefaultsToPrivate(t *testing.T) {
 		wantErr error
 		want    models.Event
 	}{
-		"defaults: private, member reaches, trimmed texts": {
+		"defaults: private, trimmed texts": {
 			params: models.EventCreateParams{Type: models.EventRegular, Name: "  Club  ", Description: " d ", OwnerID: 7},
 			want: models.Event{
 				Type: models.EventRegular, Name: "Club", Description: "d", OwnerUserID: 7,
-				Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers,
-				Rules: models.StandardGameRules(), Settings: models.DefaultEventSettings(),
+				Visibility: models.EventVisibilityPrivate,
+				Rules:      models.StandardGameRules(), Settings: models.DefaultEventSettings(),
 			},
 		},
 		"given rules": {
@@ -34,8 +34,8 @@ func TestCreate_validatesAndDefaultsToPrivate(t *testing.T) {
 			},
 			want: models.Event{
 				Type: models.EventRegular, Name: "Club", OwnerUserID: 7,
-				Visibility: models.EventVisibilityPrivate, RatingsReach: models.ContentReachMembers, GamesReach: models.ContentReachMembers,
-				Rules: models.GameRules{Hands: 8, MinHand: 8}, Settings: models.DefaultEventSettings(),
+				Visibility: models.EventVisibilityPrivate,
+				Rules:      models.GameRules{Hands: 8, MinHand: 8}, Settings: models.DefaultEventSettings(),
 			},
 		},
 		"invalid rules": {
@@ -80,7 +80,6 @@ func TestCreate_validatesAndDefaultsToPrivate(t *testing.T) {
 func TestUpdate_finishedEventOnlyVisibility(t *testing.T) {
 	finished := models.Event{
 		ID: 1, Name: "Club", Description: "d", Visibility: models.EventVisibilityPublic,
-		RatingsReach: models.ContentReachPublic, GamesReach: models.ContentReachPublic,
 		FinishedAt: new(time.Now()),
 	}
 
@@ -94,15 +93,10 @@ func TestUpdate_finishedEventOnlyVisibility(t *testing.T) {
 		"the whole form sent, only visibility changed": {
 			params: models.UpdateEventParams{
 				ID: 1, Name: new("Club"), Description: new("d"), Visibility: new(models.EventVisibilityPrivate),
-				RatingsReach: new(models.ContentReachPublic), GamesReach: new(models.ContentReachPublic),
 			},
 		},
 		"name changes": {
 			params:  models.UpdateEventParams{ID: 1, Name: new("Other")},
-			wantErr: models.ErrEventAlreadyFinished,
-		},
-		"reach changes": {
-			params:  models.UpdateEventParams{ID: 1, RatingsReach: new(models.ContentReachStaff)},
 			wantErr: models.ErrEventAlreadyFinished,
 		},
 	}

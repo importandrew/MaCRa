@@ -33,18 +33,6 @@ func (s *Service) Update(ctx context.Context, params models.UpdateEventParams) e
 		}
 		event.Visibility = *params.Visibility
 	}
-	if params.RatingsReach != nil {
-		if err := validateReach(*params.RatingsReach); err != nil {
-			return err
-		}
-		event.RatingsReach = *params.RatingsReach
-	}
-	if params.GamesReach != nil {
-		if err := validateReach(*params.GamesReach); err != nil {
-			return err
-		}
-		event.GamesReach = *params.GamesReach
-	}
 
 	if before.FinishedAt != nil {
 		beforeOtherThanVisibility := before

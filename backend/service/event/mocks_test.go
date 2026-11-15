@@ -1780,8 +1780,8 @@ func (_c *MockEventRepo_ListEndedPlayerResults_Call) RunAndReturn(run func(ctx c
 }
 
 // ListGamesByStatus provides a mock function for the type MockEventRepo
-func (_mock *MockEventRepo) ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int) ([]models.EventGameItemRow, error) {
-	ret := _mock.Called(ctx, eventID, status, limit, offset)
+func (_mock *MockEventRepo) ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, hiddenTourID int, callerID int, limit int, offset int) ([]models.EventGameItemRow, error) {
+	ret := _mock.Called(ctx, eventID, status, hiddenTourID, callerID, limit, offset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListGamesByStatus")
@@ -1789,18 +1789,18 @@ func (_mock *MockEventRepo) ListGamesByStatus(ctx context.Context, eventID int, 
 
 	var r0 []models.EventGameItemRow
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameStatus, int, int) ([]models.EventGameItemRow, error)); ok {
-		return returnFunc(ctx, eventID, status, limit, offset)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameStatus, int, int, int, int) ([]models.EventGameItemRow, error)); ok {
+		return returnFunc(ctx, eventID, status, hiddenTourID, callerID, limit, offset)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameStatus, int, int) []models.EventGameItemRow); ok {
-		r0 = returnFunc(ctx, eventID, status, limit, offset)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameStatus, int, int, int, int) []models.EventGameItemRow); ok {
+		r0 = returnFunc(ctx, eventID, status, hiddenTourID, callerID, limit, offset)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]models.EventGameItemRow)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.GameStatus, int, int) error); ok {
-		r1 = returnFunc(ctx, eventID, status, limit, offset)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.GameStatus, int, int, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, status, hiddenTourID, callerID, limit, offset)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1816,13 +1816,15 @@ type MockEventRepo_ListGamesByStatus_Call struct {
 //   - ctx context.Context
 //   - eventID int
 //   - status models.GameStatus
+//   - hiddenTourID int
+//   - callerID int
 //   - limit int
 //   - offset int
-func (_e *MockEventRepo_Expecter) ListGamesByStatus(ctx any, eventID any, status any, limit any, offset any) *MockEventRepo_ListGamesByStatus_Call {
-	return &MockEventRepo_ListGamesByStatus_Call{Call: _e.mock.On("ListGamesByStatus", ctx, eventID, status, limit, offset)}
+func (_e *MockEventRepo_Expecter) ListGamesByStatus(ctx any, eventID any, status any, hiddenTourID any, callerID any, limit any, offset any) *MockEventRepo_ListGamesByStatus_Call {
+	return &MockEventRepo_ListGamesByStatus_Call{Call: _e.mock.On("ListGamesByStatus", ctx, eventID, status, hiddenTourID, callerID, limit, offset)}
 }
 
-func (_c *MockEventRepo_ListGamesByStatus_Call) Run(run func(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int)) *MockEventRepo_ListGamesByStatus_Call {
+func (_c *MockEventRepo_ListGamesByStatus_Call) Run(run func(ctx context.Context, eventID int, status models.GameStatus, hiddenTourID int, callerID int, limit int, offset int)) *MockEventRepo_ListGamesByStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1844,12 +1846,22 @@ func (_c *MockEventRepo_ListGamesByStatus_Call) Run(run func(ctx context.Context
 		if args[4] != nil {
 			arg4 = args[4].(int)
 		}
+		var arg5 int
+		if args[5] != nil {
+			arg5 = args[5].(int)
+		}
+		var arg6 int
+		if args[6] != nil {
+			arg6 = args[6].(int)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
 			arg3,
 			arg4,
+			arg5,
+			arg6,
 		)
 	})
 	return _c
@@ -1860,7 +1872,7 @@ func (_c *MockEventRepo_ListGamesByStatus_Call) Return(eventGameItemRows []model
 	return _c
 }
 
-func (_c *MockEventRepo_ListGamesByStatus_Call) RunAndReturn(run func(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int) ([]models.EventGameItemRow, error)) *MockEventRepo_ListGamesByStatus_Call {
+func (_c *MockEventRepo_ListGamesByStatus_Call) RunAndReturn(run func(ctx context.Context, eventID int, status models.GameStatus, hiddenTourID int, callerID int, limit int, offset int) ([]models.EventGameItemRow, error)) *MockEventRepo_ListGamesByStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2063,6 +2075,78 @@ func (_c *MockEventRepo_ListParticipants_Call) Return(tournamentParticipants mod
 }
 
 func (_c *MockEventRepo_ListParticipants_Call) RunAndReturn(run func(ctx context.Context, eventID int) (models.TournamentParticipants, error)) *MockEventRepo_ListParticipants_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// LiveTour provides a mock function for the type MockEventRepo
+func (_mock *MockEventRepo) LiveTour(ctx context.Context, eventID int, playerID int) (models.LiveTour, error) {
+	ret := _mock.Called(ctx, eventID, playerID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LiveTour")
+	}
+
+	var r0 models.LiveTour
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) (models.LiveTour, error)); ok {
+		return returnFunc(ctx, eventID, playerID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int) models.LiveTour); ok {
+		r0 = returnFunc(ctx, eventID, playerID)
+	} else {
+		r0 = ret.Get(0).(models.LiveTour)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, playerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockEventRepo_LiveTour_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LiveTour'
+type MockEventRepo_LiveTour_Call struct {
+	*mock.Call
+}
+
+// LiveTour is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int
+//   - playerID int
+func (_e *MockEventRepo_Expecter) LiveTour(ctx any, eventID any, playerID any) *MockEventRepo_LiveTour_Call {
+	return &MockEventRepo_LiveTour_Call{Call: _e.mock.On("LiveTour", ctx, eventID, playerID)}
+}
+
+func (_c *MockEventRepo_LiveTour_Call) Run(run func(ctx context.Context, eventID int, playerID int)) *MockEventRepo_LiveTour_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockEventRepo_LiveTour_Call) Return(liveTour models.LiveTour, err error) *MockEventRepo_LiveTour_Call {
+	_c.Call.Return(liveTour, err)
+	return _c
+}
+
+func (_c *MockEventRepo_LiveTour_Call) RunAndReturn(run func(ctx context.Context, eventID int, playerID int) (models.LiveTour, error)) *MockEventRepo_LiveTour_Call {
 	_c.Call.Return(run)
 	return _c
 }

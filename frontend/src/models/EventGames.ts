@@ -19,4 +19,8 @@ export type EventGameListItem = {
 export type EventGamesListData = {
   games: EventGameListItem[];
   has_more: boolean;
+  // hidden_tour: the live tour whose tables the caller can't see yet (they
+  // are seen by the staff and the players whose own game ended); missing
+  // when none is hidden.
+  hidden_tour?: number;
 };

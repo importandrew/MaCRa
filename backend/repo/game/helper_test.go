@@ -52,8 +52,8 @@ func createTestEvent(t *testing.T, conn *pgxpool.Conn) {
 	ctx := context.Background()
 	createTestUser(t, conn, 1)
 	_, err := conn.Exec(ctx, `
-		INSERT INTO events(id, type, name, owner_user_id, visibility, ratings_reach, games_reach, rules, settings, created_at)
-		VALUES($1, 'regular', $2, 1, 'public', 'public', 'public', $3, $4, now())
+		INSERT INTO events(id, type, name, owner_user_id, visibility, rules, settings, created_at)
+		VALUES($1, 'regular', $2, 1, 'public', $3, $4, now())
 		ON CONFLICT (id) DO NOTHING`,
 		testEventID, "Test Event", models.StandardGameRules(), models.DefaultEventSettings(),
 	)

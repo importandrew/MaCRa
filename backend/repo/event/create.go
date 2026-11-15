@@ -14,27 +14,25 @@ func (r *Repo) Create(ctx context.Context, event models.Event) (int, error) {
 	err := r.InTx(ctx, func(tx *Repo) error {
 		now := time.Now().UTC()
 		args := pgx.NamedArgs{
-			"owner_id":      event.OwnerUserID,
-			"type":          event.Type,
-			"name":          event.Name,
-			"desc":          event.Description,
-			"visibility":    event.Visibility,
-			"ratings_reach": event.RatingsReach,
-			"games_reach":   event.GamesReach,
-			"rules":         event.Rules,
-			"settings":      event.Settings,
-			"tournament":    event.Tournament,
-			"now":           now,
+			"owner_id":   event.OwnerUserID,
+			"type":       event.Type,
+			"name":       event.Name,
+			"desc":       event.Description,
+			"visibility": event.Visibility,
+			"rules":      event.Rules,
+			"settings":   event.Settings,
+			"tournament": event.Tournament,
+			"now":        now,
 		}
 
 		rows, err := tx.db.Query(ctx, `
 			INSERT INTO events (
 				type, name, description, owner_user_id,
-				visibility, ratings_reach, games_reach, rules, settings, tournament, created_at
+				visibility, rules, settings, tournament, created_at
 			)
 			VALUES (
 				@type, @name, @desc, @owner_id,
-				@visibility, @ratings_reach, @games_reach, @rules, @settings, @tournament, @now
+				@visibility, @rules, @settings, @tournament, @now
 			)
 			RETURNING id`,
 			args,

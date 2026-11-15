@@ -11,11 +11,9 @@ import (
 )
 
 type UpdateEventRequest struct {
-	Name         *string                 `json:"name"`
-	Description  *string                 `json:"description"`
-	Visibility   *models.EventVisibility `json:"visibility"`
-	RatingsReach *models.ContentReach    `json:"ratings_reach"`
-	GamesReach   *models.ContentReach    `json:"games_reach"`
+	Name        *string                 `json:"name"`
+	Description *string                 `json:"description"`
+	Visibility  *models.EventVisibility `json:"visibility"`
 }
 
 func (h Handler) Update(c *gin.Context) {
@@ -34,12 +32,10 @@ func (h Handler) Update(c *gin.Context) {
 	}
 
 	params := models.UpdateEventParams{
-		ID:           eventID,
-		Name:         req.Name,
-		Description:  req.Description,
-		Visibility:   req.Visibility,
-		RatingsReach: req.RatingsReach,
-		GamesReach:   req.GamesReach,
+		ID:          eventID,
+		Name:        req.Name,
+		Description: req.Description,
+		Visibility:  req.Visibility,
 	}
 
 	if err := h.event.Update(c.Request.Context(), params); err != nil {

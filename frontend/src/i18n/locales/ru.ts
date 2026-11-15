@@ -89,7 +89,6 @@ const ru: Messages = {
     missing_player_role: '{{name}} не игрок этого события',
     game_not_in_event: 'Эта игра не из этого события',
     invalid_event_type: 'Некорректный тип события',
-    invalid_content_reach: 'Некорректная настройка видимости',
     invalid_visibility: 'Некорректная видимость события',
     long_event_name: 'Слишком длинное название события',
     long_description: 'Слишком длинное описание',
@@ -437,15 +436,17 @@ const ru: Messages = {
     regular: 'Обычное',
     tournament: 'Турнир',
   },
-  visibility: {
-    private: 'Закрытое',
-    public: 'Открытое',
-  },
-  reach: {
+  whoSees: {
+    private: 'Только участники',
     public: 'Все',
-    members: 'Только участники',
-    staff: 'Только организаторы',
+    hint: {
+      private:
+        'Событие видят только его участники: рейтинг, игры, список участников. Остальные не видят его вовсе.',
+      public:
+        'Событие видят все, в том числе без входа: рейтинг, игры, список участников. Емейлы не показываются никогда, управление остаётся за вами.',
+    },
   },
+
   events: {
     title: 'События',
     event: 'Событие',
@@ -471,9 +472,7 @@ const ru: Messages = {
     descriptionTooLong: 'Слишком длинное описание (не больше {{max}} символов)',
     finishedReadOnly: 'Событие завершено: можно изменить только видимость.',
     type: 'Тип',
-    visibility: 'Видимость',
-    ratingsReach: 'Рейтинг',
-    gamesReach: 'Идущие игры и результаты',
+    whoSees: 'Кто видит событие',
     manage: 'Управление',
     manageWithRequests: 'Управление (заявок: {{n}})',
     manageTitle: 'Управление — {{name}}',
@@ -485,6 +484,8 @@ const ru: Messages = {
     ratingTitle: 'Рейтинг — {{name}}',
     liveGames: 'Идущие игры',
     liveGamesTitle: 'Идущие игры — {{name}}',
+    tourTablesHidden:
+      'Идёт тур {{n}}: его столы видят судьи, наблюдатели, организатор и игроки, которые уже доиграли свою игру.',
     noLiveGames: 'Сейчас игр нет',
     finishedGames: 'Завершённые игры',
     finishedGamesTitle: 'Завершённые игры — {{name}}',
