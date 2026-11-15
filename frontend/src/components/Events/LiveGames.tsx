@@ -13,6 +13,7 @@ export default function LiveGames() {
   const {
     games,
     hasMore,
+    hiddenTour,
     isLoading,
     isLoadingMore,
     isError,
@@ -42,6 +43,11 @@ export default function LiveGames() {
         <h1 className="text-2xl font-semibold truncate min-w-0" title={title}>
           {title}
         </h1>
+        {hiddenTour > 0 && (
+          <p className="text-sm text-muted">
+            {t('events.tourTablesHidden', { n: hiddenTour })}
+          </p>
+        )}
         <EventGamesList
           games={games}
           emptyContent={t('events.noLiveGames')}

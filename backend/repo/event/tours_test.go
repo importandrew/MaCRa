@@ -183,6 +183,22 @@ func TestTourRun(t *testing.T) {
 		assert.Equal(t, 1, dataErr.Data["playing"])
 
 		seats := state.Tables[0].Seats
+		// The live tour as its players see it: their games not ended yet;
+		// the list of live games leaves out a hidden tour's tables but the
+		// caller's own.
+		liveTour, err := repo.LiveTour(ctx, eventID, seats[0].UserID)
+		require.NoError(t, err)
+		assert.Equal(t, models.LiveTour{ID: state.Current.ID, Number: 1}, liveTour)
+		listed, err := repo.ListGamesByStatus(ctx, eventID, models.GameLive, liveTour.ID, 999, 10, 0)
+		require.NoError(t, err)
+		assert.Empty(t, listed, "hidden from someone else")
+		listed, err = repo.ListGamesByStatus(ctx, eventID, models.GameLive, liveTour.ID, seats[1].UserID, 10, 0)
+		require.NoError(t, err)
+		assert.Len(t, listed, 1, "the caller's own table")
+		listed, err = repo.ListGamesByStatus(ctx, eventID, models.GameLive, 0, 999, 10, 0)
+		require.NoError(t, err)
+		assert.Len(t, listed, 1, "nothing hidden")
+
 		result := func(i int, gp int, tp float32) models.FinalPlayerData {
 			return models.FinalPlayerData{ID: seats[i].UserID, GP: gp, TP: tp}
 		}
@@ -192,12 +208,17 @@ func TestTourRun(t *testing.T) {
 		rating, err := repo.ListEndedPlayerResults(ctx, eventID)
 		require.NoError(t, err)
 		assert.Empty(t, rating, "a tour's results count once it is finished")
+		liveTour, err = repo.LiveTour(ctx, eventID, seats[0].UserID)
+		require.NoError(t, err)
+		assert.True(t, liveTour.Finished, "the player's game ended")
 		results, inProgress, err := repo.TourResults(ctx, eventID)
 		require.NoError(t, err)
 		assert.Empty(t, results, "nor in the rating by tour")
 		assert.Equal(t, 1, inProgress)
 
 		require.NoError(t, repo.FinishTour(ctx, eventID))
+		_, err = repo.LiveTour(ctx, eventID, seats[0].UserID)
+		assert.ErrorIs(t, err, models.ErrTourNotFound, "no tour is live")
 		rating, err = repo.ListEndedPlayerResults(ctx, eventID)
 		require.NoError(t, err)
 		assert.Len(t, rating, 4)

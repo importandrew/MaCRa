@@ -396,3 +396,41 @@ func TestCanFinishGame_tournament(t *testing.T) {
 		})
 	}
 }
+
+func TestHasCapability_tourTablesHidden(t *testing.T) {
+	// A public tournament whose games are public: still, a tour's other
+	// tables are hidden while they play (area 8, "Visibility").
+	event := testEvent(models.EventTournament)
+	event.Visibility = models.EventVisibilityPublic
+	live, published, finished := models.TourLive, models.TourPublished, models.TourFinished
+	player := []models.EventRole{models.EventPlayer}
+	for name, testCase := range map[string]struct {
+		caller   int
+		roles    []models.EventRole
+		seated   bool
+		finished bool
+		game     models.GameSummary
+		want     bool
+	}{
+		"anonymous, live table":            {game: models.GameSummary{Status: models.GameLive, TourStatus: &live}},
+		"player still playing":             {caller: 5, roles: player, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}},
+		"player whose game ended":          {caller: 5, roles: player, finished: true, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"the table itself":                 {caller: 5, roles: player, seated: true, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"observer":                         {caller: 6, roles: []models.EventRole{models.EventObserver}, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"owner":                            {caller: 10, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"ended table of the live tour":     {caller: 5, roles: player, game: models.GameSummary{Status: models.GameEnded, TourStatus: &live}, want: true},
+		"another table, seating published": {caller: 5, roles: player, game: models.GameSummary{Status: models.GameCreated, TourStatus: &published}},
+		"finished tour":                    {game: models.GameSummary{Status: models.GameEnded, TourStatus: &finished}, want: true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			authCtx := eventAuthContext(event, testCase.caller, testCase.roles)
+			authCtx.IsSeatedInGame = testCase.seated
+			authCtx.FinishedInTour = testCase.finished
+			game := testCase.game
+			authCtx.Game = &game
+			for _, capability := range []models.Capability{models.CapViewGame, models.CapWatchLive, models.CapWatchResults} {
+				assert.Equal(t, testCase.want, authCtx.hasCapability(capability), capability)
+			}
+		})
+	}
+}

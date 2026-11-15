@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"errors"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -13,7 +14,7 @@ const (
 
 func (s *Service) ListGamesByStatus(
 	ctx context.Context,
-	eventID int,
+	eventID, callerID int,
 	status models.GameStatus,
 	limit, offset int,
 ) (models.EventGames, error) {
@@ -31,8 +32,12 @@ func (s *Service) ListGamesByStatus(
 		offset = 0
 	}
 
+	hiddenTour, err := s.hiddenTour(ctx, eventID, callerID, status)
+	if err != nil {
+		return models.EventGames{}, err
+	}
 	// Fetch one extra row to detect whether more pages exist.
-	rows, err := s.repo.ListGamesByStatus(ctx, eventID, status, limit+1, offset)
+	rows, err := s.repo.ListGamesByStatus(ctx, eventID, status, hiddenTour.ID, callerID, limit+1, offset)
 	if err != nil {
 		return models.EventGames{}, err
 	}
@@ -64,8 +69,34 @@ func (s *Service) ListGamesByStatus(
 		Games:   games,
 		HasMore: hasMore,
 	}
+	eventGames.HiddenTour = hiddenTour.Number
 
 	return eventGames, nil
+}
+
+// hiddenTour returns the live tour whose tables the caller may not see in
+// the list of live games (tourTableHidden: not staff, and their own game in
+// it hasn't ended); the zero LiveTour when none is hidden.
+func (s *Service) hiddenTour(ctx context.Context, eventID, callerID int, status models.GameStatus) (models.LiveTour, error) {
+	if status != models.GameLive {
+		return models.LiveTour{}, nil
+	}
+	event, err := s.repo.Get(ctx, eventID)
+	if err != nil || event.Type != models.EventTournament {
+		return models.LiveTour{}, err
+	}
+	authCtx, err := s.buildAuthContext(ctx, event, callerID, 0)
+	if err != nil || authCtx.isStaff() {
+		return models.LiveTour{}, err
+	}
+	tour, err := s.repo.LiveTour(ctx, eventID, callerID)
+	switch {
+	case errors.Is(err, models.ErrTourNotFound) || err == nil && tour.Finished:
+		return models.LiveTour{}, nil
+	case err != nil:
+		return models.LiveTour{}, err
+	}
+	return tour, nil
 }
 
 func (s *Service) listLiveGames(

@@ -246,6 +246,7 @@ export const useFetchEventGames = (
   return {
     games,
     hasMore,
+    hiddenTour: first.data?.hidden_tour ?? 0,
     isError: first.isError || first.isNotFound,
     isForbidden: first.isForbidden,
     isLoading: first.isLoading,

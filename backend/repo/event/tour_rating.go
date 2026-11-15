@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
@@ -48,4 +49,27 @@ func (r *Repo) TourResults(ctx context.Context, eventID int) ([]models.TourResul
 		return nil
 	})
 	return results, inProgress, err
+}
+
+// LiveTour returns the tournament's live tour and whether the player's own
+// game in it has ended, or models.ErrTourNotFound when no tour is live.
+func (r *Repo) LiveTour(ctx context.Context, eventID, playerID int) (models.LiveTour, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT t.id, t.number, EXISTS (
+			SELECT 1 FROM games g JOIN game_players gp ON gp.game_id = g.id
+			WHERE g.tour_id = t.id AND g.status = $3 AND gp.player_id = $2) AS finished
+		FROM tours t WHERE t.event_id = $1 AND t.status = $4
+		LIMIT 1`,
+		eventID, playerID, models.GameEnded, models.TourLive)
+	if err != nil {
+		return models.LiveTour{}, fmt.Errorf("live tour: %w", err)
+	}
+	tour, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.LiveTour])
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return models.LiveTour{}, models.ErrTourNotFound
+	case err != nil:
+		return models.LiveTour{}, fmt.Errorf("live tour: %w", err)
+	}
+	return tour, nil
 }

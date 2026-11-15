@@ -464,6 +464,8 @@ const en = {
     ratingTitle: 'Rating — {{name}}',
     liveGames: 'Live games',
     liveGamesTitle: 'Live games — {{name}}',
+    tourTablesHidden:
+      'Tour {{n}} is being played: its tables are seen by the staff and by the players whose own game has ended.',
     noLiveGames: 'No live games',
     finishedGames: 'Finished games',
     finishedGamesTitle: 'Finished games — {{name}}',
