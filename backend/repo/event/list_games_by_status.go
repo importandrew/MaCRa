@@ -25,8 +25,9 @@ func (r *Repo) ListGamesByStatus(
 		WHERE g.event_id = $1
 			AND g.status = $2
 			-- The tables of a hidden tour, except the caller's own.
-			AND (g.tour_id IS DISTINCT FROM $5 OR EXISTS (
-				SELECT 1 FROM game_players gp WHERE gp.game_id = g.id AND gp.player_id = $6))
+			AND (g.tour_id IS DISTINCT FROM $5
+				OR EXISTS (SELECT 1 FROM game_players gp WHERE gp.game_id = g.id AND gp.player_id = $6)
+				OR EXISTS (SELECT 1 FROM game_seats s WHERE s.game_id = g.id AND s.sitter_id = $6))
 		ORDER BY g.id DESC
 		LIMIT $3 OFFSET $4`,
 		eventID, status, limit, offset, hiddenTourID, callerID,

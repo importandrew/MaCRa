@@ -26,6 +26,7 @@ type GameService interface {
 	HUD(ctx context.Context, gameID int, linger int) (models.GameHUD, error)
 	Status(ctx context.Context, gameID int) (models.GameStatus, error)
 	EventID(ctx context.Context, gameID int) (int, error)
+	SeatSitter(ctx context.Context, seat models.SeatChange) error
 }
 
 func (h Handler) GameViewLive(c *gin.Context) {

@@ -27,6 +27,8 @@ func (r *Repo) TourResults(ctx context.Context, eventID int) ([]models.TourResul
 			JOIN player_results pr ON pr.game_id = g.id
 			JOIN users u ON u.id = pr.player_id
 			WHERE t.event_id = $1 AND t.status = $2
+				-- A forfeited seat counts for nobody: its player gets 0 / 0.
+				AND NOT EXISTS (SELECT 1 FROM game_players f WHERE f.game_id = pr.game_id AND f.player_id = pr.player_id AND f.forfeit)
 			ORDER BY t.number, g.table_number, pr.player_id`,
 			eventID, models.TourFinished, models.GameEnded)
 		if err != nil {

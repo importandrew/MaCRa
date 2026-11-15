@@ -225,3 +225,25 @@ func (r *Repo) dropFileTables(ctx context.Context, eventID, seated int) error {
 	}
 	return nil
 }
+
+// substitutes returns the tournament's substitutes by name, each with the
+// table they sit at now in a game that isn't over (0 for none).
+func (r *Repo) substitutes(ctx context.Context, eventID int) ([]models.Substitute, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT u.id, u.name, COALESCE((
+			SELECT g.table_number FROM game_sitters gs JOIN games g ON g.id = gs.game_id
+			WHERE gs.sitter_id = u.id AND g.event_id = $1 AND g.status IN ($3, $4)
+			LIMIT 1), 0) AS table_number
+		FROM event_user_roles r JOIN users u ON u.id = r.user_id
+		WHERE r.event_id = $1 AND r.role = $2
+		ORDER BY u.name, u.id`,
+		eventID, models.EventSubstitute, models.GameCreated, models.GameLive)
+	if err != nil {
+		return nil, fmt.Errorf("substitutes: %w", err)
+	}
+	list, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Substitute])
+	if err != nil {
+		return nil, fmt.Errorf("substitutes: %w", err)
+	}
+	return list, nil
+}

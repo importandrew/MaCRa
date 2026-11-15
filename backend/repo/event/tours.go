@@ -272,7 +272,10 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 		}
 		state.Missing = missingPlayers(state.Active)
 
-		state.Plan, err = tx.planList(ctx, eventID)
+		if state.Plan, err = tx.planList(ctx, eventID); err != nil {
+			return err
+		}
+		state.Substitutes, err = tx.substitutes(ctx, eventID)
 		return err
 	})
 	return state, err
@@ -282,10 +285,14 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT g.table_number, g.id AS game_id, g.status, g.extra_minutes, gp.player_id, u.name,
-			COALESCE(tp.number, 0) AS number, gp.starting_wind
+			COALESCE(tp.number, 0) AS number, gp.starting_wind, gp.forfeit,
+			gs.sitter_id, su.name AS sitter_name,
+			(SELECT count(*) FROM rounds r WHERE r.game_id = g.id) AS log_size
 		FROM games g
 		JOIN game_players gp ON gp.game_id = g.id
 		JOIN users u ON u.id = gp.player_id
+		JOIN game_sitters gs ON gs.game_id = g.id AND gs.seat_player_id = gp.player_id
+		JOIN users su ON su.id = gs.sitter_id
 		LEFT JOIN tournament_participants tp ON tp.event_id = g.event_id AND tp.user_id = gp.player_id
 		WHERE g.tour_id = $1
 		ORDER BY g.table_number,
@@ -304,6 +311,10 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 		Name         string            `db:"name"`
 		Number       int               `db:"number"`
 		Wind         string            `db:"starting_wind"`
+		Forfeit      bool              `db:"forfeit"`
+		SitterID     int               `db:"sitter_id"`
+		SitterName   string            `db:"sitter_name"`
+		LogSize      int               `db:"log_size"`
 	}
 	seats, err := pgx.CollectRows(rows, pgx.RowToStructByName[seatRow])
 	if err != nil {
@@ -313,10 +324,16 @@ func (r *Repo) tourTables(ctx context.Context, tourID int) ([]models.TourTable, 
 	tables := []models.TourTable{}
 	for _, s := range seats {
 		if len(tables) == 0 || tables[len(tables)-1].Table != s.Table {
-			tables = append(tables, models.TourTable{Table: s.Table, GameID: s.GameID, Status: s.Status, ExtraMinutes: s.ExtraMinutes})
+			tables = append(tables, models.TourTable{
+				Table: s.Table, GameID: s.GameID, Status: s.Status, ExtraMinutes: s.ExtraMinutes, LogSize: s.LogSize,
+			})
 		}
 		last := &tables[len(tables)-1]
-		last.Seats = append(last.Seats, models.Seat{UserID: s.UserID, Name: s.Name, Number: s.Number, Wind: s.Wind})
+		seat := models.Seat{UserID: s.UserID, Name: s.Name, Number: s.Number, Wind: s.Wind, Forfeit: s.Forfeit}
+		if s.SitterID != s.UserID {
+			seat.Sitter = &models.Player{ID: s.SitterID, Name: s.SitterName}
+		}
+		last.Seats = append(last.Seats, seat)
 	}
 	return tables, nil
 }
@@ -503,6 +520,7 @@ func (r *Repo) SeatingHistory(ctx context.Context, eventID, beforeNumber int) (m
 		JOIN games g ON g.tour_id = t.id AND g.status = $3
 		JOIN player_results pr ON pr.game_id = g.id
 		WHERE t.event_id = $1 AND t.status = $2 AND t.number < $4
+			AND NOT EXISTS (SELECT 1 FROM game_players f WHERE f.game_id = pr.game_id AND f.player_id = pr.player_id AND f.forfeit)
 		GROUP BY pr.player_id`,
 		eventID, models.TourFinished, models.GameEnded, beforeNumber)
 	if err != nil {

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"context"
 	"time"
 
 	"github.com/stretchr/testify/mock"
@@ -24,6 +25,15 @@ func expectLoadGame(m *MockGameRepo, gameID int, logs []models.RoundLog) {
 		logs = []models.RoundLog{}
 	}
 	m.EXPECT().GameLog(mock.Anything, gameID).Return(logs, nil).Once()
+	expectOwnSeats(m, gameID)
+}
+
+// expectOwnSeats: every player sits at their own seat (no substitutes), for
+// whatever asks who sits where.
+func expectOwnSeats(m *MockGameRepo, gameID int) {
+	m.EXPECT().Sitters(mock.Anything, gameID).Return(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil).Maybe()
+	m.EXPECT().SeatOf(mock.Anything, gameID, mock.Anything).
+		RunAndReturn(func(_ context.Context, _, userID int) (int, error) { return userID, nil }).Maybe()
 }
 
 func expectCurrentGame(m *MockGameRepo, playerID, gameID int, logs []models.RoundLog, times int) {

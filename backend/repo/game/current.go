@@ -11,10 +11,12 @@ import (
 
 func (r *Repo) CurrentGame(ctx context.Context, playerID, eventID int) (int, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT g.id 
+		SELECT g.id
 		FROM games g
-		JOIN game_players gp ON g.id = gp.game_id
-		WHERE gp.player_id = $1 AND g.event_id = $2 AND g.status = $3
+		-- Where the player sits now: their own seat, or one they took as a
+		-- substitute.
+		JOIN game_sitters gs ON g.id = gs.game_id
+		WHERE gs.sitter_id = $1 AND g.event_id = $2 AND g.status = $3
 		ORDER BY g.created_at DESC NULLS LAST
 		LIMIT 1`,
 		playerID, eventID, models.GameLive)
@@ -41,8 +43,8 @@ func (r *Repo) SeatedGame(ctx context.Context, playerID, eventID int) (int, erro
 	rows, err := r.db.Query(ctx, `
 		SELECT g.id
 		FROM games g
-		JOIN game_players gp ON g.id = gp.game_id
-		WHERE gp.player_id = $1 AND g.event_id = $2 AND g.status IN ($3, $4)
+		JOIN game_sitters gs ON g.id = gs.game_id
+		WHERE gs.sitter_id = $1 AND g.event_id = $2 AND g.status IN ($3, $4)
 			-- A drafted seating isn't shown to the players yet.
 			AND NOT EXISTS (SELECT 1 FROM tours t WHERE t.id = g.tour_id AND t.status = $5)
 		ORDER BY g.status = $3 DESC, g.created_at DESC NULLS LAST

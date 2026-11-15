@@ -15,20 +15,17 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 	score := game.Score()
 	round := game.Round()
 
+	// Seats keep their players' IDs; the names are of whoever sits there.
+	names, err := s.seatNames(ctx, game.ID())
+	if err != nil {
+		return models.GameView{}, err
+	}
 	playerScores := make([]models.PlayerWindScore, 0, len(models.Winds))
-	names := make(map[int]string, len(models.Winds))
 	for _, wind := range models.Winds {
 		playerID := game.PlayerBySeatInRound(round, wind)
-
-		player, err := s.playerRepo.Get(ctx, playerID)
-		if err != nil {
-			return models.GameView{}, err
-		}
-
-		names[playerID] = player.Name
 		playerScores = append(playerScores, models.PlayerWindScore{
 			ID:    playerID,
-			Name:  player.Name,
+			Name:  names[playerID],
 			Wind:  game.CurrentWind(playerID).Kanji(),
 			Score: score[playerID].GP,
 		})

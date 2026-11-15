@@ -103,7 +103,9 @@ function Seating({ state }: { state: TourState }) {
                 <span className="w-[1.8em] shrink-0 text-end tabular-nums text-muted">
                   {seat.number}
                 </span>
-                <span className="min-w-0 truncate">{seat.name}</span>
+                <span className="min-w-0 truncate">
+                  {seat.sitter ? seat.sitter.name : seat.name}
+                </span>
               </li>
             ))}
           </ul>

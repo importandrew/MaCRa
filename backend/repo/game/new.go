@@ -128,11 +128,11 @@ func (r *Repo) checkNoOtherLiveGame(ctx context.Context, seating [4]int, eventID
 	}
 
 	rows, err := r.db.Query(ctx, `
-		SELECT gp.player_id, u.name, g.id AS game_id
+		SELECT gs.sitter_id AS player_id, u.name, g.id AS game_id
 		FROM games g
-		JOIN game_players gp ON gp.game_id = g.id
-		JOIN users u ON u.id = gp.player_id
-		WHERE gp.player_id = ANY($1) AND g.event_id = $2 AND g.status = $3 AND g.id <> $4
+		JOIN game_sitters gs ON gs.game_id = g.id
+		JOIN users u ON u.id = gs.sitter_id
+		WHERE gs.sitter_id = ANY($1) AND g.event_id = $2 AND g.status = $3 AND g.id <> $4
 		ORDER BY u.name
 		LIMIT 1`,
 		seating[:], eventID, models.GameLive, exceptGameID)
@@ -144,7 +144,7 @@ func (r *Repo) checkNoOtherLiveGame(ctx context.Context, seating [4]int, eventID
 	switch {
 	case err == nil:
 		return fmt.Errorf("player %d in game %d: %w", live.PlayerID, live.GameID,
-			models.WithData(models.ErrPlayerInAnotherGame, models.ErrorData{"name": live.Name}))
+			models.WithData(models.ErrPlayerInAnotherGame, models.ErrorData{dataName: live.Name}))
 	case errors.Is(err, pgx.ErrNoRows):
 		return nil
 	default:
@@ -184,6 +184,6 @@ func (r *Repo) checkPlayerRoles(ctx context.Context, seating [4]int, eventID int
 		return fmt.Errorf("check player roles: %w", err)
 	default:
 		return fmt.Errorf("player %d in event %d: %w", player.PlayerID, eventID,
-			models.WithData(models.ErrMissingPlayerRole, models.ErrorData{"name": player.Name}))
+			models.WithData(models.ErrMissingPlayerRole, models.ErrorData{dataName: player.Name}))
 	}
 }

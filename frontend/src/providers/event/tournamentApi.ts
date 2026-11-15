@@ -125,6 +125,40 @@ export async function tourAction(
   return result !== null;
 }
 
+// seatSitter seats a substitute at a seat of a tournament game (forfeit: the
+// seat's player gets 0 / 0), or the seat's player back (sitter = seat), from
+// the next log entry on.
+export async function seatSitter(
+  eventId: number,
+  gameId: number,
+  change: { seat: number; sitter: number; forfeit: boolean; log_size: number }
+): Promise<boolean> {
+  const result = await authFetch<null>(
+    PostRequest(eventGamePath(eventId, gameId, '/seat'), change)
+  );
+  return result !== null;
+}
+
+// penalize enters a referee's penalty against a player of a live game (a
+// late player back at the table).
+export async function penalize(
+  eventId: number,
+  gameId: number,
+  playerId: number,
+  value: number,
+  logSize: number
+): Promise<boolean> {
+  const result = await authFetch<unknown>(
+    PostRequest(eventGamePath(eventId, gameId, '/penalty'), {
+      loser: playerId,
+      value,
+      force_next_round: false,
+      log_size: logSize,
+    })
+  );
+  return result !== null;
+}
+
 // addTime adds minutes to a table of the live tour.
 export async function addTime(
   eventId: number,

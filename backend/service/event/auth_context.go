@@ -13,12 +13,17 @@ import (
 // EventAuthContext is what the capability rules know about the caller in an
 // event, and about a game when the check is about one (Game != nil).
 type EventAuthContext struct {
-	Event          models.Event
-	CallerID       int
-	Roles          []models.EventRole
-	IsOwner        bool
-	IsMember       bool
+	Event    models.Event
+	CallerID int
+	Roles    []models.EventRole
+	IsOwner  bool
+	IsMember bool
+	// IsSeatedInGame: the caller sits at the game now (their own seat, or
+	// one they took as a substitute): they enter its rounds.
 	IsSeatedInGame bool
+	// HasPlaceInGame: the game is the caller's: their own seat (also while
+	// a substitute sits there) or one they sat at. They see it.
+	HasPlaceInGame bool
 	// FinishedInTour: the caller's own game in the live tour has ended (they
 	// may watch its other tables); set for a check about a game of that tour.
 	FinishedInTour bool
@@ -52,10 +57,16 @@ func (s *Service) buildAuthContext(ctx context.Context, event models.Event, call
 			return EventAuthContext{}, err
 		}
 		authCtx.IsSeatedInGame = seated
+		authCtx.HasPlaceInGame = seated
+		if !seated {
+			if authCtx.HasPlaceInGame, err = s.gameService.HasPlace(ctx, gameID, callerID); err != nil {
+				return EventAuthContext{}, err
+			}
+		}
 	}
 
 	if authCtx.Game != nil && authCtx.Game.TourStatus != nil && *authCtx.Game.TourStatus == models.TourLive &&
-		!authCtx.IsSeatedInGame && callerID != 0 {
+		!authCtx.HasPlaceInGame && callerID != 0 {
 		tour, err := s.repo.LiveTour(ctx, event.ID, callerID)
 		switch {
 		case errors.Is(err, models.ErrTourNotFound):
@@ -263,7 +274,7 @@ func (authCtx EventAuthContext) tourTableHidden() bool {
 	case models.TourDraft:
 		return true
 	case models.TourLive:
-		return g.Status == models.GameLive && !authCtx.IsSeatedInGame && !authCtx.FinishedInTour
+		return g.Status == models.GameLive && !authCtx.HasPlaceInGame && !authCtx.FinishedInTour
 	default:
 		return false
 	}

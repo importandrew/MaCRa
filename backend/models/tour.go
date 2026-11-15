@@ -73,6 +73,11 @@ type Seat struct {
 	Number int    `json:"number"`
 	// Wind is the starting seat: "east", "south", "west" or "north".
 	Wind string `json:"wind"`
+	// Sitter is who sits at the seat instead of its player (a substitute);
+	// nil while the player does.
+	Sitter *Player `json:"sitter"`
+	// Forfeit: the player gets 0 TP and 0 GP for the game.
+	Forfeit bool `json:"forfeit"`
 }
 
 // TourTable is a table of a tour: its game and the four seats, east first.
@@ -82,8 +87,11 @@ type TourTable struct {
 	// Status is the table's game status: created, live, ended or aborted.
 	Status GameStatus `json:"status"`
 	// ExtraMinutes is the time a referee added to the table.
-	ExtraMinutes int    `json:"extra_minutes"`
-	Seats        []Seat `json:"seats"`
+	ExtraMinutes int `json:"extra_minutes"`
+	// LogSize is the number of the game's log entries, for a referee's
+	// change at the table (seating a substitute).
+	LogSize int    `json:"log_size"`
+	Seats   []Seat `json:"seats"`
 	// Repeats counts the table's repeat meetings; RepeatPairs are the pairs
 	// who met before, with how many times.
 	Repeats     int          `json:"repeats"`
@@ -130,6 +138,17 @@ type TourState struct {
 	// without them.
 	Plan []TourPlan       `json:"plan"`
 	File *SeatingFileInfo `json:"file"`
+	// Substitutes are the tournament's substitutes, by name, with the table
+	// each sits at now (0: none), for seating them.
+	Substitutes []Substitute `json:"substitutes"`
+}
+
+// Substitute is a substitute of a tournament and the table they sit at now
+// (0 when they sit nowhere).
+type Substitute struct {
+	ID    int    `db:"id" json:"id"`
+	Name  string `db:"name" json:"name"`
+	Table int    `db:"table_number" json:"table"`
 }
 
 // TourPlan is the seating a tour is to have. A tour without a plan of its
@@ -202,6 +221,19 @@ type TablesFunc func(input SeatingInput) ([][4]int, error)
 type TourSeat struct {
 	Tour  int `json:"tour"`
 	Table int `json:"table"`
+}
+
+// SeatChange is a referee seating someone at a seat of a tournament game:
+// a substitute, or the seat's player back (SitterID == SeatPlayerID), from
+// the log entry after SeenLogSize. Forfeit: the seat's player gets 0 TP and
+// 0 GP for the game (only with a substitute).
+type SeatChange struct {
+	EventID      int
+	GameID       int
+	SeatPlayerID int
+	SitterID     int
+	Forfeit      bool
+	SeenLogSize  int
 }
 
 // GameTimeLimit is a tournament game's time: when its time is up (the

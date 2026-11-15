@@ -130,6 +130,8 @@ const ru: Messages = {
       'В событии есть идущие игры. Сначала завершите или прервите их.',
     invalid_tournament_settings: 'Неверные настройки турнира',
     not_tournament: 'Это только для турниров',
+    not_substitute: 'Этот участник — не замена турнира',
+    already_seated: 'Он уже сидит на этом месте',
     player_and_substitute:
       'Участник не может быть одновременно игроком и заменой',
     participants_closed:
@@ -684,6 +686,32 @@ const ru: Messages = {
     belowMinimum_many: 'Меньше {{count}} игр',
     belowMinimum_other: 'Меньше {{count}} игры',
     notPlayedYet: 'Ещё не играли',
+  },
+  seat: {
+    title: 'Стол {{table}}: место {{name}}',
+    sitsNow: 'Сейчас там сидит {{name}}.',
+    who: 'Кто сядет',
+    back: '{{name}}: вернуть за стол',
+    busy: '{{name}} (за столом {{table}})',
+    noSubstitutes:
+      'В турнире нет замен. Добавьте их в Управление → Участники с ролью «замена».',
+    outcome: 'Что получит {{name}} за тур',
+    usual: 'Результат места',
+    forfeit: '0 / 0',
+    usualHint: 'Результат места засчитывается игроку, как будто он играл.',
+    forfeitHint:
+      'Игрок получает за тур 0 ТО и 0 ИО; ТО за это место не получает никто, соперники получают свои.',
+    latePenalty: 'Штраф за опоздание',
+    noPenalty: 'Без штрафа',
+    fromNextHand: 'С ближайшей раздачи. Счёт места сохраняется.',
+    seat: 'Посадить',
+    backButton: 'Вернуть',
+    seated: 'Стол {{table}}: замена посажена',
+    backDone: '{{name}} вернулся за стол',
+    for: 'за {{name}}',
+    forfeitMark: '0 / 0',
+    change: 'Изменить, кто сидит на месте {{name}}',
+    changeShort: 'Замена…',
   },
   screen: {
     open: 'Общий экран',

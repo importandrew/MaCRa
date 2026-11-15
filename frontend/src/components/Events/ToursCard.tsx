@@ -12,6 +12,7 @@ import {
 } from '../../providers/event/tournamentApi';
 import Confirm from '../Confirm';
 import AddTimeModal from './AddTimeModal';
+import SeatModal from './SeatModal';
 import PendingButton from '../PendingButton';
 import { showToast } from '../Toast';
 import { getTimeFormatted } from '../../utils/date-tools';
@@ -67,6 +68,17 @@ export default function ToursCard({
         ).toISOString()
       : null;
   // timeFor: the table a referee adds time to (the modal is open).
+  // seatFor: the seat a referee changes (the modal is open).
+  const [seatFor, setSeatFor] = useState<{
+    table: TourTable;
+    seat: TourTable['seats'][number];
+  } | null>(null);
+  // canSeat: a referee changes who sits at a table of a published or live
+  // tour whose game isn't over.
+  const canSeat = (table: TourTable) =>
+    canRun &&
+    (isPublished || isLive) &&
+    (table.status === 'created' || table.status === 'live');
   const [timeFor, setTimeFor] = useState<{
     gameId: number;
     number: number;
@@ -315,18 +327,6 @@ export default function ToursCard({
                     </span>
                   )}
                 </p>
-                {canRun && isLive && table.status === 'live' && (
-                  <Button
-                    size="sm"
-                    variant="tertiary"
-                    className="float-end"
-                    onPress={() =>
-                      setTimeFor({ gameId: table.game_id, number: table.table })
-                    }
-                  >
-                    {t('tours.addTime')}
-                  </Button>
-                )}
                 <ul>
                   {table.seats.map((seat) => (
                     <li key={seat.user_id} className="flex items-center gap-2">
@@ -336,10 +336,50 @@ export default function ToursCard({
                       <span className="w-7 shrink-0 text-end tabular-nums text-muted">
                         {seat.number}
                       </span>
-                      <span className="min-w-0 truncate">{seat.name}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">
+                          {seat.sitter ? seat.sitter.name : seat.name}
+                        </span>
+                        {/* A substitute's seat: whose it is, and whether the
+                            player gets 0 / 0. */}
+                        {(seat.sitter || seat.forfeit) && (
+                          <span className="block truncate text-xs text-muted">
+                            {[
+                              seat.sitter && t('seat.for', { name: seat.name }),
+                              seat.forfeit && t('seat.forfeitMark'),
+                            ]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </span>
+                        )}
+                      </span>
+                      {canSeat(table) && (
+                        <Button
+                          size="sm"
+                          variant="tertiary"
+                          aria-label={t('seat.change', { name: seat.name })}
+                          onPress={() => setSeatFor({ table, seat })}
+                        >
+                          {t('seat.changeShort')}
+                        </Button>
+                      )}
                     </li>
                   ))}
                 </ul>
+                {/* Under the seats, so a long name at the first one isn't
+                    cut by it. */}
+                {canRun && isLive && table.status === 'live' && (
+                  <Button
+                    size="sm"
+                    variant="tertiary"
+                    className="mt-1 ml-auto flex"
+                    onPress={() =>
+                      setTimeFor({ gameId: table.game_id, number: table.table })
+                    }
+                  >
+                    {t('tours.addTime')}
+                  </Button>
+                )}
                 {table.repeats > 0 && (
                   <p className="mt-1 text-sm text-warning">
                     {t('tours.metBefore', {
@@ -360,6 +400,13 @@ export default function ToursCard({
           </ul>
         )}
       </Card.Content>
+      <SeatModal
+        eventId={eventId}
+        target={seatFor}
+        substitutes={state.substitutes}
+        onClose={() => setSeatFor(null)}
+        onDone={onChanged}
+      />
       <AddTimeModal
         eventId={eventId}
         table={timeFor}
