@@ -732,12 +732,19 @@ export default function Delta({
                   ) : null;
                 })}
                 <div className="delta-center">
-                  <Button variant="secondary" size="sm" onPress={close}>
+                  {/* h-11: 44 px, the size touch guidelines ask for. */}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="h-11"
+                    onPress={close}
+                  >
                     {t('delta.backToTable')}
                   </Button>
                   <Button
                     variant="tertiary"
                     size="sm"
+                    className="h-11"
                     onPress={() => setHelpOpen(true)}
                   >
                     {t('delta.howToRead')}

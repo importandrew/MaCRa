@@ -52,7 +52,10 @@ export default function CurrentGameSeat({
             size="sm"
             aria-label={t('delta.showFor', { name: player.name })}
             onPress={() => onOpenDelta(player.id)}
-            className="shrink-0"
+            // 44 px: the size touch guidelines ask for; a side seat keeps 36
+            // px on a screen narrower than 340 px, where 44 would leave the
+            // screen.
+            className={`size-11 shrink-0 ${isSideSeat ? 'max-[340px]:size-9' : ''}`}
           >
             <svg
               aria-hidden="true"

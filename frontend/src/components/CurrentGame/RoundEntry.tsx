@@ -28,12 +28,13 @@ const OUTCOMES = [
 // that fills (and turns the border accent) when picked. Larger from md up,
 // for the mouse; HeroUI's own sizes shrink there instead.
 const MARK_CLASS =
-  'size-10 md:size-12 rounded-lg border-2 border-border data-[selected=true]:border-accent';
+  'size-11 md:size-12 rounded-lg border-2 border-border data-[selected=true]:border-accent';
 
 const MARK_ICON_CLASS = 'm-0 size-6 md:size-7 [&_path]:stroke-2';
 
-// Outcome buttons, step buttons and OK grow from md up too.
-const DESKTOP_BUTTON_CLASS = 'md:h-10 md:text-base';
+// Outcome buttons and OK: 44 px high on a phone, the size touch guidelines
+// ask for (users missed smaller ones); 40 px from md up, for the mouse.
+const DESKTOP_BUTTON_CLASS = 'h-11 md:h-10 md:text-base';
 
 // SeatMarks are the + (won) and − (dealt in / fined) toggles at a player's
 // seat while a round is entered. They sit between the name and the center
@@ -55,13 +56,14 @@ export function SeatMarks({
   const { t } = useTranslation();
   return (
     // Fixed height: the line keeps its size whatever the outcome shows.
-    <span className="mb-2 flex h-10 md:h-12 items-center justify-center gap-2">
+    <span className="mb-2 flex h-11 md:h-12 items-center justify-center gap-2">
       {entry.isWin && (
         <SeatMark
           sign="plus"
           label={t('roundEntry.won', { name: player.name })}
           isSelected={entry.winner === player.id}
           onChange={() => entry.pickWinner(player.id)}
+          isSideSeat={isSideSeat}
         />
       )}
       {entry.showLose && (
@@ -75,6 +77,7 @@ export function SeatMarks({
           isSelected={entry.loser === player.id}
           onChange={() => entry.pickLoser(player.id)}
           iconClassName={isSideSeat ? 'rotate-90' : undefined}
+          isSideSeat={isSideSeat}
         />
       )}
     </span>
@@ -88,12 +91,16 @@ function SeatMark({
   isSelected,
   onChange,
   iconClassName = '',
+  isSideSeat = false,
 }: {
   sign: 'plus' | 'minus';
   label: string;
   isSelected: boolean;
   onChange: () => void;
   iconClassName?: string;
+  // isSideSeat: on a screen narrower than 340 px a side seat's 44 px mark
+  // would reach into the center of the table, so it stays 40 px there.
+  isSideSeat?: boolean;
 }) {
   return (
     <ToggleButton
@@ -103,7 +110,7 @@ function SeatMark({
       aria-label={label}
       isSelected={isSelected}
       onChange={onChange}
-      className={MARK_CLASS}
+      className={`${MARK_CLASS} ${isSideSeat ? 'max-[340px]:size-10' : ''}`}
     >
       <SignIcon sign={sign} className={`${MARK_ICON_CLASS} ${iconClassName}`} />
     </ToggleButton>
@@ -117,7 +124,9 @@ function SeatMark({
 export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
   const { t } = useTranslation();
   return (
-    <div className="flex w-full flex-col items-stretch gap-2 text-base">
+    // On a short screen (an iPhone SE: 568 px) smaller gaps keep the
+    // Penalty form clear of the marks above and below the center.
+    <div className="flex w-full flex-col items-stretch gap-2 text-base [@media(max-height:600px)]:gap-1">
       {/* 2×2 instead of one row: four options don't fit the center of a
           phone in one line. */}
       <ToggleButtonGroup
