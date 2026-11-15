@@ -1,4 +1,6 @@
 import { useCallback, useState } from 'react';
+import type { TourRating } from '../../models/TourRating';
+import type { TournamentSettings } from '../../models/TournamentSettings';
 import {
   GetRequest,
   authFetch,
@@ -11,7 +13,7 @@ import {
   fetchWithStatus,
 } from '../../components/Request';
 import { useFetch } from '../useFetch';
-import { Event, EventVisibility, ContentReach } from '../../models/Event';
+import { Event, EventVisibility } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
 import type { GameRules } from '../../models/GameRules';
 import type { EventSettings } from '../../models/EventSettings';
@@ -27,8 +29,6 @@ export type CreateEventPayload = {
   name: string;
   description?: string;
   visibility?: EventVisibility;
-  ratings_reach?: ContentReach;
-  games_reach?: ContentReach;
   rules?: GameRules;
 };
 
@@ -36,8 +36,6 @@ export type UpdateEventPayload = {
   name?: string;
   description?: string;
   visibility?: EventVisibility;
-  ratings_reach?: ContentReach;
-  games_reach?: ContentReach;
 };
 
 export const useFetchEvent = (id: number | null) => {
@@ -110,6 +108,16 @@ export async function updateEventRules(
   rules: GameRules
 ): Promise<boolean> {
   const request = PutRequest(eventPath(id, '/rules'), rules);
+  const result = await authFetch<null>(request);
+  return result !== null;
+}
+
+// updateTournament sets a tournament's own settings, all at once.
+export async function updateTournament(
+  id: number,
+  settings: TournamentSettings
+): Promise<boolean> {
+  const request = PutRequest(eventPath(id, '/tournament'), settings);
   const result = await authFetch<null>(request);
   return result !== null;
 }
@@ -234,12 +242,27 @@ export const useFetchEventGames = (
   return {
     games,
     hasMore,
+    hiddenTour: first.data?.hidden_tour ?? 0,
     isError: first.isError || first.isNotFound,
     isForbidden: first.isForbidden,
     isLoading: first.isLoading,
     isLoadingMore,
     refetch,
     loadMore,
+  };
+};
+
+// A tournament's rating by tour.
+export const useFetchTourRating = (eventId: number | null) => {
+  const f = useFetch<TourRating>(eventId, () =>
+    publicFetch<TourRating>(GetRequest(eventPath(eventId!, '/tours/rating')))
+  );
+  return {
+    data: f.data,
+    isError: f.isError || f.isNotFound,
+    isForbidden: f.isForbidden,
+    isLoading: f.isLoading,
+    refetch: f.refetch,
   };
 };
 

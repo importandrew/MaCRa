@@ -32,16 +32,18 @@ const (
 )
 
 type Event struct {
-	ID           int             `db:"id" json:"id"`
-	Type         EventType       `db:"type" json:"type"`
-	Name         string          `db:"name" json:"name"`
-	Description  string          `db:"description" json:"description,omitempty"`
-	OwnerUserID  int             `db:"owner_user_id" json:"owner_user_id"`
-	Visibility   EventVisibility `db:"visibility" json:"visibility"`
-	RatingsReach ContentReach    `db:"ratings_reach" json:"ratings_reach"`
-	GamesReach   ContentReach    `db:"games_reach" json:"games_reach"`
-	Rules        GameRules       `db:"rules" json:"rules"`
-	Settings     EventSettings   `db:"settings" json:"settings"`
+	ID          int             `db:"id" json:"id"`
+	Type        EventType       `db:"type" json:"type"`
+	Name        string          `db:"name" json:"name"`
+	Description string          `db:"description" json:"description,omitempty"`
+	OwnerUserID int             `db:"owner_user_id" json:"owner_user_id"`
+	Visibility  EventVisibility `db:"visibility" json:"visibility"`
+	Rules       GameRules       `db:"rules" json:"rules"`
+	Settings    EventSettings   `db:"settings" json:"settings"`
+	// Tournament is a tournament's own settings; nil for a regular event.
+	Tournament *TournamentSettings `db:"tournament" json:"tournament"`
+	// StartedAt is when a tournament's first tour started; nil before.
+	StartedAt *time.Time `db:"started_at" json:"started_at"`
 	// AcceptRequests: the owner takes requests to join (public events only).
 	AcceptRequests bool `db:"accept_requests" json:"accept_requests"`
 	// PlayerLimit is the most players the event takes by a request or the
@@ -49,6 +51,11 @@ type Event struct {
 	PlayerLimit *int       `db:"player_limit" json:"player_limit"`
 	CreatedAt   time.Time  `db:"created_at" json:"created_at"`
 	FinishedAt  *time.Time `db:"finished_at" json:"finished_at"`
+}
+
+// Status is where the event is in its life (see EventStatus).
+func (e Event) Status() EventStatus {
+	return eventStatus(e.Type, e.StartedAt, e.FinishedAt)
 }
 
 // EventDetails is an event with what its overview shows besides the event
@@ -95,24 +102,20 @@ type EventMe struct {
 }
 
 type EventCreateParams struct {
-	OwnerID      int
-	Type         EventType
-	Name         string
-	Description  string
-	Visibility   EventVisibility
-	RatingsReach *ContentReach
-	GamesReach   *ContentReach
+	OwnerID     int
+	Type        EventType
+	Name        string
+	Description string
+	Visibility  EventVisibility
 	// Rules are the event's game rules; nil for the MCR standard ones.
 	Rules *GameRules
 }
 
 type UpdateEventParams struct {
-	ID           int
-	Name         *string
-	Description  *string
-	Visibility   *EventVisibility
-	RatingsReach *ContentReach
-	GamesReach   *ContentReach
+	ID          int
+	Name        *string
+	Description *string
+	Visibility  *EventVisibility
 }
 
 // EventRatingEntry is one row in the event standings table. Rank is 0 (not

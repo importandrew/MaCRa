@@ -15,20 +15,17 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 	score := game.Score()
 	round := game.Round()
 
+	// Seats keep their players' IDs; the names are of whoever sits there.
+	names, err := s.seatNames(ctx, game.ID())
+	if err != nil {
+		return models.GameView{}, err
+	}
 	playerScores := make([]models.PlayerWindScore, 0, len(models.Winds))
-	names := make(map[int]string, len(models.Winds))
 	for _, wind := range models.Winds {
 		playerID := game.PlayerBySeatInRound(round, wind)
-
-		player, err := s.playerRepo.Get(ctx, playerID)
-		if err != nil {
-			return models.GameView{}, err
-		}
-
-		names[playerID] = player.Name
 		playerScores = append(playerScores, models.PlayerWindScore{
 			ID:    playerID,
-			Name:  player.Name,
+			Name:  names[playerID],
 			Wind:  game.CurrentWind(playerID).Kanji(),
 			Score: score[playerID].GP,
 		})
@@ -39,9 +36,16 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 		return models.GameView{}, err
 	}
 
+	limit, err := s.gameRepo.TimeLimit(ctx, game.ID())
+	if err != nil {
+		return models.GameView{}, err
+	}
+
 	view := models.GameView{
-		ID:      game.ID(),
-		Status:  game.Status(),
+		ID: game.ID(),
+		// LiveGame loaded a live game: one stopped at its tour's time has
+		// ended in the replay but stays live until it is finished.
+		Status:  models.GameLive,
 		LogSize: game.LogSize(),
 		Rules:   game.Rules(),
 		Round: models.Round{
@@ -50,6 +54,7 @@ func (s *Service) ViewLive(ctx context.Context, gameID int) (models.GameView, er
 		},
 		PlayerScores: playerScores,
 		Log:          gameLog(game, log, undone, names),
+		Timer:        gameTimer(game, limit),
 	}
 
 	return view, nil

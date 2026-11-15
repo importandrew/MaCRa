@@ -9,10 +9,10 @@ import (
 )
 
 func (g *Game) NextRound() error {
-	if !g.IsLive() {
-		return models.ErrGameNotLive
+	if err := g.checkLive(); err != nil {
+		return err
 	}
-	if g.round == g.rules.Hands {
+	if g.round == g.LastHand() {
 		return g.End()
 	}
 	switch g.round {
@@ -35,8 +35,8 @@ func (g *Game) NextRound() error {
 }
 
 func (g *Game) EnterRoundResult(outcome models.Outcome, hand, loser, winner int) error {
-	if !g.IsLive() {
-		return models.ErrGameNotLive
+	if err := g.checkLive(); err != nil {
+		return err
 	}
 
 	switch outcome {

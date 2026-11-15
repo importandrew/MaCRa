@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/importandrew/MaCRa/models"
 )
@@ -18,6 +19,9 @@ func (s *Service) AddMemberRoles(ctx context.Context, eventID, targetUserID int,
 	if len(roles) == 0 {
 		return fmt.Errorf("%w: no roles to add", models.ErrInvalidRole)
 	}
+	if err := s.checkRolesFitEvent(ctx, eventID, roles); err != nil {
+		return err
+	}
 
 	return s.repo.AddMemberRoles(ctx, eventID, targetUserID, roles)
 }
@@ -32,6 +36,26 @@ func (s *Service) SetMemberRoles(ctx context.Context, eventID, targetUserID int,
 	if err != nil {
 		return err
 	}
+	if err := s.checkRolesFitEvent(ctx, eventID, roles); err != nil {
+		return err
+	}
 
 	return s.repo.SetMemberRoles(ctx, eventID, targetUserID, roles)
+}
+
+// checkRolesFitEvent refuses the substitute role outside a tournament
+// (models.ErrInvalidRole). That a member isn't both a player and a
+// substitute is checked by the repo, with the roles they already hold.
+func (s *Service) checkRolesFitEvent(ctx context.Context, eventID int, roles []models.EventRole) error {
+	if !slices.Contains(roles, models.EventSubstitute) {
+		return nil
+	}
+	event, err := s.repo.Get(ctx, eventID)
+	if err != nil {
+		return err
+	}
+	if event.Type != models.EventTournament {
+		return fmt.Errorf("%w: substitutes are for tournaments only", models.ErrInvalidRole)
+	}
+	return nil
 }

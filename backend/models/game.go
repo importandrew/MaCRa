@@ -22,6 +22,10 @@ type GameNow struct {
 	// Log is the round log of the same state as the table, so the table
 	// screen and its log can't disagree.
 	Log GameLog `json:"log"`
+	// Tour is the tour and table of a tournament game; nil otherwise.
+	Tour *TourSeat `json:"tour,omitempty"`
+	// Timer is the tour's timer of a started tournament game; nil otherwise.
+	Timer *GameTimer `json:"timer,omitempty"`
 }
 
 type Round struct {
@@ -69,6 +73,8 @@ type GameView struct {
 
 	// Log is the round log of the same state, as in GameNow.
 	Log GameLog `json:"log"`
+	// Timer is the tour's timer of a started tournament game; nil otherwise.
+	Timer *GameTimer `json:"timer,omitempty"`
 }
 
 type MainGameInfo struct {
@@ -80,6 +86,10 @@ type MainGameInfo struct {
 type EventGames struct {
 	Games   []EventGameItem `json:"games"`
 	HasMore bool            `json:"has_more"`
+	// HiddenTour is the live tour whose tables the caller can't see yet
+	// (they play in it and their game hasn't ended, or they don't play);
+	// 0 when none is hidden.
+	HiddenTour int `json:"hidden_tour,omitempty"`
 }
 
 // EventGameItem is one game row in GET /api/event/:eventId/games.
@@ -111,6 +121,12 @@ type GameSummary struct {
 	Status     GameStatus `db:"status"`
 	FinishedAt *time.Time `db:"finished_at"`
 	LogSize    int        `db:"log_size"`
+	// TourStatus is the status of a tournament game's tour; nil for a game
+	// of a regular event.
+	TourStatus *TourStatus `db:"tour_status"`
+	// StoppedAtTime: a tournament game whose time is up with the rule "the
+	// game ends at once": it is to be finished.
+	StoppedAtTime bool `db:"stopped_at_time"`
 }
 
 // GameMe is the caller's capabilities for one game

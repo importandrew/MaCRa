@@ -93,7 +93,6 @@ const en = {
     missing_player_role: '{{name}} is not a player in this event',
     game_not_in_event: 'This game is not in this event',
     invalid_event_type: 'Invalid event type',
-    invalid_content_reach: 'Invalid visibility setting',
     invalid_visibility: 'Invalid visibility setting',
     long_event_name: 'The event name is too long',
     long_description: 'The description is too long',
@@ -133,6 +132,48 @@ const en = {
     already_member: 'You are already a member of this event',
     event_full: 'The event has no places left',
     invalid_player_limit: 'The player limit must be at least 1',
+    invalid_tournament_settings: 'The tournament settings are invalid',
+    not_tournament: 'This is for tournaments only',
+    not_substitute: 'This member isn’t a substitute of the tournament',
+    too_many_substitutes: 'More substitutes than the tables need ({{missing}})',
+    already_seated: 'They already sit at that seat',
+    player_and_substitute: 'A member can’t be both a player and a substitute',
+    participants_closed:
+      'The first tour has started: players can’t be added or removed any more (a player withdraws instead)',
+    tournament_not_started: 'The tournament hasn’t started yet',
+    no_players: 'The tournament has no players yet',
+    not_participant: 'This user has no participant number',
+    not_drawn: 'Draw the participant numbers first',
+    tour_in_progress:
+      'A tour is in progress: the next one waits until it is finished',
+    all_tours_played: 'All tours have been played',
+    tables_incomplete: '{{missing}} players are missing for whole tables',
+    tour_not_found: 'No published seating to cancel',
+    seating_file_empty: 'The file has no tables',
+    seating_file_row:
+      'Line {{line}}: expected six whole numbers from 1 — tour, table, east, south, west, north',
+    seating_file_table_twice:
+      'Line {{line}}: table {{table}} of tour {{tour}} comes twice',
+    seating_file_number_twice:
+      'Line {{line}}: number {{number}} is seated twice in tour {{tour}}',
+    seating_file_table_missing:
+      'Tour {{tour}} has no table {{table}}: tables go 1, 2, 3, …',
+    file_seating_missing: 'Tour {{tour}} has no tables from a file',
+    file_seating_absent:
+      'Tour {{tour}} from the file seats numbers who don’t play (withdrew or no such participant): {{numbers}}. Pick another method for this tour.',
+    file_seating_unseated:
+      'Tour {{tour}} from the file leaves out participants {{numbers}}',
+    tour_already_seated:
+      'Tour {{tour}} is already seated: its plan can no longer change',
+    seating_file_tour:
+      'The file has tour {{tour}}, the tournament only {{tours}} tours',
+    invalid_seating: 'Unknown seating method',
+    tables_still_playing: '{{playing}} tables are still playing',
+    tour_finished: 'The tour is finished: its entries can no longer be undone',
+    time_is_up:
+      'Time is up: the game ends at once. Finish it from the table menu.',
+    setting_frozen: 'This setting can no longer change',
+    invalid_extra_minutes: 'The time to add is out of range',
   },
   auth: {
     tabs: 'Authentication',
@@ -183,25 +224,229 @@ const en = {
     namePlaceholder: 'Enter your name',
     updated: 'Profile updated successfully',
   },
+  eventStatus: {
+    preparation: 'Preparation',
+    in_progress: 'In progress',
+    finished: 'Finished',
+  },
+  timer: {
+    left: 'Time left',
+    up: 'Time is up. Tap Refresh.',
+    lastHand: 'Time is up: {{hand}} is the last hand',
+    stopped: 'Time is up: the game is over. Finish it from the menu.',
+  },
+  tours: {
+    endsAt: 'Time is up at {{time}}.',
+    addTime: 'Add time',
+    addTimeTitle: 'Add time to table {{table}}',
+    minutes: 'Minutes',
+    minutesRange: 'From {{min}} to {{max}} minutes',
+    addMinutes: 'Add {{n}} min',
+    timeAdded: '{{n}} minutes added to table {{table}}',
+    extra: '+{{n}} min',
+    start: 'Start tour {{n}}',
+    playing_one: '{{count}} table is still playing.',
+    playing_other: '{{count}} tables are still playing.',
+    allEnded: 'All games have ended: the tour can be finished.',
+    finish: 'Finish tour {{n}}',
+    finishTitle: 'Finish the tour',
+    finishPrompt:
+      'The tour’s results enter the rating and become final: no entry of the tour can be undone after this.',
+    abort: 'Abort tour',
+    abortTitle: 'Abort the tour',
+    abortPrompt:
+      'All the tour’s games are aborted and don’t count; the tour is played again from its seating. This can’t be undone.',
+    done: {
+      publish: 'Tour {{n}} seating published',
+      start: 'Tour {{n}} started',
+      finish: 'Tour {{n}} finished',
+      abort: 'Tour {{n}} aborted',
+    },
+    tableStatus: {
+      created: 'not started',
+      live: 'playing',
+      ended: 'ended',
+      aborted: 'aborted',
+    },
+    title: 'Tours',
+    current: 'Tour {{n}}: {{status}}',
+    status: {
+      draft: 'seating generated, not published',
+      published: 'seating published',
+      live: 'in progress',
+      finished: 'finished',
+      aborted: 'aborted',
+    },
+    methodLabel: 'Seating method',
+    method: {
+      random: 'Random',
+      swiss: 'Swiss',
+      interval: 'Interval',
+      fixed: 'From file',
+    },
+    methodHint: {
+      random:
+        'Random seating of {{players}} players with as few repeat meetings as possible, planned together with the random tours after it. Only the staff see it until it is published.',
+      swiss:
+        'Neighbours in the current standings play together (places 1–4, 5–8, …), moved apart only to avoid repeat meetings. Only the staff see it until it is published.',
+      interval:
+        'By the current standings with a step of the number of tables: table 1 gets places 1, 1+k, 1+2k, 1+3k. Only the staff see it until it is published.',
+      fixed:
+        'Tour {{n}} from the file (the tournament’s plan, below): its tables and winds as there. Only the staff see it until it is published.',
+    },
+    methodUsed: 'Seating: {{method}}',
+    step: 'Step (places i, i+k, …)',
+    stepPart: ', step {{step}}',
+    avoidPart: ', avoiding repeats',
+    avoidRepeats: 'Avoid repeat meetings',
+    noRepeats: 'No repeat meetings',
+    repeatsSummary_one:
+      '{{count}} repeat meeting · a pair met up to {{maxMet}} times before · {{players}} players meet someone again',
+    repeatsSummary_other:
+      '{{count}} repeat meetings · a pair met up to {{maxMet}} times before · {{players}} players meet someone again',
+    places: 'places {{from}}–{{to}}',
+    metBefore: 'Met before: {{pairs}}',
+    pair_one: '{{a}} – {{b}}',
+    pair_other: '{{a}} – {{b}} (×{{count}})',
+    generate: 'Generate tour {{n}} seating',
+    generated: 'Tour {{n}} seating generated',
+    draftHint:
+      'Only the staff see this seating. Publish it to show the players their tables, or generate it again.',
+    regenerate: 'Generate again',
+    publish: 'Publish to the players',
+    needsDraw: 'Draw the participant numbers first (below).',
+    missing_one:
+      '{{count}} player is missing for whole tables: add a player or a substitute.',
+    missing_other:
+      '{{count}} players are missing for whole tables: add players or substitutes.',
+    substitutesLabel: 'Substitutes for this tour',
+    pickSubstitutes_one:
+      'Pick {{count}} more substitute to complete the tables.',
+    pickSubstitutes_other:
+      'Pick {{count}} more substitutes to complete the tables.',
+    substitutesHint:
+      'The substitutes complete the tables; their seats count for nobody.',
+    cancel: 'Cancel seating',
+    cancelTitle: 'Cancel the seating',
+    cancelPrompt:
+      'The tour’s tables are deleted and can be seated again. Continue?',
+    cancelled: 'Seating cancelled',
+    tables: 'Tables',
+    table: 'Table {{n}}',
+  },
+  tourPlan: {
+    title: 'Tournament plan',
+    hint: 'How each tour is to be seated: generating a tour’s seating starts from it. Random tours are planned together, so that all of them have as few repeat meetings as possible.',
+    tour: 'Tour {{n}}',
+    seated: 'seated',
+    edit: 'Change',
+    editTour: 'Change tour {{n}}',
+    editTitle: 'Tour {{n}} seating',
+    saved: 'Tour {{n}} plan saved',
+    fileTitle: 'Seating from a file',
+    fileSummary_one:
+      'Tour {{tours}} · {{tables}} tables · {{players}} participant numbers',
+    fileSummary_other:
+      'Tours {{tours}} · up to {{tables}} tables · {{players}} participant numbers',
+    fileRepeats_one:
+      '{{count}} repeat meeting · a pair meets up to {{maxMet}} times',
+    fileRepeats_other:
+      '{{count}} repeat meetings · a pair meets up to {{maxMet}} times',
+    fileHint:
+      'Your own seating: a CSV file, one row per table — tour, table, east, south, west, north, as participant numbers. Comma or semicolon; a header row is fine. Its tours are planned “From file”.',
+    import: 'Import a file',
+    reimport: 'Import another file',
+    imported: 'Seating imported',
+    tooLarge: 'The file is too large for a seating',
+    delete: 'Delete the file’s seating',
+    deleted: 'The file’s seating deleted',
+    deleteTitle: 'Delete the file’s seating',
+    deletePrompt:
+      'The tables from the file are deleted; the tours planned “From file” become random. Tours already seated stay as they are.',
+  },
+  tournamentDesk: {
+    menu: 'Tournament',
+    title: 'Tournament — {{name}}',
+    participants: 'Participants [{{n}}]',
+    participantsList: 'Participants',
+    noPlayers: 'No players yet. Add them in Manage → Members.',
+    drawnHint: 'The numbers are drawn. A change of players needs a new draw.',
+    closedHint:
+      'The first tour has started: the players and their numbers are final. A player who leaves withdraws.',
+    notDrawnHint:
+      'The participant numbers aren’t drawn for the current players yet. The draw is needed before the first tour’s seating.',
+    draw: 'Draw numbers',
+    redraw: 'Draw again',
+    drawn: 'Numbers drawn',
+    redrawTitle: 'Draw again',
+    redrawPrompt: 'Everyone gets a new random number. Continue?',
+    withdraw: 'Withdraw',
+    withdrawTitle: 'Withdraw from the tournament',
+    withdrawPrompt:
+      '{{name}} withdraws: their games stay in the rating, and they won’t be seated any more. This can’t be undone.',
+    withdrawn: '{{name}} withdrew',
+    withdrewMark: 'withdrew',
+  },
+  tournament: {
+    timeUpFrozen: 'The first tour has started: this can no longer change.',
+    title: 'Tournament',
+    hint: 'Tours and their length, and what happens when a tour’s time is up.',
+    tours: 'Tours',
+    tourMinutes: 'Tour length, minutes',
+    tourMinutesRange: 'From {{min}} to {{max}} minutes',
+    tiesLabel: 'Players equal in TP and GP',
+    ties: {
+      share: 'Share the place',
+      h2h_first: 'Head to head, then first places',
+      first_h2h: 'First places, then head to head',
+      h2h: 'Head to head',
+      first: 'First places',
+      number: 'Draw number only',
+    },
+    tiesHint:
+      'Head to head: in their games together, who scored more GP more often. First places: games won. Still equal: the lower draw number goes first.',
+    timeUpLabel: 'When the time is up',
+    timeUp: {
+      finish_hand: 'The hand in progress is played to the end',
+      extra_hands: 'The hand in progress and a few more',
+      stop_now: 'The game ends at once; the hand in progress doesn’t count',
+    },
+    timeUpShort: {
+      finish_hand: 'the hand in progress is finished when time is up',
+      extra_hands_one:
+        'the hand in progress and {{count}} more when time is up',
+      extra_hands_other:
+        'the hand in progress and {{count}} more when time is up',
+      stop_now: 'the game ends when time is up',
+    },
+    extraHands: 'More hands after the one in progress',
+    summary_one: '{{count}} tour of {{minutes}} minutes',
+    summary_other: '{{count}} tours of {{minutes}} minutes',
+    save: 'Save',
+    saved: 'Tournament settings saved',
+  },
   roles: {
     owner: 'Owner',
     player: 'Player',
     referee: 'Referee',
     observer: 'Observer',
+    substitute: 'Substitute',
   },
   eventType: {
     regular: 'Regular',
     tournament: 'Tournament',
   },
-  visibility: {
-    private: 'Private',
-    public: 'Public',
-  },
-  reach: {
+  whoSees: {
+    private: 'Members only',
     public: 'Everyone',
-    members: 'Participants only',
-    staff: 'Staff only',
+    hint: {
+      private:
+        'Only the event’s members see it: the rating, the games, the members. Others don’t see it at all.',
+      public:
+        'Everyone sees the event, signed in or not: the rating, the games, the members. Emails are never shown; managing stays with you.',
+    },
   },
+
   events: {
     title: 'Events',
     event: 'Event',
@@ -227,9 +472,7 @@ const en = {
     descriptionTooLong: 'Description is too long (at most {{max}} characters)',
     finishedReadOnly: 'The event is finished: only its visibility can change.',
     type: 'Type',
-    visibility: 'Visibility',
-    ratingsReach: 'Ratings',
-    gamesReach: 'Live games & results',
+    whoSees: 'Who sees the event',
     manage: 'Manage',
     manageWithRequests: 'Manage ({{n}} requests)',
     manageTitle: 'Manage — {{name}}',
@@ -241,6 +484,8 @@ const en = {
     ratingTitle: 'Rating — {{name}}',
     liveGames: 'Live games',
     liveGamesTitle: 'Live games — {{name}}',
+    tourTablesHidden:
+      'Tour {{n}} is being played: its tables are seen by the staff and by the players whose own game has ended.',
     noLiveGames: 'No live games',
     finishedGames: 'Finished games',
     finishedGamesTitle: 'Finished games — {{name}}',
@@ -293,6 +538,8 @@ const en = {
       'The event is finished: its settings can no longer change.',
     permissions: 'Permissions',
     hint: 'Can change at any time.',
+    permissionsHintTournament:
+      'Referees can always undo the last round and enter penalties, also from the game’s view.',
     permissionsHint:
       'Referees can always finish and abort games, undo the last round and enter penalties, also from the game’s view.',
     finishGame: 'Finish a game early',
@@ -402,6 +649,8 @@ const en = {
     title: 'Members',
     titleWithCount: 'Members [{{n}}]',
     addTitle: 'Add members',
+    substituteRoleHint:
+      'A substitute plays only where a referee seats them; a member is either a player or a substitute.',
     playerRoleHint: 'All 4 players need the player role to start a game.',
     user: 'User',
     roles: 'Roles',
@@ -429,6 +678,75 @@ const en = {
     belowMinimum_one: 'Fewer than {{count}} game',
     belowMinimum_other: 'Fewer than {{count}} games',
     notPlayedYet: 'No games yet',
+  },
+  seat: {
+    title: 'Table {{table}}: {{name}}’s seat',
+    sitsNow: 'Sitting there now: {{name}}.',
+    who: 'Who sits there',
+    back: '{{name}}, back at the table',
+    busy: '{{name}} (at table {{table}})',
+    noSubstitutes:
+      'The tournament has no substitutes. Add them in Manage → Members with the role “substitute”.',
+    outcome: 'What {{name}} gets for the tour',
+    usual: 'The seat’s result',
+    forfeit: '0 / 0',
+    usualHint:
+      'The seat’s result counts for the player, as if they had played.',
+    forfeitHint:
+      'The player gets 0 TP and 0 GP for the tour; the seat’s TP go to nobody, the opponents keep theirs.',
+    latePenalty: 'Fine for being late',
+    noPenalty: 'None',
+    fromNextHand: 'From the next hand on. The seat’s score carries on.',
+    seat: 'Seat',
+    backButton: 'Seat back',
+    seated: 'Table {{table}}: substitute seated',
+    backDone: '{{name}} is back at the table',
+    for: 'for {{name}}',
+    substitute: 'substitute',
+    forfeitMark: '0 / 0',
+    change: 'Change who sits at {{name}}’s seat',
+    changeShort: 'Seat…',
+  },
+  screen: {
+    open: 'Common screen',
+    viewLabel: 'What the screen shows',
+    view: { auto: 'Auto', seating: 'Seating', rating: 'Rating' },
+    fullScreen: 'Full screen',
+    tour: 'Tour {{n}}',
+    status: {
+      draft: 'seating in preparation',
+      published: 'find your table',
+      live: 'in progress',
+      finished: 'finished',
+      aborted: 'aborted',
+    },
+    preparing: 'Tour {{n}}: the seating is being prepared',
+    noTours: 'The tournament hasn’t started yet',
+    timeUp: 'Time is up',
+    seating: 'Seating',
+    tableEnded: 'ended',
+    nothingYet: 'The seating and the rating appear here once there are any.',
+  },
+  tourRating: {
+    after: 'Standings after tour {{n}}',
+    noTours: 'No tour is finished yet',
+    inProgress: 'tour {{n}} in progress',
+    viewLabel: 'Rating view',
+    totals: 'Totals',
+    byTour: 'By tour',
+    tourLabel: 'Tour',
+    tourColumn: 'Tour {{n}}',
+    exportCsv: 'Download CSV',
+    fileName: 'rating',
+    csv: {
+      place: 'Place',
+      number: 'Number',
+      name: 'Player',
+      tourTP: 'Tour {{n}} TP',
+      tourGP: 'Tour {{n}} GP',
+      withdrew: 'Withdrew',
+      yes: 'yes',
+    },
   },
   games: {
     gameNumber: 'Game #{{id}}',
@@ -503,6 +821,9 @@ const en = {
     fined: '{{name}} fined',
   },
   game: {
+    tourTable: 'Tour {{tour}} · Table {{table}}',
+    tourNotStarted:
+      'The tour hasn’t started yet. Tap Refresh when the referee starts it.',
     enterPenalty: 'Enter a penalty, round {{round}}',
     enterRound: 'Enter result of round {{round}}',
     tableMenu: 'Table menu',

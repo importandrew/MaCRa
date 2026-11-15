@@ -25,8 +25,6 @@ export default function EventCreate() {
     name: '',
     description: '',
     visibility: 'private',
-    ratingsReach: 'members',
-    gamesReach: 'members',
   });
   // Game rules start as the MCR standard; the owner can change them later,
   // until the first game.
@@ -44,8 +42,6 @@ export default function EventCreate() {
       name: settings.name.trim(),
       description: settings.description.trim(),
       visibility: settings.visibility,
-      ratings_reach: settings.ratingsReach,
-      games_reach: settings.gamesReach,
       rules,
     });
 
@@ -83,7 +79,6 @@ export default function EventCreate() {
                       {
                         value: 'tournament',
                         label: t('eventType.tournament'),
-                        isDisabled: true,
                       },
                     ]}
                     selectedKey={type}

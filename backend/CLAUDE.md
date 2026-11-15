@@ -7,6 +7,7 @@
 - Regenerate mocks with `mockery` **v3.8.1**, the official release binary (the dev image has it in `/usr/local/bin`; never `go install` it). It reads `.mockery.yml` and writes `mocks_test.go` next to each listed interface, so add new interfaces there. Another version rewrites every mock in its own style; CI regenerates the mocks with v3.8.1 and fails if anything differs, so commit regenerated mocks with every interface change.
 - Repo tests (`repo/...`) need a real PostgreSQL in `PSQL_MACRA_TEST`. `database.DB.Test` runs migrations **up before and down after** each test, so the test DB is wiped. Never point it at real data. Service and handler tests use mocks and need no DB.
 - Use `go test -count=1 ./...` to bypass the test cache when DB state matters.
+- `cmd/devtools` drives a test stand's tournament by hand (status of the tour's tables, random hands at tables one doesn't sit at, playing them to the end, setting the tour's time left, creating verified test players): `MACRA_DEVTOOLS=1 go run ./cmd/devtools -c path/to/backend_config.json status -e EVENT`; the commands are in its doc comment. It works on the database through the services, migrates it up like the backend, and refuses to run without `MACRA_DEVTOOLS=1`: never on production.
 
 ## Architecture
 

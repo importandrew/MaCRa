@@ -25,6 +25,10 @@ import (
 // The deleted entry is kept in undone_rounds with undoneBy (the user undoing
 // it) and the time, for the game's log.
 //
+// A tournament game's entries can be undone only while its tour is live
+// (models.ErrTourFinished after that), and then a referee may revive an
+// ended game however long ago it ended.
+//
 // Reviving an ended game takes the same advisory locks as NewGame and refuses
 // with models.ErrPlayerInAnotherGame if one of its players has started
 // another live game in the event: a player can't have two live games.
@@ -38,15 +42,22 @@ func (r *Repo) UndoLastRound(ctx context.Context, gameID, logSize, undoneBy int,
 			Status     models.GameStatus `db:"status"`
 			FinishedAt *time.Time        `db:"finished_at"`
 			EventID    int               `db:"event_id"`
+			TourID     *int              `db:"tour_id"`
 		}
 
-		rows, err := tx.db.Query(ctx, `SELECT status, finished_at, event_id FROM games WHERE id = $1`, gameID)
+		rows, err := tx.db.Query(ctx, `SELECT status, finished_at, event_id, tour_id FROM games WHERE id = $1`, gameID)
 		if err != nil {
 			return fmt.Errorf("get game: %w", err)
 		}
 		game, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[gameState])
 		if err != nil {
 			return fmt.Errorf("get game: %w", err)
+		}
+
+		if game.TourID != nil {
+			if endedAfter, err = tx.tourUndoLimit(ctx, *game.TourID, endedAfter); err != nil {
+				return err
+			}
 		}
 
 		switch game.Status {
@@ -181,4 +192,28 @@ func seatScores(roundIDParam string) string {
 		FROM round_scores rs
 		JOIN game_players gp ON gp.game_id = rs.game_id AND gp.player_id = rs.player_id
 		WHERE rs.round_id = ` + roundIDParam + `::int)`
+}
+
+// tourUndoLimit locks the tour row FOR SHARE (finishing a tour locks it FOR
+// UPDATE, so a tour can't be finished while one of its games is being
+// undone, nor revived after) and returns the undo limit for a game of that
+// tour: models.ErrTourFinished unless the tour is live; otherwise no time
+// limit for a referee (endedAfter not nil), and none to revive for a seated
+// player (nil stays nil).
+func (r *Repo) tourUndoLimit(ctx context.Context, tourID int, endedAfter *time.Time) (*time.Time, error) {
+	rows, err := r.db.Query(ctx, `SELECT status FROM tours WHERE id = $1 FOR SHARE`, tourID)
+	if err != nil {
+		return nil, fmt.Errorf("lock tour: %w", err)
+	}
+	status, err := pgx.CollectOneRow(rows, pgx.RowTo[models.TourStatus])
+	if err != nil {
+		return nil, fmt.Errorf("lock tour: %w", err)
+	}
+	if status != models.TourLive {
+		return nil, fmt.Errorf("tour %d is %s: %w", tourID, status, models.ErrTourFinished)
+	}
+	if endedAfter == nil {
+		return endedAfter, nil
+	}
+	return &time.Time{}, nil
 }

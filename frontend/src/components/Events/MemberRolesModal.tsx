@@ -14,12 +14,14 @@ import RoleCheckboxes from './RoleCheckboxes';
 // refuses dropping the player role of someone in a live game.
 export default function MemberRolesModal({
   eventId,
+  eventType,
   member,
   isOwner,
   onClose,
   onSaved,
 }: {
   eventId: number;
+  eventType: 'regular' | 'tournament';
   // member: the member edited; null closes the modal.
   member: EventMember | null;
   isOwner: boolean;
@@ -80,6 +82,7 @@ export default function MemberRolesModal({
                 onChange={(next) =>
                   setDraft({ userId: member.user_id, roles: next })
                 }
+                eventType={eventType}
               />
             )}
             <p className="text-sm text-muted">

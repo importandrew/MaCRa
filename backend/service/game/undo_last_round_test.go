@@ -13,6 +13,7 @@ import (
 
 func TestUndoLastRound_passesCutoff(t *testing.T) {
 	mockGameRepo := NewMockGameRepo(t)
+	mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 	service := NewService(mockGameRepo, NewMockPlayerRepo(t))
 
 	before := time.Now()
@@ -28,6 +29,7 @@ func TestUndoLastRound_passesCutoff(t *testing.T) {
 
 func TestUndoLastRound_withoutReviving(t *testing.T) {
 	mockGameRepo := NewMockGameRepo(t)
+	mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 	service := NewService(mockGameRepo, NewMockPlayerRepo(t))
 	mockGameRepo.EXPECT().UndoLastRound(mock.Anything, 100, 7, 9, (*time.Time)(nil)).Return(nil)
 

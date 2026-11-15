@@ -9,7 +9,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 ### Who is who in an event
 
 - **Owner**: the user who created the event. Not a role. The owner always sees everything in their own event, as staff do, and manages it (settings, members, finishing), whatever roles they hold. Acting as a referee (undo, abort) takes the referee role, also for the owner: an organizer who isn't a referee can leave it out and can't press those by accident. In a regular event the owner gets the referee role at creation.
-- **Member roles**: player, referee, observer. One user can hold several.
+- **Member roles**: player, referee, observer; in a tournament also substitute, never together with player (area 8). One user can hold several.
 - **Member**: the owner or anyone with at least one role.
 - **Staff**: referees, observers and the owner.
 - When the owner creates a **regular** event, they also get the player and referee roles, so they can play and fix rounds right away. In a tournament the owner gets no roles by default (area 8).
@@ -17,15 +17,15 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 ### Event settings that affect access
 
 - **Visibility**: public (anyone, incl. anonymous visitors, can open the event) or private (members only). **Default: private.**
-- **Ratings reach** and **games reach**: who sees the rating and the games — public, members or staff. "Public" means everyone only in a public event; in a private event it falls back to members. Defaults: public in a public event, members in a private one.
+- One setting decides who sees the event (owner, 2026-11-16): everything but managing it — the overview, the member list, the rating, statistics, the games and their logs — is seen by **everyone** in a public event (anonymous visitors included) and by its **members** in a private one. There are no separate settings for the rating or the games. Emails are never shown to other users; managing stays with the owner (and, for a tournament's desk, its staff).
 
 ### What each user can see
 
 - **Open the event** (overview): anyone in a public event; members in a private event. Without access to the event a user sees nothing in it, not even their own past games.
-- **Member list**: members see the full list (names and roles). Everyone else sees only what the overview shows: the staff by name and the number of players.
-- **Rating**: staff always; otherwise as set by ratings reach.
-- **Other people's games** (live and finished lists, game pages, logs, players at the table): staff always; otherwise as set by games reach. In a tournament, live tables are also hidden during a tour (area 8).
-- **Own games**: a player who sat at a game always sees that game (live, result, log, players) and their own game history, regardless of games reach, as long as they can open the event.
+- **Member list** (names and roles): anyone who can open the event.
+- **Rating** and players' **statistics**: anyone who can open the event.
+- **Other people's games** (live and finished lists, game pages, logs, players at the table): anyone who can open the event. In a tournament, a tour's other live tables are hidden while it is played, and a drafted seating from all but the staff (area 8, "Visibility").
+- **Own games**: a player who sat at a game always sees that game (live, result, log, players) and their own game history, as long as they can open the event.
 - **Game status** (live / ended / aborted, used to pick the right game page): anyone who can open the event.
 
 ### What each user can do
@@ -90,7 +90,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Creating an event
 
-- Any signed-in user can create one: name (required, trimmed, at most 100 characters), description (optional, at most 1000), type (tournament not available until area 8 is built), visibility (private by default) and ratings/games reach with presets. The backend checks the same limits on create and edit.
+- Any signed-in user can create one: name (required, trimmed, at most 100 characters), description (optional, at most 1000), type (regular or tournament; a tournament starts with 5 tours of 120 minutes, the hand in progress finished when time is up, and its owner gets no roles), who sees it (members only by default). The backend checks the same limits on create and edit.
 
 ### Event page
 
@@ -99,7 +99,7 @@ Areas: 1. Roles and access · 2. Auth and account · 3. Events · 4. Playing a g
 
 ### Managing an event (owner)
 
-- **Settings**: name, description, visibility, ratings/games reach. Changing visibility changes a reach only when it becomes invalid (public → members when the event turns private); a custom reach is kept otherwise.
+- **Settings**: name, description, and who sees the event (everyone / members only, area 1), with a line under the choice saying what it means.
 - **Members**: add a user (server-side search by name or ID) with roles; tap a member to switch their roles (a member keeps at least one role: to take all of them away, remove the member); remove a member after a confirmation. The owner can't be removed and may drop any of their roles, even all of them; they stay in the member list and can take a role again. A member in a live game can't be removed, and their player role can't be taken away until the game ends.
 - **Overview**: players are a count; referees and observers are listed by name, the first five of a longer list with "N more" for the rest.
 - **Joining by invite**: in Manage → Members the owner turns on an invite link and shares it (copy, the phone's share sheet, or its QR code). Whoever opens it sees the event's name (also in a private event: the link is the access) and joins as a player with one tap; a visitor signs in first and comes back to the link; a member is told they already are one. The owner can replace the link (the old one and its QR code stop working) or turn it off. A finished event doesn't take new players by the link.
@@ -174,7 +174,7 @@ Applies to regular events; tournament games follow area 8.
 - A table of players: place, name, games, TP, GP; sortable by any column. A long name is cut with an ellipsis so rows keep one height; the full name shows on hover and on the player's statistics, which a tap opens. The table never scrolls sideways, also at 320 px. Only ended games count (not live or aborted ones). Members who left or were removed stay in it.
 - Order: total TP, then total GP, then the best single games by GP. Players equal in all of that share the place (5, 5, then 7).
 - The user's own row is highlighted; when it is far down, it stays pinned at the bottom of the screen.
-- Players with fewer ended games than the event's minimum (event settings) get no place: in the same table, under a separator row "Fewer than N games", they follow the ranked players in grey, in the same order, with "—" for the place. Places count only the players above the minimum. Sorting by a column sorts each group on its own; the group without places stays under the separator. Members and staff also see there the event's players who haven't played yet (0 games, by name; the separator says "No games yet" when the minimum is 1), so players know who is in the event; others don't, as they don't get the member list.
+- Players with fewer ended games than the event's minimum (event settings) get no place: in the same table, under a separator row "Fewer than N games", they follow the ranked players in grey, in the same order, with "—" for the place. Places count only the players above the minimum. Sorting by a column sorts each group on its own; the group without places stays under the separator. The event's players who haven't played yet are listed there too (0 games, by name; the separator says "No games yet" when the minimum is 1), so everyone sees who is in the event.
 - Tapping a row (the name included) opens that player's statistics in the event (area 6, "Statistics"); their game history there is planned (for users who can see the event's results; one's own always).
 
 ### History
@@ -185,7 +185,7 @@ Applies to regular events; tournament games follow area 8.
 ### Statistics
 
 - **Player, in one event**: from the event's ended games. Per game: games, places (the average place; a tap expands 1st–4th with their share of the games; a tie in GP shares the better place), average TP and GP, best and worst game (GP). Per hand: hands played, wins and their share of the hands (a tap expands self-draw and deal-in), average and biggest winning hand, deal-ins (the player dealt in to someone's win) and draws with their shares, penalties (a tap expands point penalties and false mahjongs).
-- **Where**: one's own on `/history`, tab "Statistics" next to "Games", for the selected event; anyone's from the event's rating: a tap on a player's row opens `/event/N/player/M` with their name and statistics. One's own statistics are always visible (while the user can open the event); other players' follow the event's ratings reach, as the rating does.
+- **Where**: one's own on `/history`, tab "Statistics" next to "Games", for the selected event; anyone's from the event's rating: a tap on a player's row opens `/event/N/player/M` with their name and statistics. One's own statistics are always visible (while the user can open the event); other players' to anyone who can open the event, as the rating.
 - **Later**: the event's statistics as a whole (the same figures for all players, the biggest hand and who won it); a player's statistics over a chosen set of their events.
 
 ## 7. Landing and navigation
@@ -225,7 +225,7 @@ Applies to regular events; tournament games follow area 8.
 
 ## 8. Tournaments
 
-Planned: none of this is built yet. Until it is, tournaments are a stub (no games can be created in one). The rules follow the official *Mahjong Competition Rules* (WMO / WMCC, 2021 edition) where they cover a question; where the rules are silent, these are the organizer's practice. A few questions are still open with referees; they are listed at the end.
+Being built in stages. So far: creating a tournament, its status (preparation until the first tour starts, then in progress, then finished), its settings in Manage → Settings (number of tours, tour length, what happens when time is up; the regular-event permissions to finish or abort a game and the rating's minimum games don't apply and are hidden), the substitute role, and the tournament's desk (≡ → Tournament, for its staff) with the participants and their numbers: the referee's draw, redone after the players change, and withdrawals once the first tour has started, when the players are closed (they can't be added or removed, also not by the invite link or a request). On the desk a referee also generates the next tour's seating (random with as few repeat meetings as the search finds, Swiss or interval with a chosen step, picked each time; the desk shows the method, the repeat meetings in all, the most times a pair met before and how many players meet someone again, and at each table its places in the standings and who met before; it needs the draw and whole tables of four, else the desk says how many players are missing) as a draft that only the staff see, may generate it again, publishes it, and cancels it (drafted or published) before the tour starts; once published, each player sees their table, seat and opponents as "Current game" ("Tour N · Table T", the tour not started yet). Then the referee starts the tour (its games go live, the tables enter rounds; the first start puts the tournament in progress), finishes it once every table's game has ended (the desk says how many tables still play; the tour's results enter the rating only then, and its entries can no longer be undone; until then a referee may undo also in a game that has ended, with no time limit), or aborts it (all its games are aborted and the number is played again). Each tour has a timer from its start: the tables and the game views count down, then say which hand is the last one (or that the game is over, with "the game ends at once"); the desk shows when the time is up and lets a referee add time to a table (any number of minutes from 1 to 60, starting at 1). The tournament's settings freeze as the table below says. The desk also holds the tournament's plan: each tour's seating method (random by default; Swiss and interval with a choice to avoid repeat meetings, on by default for Swiss and off for interval), which a referee changes until the tour is seated and which the next tour's seating starts from; a random tour is planned together with the random tours after it, so that all of them have as few repeat meetings as possible. A CSV file (one row per table: `tour,table,east,south,west,north` as participant numbers; a comma or a semicolon, a header row allowed) gives its tours their tables and plans them "from file"; such a tour is refused if its tables seat a number who withdrew (until substitutes take whole tours) or leave out a participant. The rating of a tournament is by tour ("Rating" below). Its staff show the tour on a common screen ("Screens" below). A referee seats a substitute at a seat, or the player back with a fine for being late, and completes a tour's tables with substitutes ("Substitutes" below). While a tour is live, its tables are hidden as "Visibility" says: the live games list shows a player only their own table and says the tour's tables are hidden; a drafted seating is seen only by the staff. The rules follow the official *Mahjong Competition Rules* (WMO / WMCC, 2021 edition) where they cover a question; where the rules are silent, these are the organizer's practice. A few questions are still open with referees; they are listed at the end.
 
 ### Format
 
@@ -245,34 +245,35 @@ Planned: none of this is built yet. Until it is, tournaments are a stub (no game
 
 - Everyone registers in advance with an account (no guests). Ways in: the invite link, being added by the organizer, or a request to join that the organizer accepts or declines.
 - A participant can't leave a tournament themselves.
-- **Participant numbers** come from a draw (a shuffle), a referee's button that must be pressed before the first tour's seating is published. Random numbers, so nobody can pick opponents by the order of registration.
-- Before the first tour starts, the participants may change: after a change, the draw is redone (cancelling the seating first if it was published).
+- **Participant numbers** come from a draw (a shuffle), a referee's button on the tournament's desk that must be pressed before the first tour's seating is published. Random numbers, so nobody can pick opponents by the order of registration. The desk lists the players by number for the staff (referees, observers, the owner); a redraw asks for a confirmation.
+- Before the first tour starts, the participants may change: after a change, the numbers no longer count and the desk asks for a new draw (cancelling the seating first if it was published).
 - **Once the first tour starts, the list of players is closed.** After that only staff and substitutes can be added.
 - **A player who withdraws** keeps their past games in the rating, is marked "withdrew" and isn't seated any more; a substitute takes their number in the seating.
-- **Late players**: the app doesn't track lateness. The referee decides and seats or removes a substitute by hand. Under the official rules, being late by up to 15 minutes costs 10 or 20 points (an out-of-game penalty), and by more than 15 minutes the player misses that tour and a substitute plays; from the next tour the player plays again.
+- **Late players**: the app doesn't track lateness. The referee seats a substitute and seats the player back with a fine for being late ("Substitutes" below). Under the official rules, being late by up to 15 minutes costs 10 or 20 points, and by more than 15 minutes the player misses that tour (0 / 0) and a substitute plays; from the next tour the player plays again.
 
 ### Visibility
 
-- Non-members see what they see in any event (the number of players, the staff by name).
-- Participants see the other participants: names in the rating table, only the number on the overview.
-- **Live tables during a tour** are visible only to staff and to the players of the tour who have finished their own game. Everyone else, anonymous visitors included, doesn't see them, so signing out doesn't get around it.
-- A setting hides the rating after tour N until the end; staff always see it.
+- Who sees the tournament at all is the event's one setting (area 1): everyone in a public one, its members in a private one. On top of it, one rule for fair play, always on (owner, 2026-11-16):
+- **Live tables during a tour** are visible only to staff, to the table itself, and to the players of the tour who have finished their own game. Everyone else, anonymous visitors included, doesn't see them, so signing out doesn't get around it. Ended tables of the tour are seen as any game.
+- **A drafted seating** is seen only by the staff, its tables' players included. A **published** seating is seen by everyone who sees the event.
+- Hiding the rating after tour N is postponed (owner, 2026-11-15): to keep it hidden, players would also have to stop seeing the games' results, or they could work the standings out; that is hard to justify for now.
 
 ### Seating
 
 - The method is chosen for each tour:
   - random, with as few repeat meetings as possible;
-  - Swiss without repeats: neighbours in the current rating play together, repeat meetings are avoided;
+  - Swiss: neighbours in the current rating play together;
   - interval: by the current rating with step k (by default the number of tables), e.g. table 1 gets places 1, 1+k, 1+2k, 1+3k;
-  - fixed without repeats for all tours at once;
-  - imported from a file (seatings prepared by the organizer).
+  - from a file (seatings prepared by the organizer).
+- **The tournament's plan** sets each tour's method in advance (the referee may still pick another when seating the tour). Swiss and interval each have a switch "avoid repeat meetings": on by default for Swiss (neighbours move apart only to avoid repeats), off for interval (the scheme as it is). Random tours are planned together: seating one, the generator also plans the random tours after it, so no repeats come up near the end while they can be avoided.
+- A file holds tables of any tours, `tour,table,east,south,west,north`, one row per table, by participant number (a redraw changes who sits where, not the file); its tours are planned "from file" and keep its tables and winds. A withdrawn player's number in it refuses the tour (until whole-tour substitutes exist), and the referee picks another method for that tour.
 - All methods come from **one seating generator of our own**. It searches for a limited time and shows the referee the number of repeat meetings. No repeats can't be guaranteed near the limit of (N−1)/3 tours for N players.
 - Table and wind are assigned automatically, by participant number. Winds are not balanced on purpose: in MCR their effect is minimal.
 - Before a tour starts, the referee can regenerate or edit its seating; after the start, only through substitutes.
 
 ### A tour, step by step
 
-1. The referee prepares the seating and **publishes** it: the tour's games are created (status `created`). Each player sees their own table, seat and opponents as "Current game", not the other tables. Rounds can't be entered yet.
+1. The referee **generates** the seating: a draft that only the staff see (the tour's games are created with status `created`); it can be generated again. Then the referee **publishes** it. Each player sees their own table, seat and opponents as "Current game"; the other tables are seen as any game of the event. Rounds can't be entered yet.
 2. **Cancel seating** (before the start): the created games are deleted; the seating can be edited or made again.
 3. **Start tour**: the tour's timer starts, the games become live, the tables enter rounds.
 4. The next tour's seating can be published only after this tour is finished: a player must not have a created and a live game at once, and the Swiss seating depends on the tour's results anyway.
@@ -290,7 +291,8 @@ Planned: none of this is built yet. Until it is, tournaments are a stub (no game
   - the game ends at once and the hand in progress doesn't count (the official rule).
 
   Hands that the setting lets the table finish are entered after the signal.
-- The timer shows on the table screen and on the common screen, with no warnings as the end nears. It is the one exception to "the table screen changes only on the player's tap" (area 4): only the timer ticks.
+- The timer shows on the table screen (and the game's view; the common screen comes later), with no warnings as the end nears. Once the time is up the table shows the last hand to play; with "the game ends at once" no more entries are taken and the server finishes the game by itself within about 15 seconds, its result counting the hands played (the table or a referee may also finish it from the table menu first).
+- A tour keeps the length it started with: changing the tour length applies to the next tours. It is the one exception to "the table screen changes only on the player's tap" (area 4): only the timer ticks.
 
 ### Playing
 
@@ -299,32 +301,35 @@ Planned: none of this is built yet. Until it is, tournaments are a stub (no game
 - **Only the table enters rounds** (not the referee). No paper score sheets.
 - Mistakes are fixed only by undoing the last entry, one at a time; there is no editing an entry in the middle of the game.
 - **Penalties in a game**: the referee always; players only if the setting "players may enter penalties" is on. The amounts follow the official list (5, 10, 20, 30, 40, 50 or 60 points), taken from the offender only.
-- **Penalties outside a hand** (lateness, conduct): by the referee, tied to the player's game in that tour: points off that game's result, with a reason, from the same list. Being part of the game's score, they can change the places at that table and so the tournament points.
+- **Penalties outside a hand** (lateness, conduct): by the referee, as a penalty in the player's game of that tour (from the game's view, or when seating a late player back): points off that game's score, from the same list. Being part of the game's score, they can change the places at that table and so the tournament points. Not into a game that has already ended (for now).
 - Undoing the last entry: the referee always; players only if the setting "players may undo" is on; only until the tour is finished.
 - Players don't confirm a game's result. A confirmation screen before entering a hand may come later, for all events.
 
 ### Substitutes
 
-- One mechanism: **another person takes a seat from hand N on**, for the whole tour or in the middle of a game.
-- The referee seats and removes substitutes by hand from the table menu. From then on the substitute has the game as "Current game" on the home page, sees the table and enters rounds; the replaced player can no longer enter rounds but still sees their game. A substitute can't sit in two live games at once.
-- The seat's score carries on. The log may mark from which hand someone else sat, if it doesn't clutter the log.
-- **Points**: the opponents get tournament points for their places as usual; the place held by a substitute gives tournament points to nobody. A substitute doesn't take part in the rating: they play only so that the table is complete. The game's record shows who actually sat.
-- **Substitutes in the rating** are hidden by default; a switch on the rating page shows them, always at the bottom whatever their points (their results mean little: substitutes swap with each other).
-- **Data**: a seat keeps a history of who sat from which hand, from the start, even if mid-game substitution comes later.
-- **An incomplete table**: no skipped tour, no three-player game. For now a substitute must be found; when starting a tour, the referee sees "N players missing". An "empty seat" (a technical player, the table effectively playing three) may come later, once it's decided how to score it.
+- One mechanism: **another person takes a seat from the next hand on**, for the whole tour or in the middle of a game (owner, 2026-11-16).
+- The referee changes who sits at a seat on the tournament's desk ("Seat…" next to the seat), at a table of a published or live tour whose game isn't over: a substitute (a member with the substitute role who sits at no other table), or the seat's player back. From then on the substitute has the game as "Current game" on the home page, sees the table under their own name and enters rounds; the replaced player can no longer enter rounds but still sees their game. Nobody sits at two tables at once.
+- **What the replaced player gets** is the referee's choice when seating a substitute: **the seat's result** (as if they had played) or **0 / 0** (0 TP and 0 GP for the tour: the tour shows "—" in the rating). Seating the player back clears 0 / 0.
+- **A late player back at the table**: the referee may fine them for being late at the same time (none, −10 or −20: MCR 2021 gives −10 up to 10 minutes and −20 for 11–15 minutes). The fine is an ordinary penalty entry in that game's log: points off that game's score, so it may change the places at the table and with them the TP; it can be undone like any entry.
+- The seat's score carries on. The table and the desk show who sits now; the desk also says whose seat it is and "0 / 0".
+- **Points**: the opponents get tournament points for their places as usual; with 0 / 0 the seat's tournament points go to nobody, and a place the player shares with the seat counts as usual for the others. A substitute doesn't take part in the rating: they play only so that the table is complete.
+- **Data**: a seat keeps its player (rounds, scores and results stay theirs) and a history of who sat there from which log entry on.
+- **Substitutes in the seating**: when players are missing for whole tables (someone withdrew, or the count isn't a multiple of four), the referee picks as many substitutes for the tour as are missing before generating it (those who sit at no table, or at a table of the draft being replaced). The generator seats them with the players, after them in the standings and the winds; in a tour from a file they take the numbers that don't play, lowest first. A substitute's seat is their own and counts for nobody (0 / 0); the desk shows it as "substitute".
+- **Not yet**: statistics still count a seat's hands for its player also where a substitute played them (a forfeited game is left out).
+- **An incomplete table**: no skipped tour, no three-player game. A substitute must be found: the desk says "N players missing" when there are fewer free substitutes than that, and asks to pick them otherwise. An "empty seat" (a technical player, the table effectively playing three) may come later, once it's decided how to score it.
 
 ### Rating
 
-- The main table of a tournament is by tour: tournament points (TP) and game points (GP) for each tour, and the totals.
-- It shows the standings after the last finished tour, with a line "Tour N in progress".
-- Order: TP, then GP (official rules). TP for places are 4, 2, 1, 0, fixed.
-- Players who withdrew are listed below the active players, marked "withdrew" (tentative).
-- Export to CSV.
+- A tournament's rating (≡ → Rating, the same page as a regular event's) is by tour: it shows the standings after the last finished tour ("Standings after tour N", and "tour N in progress" while one is live). Only finished tours count; aborted ones don't.
+- Two views of one table (place, name, TP, GP; it fits the screen): **Totals**, and **By tour** with a picker of the finished tours: the players ranked by their result in that tour (TP, then GP; equal ones share the place), so the tour's best result is on top (organizers often reward it). A tap on a row opens the player's statistics, as in any event.
+- Order of the totals: TP, then GP (official rules). Players equal in both: a tournament setting, "Players equal in TP and GP" (owner, 2026-11-16), any time: they **share the place** (5, 5, then 7; the default), or a **tie-break** orders them, by criteria in the order chosen — **head to head** (in the games they played together, who scored more GP than the other more often) and **first places** (games won: nobody at the table scored more GP) — then the **draw number**, the lower first (a coin toss). The choices: share; head to head, then first places; first places, then head to head; head to head; first places; the draw number only. TP for places are 4, 2, 1, 0, fixed. The event's minimum games doesn't apply.
+- Players without a place come last on a grey background, without a caption: in the totals those who haven't played a finished tour yet and those who withdrew (their results kept); in a tour, those who didn't play it. A player who withdrew stays grey also where they have a result.
+- **Download CSV**, for anyone who sees the rating: place, participant number, name, TP and GP of each tour, the totals, and whether the player withdrew (UTF-8 with a BOM, so spreadsheets read the names).
 
 ### Screens
 
 - **A player's home page**: the current tour and table ("Current game"). Everything else is on the event's pages.
-- **The common screen** for the hall (projector, TV): the current tour's seating (all tables: players find their table by it), the timer, the rating; it refreshes by itself.
+- **The common screen** for the hall (projector, TV), for the tournament's staff only (the organizer opens it on their own device; owner, 2026-11-15): from the desk, "Common screen". It shows the event's name, the current tour and its state ("find your table" once the seating is published, "in progress", "finished"), the countdown while the tour is live (from the tour's start and length; the time added to a table is shown on that table), and either the seating (all tables: wind, participant number, name; during the tour which tables have ended) or the rating after the last finished tour (place, name, TP, GP, in columns). "Auto" alternates the two every 20 seconds; "Seating" and "Rating" fix one. A drafted seating is never shown ("the seating is being prepared"). It is the one page that refreshes by itself: the data every 30 seconds, the countdown every second. "Full screen" leaves out the app's header. No live scores of the tables.
 - No push notifications.
 
 ### Settings and when they freeze
@@ -337,7 +342,7 @@ Planned: none of this is built yet. Until it is, tournaments are a stub (no game
 | Tour length | until that tour starts; during it, only adding time to a table |
 | Seating method of a tour | until that tour's seating is published |
 | "Players may enter penalties", "players may undo" | any time |
-| "Hide the rating after tour N" | any time |
+| Players equal in TP and GP (share / tie-break) | any time |
 
 ### Lifecycle
 
@@ -362,8 +367,6 @@ Preparation (registration, draw, seating) → in progress (tours) → finished (
 
 ### Open questions (asking referees)
 
-- Does a player who misses a tour (absent, or late by more than 15 minutes) get 0 TP and 0 GP for it?
-- A player played part of a game and left, and a substitute finished it: does that player get anything for the game?
-- In a game with a substitute, do the opponents get GP from the actual result and TP for their places, with nobody getting the substitute's place's TP?
-- When a player and a substitute share a place (e.g. 2nd–3rd), does the player get their share of TP (1.5)?
-- What breaks a tie after TP and GP? If everything is equal, do the players share the place?
+Answered on 2026-11-16: a player who misses a tour gets 0 TP and 0 GP; in a game with a substitute the opponents get GP from the actual result and TP for their places, nobody gets the substitute's place's TP; a player sharing a place with a substitute gets their share. Still open:
+
+- A player played part of a game and left, and a substitute finished it: the referee chooses when seating the substitute (the seat's result or 0 / 0); is that enough, or should the result be split?

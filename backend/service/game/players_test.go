@@ -23,6 +23,7 @@ func TestPlayers(t *testing.T) {
 		"ok": {
 			gameID: 100,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{
 						East:  1,
@@ -51,6 +52,7 @@ func TestPlayers(t *testing.T) {
 		"game repo error": {
 			gameID: 100,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{},
 					errors.New("database error"),
@@ -61,6 +63,7 @@ func TestPlayers(t *testing.T) {
 		"player repo error on east": {
 			gameID: 100,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{
 						East:  1,
@@ -77,6 +80,7 @@ func TestPlayers(t *testing.T) {
 		"player repo error on south": {
 			gameID: 100,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{
 						East:  1,
@@ -96,6 +100,7 @@ func TestPlayers(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)
 

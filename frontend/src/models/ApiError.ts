@@ -4,4 +4,7 @@ export type ApiError = {
   error: string;
   // name is the player a message is about, e.g. for player_in_another_game.
   name?: string;
+  // Other data a message needs, e.g. missing for tables_incomplete, line
+  // for seating_file_row.
+  [key: string]: string | number | undefined;
 };

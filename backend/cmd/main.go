@@ -59,6 +59,9 @@ func main() {
 	playerService := psvc.NewService(playerRepo, mail)
 	eventService := esvc.NewService(eventRepo, playerRepo, gameService)
 
+	// A tournament game stopped at its tour's time ends by itself.
+	go gameService.RunTimeUpChecks(ctx, gsvc.TimeUpCheckInterval)
+
 	// handler
 	eventHandler := ehndl.NewHandler(eventService, gameService)
 	playerHandler := phndl.NewHandler(playerService, cfg)

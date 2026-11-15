@@ -24,6 +24,7 @@ func TestLogs(t *testing.T) {
 		"ok": {
 			gameID: 100,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				// Setup Players call
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{
@@ -67,6 +68,7 @@ func TestLogs(t *testing.T) {
 		"players error": {
 			gameID: 100,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{},
 					errors.New("database error"),
@@ -77,6 +79,7 @@ func TestLogs(t *testing.T) {
 		"game log error": {
 			gameID: 100,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{
 						East:  1,
@@ -101,6 +104,7 @@ func TestLogs(t *testing.T) {
 		"empty round logs": {
 			gameID: 200,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Players", mock.Anything, gameID).Return(
 					models.StartingPlayers{
 						East:  1,
@@ -132,6 +136,7 @@ func TestLogs(t *testing.T) {
 	for name, testCase := range testData {
 		t.Run(name, func(t *testing.T) {
 			mockGameRepo := NewMockGameRepo(t)
+			mockGameRepo.EXPECT().TimeLimit(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockGameRepo.EXPECT().UndoneEntries(mock.Anything, mock.Anything).Return(nil, nil).Maybe()
 			mockPlayerRepo := NewMockPlayerRepo(t)
 			service := NewService(mockGameRepo, mockPlayerRepo)

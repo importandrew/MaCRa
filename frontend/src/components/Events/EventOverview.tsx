@@ -3,6 +3,7 @@ import { Button, Chip, Separator } from '@heroui/react';
 import { type ReactNode, useMemo, useState } from 'react';
 import type { EventMember } from '../../models/EventRole';
 import { useFetchEventMembers } from '../../providers/event/eventApi';
+import { eventStatus } from '../../models/Event';
 import { useEventLayout } from '../../providers/event/eventLayoutContext';
 import { getDateTimeFormatted } from '../../utils/date-tools';
 import { CalendarIcon } from '../Icons/CalendarIcon';
@@ -20,8 +21,8 @@ import JoinRequestBox from './JoinRequestBox';
 
 const iconClass = 'w-6 h-6';
 
-// namesWithRole lists the staff by name. Non-members get only the staff from
-// /members, so it is never used for players (see player_count).
+// namesWithRole lists the staff by name (players are counted instead: see
+// player_count).
 function namesWithRole(
   members: EventMember[] | null,
   role: 'referee' | 'observer'
@@ -137,6 +138,12 @@ export default function EventOverview() {
               {t('events.finished')}
             </Chip>
           )}
+          {/* A tournament also says whether it is still being prepared. */}
+          {event.type === 'tournament' && !isFinished && (
+            <Chip size="sm" variant="soft">
+              {t(`eventStatus.${eventStatus(event)}`)}
+            </Chip>
+          )}
         </div>
       </div>
 
@@ -168,6 +175,21 @@ export default function EventOverview() {
                   limit: event.player_limit,
                 })}
         </DetailRow>
+        {event.tournament && (
+          <DetailRow
+            icon={<TrophyIcon className={iconClass} />}
+            label={t('tournament.title')}
+          >
+            {t('tournament.summary', {
+              count: event.tournament.tours,
+              minutes: event.tournament.tour_minutes,
+            })}
+            {', '}
+            {t(`tournament.timeUpShort.${event.tournament.time_up}`, {
+              count: event.tournament.extra_hands,
+            })}
+          </DetailRow>
+        )}
         <DetailRow
           icon={<BookIcon className={iconClass} />}
           label={t('events.rules')}

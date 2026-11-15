@@ -92,15 +92,104 @@ var (
 	// other than the owner was left without roles (remove them instead).
 	ErrInvalidRole = errors.New("invalid member roles")
 	// ErrMissingPlayerRole is sent with the player's name.
-	ErrMissingPlayerRole   = errors.New("missing 'player' role")
-	ErrGameNotInEvent      = errors.New("game not in event")
-	ErrInvalidEventType    = errors.New("invalid event type")
-	ErrInvalidContentReach = errors.New("invalid content reach")
-	ErrInvalidVisibility   = errors.New("invalid event visibility")
-	ErrLongEventName       = errors.New("event name too long")
-	ErrLongDescription     = errors.New("event description too long")
-	ErrInvalidGameStatus   = errors.New("invalid game status")
-	ErrInvalidGameRules    = errors.New("invalid game rules")
+	ErrMissingPlayerRole = errors.New("missing 'player' role")
+	ErrGameNotInEvent    = errors.New("game not in event")
+	ErrInvalidEventType  = errors.New("invalid event type")
+	ErrInvalidVisibility = errors.New("invalid event visibility")
+	ErrLongEventName     = errors.New("event name too long")
+	ErrLongDescription   = errors.New("event description too long")
+	ErrInvalidGameStatus = errors.New("invalid game status")
+	ErrInvalidGameRules  = errors.New("invalid game rules")
+	// ErrInvalidTournamentSettings means a tournament setting is out of its
+	// range or not one of its options.
+	ErrInvalidTournamentSettings = errors.New("invalid tournament settings")
+	// ErrParticipantsClosed means the tournament's first tour has started:
+	// players can't be added or removed any more (a player withdraws instead).
+	ErrParticipantsClosed = errors.New("tournament participants are closed")
+	// ErrTournamentNotStarted means the action needs a tournament in
+	// progress (e.g. a withdrawal).
+	ErrTournamentNotStarted = errors.New("tournament not started")
+	// ErrNoPlayers means a tournament has no players to draw numbers for.
+	ErrNoPlayers = errors.New("no players")
+	// ErrNotParticipant means the user has no participant number in the
+	// tournament (or has withdrawn already).
+	ErrNotParticipant = errors.New("not a participant")
+	// ErrNotDrawn means the participant numbers aren't drawn for the current
+	// players: the draw comes before the seating.
+	ErrNotDrawn = errors.New("participant numbers not drawn")
+	// ErrTourInProgress means a tour is published or live: the next one
+	// waits until it is finished.
+	ErrTourInProgress = errors.New("a tour is in progress")
+	// ErrAllToursPlayed means every tour of the tournament has been played.
+	ErrAllToursPlayed = errors.New("all tours played")
+	// ErrTablesIncomplete means the active participants don't fill whole
+	// tables; sent with "missing", the players lacking.
+	ErrTablesIncomplete = errors.New("tables incomplete")
+	// ErrTablesStillPlaying means a tour can't be finished while some of its
+	// games haven't ended; sent with "playing", the number of such tables.
+	ErrTablesStillPlaying = errors.New("tables still playing")
+	// ErrTourFinished means the game's tour is finished: its entries can't
+	// be undone any more.
+	ErrTourFinished = errors.New("tour finished")
+	// ErrTimeUp means the tour's time is up and its rule ends the game at
+	// once: no more entries; the game is to be finished.
+	ErrTimeUp = errors.New("time is up")
+	// ErrSettingFrozen means a tournament setting can no longer change (e.g.
+	// the time-up rule after the first tour started); sent with "setting".
+	ErrSettingFrozen = errors.New("setting frozen")
+	// ErrInvalidExtraMinutes means the time added to a table is out of range.
+	ErrInvalidExtraMinutes = errors.New("invalid extra minutes")
+	// ErrTourNotFound means there is no such tour, or not in that state.
+	ErrTourNotFound = errors.New("tour not found")
+	// ErrInvalidSeating means a seating method isn't one of the known ones,
+	// or an interval step is out of range.
+	ErrInvalidSeating = errors.New("invalid seating method")
+	// ErrNotTournament means the action is for tournaments only.
+	ErrNotTournament = errors.New("not a tournament")
+	// ErrFileSeatingMissing means the tour has no tables imported from a
+	// file (the "fixed" method); sent with "tour".
+	ErrFileSeatingMissing = errors.New("no file seating for the tour")
+	// ErrFileSeatingAbsent means a tour's tables from a file seat numbers
+	// that don't play (withdrew, or no such participant); sent with "tour"
+	// and "numbers".
+	ErrFileSeatingAbsent = errors.New("file seating seats absent numbers")
+	// ErrFileSeatingUnseated means a tour's tables from a file leave out
+	// participants; sent with "tour" and "numbers".
+	ErrFileSeatingUnseated = errors.New("file seating leaves out participants")
+	// ErrTourAlreadySeated means the tour's seating is published or played:
+	// its plan can't change any more; sent with "tour".
+	ErrTourAlreadySeated = errors.New("tour already seated")
+	// ErrSeatingFileTour means a seating file has a tour beyond the
+	// tournament's tours; sent with "line", "tour" and "tours".
+	ErrSeatingFileTour = errors.New("seating file tour out of range")
+	// ErrSeatingFileEmpty means an imported seating file has no tables.
+	ErrSeatingFileEmpty = errors.New("seating file empty")
+	// ErrSeatingFileRow means a row of an imported seating file isn't six
+	// whole numbers from 1 (tour, table, east, south, west, north); sent
+	// with "line".
+	ErrSeatingFileRow = errors.New("invalid seating file row")
+	// ErrSeatingFileTableTwice means a tour's table comes twice in an
+	// imported seating file; sent with "line", "tour" and "table".
+	ErrSeatingFileTableTwice = errors.New("seating file table twice")
+	// ErrSeatingFileNumberTwice means a participant number is seated twice
+	// in one tour of an imported seating file; sent with "line", "tour" and
+	// "number".
+	ErrSeatingFileNumberTwice = errors.New("seating file number twice")
+	// ErrSeatingFileTableMissing means a tour of an imported seating file
+	// skips a table number (tables go 1, 2, 3, …); sent with "tour" and
+	// "table".
+	ErrSeatingFileTableMissing = errors.New("seating file table missing")
+	// ErrNotSubstitute means the user seated at a table is neither a
+	// substitute of the event nor the seat's own player.
+	ErrNotSubstitute = errors.New("not a substitute")
+	// ErrTooManySubstitutes means more substitutes were chosen for a tour
+	// than its tables need; sent with "missing", the number needed.
+	ErrTooManySubstitutes = errors.New("too many substitutes")
+	// ErrAlreadySeated means the user already sits at that seat.
+	ErrAlreadySeated = errors.New("already seated")
+	// ErrPlayerAndSubstitute means a member would be both a player and a
+	// substitute, which can't be.
+	ErrPlayerAndSubstitute = errors.New("a member can't be both a player and a substitute")
 	// ErrInvalidEventSettings means a setting isn't one of its options.
 	ErrInvalidEventSettings = errors.New("invalid event settings")
 	// ErrEventRulesFrozen means the event's game rules can't change: it
@@ -128,34 +217,43 @@ var ErrInternal = APIError{Status: http.StatusInternalServerError, Code: "intern
 
 var Errors = map[error]APIError{
 	// 400
-	ErrInvalidRequest:           {http.StatusBadRequest, "invalid_request"},
-	ErrBadCredentials:           {http.StatusBadRequest, "bad_credentials"},
-	ErrUserNotInPlayers:         {http.StatusBadRequest, "user_not_in_players"},
-	ErrValidateEnterRoundResult: {http.StatusBadRequest, "invalid_round"},
-	ErrValidatePenalty:          {http.StatusBadRequest, "invalid_penalty"},
-	ErrValidatePlayers:          {http.StatusBadRequest, "invalid_players"},
-	ErrNoRounds:                 {http.StatusBadRequest, "no_rounds"},
-	ErrTooLate:                  {http.StatusBadRequest, "too_late"},
-	ErrEmptyName:                {http.StatusBadRequest, "empty_name"},
-	ErrLongName:                 {http.StatusBadRequest, "long_name"},
-	ErrEmptyEmail:               {http.StatusBadRequest, "empty_email"},
-	ErrLongEmail:                {http.StatusBadRequest, "long_email"},
-	ErrInvalidEmail:             {http.StatusBadRequest, "invalid_email"},
-	ErrEmptyPassword:            {http.StatusBadRequest, "empty_password"},
-	ErrLongPassword:             {http.StatusBadRequest, "long_password"},
-	ErrMissingPlayerRole:        {http.StatusBadRequest, "missing_player_role"},
-	ErrGameNotInEvent:           {http.StatusBadRequest, "game_not_in_event"},
-	ErrInvalidEventType:         {http.StatusBadRequest, "invalid_event_type"},
-	ErrInvalidContentReach:      {http.StatusBadRequest, "invalid_content_reach"},
-	ErrInvalidVisibility:        {http.StatusBadRequest, "invalid_visibility"},
-	ErrLongEventName:            {http.StatusBadRequest, "long_event_name"},
-	ErrLongDescription:          {http.StatusBadRequest, "long_description"},
-	ErrInvalidGameStatus:        {http.StatusBadRequest, "invalid_game_status"},
-	ErrInvalidGameRules:         {http.StatusBadRequest, "invalid_game_rules"},
-	ErrInvalidRole:              {http.StatusBadRequest, "invalid_role"},
-	ErrInvalidEventSettings:     {http.StatusBadRequest, "invalid_event_settings"},
-	ErrInvalidPlayerLimit:       {http.StatusBadRequest, "invalid_player_limit"},
-	ErrInvalidAuthToken:         {http.StatusBadRequest, "invalid_auth_token"},
+	ErrInvalidRequest:            {http.StatusBadRequest, "invalid_request"},
+	ErrBadCredentials:            {http.StatusBadRequest, "bad_credentials"},
+	ErrUserNotInPlayers:          {http.StatusBadRequest, "user_not_in_players"},
+	ErrValidateEnterRoundResult:  {http.StatusBadRequest, "invalid_round"},
+	ErrValidatePenalty:           {http.StatusBadRequest, "invalid_penalty"},
+	ErrValidatePlayers:           {http.StatusBadRequest, "invalid_players"},
+	ErrNoRounds:                  {http.StatusBadRequest, "no_rounds"},
+	ErrTooLate:                   {http.StatusBadRequest, "too_late"},
+	ErrEmptyName:                 {http.StatusBadRequest, "empty_name"},
+	ErrLongName:                  {http.StatusBadRequest, "long_name"},
+	ErrEmptyEmail:                {http.StatusBadRequest, "empty_email"},
+	ErrLongEmail:                 {http.StatusBadRequest, "long_email"},
+	ErrInvalidEmail:              {http.StatusBadRequest, "invalid_email"},
+	ErrEmptyPassword:             {http.StatusBadRequest, "empty_password"},
+	ErrLongPassword:              {http.StatusBadRequest, "long_password"},
+	ErrMissingPlayerRole:         {http.StatusBadRequest, "missing_player_role"},
+	ErrGameNotInEvent:            {http.StatusBadRequest, "game_not_in_event"},
+	ErrInvalidEventType:          {http.StatusBadRequest, "invalid_event_type"},
+	ErrInvalidVisibility:         {http.StatusBadRequest, "invalid_visibility"},
+	ErrLongEventName:             {http.StatusBadRequest, "long_event_name"},
+	ErrLongDescription:           {http.StatusBadRequest, "long_description"},
+	ErrInvalidGameStatus:         {http.StatusBadRequest, "invalid_game_status"},
+	ErrInvalidGameRules:          {http.StatusBadRequest, "invalid_game_rules"},
+	ErrInvalidRole:               {http.StatusBadRequest, "invalid_role"},
+	ErrInvalidEventSettings:      {http.StatusBadRequest, "invalid_event_settings"},
+	ErrInvalidPlayerLimit:        {http.StatusBadRequest, "invalid_player_limit"},
+	ErrInvalidSeating:            {http.StatusBadRequest, "invalid_seating"},
+	ErrInvalidExtraMinutes:       {http.StatusBadRequest, "invalid_extra_minutes"},
+	ErrInvalidTournamentSettings: {http.StatusBadRequest, "invalid_tournament_settings"},
+	ErrNotTournament:             {http.StatusBadRequest, "not_tournament"},
+	ErrSeatingFileEmpty:          {http.StatusBadRequest, "seating_file_empty"},
+	ErrSeatingFileTour:           {http.StatusBadRequest, "seating_file_tour"},
+	ErrSeatingFileRow:            {http.StatusBadRequest, "seating_file_row"},
+	ErrSeatingFileTableTwice:     {http.StatusBadRequest, "seating_file_table_twice"},
+	ErrSeatingFileNumberTwice:    {http.StatusBadRequest, "seating_file_number_twice"},
+	ErrSeatingFileTableMissing:   {http.StatusBadRequest, "seating_file_table_missing"},
+	ErrInvalidAuthToken:          {http.StatusBadRequest, "invalid_auth_token"},
 
 	// 401
 	ErrSessionExpired: {http.StatusUnauthorized, "session_expired"},
@@ -174,6 +272,8 @@ var Errors = map[error]APIError{
 	ErrNotMember:       {http.StatusNotFound, "not_member"},
 	ErrInviteNotFound:  {http.StatusNotFound, "invite_not_found"},
 	ErrRequestNotFound: {http.StatusNotFound, "request_not_found"},
+	ErrNotParticipant:  {http.StatusNotFound, "not_participant"},
+	ErrTourNotFound:    {http.StatusNotFound, "tour_not_found"},
 
 	// 409
 	ErrLogChanged:           {http.StatusConflict, "log_changed"},
@@ -189,6 +289,25 @@ var Errors = map[error]APIError{
 	ErrRequestDeclined:      {http.StatusConflict, "request_declined"},
 	ErrAlreadyMember:        {http.StatusConflict, "already_member"},
 	ErrEventFull:            {http.StatusConflict, "event_full"},
+	ErrPlayerAndSubstitute:  {http.StatusConflict, "player_and_substitute"},
+	ErrNotSubstitute:        {http.StatusConflict, "not_substitute"},
+	ErrAlreadySeated:        {http.StatusConflict, "already_seated"},
+	ErrTooManySubstitutes:   {http.StatusConflict, "too_many_substitutes"},
+	ErrParticipantsClosed:   {http.StatusConflict, "participants_closed"},
+	ErrTournamentNotStarted: {http.StatusConflict, "tournament_not_started"},
+	ErrNoPlayers:            {http.StatusConflict, "no_players"},
+	ErrNotDrawn:             {http.StatusConflict, "not_drawn"},
+	ErrTourInProgress:       {http.StatusConflict, "tour_in_progress"},
+	ErrAllToursPlayed:       {http.StatusConflict, "all_tours_played"},
+	ErrTablesIncomplete:     {http.StatusConflict, "tables_incomplete"},
+	ErrTablesStillPlaying:   {http.StatusConflict, "tables_still_playing"},
+	ErrTourFinished:         {http.StatusConflict, "tour_finished"},
+	ErrTimeUp:               {http.StatusConflict, "time_is_up"},
+	ErrSettingFrozen:        {http.StatusConflict, "setting_frozen"},
+	ErrFileSeatingMissing:   {http.StatusConflict, "file_seating_missing"},
+	ErrFileSeatingAbsent:    {http.StatusConflict, "file_seating_absent"},
+	ErrFileSeatingUnseated:  {http.StatusConflict, "file_seating_unseated"},
+	ErrTourAlreadySeated:    {http.StatusConflict, "tour_already_seated"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

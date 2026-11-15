@@ -39,7 +39,7 @@ func TestHandler_ListGames(t *testing.T) {
 			HasCapability(mock.Anything, 1, 5, 0, models.CapWatchLive).
 			Return(nil)
 		eventSvc.EXPECT().
-			ListGamesByStatus(mock.Anything, 1, models.GameLive, 50, 0).
+			ListGamesByStatus(mock.Anything, 1, 5, models.GameLive, 50, 0).
 			Return(models.EventGames{
 				Games: []models.EventGameItem{
 					{ID: 9, Status: models.GameLive},
@@ -63,7 +63,7 @@ func TestHandler_ListGames(t *testing.T) {
 			HasCapability(mock.Anything, 1, 5, 0, models.CapWatchResults).
 			Return(nil)
 		eventSvc.EXPECT().
-			ListGamesByStatus(mock.Anything, 1, models.GameEnded, 50, 0).
+			ListGamesByStatus(mock.Anything, 1, 5, models.GameEnded, 50, 0).
 			Return(models.EventGames{}, nil)
 
 		handler := NewHandler(eventSvc, NewMockGameService(t))
@@ -100,7 +100,7 @@ func TestHandler_ListGames(t *testing.T) {
 			HasCapability(mock.Anything, 1, 5, 0, models.CapWatchLive).
 			Return(nil)
 		eventSvc.EXPECT().
-			ListGamesByStatus(mock.Anything, 1, models.GameLive, 50, 0).
+			ListGamesByStatus(mock.Anything, 1, 5, models.GameLive, 50, 0).
 			Return(models.EventGames{}, errors.New("db down"))
 
 		handler := NewHandler(eventSvc, NewMockGameService(t))

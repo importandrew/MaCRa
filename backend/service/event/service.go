@@ -45,9 +45,27 @@ type EventRepo interface {
 	RulesFrozen(ctx context.Context, eventID int) (bool, error)
 	UpdateRules(ctx context.Context, eventID int, rules models.GameRules) error
 	UpdateSettings(ctx context.Context, eventID int, settings models.EventSettings) error
+	UpdateTournament(ctx context.Context, eventID int, settings models.TournamentSettings) error
+	ListParticipants(ctx context.Context, eventID int) (models.TournamentParticipants, error)
+	Draw(ctx context.Context, eventID int) error
+	Withdraw(ctx context.Context, eventID, userID int) error
+	GenerateTour(ctx context.Context, eventID int, seating models.Seating, substitutes []int, makeTables models.TablesFunc) (models.Tour, error)
+	SeatingHistory(ctx context.Context, eventID, beforeNumber int) (models.SeatingInput, error)
+	SetTourPlan(ctx context.Context, eventID int, plan models.TourPlan) error
+	ImportSeatingFile(ctx context.Context, eventID int, file models.PlanTours) error
+	DeleteSeatingFile(ctx context.Context, eventID int) error
+	PublishTour(ctx context.Context, eventID int) error
+	CancelTour(ctx context.Context, eventID int) error
+	StartTour(ctx context.Context, eventID int) error
+	FinishTour(ctx context.Context, eventID int) error
+	AbortTour(ctx context.Context, eventID int) error
+	AddTime(ctx context.Context, eventID, gameID, minutes int) error
+	TourState(ctx context.Context, eventID int) (models.TourState, error)
+	TourResults(ctx context.Context, eventID int) ([]models.TourResultRow, int, error)
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)
-	ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit, offset int) ([]models.EventGameItemRow, error)
+	ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, hiddenTourID, callerID int, limit, offset int) ([]models.EventGameItemRow, error)
+	LiveTour(ctx context.Context, eventID, playerID int) (models.LiveTour, error)
 	ListEndedPlayerResults(ctx context.Context, eventID int) ([]models.EventPlayerResultRow, error)
 	PlayerStats(ctx context.Context, eventID, playerID int) (models.PlayerStats, error)
 }

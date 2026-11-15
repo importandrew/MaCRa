@@ -1,6 +1,7 @@
 import { PlayerScore, RoundData } from './GameData';
 import type { GameRoundLogs } from './GameResult';
 import type { GameRules } from './GameRules';
+import type { GameTimer } from './GameTimer';
 
 export interface GameView {
   id: number;
@@ -12,4 +13,6 @@ export interface GameView {
   player_scores: PlayerScore[];
   // log is the round log of the same state, as in GameData.
   log: GameRoundLogs;
+  // timer: a started tournament game's timer; missing otherwise.
+  timer?: GameTimer;
 }

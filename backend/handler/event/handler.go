@@ -27,17 +27,33 @@ type EventService interface {
 	Invite(ctx context.Context, token string, userID int) (models.EventInvite, error)
 	JoinByInvite(ctx context.Context, token string, userID int) (int, error)
 	UpdateJoining(ctx context.Context, eventID int, settings models.JoiningSettings) error
+	UpdateTournament(ctx context.Context, eventID int, settings models.TournamentSettings) error
+	Participants(ctx context.Context, eventID int) (models.TournamentParticipants, error)
+	Draw(ctx context.Context, eventID int) error
+	Withdraw(ctx context.Context, eventID, userID int) error
+	Tours(ctx context.Context, eventID int) (models.TourState, error)
+	TourRating(ctx context.Context, eventID int) (models.TourRating, error)
+	GenerateTour(ctx context.Context, eventID int, seating models.Seating, substitutes []int) (models.Tour, error)
+	SetTourPlan(ctx context.Context, eventID int, plan models.TourPlan) error
+	ImportSeatingFile(ctx context.Context, eventID int, file string) (models.SeatingFileInfo, error)
+	DeleteSeatingFile(ctx context.Context, eventID int) error
+	PublishTour(ctx context.Context, eventID int) error
+	CancelTour(ctx context.Context, eventID int) error
+	StartTour(ctx context.Context, eventID int) error
+	FinishTour(ctx context.Context, eventID int) error
+	AbortTour(ctx context.Context, eventID int) error
+	AddTime(ctx context.Context, eventID, gameID, minutes int) error
 	RequestToJoin(ctx context.Context, eventID, userID int) error
 	WithdrawJoinRequest(ctx context.Context, eventID, userID int) error
 	JoinRequests(ctx context.Context, eventID int) ([]models.JoinRequest, error)
 	AcceptJoinRequest(ctx context.Context, eventID, userID int) error
 	DeclineJoinRequest(ctx context.Context, eventID, userID int) error
-	ListMembers(ctx context.Context, eventID, callerID int) ([]models.EventMember, error)
+	ListMembers(ctx context.Context, eventID int) ([]models.EventMember, error)
 	GameHistory(ctx context.Context, eventID int) ([]int, error)
 	PlayerGameHistory(ctx context.Context, eventID, playerID int) ([]int, error)
 	PlayerStats(ctx context.Context, eventID, playerID int) (models.PlayerStats, error)
-	ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit, offset int) (models.EventGames, error)
-	Ratings(ctx context.Context, eventID, callerID int) (models.EventRatings, error)
+	ListGamesByStatus(ctx context.Context, eventID, callerID int, status models.GameStatus, limit, offset int) (models.EventGames, error)
+	Ratings(ctx context.Context, eventID int) (models.EventRatings, error)
 
 	NewGame(ctx context.Context, eventID int, playerIDs []int) (int, error)
 	MainGameInfo(ctx context.Context, eventID, userID int) (models.MainGameInfo, error)

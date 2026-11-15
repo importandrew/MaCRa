@@ -17,6 +17,10 @@ type GameRepo interface {
 	SaveRoundOutcome(ctx context.Context, gameID int, data models.RoundData) error
 	UndoLastRound(ctx context.Context, gameID, logSize, undoneBy int, endedAfter *time.Time) error
 	UndoneEntries(ctx context.Context, gameID int) ([]models.UndoneEntry, error)
+	SeatedGame(ctx context.Context, playerID, eventID int) (int, error)
+	TourSeat(ctx context.Context, gameID int) (*models.TourSeat, error)
+	TimeLimit(ctx context.Context, gameID int) (*models.GameTimeLimit, error)
+	TimedOutGames(ctx context.Context, now time.Time) ([]int, error)
 	NewGame(ctx context.Context, seating [4]int, eventID int) (int, error)
 	GameResult(ctx context.Context, gameID int) (models.GameResult, error)
 	GameResults(ctx context.Context, gameIDs []int) (map[int]models.GameResult, error)
@@ -25,6 +29,10 @@ type GameRepo interface {
 	CurrentGame(ctx context.Context, playerID, eventID int) (int, error)
 	EventID(ctx context.Context, gameID int) (int, error)
 	IsPlayerInGame(ctx context.Context, gameID, playerID int) (bool, error)
+	Sitters(ctx context.Context, gameID int) (map[int]int, error)
+	SeatOf(ctx context.Context, gameID, userID int) (int, error)
+	HasPlace(ctx context.Context, gameID, userID int) (bool, error)
+	SeatSitter(ctx context.Context, seat models.SeatChange) error
 }
 
 type PlayerRepo interface {
@@ -56,6 +64,11 @@ type GameEngine interface {
 	Players() [4]int
 
 	PlayerBySeatInRound(round int, seat models.Wind) int
+
+	LastHand() int
+	LimitHands(last int)
+	StopAtTime() error
+	StoppedAtTime() bool
 }
 
 type Service struct {

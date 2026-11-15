@@ -1,6 +1,7 @@
 package game
 
 import (
+	"context"
 	"time"
 
 	"github.com/stretchr/testify/mock"
@@ -24,6 +25,15 @@ func expectLoadGame(m *MockGameRepo, gameID int, logs []models.RoundLog) {
 		logs = []models.RoundLog{}
 	}
 	m.EXPECT().GameLog(mock.Anything, gameID).Return(logs, nil).Once()
+	expectOwnSeats(m, gameID)
+}
+
+// expectOwnSeats: every player sits at their own seat (no substitutes), for
+// whatever asks who sits where.
+func expectOwnSeats(m *MockGameRepo, gameID int) {
+	m.EXPECT().Sitters(mock.Anything, gameID).Return(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil).Maybe()
+	m.EXPECT().SeatOf(mock.Anything, gameID, mock.Anything).
+		RunAndReturn(func(_ context.Context, _, userID int) (int, error) { return userID, nil }).Maybe()
 }
 
 func expectCurrentGame(m *MockGameRepo, playerID, gameID int, logs []models.RoundLog, times int) {
@@ -37,10 +47,25 @@ func expectCurrentGameLoad(m *MockGameRepo, playerID, gameID int, logs []models.
 	expectLoadGame(m, gameID, logs)
 }
 
+// expectCurrentGameLoads expects the entry's load of the live game, then the
+// table's loads (Now) for the rest.
 func expectCurrentGameLoads(m *MockGameRepo, playerID, gameID int, logsPerLoad [][]models.RoundLog) {
-	for _, logs := range logsPerLoad {
-		expectCurrentGameLoad(m, playerID, gameID, logs)
+	for i, logs := range logsPerLoad {
+		if i == 0 {
+			expectCurrentGameLoad(m, playerID, gameID, logs)
+		} else {
+			expectTableLoad(m, playerID, gameID, logs)
+		}
 	}
+}
+
+// expectTableLoad expects Now's load of the player's live game: not a
+// tournament game.
+func expectTableLoad(m *MockGameRepo, playerID, gameID int, logs []models.RoundLog) {
+	m.EXPECT().SeatedGame(mock.Anything, playerID, testEventID).Return(gameID, nil)
+	m.EXPECT().Status(mock.Anything, gameID).Return(models.GameLive, nil)
+	expectLoadGame(m, gameID, logs)
+	m.EXPECT().TourSeat(mock.Anything, gameID).Return(nil, nil)
 }
 
 func expectLiveGame(m *MockGameRepo, gameID int, logs []models.RoundLog) {

@@ -8,8 +8,8 @@ import (
 )
 
 func (g *Game) FalseMahjong(loser, value int, forceNextRound bool) error {
-	if !g.IsLive() {
-		return models.ErrGameNotLive
+	if err := g.checkLive(); err != nil {
+		return err
 	}
 
 	if !g.isSeated(loser) {
@@ -42,8 +42,8 @@ func (g *Game) FalseMahjong(loser, value int, forceNextRound bool) error {
 }
 
 func (g *Game) Penalty(loser, value int, forceNextRound bool) error {
-	if !g.IsLive() {
-		return models.ErrGameNotLive
+	if err := g.checkLive(); err != nil {
+		return err
 	}
 
 	if !g.isSeated(loser) {

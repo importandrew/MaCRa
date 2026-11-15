@@ -41,12 +41,10 @@ func TestCreate_regularEventSeedsOwnerRoles(t *testing.T) {
 		createTestUser(t, db, ownerID)
 
 		eventID, err := repo.Create(ctx, models.Event{
-			Type:         models.EventRegular,
-			Name:         "Regular",
-			OwnerUserID:  ownerID,
-			Visibility:   models.EventVisibilityPrivate,
-			RatingsReach: models.ContentReachMembers,
-			GamesReach:   models.ContentReachMembers,
+			Type:        models.EventRegular,
+			Name:        "Regular",
+			OwnerUserID: ownerID,
+			Visibility:  models.EventVisibilityPrivate,
 		})
 		require.NoError(t, err)
 
@@ -68,12 +66,10 @@ func TestCreate_tournamentEventNoOwnerRoles(t *testing.T) {
 		createTestUser(t, db, ownerID)
 
 		eventID, err := repo.Create(ctx, models.Event{
-			Type:         models.EventTournament,
-			Name:         "Tournament",
-			OwnerUserID:  ownerID,
-			Visibility:   models.EventVisibilityPrivate,
-			RatingsReach: models.ContentReachMembers,
-			GamesReach:   models.ContentReachMembers,
+			Type:        models.EventTournament,
+			Name:        "Tournament",
+			OwnerUserID: ownerID,
+			Visibility:  models.EventVisibilityPrivate,
 		})
 		require.NoError(t, err)
 

@@ -3,6 +3,7 @@ package game
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/importandrew/MaCRa/engine/game"
 	"github.com/importandrew/MaCRa/models"
@@ -47,7 +48,20 @@ func (s *Service) load(ctx context.Context, gameID int) (GameEngine, []models.Ro
 		return nil, nil, fmt.Errorf("get game log: %w", err)
 	}
 
+	limit, err := s.gameRepo.TimeLimit(ctx, gameID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get time limit: %w", err)
+	}
+	timeUp := timeUpRule(g, limit)
+
 	for _, log := range roundLogs {
+		// The first entry after the time is up: the rule applies from the
+		// hand that was in progress then.
+		if limit != nil && log.CreatedAt.After(limit.EndsAt) {
+			if err := timeUp(); err != nil {
+				return nil, nil, err
+			}
+		}
 		switch log.Outcome {
 		case models.FalseMahjong:
 			err = g.FalseMahjong(log.Loser, log.Value, log.ForceNextRound)
@@ -60,8 +74,50 @@ func (s *Service) load(ctx context.Context, gameID int) (GameEngine, []models.Ro
 			return nil, nil, fmt.Errorf("log record %d game %d: %w", log.ID, gameID, err)
 		}
 	}
+	if limit != nil && time.Now().After(limit.EndsAt) {
+		if err := timeUp(); err != nil {
+			return nil, nil, err
+		}
+	}
 
 	return g, roundLogs, nil
+}
+
+// timeUpRule returns what happens to g once its tour's time is up, applied
+// once however often it is called: the hand in progress is the last one
+// (models.TimeUpFinishHand), or a few more after it (models.TimeUpExtraHands),
+// or the game stops at once (models.TimeUpStopNow). Without a limit it does
+// nothing.
+func timeUpRule(g GameEngine, limit *models.GameTimeLimit) func() error {
+	applied := false
+	return func() error {
+		if limit == nil || applied {
+			return nil
+		}
+		applied = true
+		switch limit.TimeUp {
+		case models.TimeUpExtraHands:
+			g.LimitHands(g.Round() + limit.ExtraHands)
+		case models.TimeUpStopNow:
+			return g.StopAtTime()
+		default:
+			g.LimitHands(g.Round())
+		}
+		return nil
+	}
+}
+
+// gameTimer is the timer a table shows for a started tournament game; nil
+// without a time limit.
+func gameTimer(g GameEngine, limit *models.GameTimeLimit) *models.GameTimer {
+	if limit == nil {
+		return nil
+	}
+	timer := &models.GameTimer{EndsAt: limit.EndsAt, TimeUp: limit.TimeUp, Stopped: g.StoppedAtTime()}
+	if time.Now().After(limit.EndsAt) && !timer.Stopped {
+		timer.LastHand = g.LastHand()
+	}
+	return timer
 }
 
 // LiveGame loads a live game, with its round log (see load).
@@ -101,4 +157,10 @@ func (s *Service) CurrentGame(ctx context.Context, playerID, eventID int) (GameE
 
 func (s *Service) CurrentGameID(ctx context.Context, playerID, eventID int) (int, error) {
 	return s.gameRepo.CurrentGame(ctx, playerID, eventID)
+}
+
+// SeatedGameID returns the player's game that isn't over: live, or a
+// tournament game whose tour is published but not started.
+func (s *Service) SeatedGameID(ctx context.Context, playerID, eventID int) (int, error) {
+	return s.gameRepo.SeatedGame(ctx, playerID, eventID)
 }

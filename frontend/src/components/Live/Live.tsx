@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import TourTimer from '../TourTimer';
 import { Button } from '@heroui/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -174,6 +175,11 @@ export default function Live({ onGameEnded }: { onGameEnded: () => void }) {
           center={
             <div className="relative z-10 py-3 justify-self-center self-center items-center w-full text-5xl">
               <div className="flex flex-col items-center gap-2">
+                {data.timer && !isEntryOpen && (
+                  <div className="text-base">
+                    <TourTimer timer={data.timer} />
+                  </div>
+                )}
                 {canEnterPenalty ? (
                   <Button
                     size="lg"

@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS tour_plans;
+ALTER TABLE tours DROP COLUMN IF EXISTS avoid_repeats;
