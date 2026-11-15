@@ -12,9 +12,8 @@ import (
 // finished tour and the totals. The active players come first by TP, then
 // GP (players equal in both share the place), those who haven't played a
 // finished tour yet without a place; the players who withdrew follow,
-// without a place. Players with no results are listed only for members and
-// staff, as in Ratings (the member list is private).
-func (s *Service) TourRating(ctx context.Context, eventID, callerID int) (models.TourRating, error) {
+// without a place.
+func (s *Service) TourRating(ctx context.Context, eventID int) (models.TourRating, error) {
 	event, err := s.repo.Get(ctx, eventID)
 	if err != nil {
 		return models.TourRating{}, err
@@ -22,11 +21,6 @@ func (s *Service) TourRating(ctx context.Context, eventID, callerID int) (models
 	if event.Type != models.EventTournament {
 		return models.TourRating{}, models.ErrNotTournament
 	}
-	authCtx, err := s.buildAuthContext(ctx, event, callerID, 0)
-	if err != nil {
-		return models.TourRating{}, err
-	}
-
 	results, inProgress, err := s.repo.TourResults(ctx, eventID)
 	if err != nil {
 		return models.TourRating{}, err
@@ -35,15 +29,14 @@ func (s *Service) TourRating(ctx context.Context, eventID, callerID int) (models
 	if err != nil {
 		return models.TourRating{}, err
 	}
-	return tourRating(results, inProgress, participants,
-		authCtx.isParticipating() || authCtx.isStaff()), nil
+	return tourRating(results, inProgress, participants), nil
 }
 
-// tourRating builds the rating by tour from the results; withNoResults also
-// lists the participants without results.
+// tourRating builds the rating by tour from the results and the
+// participants, those without results too.
 func tourRating(
 	results []models.TourResultRow, inProgress int,
-	participants models.TournamentParticipants, withNoResults bool,
+	participants models.TournamentParticipants,
 ) models.TourRating {
 	rating := models.TourRating{Tours: []int{}, InProgress: inProgress, Rows: []models.TourRatingRow{}}
 	tourIndex := map[int]int{}
@@ -72,9 +65,6 @@ func tourRating(
 		r.Tours[tourIndex[res.Tour]] = &models.TourResult{TP: res.TP, GP: res.GP, Table: res.Table}
 	}
 	for _, p := range participants.Participants {
-		if _, played := rows[p.UserID]; !played && !withNoResults {
-			continue
-		}
 		r := row(p.UserID, p.Name)
 		r.Withdrawn = p.Withdrawn
 		if participants.Drawn {

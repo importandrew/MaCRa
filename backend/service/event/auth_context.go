@@ -155,14 +155,9 @@ func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool
 		models.CapEnterRound, models.CapEnterPenalty, models.CapRefereeEntry, models.CapViewGame:
 		return authCtx.hasGameCapability(capability)
 	case models.CapWatchLive, models.CapWatchResults:
-		// A seated player always sees their own game, whatever the games reach.
-		if authCtx.IsSeatedInGame {
-			return true
-		}
-		if authCtx.tourTableHidden() {
-			return false
-		}
-		return authCtx.canViewContent(authCtx.Event.GamesReach, authCtx.baseWatchGamesAccess())
+		// Whoever can open the event sees its games, but a tour's other
+		// tables are hidden while it is played.
+		return !authCtx.tourTableHidden()
 	case models.CapViewTournament:
 		return authCtx.Event.Type == models.EventTournament && authCtx.isStaff()
 	case models.CapRunTournament:
@@ -170,7 +165,8 @@ func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool
 		return authCtx.Event.Type == models.EventTournament &&
 			authCtx.Event.FinishedAt == nil && authCtx.hasRole(models.EventReferee)
 	case models.CapViewRatings:
-		return authCtx.canViewContent(authCtx.Event.RatingsReach, authCtx.baseViewRatingsAccess())
+		// Whoever can open the event sees its rating.
+		return true
 	default:
 		return false
 	}
@@ -245,37 +241,29 @@ func (authCtx EventAuthContext) canEnterPenalty() bool {
 		(authCtx.hasRole(models.EventReferee) || authCtx.Event.Settings.Penalties == models.PenaltiesBySeated)
 }
 
-// canViewGame: a seated player always sees their own game; others by the
-// games reach: watch_live while it is live, watch_results once it isn't.
+// canViewGame: whoever can open the event sees its games (a seated player
+// their own one in any case), but for a tour's other tables while it is
+// played (tourTableHidden).
 func (authCtx EventAuthContext) canViewGame() bool {
-	if authCtx.Game == nil {
-		return false
-	}
-	if authCtx.IsSeatedInGame {
-		return true
-	}
-	if authCtx.tourTableHidden() {
-		return false
-	}
-	return authCtx.canViewContent(authCtx.Event.GamesReach, authCtx.baseWatchGamesAccess())
+	return authCtx.Game != nil && !authCtx.tourTableHidden()
 }
 
-// tourTableHidden reports whether the game is another table of a tour that
-// the caller may not see yet (docs/user-scenarios.md, area 8, "Visibility"):
-// a live game of the live tour is seen only by the staff, its table, and the
-// players whose own game in the tour has ended; a game of a seating not
-// started yet (draft or published) only by the staff and its table. Whatever
-// the games reach, so signing out doesn't get around it.
+// tourTableHidden reports whether the game is a tournament table the caller
+// may not see now (docs/user-scenarios.md, area 8, "Visibility"): while a
+// tour is live, its live tables are seen only by the staff, the table
+// itself and the players whose own game in the tour has ended; a drafted
+// seating only by the staff, its tables included. Whatever the event's
+// visibility, so signing out doesn't get around it.
 func (authCtx EventAuthContext) tourTableHidden() bool {
 	g := authCtx.Game
-	if g == nil || g.TourStatus == nil || authCtx.IsSeatedInGame || authCtx.isStaff() {
+	if g == nil || g.TourStatus == nil || authCtx.isStaff() {
 		return false
 	}
 	switch *g.TourStatus {
-	case models.TourLive:
-		return g.Status == models.GameLive && !authCtx.FinishedInTour
-	case models.TourDraft, models.TourPublished:
+	case models.TourDraft:
 		return true
+	case models.TourLive:
+		return g.Status == models.GameLive && !authCtx.IsSeatedInGame && !authCtx.FinishedInTour
 	default:
 		return false
 	}
@@ -299,46 +287,4 @@ func (authCtx EventAuthContext) seatedMayAbort(logSize int) bool {
 // statement as the abort (repo/game.Abort).
 func (authCtx EventAuthContext) seatedAbortOnlyWithoutRounds() bool {
 	return authCtx.Event.Settings.AbortGame == models.AbortBySeatedBeforeFirstRound
-}
-
-func (authCtx EventAuthContext) baseWatchGamesAccess() bool {
-	switch authCtx.Event.Type {
-	case models.EventRegular:
-		return authCtx.isParticipating()
-	case models.EventTournament:
-		return false
-	default:
-		return false
-	}
-}
-
-func (authCtx EventAuthContext) baseViewRatingsAccess() bool {
-	switch authCtx.Event.Type {
-	case models.EventRegular:
-		return authCtx.isParticipating()
-	case models.EventTournament:
-		return authCtx.isParticipating()
-	default:
-		return false
-	}
-}
-
-func (authCtx EventAuthContext) canViewContent(reach models.ContentReach, isAllowedForMembers bool) bool {
-	if authCtx.isStaff() {
-		return true
-	}
-
-	switch reach {
-	case models.ContentReachStaff:
-		return false
-	case models.ContentReachMembers:
-		return isAllowedForMembers
-	case models.ContentReachPublic:
-		if authCtx.Event.Visibility == models.EventVisibilityPublic {
-			return true
-		}
-		return isAllowedForMembers
-	default:
-		return false
-	}
 }

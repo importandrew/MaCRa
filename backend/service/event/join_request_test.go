@@ -52,7 +52,6 @@ func TestMyCapabilities_joinRequest(t *testing.T) {
 			}
 			event := models.Event{
 				ID: 1, Type: models.EventRegular, OwnerUserID: 10, Visibility: visibility,
-				RatingsReach: models.ContentReachPublic, GamesReach: models.ContentReachPublic,
 				AcceptRequests: testCase.accept, PlayerLimit: testCase.limit, FinishedAt: testCase.finishedAt,
 			}
 
@@ -89,7 +88,6 @@ func TestMyCapabilities_pendingRequests(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			event := models.Event{
 				ID: 1, Type: models.EventRegular, OwnerUserID: 10, Visibility: models.EventVisibilityPublic,
-				RatingsReach: models.ContentReachPublic, GamesReach: models.ContentReachPublic,
 				FinishedAt: testCase.finishedAt,
 			}
 

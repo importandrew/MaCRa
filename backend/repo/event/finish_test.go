@@ -24,14 +24,12 @@ func createTestEvent(t *testing.T, db database.DB) int {
 	}
 
 	eventID, err := NewRepo(db).Create(context.Background(), models.Event{
-		Type:         models.EventRegular,
-		Name:         "Finish",
-		OwnerUserID:  1,
-		Visibility:   models.EventVisibilityPublic,
-		RatingsReach: models.ContentReachPublic,
-		GamesReach:   models.ContentReachPublic,
-		Rules:        models.StandardGameRules(),
-		Settings:     models.DefaultEventSettings(),
+		Type:        models.EventRegular,
+		Name:        "Finish",
+		OwnerUserID: 1,
+		Visibility:  models.EventVisibilityPublic,
+		Rules:       models.StandardGameRules(),
+		Settings:    models.DefaultEventSettings(),
 	})
 	require.NoError(t, err)
 	// The owner got player and referee at creation; games need the others

@@ -19,17 +19,11 @@ type playerAgg struct {
 
 // Ratings returns the event's rating: the players with at least the event's
 // minimum of ended games ranked, the others below without a place, in the
-// same order (orderedPlayers). For members and staff, the players of the
-// event who haven't played yet follow them with zero games, by name, so
-// players see who is in the event; others don't get the member list
-// (docs/user-scenarios.md, privacy).
-func (s *Service) Ratings(ctx context.Context, eventID, callerID int) (models.EventRatings, error) {
+// same order (orderedPlayers). The players of the event who haven't played
+// yet follow them with zero games, by name, so everyone who sees the rating
+// sees who is in the event.
+func (s *Service) Ratings(ctx context.Context, eventID int) (models.EventRatings, error) {
 	event, err := s.repo.Get(ctx, eventID)
-	if err != nil {
-		return models.EventRatings{}, err
-	}
-
-	authCtx, err := s.buildAuthContext(ctx, event, callerID, 0)
 	if err != nil {
 		return models.EventRatings{}, err
 	}
@@ -55,13 +49,11 @@ func (s *Service) Ratings(ctx context.Context, eventID, callerID int) (models.Ev
 		ratings.Ratings = append(ratings.Ratings, entry)
 	}
 
-	if authCtx.isParticipating() || authCtx.isStaff() {
-		notPlayed, err := s.playersWithoutGames(ctx, eventID, rows)
-		if err != nil {
-			return models.EventRatings{}, err
-		}
-		ratings.BelowMinimum = append(ratings.BelowMinimum, notPlayed...)
+	notPlayed, err := s.playersWithoutGames(ctx, eventID, rows)
+	if err != nil {
+		return models.EventRatings{}, err
 	}
+	ratings.BelowMinimum = append(ratings.BelowMinimum, notPlayed...)
 
 	return ratings, nil
 }

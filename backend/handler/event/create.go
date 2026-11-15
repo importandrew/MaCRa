@@ -11,13 +11,11 @@ import (
 )
 
 type CreateEventRequest struct {
-	Type         models.EventType       `json:"type" binding:"required"`
-	Name         string                 `json:"name"`
-	Description  string                 `json:"description"`
-	Visibility   models.EventVisibility `json:"visibility"`
-	RatingsReach *models.ContentReach   `json:"ratings_reach"`
-	GamesReach   *models.ContentReach   `json:"games_reach"`
-	Rules        *models.GameRules      `json:"rules"`
+	Type        models.EventType       `json:"type" binding:"required"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Visibility  models.EventVisibility `json:"visibility"`
+	Rules       *models.GameRules      `json:"rules"`
 }
 
 func (h Handler) Create(c *gin.Context) {
@@ -30,14 +28,12 @@ func (h Handler) Create(c *gin.Context) {
 	}
 
 	params := models.EventCreateParams{
-		OwnerID:      callerID,
-		Type:         req.Type,
-		Name:         req.Name,
-		Description:  req.Description,
-		Visibility:   req.Visibility,
-		RatingsReach: req.RatingsReach,
-		GamesReach:   req.GamesReach,
-		Rules:        req.Rules,
+		OwnerID:     callerID,
+		Type:        req.Type,
+		Name:        req.Name,
+		Description: req.Description,
+		Visibility:  req.Visibility,
+		Rules:       req.Rules,
 	}
 
 	id, err := h.event.Create(c.Request.Context(), params)

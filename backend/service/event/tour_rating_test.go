@@ -31,7 +31,7 @@ func TestTourRating(t *testing.T) {
 		{UserID: 6, Name: "Fay", Number: new(6)},
 	}}
 
-	rating := tourRating(results, 4, participants, true)
+	rating := tourRating(results, 4, participants)
 	assert.Equal(t, []int{1, 2}, rating.Tours)
 	assert.Equal(t, 4, rating.InProgress)
 
@@ -59,13 +59,9 @@ func TestTourRating(t *testing.T) {
 	assert.True(t, rating.Rows[5].Withdrawn)
 	assert.Equal(t, -30, rating.Rows[5].GP, "Dan keeps his results")
 
-	// Without the member list, players without results aren't listed.
-	rating = tourRating(results, 0, participants, false)
-	assert.Len(t, rating.Rows, 5)
-
 	// Before the draw, no numbers.
 	participants.Drawn = false
-	rating = tourRating(nil, 0, participants, true)
+	rating = tourRating(nil, 0, participants)
 	assert.Empty(t, rating.Tours)
 	assert.Len(t, rating.Rows, 6)
 	for _, row := range rating.Rows {

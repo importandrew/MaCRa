@@ -93,7 +93,6 @@ const en = {
     missing_player_role: '{{name}} is not a player in this event',
     game_not_in_event: 'This game is not in this event',
     invalid_event_type: 'Invalid event type',
-    invalid_content_reach: 'Invalid visibility setting',
     invalid_visibility: 'Invalid visibility setting',
     long_event_name: 'The event name is too long',
     long_description: 'The description is too long',
@@ -416,15 +415,17 @@ const en = {
     regular: 'Regular',
     tournament: 'Tournament',
   },
-  visibility: {
-    private: 'Private',
-    public: 'Public',
-  },
-  reach: {
+  whoSees: {
+    private: 'Members only',
     public: 'Everyone',
-    members: 'Participants only',
-    staff: 'Staff only',
+    hint: {
+      private:
+        'Only the event’s members see it: the rating, the games, the members. Others don’t see it at all.',
+      public:
+        'Everyone sees the event, signed in or not: the rating, the games, the members. Emails are never shown; managing stays with you.',
+    },
   },
+
   events: {
     title: 'Events',
     event: 'Event',
@@ -450,9 +451,7 @@ const en = {
     descriptionTooLong: 'Description is too long (at most {{max}} characters)',
     finishedReadOnly: 'The event is finished: only its visibility can change.',
     type: 'Type',
-    visibility: 'Visibility',
-    ratingsReach: 'Ratings',
-    gamesReach: 'Live games & results',
+    whoSees: 'Who sees the event',
     manage: 'Manage',
     manageWithRequests: 'Manage ({{n}} requests)',
     manageTitle: 'Manage — {{name}}',

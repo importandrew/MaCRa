@@ -60,8 +60,6 @@ export default function EventManage() {
       name: event.name,
       description: event.description || '',
       visibility: event.visibility,
-      ratingsReach: event.ratings_reach,
-      gamesReach: event.games_reach,
     });
   // A finished event: only its visibility can change, members are final.
   const isFinished = Boolean(event?.finished_at);
@@ -97,8 +95,6 @@ export default function EventManage() {
               name: settings.name.trim(),
               description: settings.description.trim(),
               visibility: settings.visibility,
-              ratings_reach: settings.ratingsReach,
-              games_reach: settings.gamesReach,
             }
       );
 
