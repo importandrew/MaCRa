@@ -57,6 +57,10 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Sea
 			return err
 		}
 		input.Participants = participants
+		input.Tour = next
+		if input.Tables, input.FutureRandom, err = tx.planInput(ctx, eventID, next); err != nil {
+			return err
+		}
 		tables, err := makeTables(input)
 		if err != nil {
 			return err
@@ -71,10 +75,10 @@ func (r *Repo) GenerateTour(ctx context.Context, eventID int, seating models.Sea
 // insertDraftTour inserts a drafted tour with its games, one per table.
 func (r *Repo) insertDraftTour(ctx context.Context, eventID, number int, seating models.Seating, tables [][4]int) (models.Tour, error) {
 	rows, err := r.db.Query(ctx, `
-		INSERT INTO tours (event_id, number, status, seating, seating_step)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, number, status, seating, seating_step, published_at, minutes, started_at, finished_at`,
-		eventID, number, models.TourDraft, seating.Method, seating.Step)
+		INSERT INTO tours (event_id, number, status, seating, seating_step, avoid_repeats)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, number, status, seating, seating_step, avoid_repeats, published_at, minutes, started_at, finished_at`,
+		eventID, number, models.TourDraft, seating.Method, seating.Step, seating.AvoidRepeats)
 	if err != nil {
 		return models.Tour{}, fmt.Errorf("insert tour: %w", err)
 	}
@@ -229,7 +233,7 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 	state := models.TourState{Tables: []models.TourTable{}}
 	err := r.InTx(ctx, func(tx *Repo) error {
 		rows, err := tx.db.Query(ctx, `
-			SELECT id, number, status, seating, seating_step, published_at, minutes, started_at, finished_at
+			SELECT id, number, status, seating, seating_step, avoid_repeats, published_at, minutes, started_at, finished_at
 			FROM tours WHERE event_id = $1 AND status <> $2
 			ORDER BY number DESC LIMIT 1`,
 			eventID, models.TourAborted)
@@ -267,7 +271,9 @@ func (r *Repo) TourState(ctx context.Context, eventID int) (models.TourState, er
 			}
 		}
 		state.Missing = missingPlayers(state.Active)
-		return nil
+
+		state.Plan, err = tx.planList(ctx, eventID)
+		return err
 	})
 	return state, err
 }
@@ -453,9 +459,10 @@ func (r *Repo) AddTime(ctx context.Context, eventID, gameID, minutes int) error 
 }
 
 // SeatingHistory returns what a seating is made from, besides the
-// participants: how many times each pair has met in the tournament's live and
-// finished tours numbered below beforeNumber (aborted ones don't count), and
-// the totals from the finished ones among them. beforeNumber 0 takes all.
+// participants: how many times each pair has met in the tournament's
+// published, live and finished tours numbered below beforeNumber (drafts and
+// aborted ones don't count), and the totals from the finished ones among
+// them. beforeNumber 0 takes all.
 func (r *Repo) SeatingHistory(ctx context.Context, eventID, beforeNumber int) (models.SeatingInput, error) {
 	input := models.SeatingInput{
 		Meetings:  map[models.SeatingPair]int{},
@@ -471,9 +478,9 @@ func (r *Repo) SeatingHistory(ctx context.Context, eventID, beforeNumber int) (m
 		JOIN games g ON g.tour_id = t.id
 		JOIN game_players a ON a.game_id = g.id
 		JOIN game_players b ON b.game_id = g.id AND a.player_id < b.player_id
-		WHERE t.event_id = $1 AND t.status IN ($2, $3) AND t.number < $4
+		WHERE t.event_id = $1 AND t.status IN ($2, $3, $4) AND t.number < $5
 		GROUP BY a.player_id, b.player_id`,
-		eventID, models.TourLive, models.TourFinished, beforeNumber)
+		eventID, models.TourPublished, models.TourLive, models.TourFinished, beforeNumber)
 	if err != nil {
 		return input, fmt.Errorf("meetings: %w", err)
 	}

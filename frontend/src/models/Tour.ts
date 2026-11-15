@@ -4,11 +4,26 @@
 export type TourStatus =
   'draft' | 'published' | 'live' | 'finished' | 'aborted';
 
-export type SeatingMethod = 'random' | 'swiss' | 'interval';
+// fixed: the tour's tables imported from a file.
+export type SeatingMethod = 'random' | 'swiss' | 'interval' | 'fixed';
 
 // SEATING_METHODS in the order the desk offers them (labels:
-// tours.method.<method>).
-export const SEATING_METHODS: SeatingMethod[] = ['random', 'swiss', 'interval'];
+// tours.method.<method>); fixed only for a tour with tables from a file.
+export const SEATING_METHODS: SeatingMethod[] = [
+  'random',
+  'swiss',
+  'interval',
+  'fixed',
+];
+
+// Seating is how a tour is to be seated (generateTour, setTourPlan): the
+// method, an interval step (undefined: the number of tables), and for Swiss
+// and interval whether to avoid repeat meetings.
+export type Seating = {
+  seating: SeatingMethod;
+  step?: number;
+  avoid_repeats: boolean;
+};
 
 export type Tour = {
   id: number;
@@ -17,6 +32,9 @@ export type Tour = {
   seating: SeatingMethod;
   // seating_step: an interval seating's step; null otherwise.
   seating_step: number | null;
+  // avoid_repeats: a Swiss or interval seating moved players apart to avoid
+  // repeat meetings.
+  avoid_repeats: boolean;
   // published_at: null while the seating is a draft.
   published_at: string | null;
   // minutes: the tour's length, set when it starts.
@@ -67,4 +85,31 @@ export type TourState = {
   // whole tables.
   active: number;
   missing: number;
+  // plan: each tour's planned seating, 1 to the number of tours; file: the
+  // tables imported from a file, null without them.
+  plan: TourPlan[];
+  file: SeatingFileInfo | null;
+};
+
+// TourPlan mirrors models.TourPlan: the seating a tour is to have.
+export type TourPlan = {
+  number: number;
+  seating: SeatingMethod;
+  seating_step: number | null;
+  avoid_repeats: boolean;
+  // file_tables: the tour's tables from a file (0 without them).
+  file_tables: number;
+  // seated: the tour's seating is published or played; its plan is final.
+  seated: boolean;
+};
+
+// SeatingFileInfo mirrors models.SeatingFileInfo: the tables from a file,
+// their tours, the most tables in a tour, the participant numbers they seat,
+// and their repeat meetings among their own tours.
+export type SeatingFileInfo = {
+  tours: number[];
+  tables: number;
+  players: number;
+  repeats: number;
+  max_met: number;
 };

@@ -1,14 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Card, useOverlayState } from '@heroui/react';
 import { useState } from 'react';
-import {
-  SEATING_METHODS,
-  type SeatingMethod,
-  type TourState,
-  type TourTable,
-} from '../../models/Tour';
-import SegmentedPicker from '../SegmentedPicker';
-import ListStepper from '../ListStepper';
+import type { Seating, TourState, TourTable } from '../../models/Tour';
+import SeatingFields from './SeatingFields';
+import { seatingLabel } from './seatingLabel';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
 import {
   cancelTour,
@@ -30,8 +25,9 @@ function seatName(table: TourTable, userId: number): string {
 const WIND_KANJI = { east: '東', south: '南', west: '西', north: '北' };
 
 // ToursCard is the tours part of the tournament's desk: the current tour and
-// its tables, and for a referee publishing the next tour's seating (random
-// for now) or cancelling a published one before it starts.
+// its tables, and for a referee generating the next tour's seating by the
+// method picked (or from the seating prepared for all tours), publishing it,
+// and running the tour.
 export default function ToursCard({
   eventId,
   state,
@@ -89,53 +85,51 @@ export default function ToursCard({
       await onChanged();
     });
 
-  // method: the seating method the next generation uses.
-  const [method, setMethod] = useState<SeatingMethod>('random');
-  // step: an interval seating's step, 1 to the number of tables; null
-  // means the number of tables (the default).
+  // nextPlan: the plan of the tour to seat next, if any.
+  const nextPlan = state.plan.find((plan) => plan.number === state.next);
+  const hasFile = (nextPlan?.file_tables ?? 0) > 0;
   const tableCount = Math.max(1, Math.floor(state.active / 4));
-  const [step, setStep] = useState<number | null>(null);
+  // picked: the seating the referee picked for the next tour; null until
+  // they do: the plan's then (fixed only while the tour has tables from a
+  // file).
+  const [picked, setPicked] = useState<Seating | null>(null);
+  const planned: Seating = nextPlan
+    ? {
+        seating: nextPlan.seating,
+        step: nextPlan.seating_step ?? undefined,
+        avoid_repeats: nextPlan.avoid_repeats,
+      }
+    : { seating: 'random', avoid_repeats: false };
+  const chosen = picked ?? planned;
+  const seating: Seating =
+    chosen.seating === 'fixed' && !hasFile
+      ? { seating: 'random', avoid_repeats: false }
+      : chosen;
   const methodPicker = (
-    <>
-      <SegmentedPicker
-        ariaLabel={t('tours.methodLabel')}
-        options={SEATING_METHODS.map((value) => ({
-          value,
-          label: t(`tours.method.${value}`),
-        }))}
-        selectedKey={method}
-        onSelectionChange={setMethod}
-      />
-      {method === 'interval' && tableCount > 1 && (
-        <>
-          <p className="text-sm">{t('tours.step')}</p>
-          <ListStepper
-            label={t('tours.step')}
-            values={Array.from({ length: tableCount }, (_, i) => i + 1)}
-            value={step ?? tableCount}
-            onChange={setStep}
-          />
-        </>
-      )}
-    </>
+    <SeatingFields
+      value={seating}
+      onChange={setPicked}
+      tableCount={tableCount}
+      hasFile={hasFile}
+    />
   );
 
   const generate = () =>
     runGenerate(async () => {
-      if (
-        await generateTour(
-          eventId,
-          method,
-          method === 'interval' && step != null && step !== tableCount
-            ? step
-            : undefined
-        )
-      ) {
+      const step =
+        seating.seating === 'interval' &&
+        seating.step != null &&
+        seating.step < tableCount
+          ? seating.step
+          : undefined;
+      if (await generateTour(eventId, { ...seating, step })) {
         showToast({
           title: t('tours.generated', { n: state.next }),
           variant: 'success',
         });
       }
+      // The next tour starts from its plan again.
+      setPicked(null);
       await onChanged();
     });
 
@@ -169,14 +163,14 @@ export default function ToursCard({
         {current && current.status !== 'finished' && (
           <div className="text-sm">
             <p>
-              {current.seating_step
-                ? t('tours.methodWithStep', {
-                    method: t(`tours.method.${current.seating}`),
-                    step: current.seating_step,
-                  })
-                : t('tours.methodUsed', {
-                    method: t(`tours.method.${current.seating}`),
-                  })}
+              {t('tours.methodUsed', {
+                method: seatingLabel(
+                  t,
+                  current.seating,
+                  current.seating_step,
+                  current.avoid_repeats
+                ),
+              })}
             </p>
             <p className={state.repeats > 0 ? 'text-warning' : 'text-muted'}>
               {state.repeats > 0
@@ -195,7 +189,10 @@ export default function ToursCard({
             {blocker == null && methodPicker}
             <p className="text-sm text-muted">
               {blocker ??
-                t(`tours.methodHint.${method}`, { players: state.active })}
+                t(`tours.methodHint.${seating.seating}`, {
+                  players: state.active,
+                  n: state.next,
+                })}
             </p>
             <PendingButton
               variant="primary"

@@ -147,6 +147,24 @@ const en = {
     all_tours_played: 'All tours have been played',
     tables_incomplete: '{{missing}} players are missing for whole tables',
     tour_not_found: 'No published seating to cancel',
+    seating_file_empty: 'The file has no tables',
+    seating_file_row:
+      'Line {{line}}: expected six whole numbers from 1 — tour, table, east, south, west, north',
+    seating_file_table_twice:
+      'Line {{line}}: table {{table}} of tour {{tour}} comes twice',
+    seating_file_number_twice:
+      'Line {{line}}: number {{number}} is seated twice in tour {{tour}}',
+    seating_file_table_missing:
+      'Tour {{tour}} has no table {{table}}: tables go 1, 2, 3, …',
+    file_seating_missing: 'Tour {{tour}} has no tables from a file',
+    file_seating_absent:
+      'Tour {{tour}} from the file seats numbers who don’t play (withdrew or no such participant): {{numbers}}. Pick another method for this tour.',
+    file_seating_unseated:
+      'Tour {{tour}} from the file leaves out participants {{numbers}}',
+    tour_already_seated:
+      'Tour {{tour}} is already seated: its plan can no longer change',
+    seating_file_tour:
+      'The file has tour {{tour}}, the tournament only {{tours}} tours',
     invalid_seating: 'Unknown seating method',
     tables_still_playing: '{{playing}} tables are still playing',
     tour_finished: 'The tour is finished: its entries can no longer be undone',
@@ -262,18 +280,23 @@ const en = {
       random: 'Random',
       swiss: 'Swiss',
       interval: 'Interval',
+      fixed: 'From file',
     },
     methodHint: {
       random:
-        'Random seating of {{players}} players with as few repeat meetings as possible. Only the staff see it until it is published.',
+        'Random seating of {{players}} players with as few repeat meetings as possible, planned together with the random tours after it. Only the staff see it until it is published.',
       swiss:
         'Neighbours in the current standings play together (places 1–4, 5–8, …), moved apart only to avoid repeat meetings. Only the staff see it until it is published.',
       interval:
         'By the current standings with a step of the number of tables: table 1 gets places 1, 1+k, 1+2k, 1+3k. Only the staff see it until it is published.',
+      fixed:
+        'Tour {{n}} from the file (the tournament’s plan, below): its tables and winds as there. Only the staff see it until it is published.',
     },
     methodUsed: 'Seating: {{method}}',
-    methodWithStep: 'Seating: {{method}}, step {{step}}',
     step: 'Step (places i, i+k, …)',
+    stepPart: ', step {{step}}',
+    avoidPart: ', avoiding repeats',
+    avoidRepeats: 'Avoid repeat meetings',
     noRepeats: 'No repeat meetings',
     repeatsSummary_one:
       '{{count}} repeat meeting · a pair met up to {{maxMet}} times before · {{players}} players meet someone again',
@@ -301,6 +324,36 @@ const en = {
     cancelled: 'Seating cancelled',
     tables: 'Tables',
     table: 'Table {{n}}',
+  },
+  tourPlan: {
+    title: 'Tournament plan',
+    hint: 'How each tour is to be seated: generating a tour’s seating starts from it. Random tours are planned together, so that all of them have as few repeat meetings as possible.',
+    tour: 'Tour {{n}}',
+    seated: 'seated',
+    edit: 'Change',
+    editTour: 'Change tour {{n}}',
+    editTitle: 'Tour {{n}} seating',
+    saved: 'Tour {{n}} plan saved',
+    fileTitle: 'Seating from a file',
+    fileSummary_one:
+      'Tour {{tours}} · {{tables}} tables · {{players}} participant numbers',
+    fileSummary_other:
+      'Tours {{tours}} · up to {{tables}} tables · {{players}} participant numbers',
+    fileRepeats_one:
+      '{{count}} repeat meeting · a pair meets up to {{maxMet}} times',
+    fileRepeats_other:
+      '{{count}} repeat meetings · a pair meets up to {{maxMet}} times',
+    fileHint:
+      'Your own seating: a CSV file, one row per table — tour, table, east, south, west, north, as participant numbers. Comma or semicolon; a header row is fine. Its tours are planned “From file”.',
+    import: 'Import a file',
+    reimport: 'Import another file',
+    imported: 'Seating imported',
+    tooLarge: 'The file is too large for a seating',
+    delete: 'Delete the file’s seating',
+    deleted: 'The file’s seating deleted',
+    deleteTitle: 'Delete the file’s seating',
+    deletePrompt:
+      'The tables from the file are deleted; the tours planned “From file” become random. Tours already seated stay as they are.',
   },
   tournamentDesk: {
     menu: 'Tournament',

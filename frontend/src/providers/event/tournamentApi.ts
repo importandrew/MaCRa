@@ -2,6 +2,7 @@ import {
   DeleteRequest,
   GetRequest,
   PostRequest,
+  PutRequest,
   authFetch,
   eventGamePath,
   eventPath,
@@ -9,7 +10,7 @@ import {
 } from '../../components/Request';
 import { useFetch } from '../useFetch';
 import type { TournamentParticipants } from '../../models/TournamentSettings';
-import type { SeatingMethod, TourState } from '../../models/Tour';
+import type { Seating, TourState } from '../../models/Tour';
 
 // A tournament's players with their numbers, for its desk (staff).
 export const useFetchParticipants = (eventId: number | null) => {
@@ -64,12 +65,42 @@ export const useFetchTours = (eventId: number | null) => {
 // replacing an earlier draft.
 export async function generateTour(
   eventId: number,
-  seating: SeatingMethod,
-  // step: an interval seating's step; undefined: the number of tables.
-  step?: number
+  how: Seating
 ): Promise<boolean> {
   const result = await authFetch<unknown>(
-    PostRequest(eventPath(eventId, '/tours'), { seating, step })
+    PostRequest(eventPath(eventId, '/tours'), how)
+  );
+  return result !== null;
+}
+
+// setTourPlan sets the seating a tour is to have.
+export async function setTourPlan(
+  eventId: number,
+  tour: number,
+  how: Seating
+): Promise<boolean> {
+  const result = await authFetch<null>(
+    PutRequest(eventPath(eventId, `/tours/plan/${tour}`), how)
+  );
+  return result !== null;
+}
+
+// importSeatingFile stores tables for several tours from a CSV file's text,
+// replacing the ones imported before; their tours are planned fixed.
+export async function importSeatingFile(
+  eventId: number,
+  csv: string
+): Promise<boolean> {
+  const result = await authFetch<unknown>(
+    PutRequest(eventPath(eventId, '/tours/file'), { csv })
+  );
+  return result !== null;
+}
+
+// deleteSeatingFile deletes the tables imported from a file.
+export async function deleteSeatingFile(eventId: number): Promise<boolean> {
+  const result = await authFetch<null>(
+    DeleteRequest(eventPath(eventId, '/tours/file'))
   );
   return result !== null;
 }

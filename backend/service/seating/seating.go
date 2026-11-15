@@ -1,9 +1,11 @@
 // Package seating makes a tournament tour's tables (docs/user-scenarios.md,
-// area 8, "Seating"): random with as few repeat meetings as possible, Swiss
-// (neighbours in the current standings) avoiding repeats, and interval (by
-// the standings with a step). One generator for all of them: a method gives a
+// area 8, "Seating"): random with as few repeat meetings as possible (also
+// with the random tours planned after it), Swiss (neighbours in the current
+// standings) and interval (by the standings with a step), each avoiding
+// repeats or not, and tables imported from a file. Swiss and interval give a
 // starting seating and a cost, and a local search swaps players between
-// tables while the cost goes down, until a deadline.
+// tables while the cost goes down, until a deadline; random tours are
+// planned together by simulated annealing (Plan).
 package seating
 
 import (
@@ -20,6 +22,8 @@ type (
 	Pair     = models.SeatingPair
 	Standing = models.SeatingStanding
 	Input    = models.SeatingInput
+	// PlanTours is tables of several tours by participant number.
+	PlanTours = models.PlanTours
 )
 
 // NewPair returns the pair of a and b in order.
@@ -66,10 +70,56 @@ func Ranked(input Input) []models.Participant {
 }
 
 // Interval seats the participants by the standings with step k (the number
-// of tables when k is 0): table i gets places i, i+k, i+2k, i+3k. No search:
-// the method fixes the tables.
-func Interval(input Input, k int) [][4]int {
+// of tables when k is 0): table i gets places i, i+k, i+2k, i+3k. With
+// avoidRepeats it then swaps players to avoid repeat meetings, keeping each
+// as near to their place in the scheme as the search finds before the
+// deadline.
+func Interval(input Input, k int, avoidRepeats bool, deadline time.Time) ([][4]int, error) {
 	ranked := Ranked(input)
+	tables := intervalTables(ranked, k)
+	if !avoidRepeats {
+		return seatByNumber(tables), nil
+	}
+	rng, err := newRNG()
+	if err != nil {
+		return nil, err
+	}
+
+	// slot[t][s] is the place the scheme gives seat s of table t.
+	place := make(map[int]int, len(ranked))
+	for i, p := range ranked {
+		place[p.UserID] = i
+	}
+	slot := make([][]int, len(tables))
+	for t, table := range tables {
+		for _, p := range table {
+			slot[t] = append(slot[t], place[p.UserID])
+		}
+	}
+	cost := func(tables [][]models.Participant) int {
+		moved := 0
+		for t, table := range tables {
+			for s, p := range table {
+				moved += abs(place[p.UserID] - slot[t][s])
+			}
+		}
+		return repeatWeight*Repeats(seatByNumber(tables), input.Meetings) + moved
+	}
+	tables = improve(tables, cost, rng, deadline)
+	return seatByNumber(tables), nil
+}
+
+// abs returns |n|.
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
+// intervalTables makes the interval scheme's tables from the ranked
+// participants (see Interval).
+func intervalTables(ranked []models.Participant, k int) [][]models.Participant {
 	tableCount := len(ranked) / models.SeatsPerTable
 	if k <= 0 || k > tableCount {
 		k = tableCount
@@ -89,49 +139,50 @@ func Interval(input Input, k int) [][4]int {
 			next++
 		}
 	}
-	return seatByNumber(tables)
+	return tables
 }
 
 // Random seats the participants at random with as few repeat meetings as
-// the search finds before the deadline.
+// the search finds before the deadline, planning input.FutureRandom more
+// random tours along with it (so it doesn't use up the pairs they need);
+// only this tour's tables are returned.
 func Random(input Input, deadline time.Time) ([][4]int, error) {
-	rng, err := newRNG()
-	if err != nil {
+	tours, err := Plan(input, 1+input.FutureRandom, deadline)
+	if err != nil || len(tours) == 0 {
 		return nil, err
 	}
-	cost := func(tables [][]models.Participant) int {
-		return Repeats(seatByNumber(tables), input.Meetings)
+	userByNumber := make(map[int]int, len(input.Participants))
+	for _, p := range input.Participants {
+		userByNumber[p.Number] = p.UserID
 	}
-
-	var best [][]models.Participant
-	bestCost := -1
-	for {
-		start := slices.Clone(input.Participants)
-		rng.Shuffle(len(start), func(i, j int) { start[i], start[j] = start[j], start[i] })
-		tables, c := improve(chunk(start), cost, rng, deadline)
-		if bestCost < 0 || c < bestCost {
-			best, bestCost = tables, c
+	tables := make([][4]int, 0, len(tours[0]))
+	for _, numbers := range tours[0] {
+		var table [4]int
+		for seat, number := range numbers {
+			table[seat] = userByNumber[number]
 		}
-		if bestCost == 0 || time.Now().After(deadline) {
-			return seatByNumber(best), nil
-		}
+		tables = append(tables, table)
 	}
+	return tables, nil
 }
 
-// swissRepeatWeight makes a repeat meeting cost more than any spread of
-// places at a table, so the search avoids repeats first and keeps
-// neighbours together second.
-const swissRepeatWeight = 1_000_000
+// repeatWeight makes a repeat meeting cost more than any spread or move of
+// places, so the Swiss and interval searches avoid repeats first and keep
+// to their scheme second.
+const repeatWeight = 1_000_000
 
-// Swiss seats neighbours in the standings together (places 1–4, 5–8, …),
-// moving players apart only to avoid repeat meetings, as far as the search
-// finds before the deadline.
-func Swiss(input Input, deadline time.Time) ([][4]int, error) {
+// Swiss seats neighbours in the standings together (places 1–4, 5–8, …).
+// With avoidRepeats it moves players apart to avoid repeat meetings, as far
+// as the search finds before the deadline.
+func Swiss(input Input, avoidRepeats bool, deadline time.Time) ([][4]int, error) {
+	ranked := Ranked(input)
+	if !avoidRepeats {
+		return seatByNumber(chunk(ranked)), nil
+	}
 	rng, err := newRNG()
 	if err != nil {
 		return nil, err
 	}
-	ranked := Ranked(input)
 	place := make(map[int]int, len(ranked))
 	for i, p := range ranked {
 		place[p.UserID] = i
@@ -145,10 +196,10 @@ func Swiss(input Input, deadline time.Time) ([][4]int, error) {
 			}
 			spread += highest - lowest
 		}
-		return swissRepeatWeight*Repeats(seatByNumber(tables), input.Meetings) + spread
+		return repeatWeight*Repeats(seatByNumber(tables), input.Meetings) + spread
 	}
 
-	tables, _ := improve(chunk(ranked), cost, rng, deadline)
+	tables := improve(chunk(ranked), cost, rng, deadline)
 	return seatByNumber(tables), nil
 }
 
@@ -156,14 +207,14 @@ func Swiss(input Input, deadline time.Time) ([][4]int, error) {
 // improvement, in a random order), until no swap helps or the deadline.
 func improve(tables [][]models.Participant, cost func([][]models.Participant) int,
 	rng *mrand.Rand, deadline time.Time,
-) ([][]models.Participant, int) {
+) [][]models.Participant {
 	current := cost(tables)
 	for improved := true; improved && current > 0; {
 		improved = false
 		for _, a := range rng.Perm(len(tables)) {
 			for b := a + 1; b < len(tables); b++ {
 				if time.Now().After(deadline) {
-					return tables, current
+					return tables
 				}
 				var better bool
 				current, better = swapBetween(tables, a, b, cost, current)
@@ -171,7 +222,7 @@ func improve(tables [][]models.Participant, cost func([][]models.Participant) in
 			}
 		}
 	}
-	return tables, current
+	return tables
 }
 
 // swapBetween tries every swap of a player at table a with one at table b,

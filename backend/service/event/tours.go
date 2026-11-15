@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/importandrew/MaCRa/models"
@@ -34,8 +35,22 @@ func (s *Service) CancelTour(ctx context.Context, eventID int) error {
 // next tour would be, for its desk.
 func (s *Service) Tours(ctx context.Context, eventID int) (models.TourState, error) {
 	state, err := s.repo.TourState(ctx, eventID)
-	if err != nil || state.Current == nil || len(state.Tables) == 0 {
+	if err != nil {
 		return state, err
+	}
+	// The tables from a file, described; the client gets only their count.
+	file := models.PlanTours{}
+	for i := range state.Plan {
+		if state.Plan[i].Tables != nil {
+			file[state.Plan[i].Number] = state.Plan[i].Tables
+		}
+	}
+	if len(file) > 0 {
+		info := seating.FileInfo(file)
+		state.File = &info
+	}
+	if state.Current == nil || len(state.Tables) == 0 {
+		return state, nil
 	}
 
 	// The seating's quality, against the tours before it.
@@ -65,24 +80,47 @@ func (s *Service) Tours(ctx context.Context, eventID int) (models.TourState, err
 }
 
 // seatingSearchTime is how long a seating may search for fewer repeat
-// meetings.
-const seatingSearchTime = 2 * time.Second
+// meetings; planSearchTime the same for a random tour planned along with
+// the random tours after it.
+const (
+	seatingSearchTime = 2 * time.Second
+	planSearchTime    = 5 * time.Second
+)
 
-// seatingFunc returns the table maker of a seating method, or
-// models.ErrInvalidSeating (also for an interval step below 1 or above the
-// number of tables, or a step with another method).
+// checkSeating refuses an unknown method, a step with a method other than
+// interval, and avoiding repeats with one other than Swiss or interval
+// (models.ErrInvalidSeating).
+func checkSeating(how models.Seating) error {
+	switch {
+	case !slices.Contains(models.ValidSeatingMethods, how.Method):
+		return fmt.Errorf("%w: %q", models.ErrInvalidSeating, how.Method)
+	case how.Step != nil && how.Method != models.SeatingInterval:
+		return fmt.Errorf("%w: a step is for the interval seating only", models.ErrInvalidSeating)
+	case how.AvoidRepeats && how.Method != models.SeatingSwiss && how.Method != models.SeatingInterval:
+		return fmt.Errorf("%w: avoiding repeats is a choice of Swiss and interval only", models.ErrInvalidSeating)
+	}
+	return nil
+}
+
+// seatingFunc returns the table maker of a seating, or
+// models.ErrInvalidSeating (checkSeating, also for an interval step below 1
+// or above the number of tables).
 func seatingFunc(how models.Seating) (models.TablesFunc, error) {
-	if how.Step != nil && how.Method != models.SeatingInterval {
-		return nil, fmt.Errorf("%w: a step is for the interval seating only", models.ErrInvalidSeating)
+	if err := checkSeating(how); err != nil {
+		return nil, err
 	}
 	switch how.Method {
 	case models.SeatingRandom:
 		return func(input models.SeatingInput) ([][4]int, error) {
-			return seating.Random(input, time.Now().Add(seatingSearchTime))
+			search := seatingSearchTime
+			if input.FutureRandom > 0 {
+				search = planSearchTime
+			}
+			return seating.Random(input, time.Now().Add(search))
 		}, nil
 	case models.SeatingSwiss:
 		return func(input models.SeatingInput) ([][4]int, error) {
-			return seating.Swiss(input, time.Now().Add(seatingSearchTime))
+			return seating.Swiss(input, how.AvoidRepeats, time.Now().Add(seatingSearchTime))
 		}, nil
 	case models.SeatingInterval:
 		return func(input models.SeatingInput) ([][4]int, error) {
@@ -93,11 +131,44 @@ func seatingFunc(how models.Seating) (models.TablesFunc, error) {
 					return nil, fmt.Errorf("%w: step %d, should be 1 to %d", models.ErrInvalidSeating, step, tables)
 				}
 			}
-			return seating.Interval(input, step), nil
+			return seating.Interval(input, step, how.AvoidRepeats, time.Now().Add(seatingSearchTime))
 		}, nil
-	default:
-		return nil, fmt.Errorf("%w: %q", models.ErrInvalidSeating, how.Method)
+	default: // models.SeatingFixed
+		return seating.Fixed, nil
 	}
+}
+
+// SetTourPlan sets the seating a tour is to have. A step is for the
+// interval method only, avoiding repeats for Swiss and interval (a random
+// seating always avoids them, a fixed one never).
+func (s *Service) SetTourPlan(ctx context.Context, eventID int, plan models.TourPlan) error {
+	how := models.Seating{Method: plan.Seating, Step: plan.Step, AvoidRepeats: plan.AvoidRepeats}
+	if err := checkSeating(how); err != nil {
+		return err
+	}
+	if plan.Step != nil && *plan.Step < 1 {
+		return fmt.Errorf("%w: step %d", models.ErrInvalidSeating, *plan.Step)
+	}
+	return s.repo.SetTourPlan(ctx, eventID, plan)
+}
+
+// ImportSeatingFile stores tables for several tours read from a CSV file
+// (seating.ParseCSV), replacing the ones imported before; the tours in it
+// are planned fixed.
+func (s *Service) ImportSeatingFile(ctx context.Context, eventID int, file string) (models.SeatingFileInfo, error) {
+	tours, err := seating.ParseCSV(file)
+	if err != nil {
+		return models.SeatingFileInfo{}, err
+	}
+	if err := s.repo.ImportSeatingFile(ctx, eventID, tours); err != nil {
+		return models.SeatingFileInfo{}, err
+	}
+	return seating.FileInfo(tours), nil
+}
+
+// DeleteSeatingFile deletes the tables imported from a file.
+func (s *Service) DeleteSeatingFile(ctx context.Context, eventID int) error {
+	return s.repo.DeleteSeatingFile(ctx, eventID)
 }
 
 // StartTour starts the published tour: its games go live.

@@ -147,6 +147,39 @@ var (
 	ErrInvalidSeating = errors.New("invalid seating method")
 	// ErrNotTournament means the action is for tournaments only.
 	ErrNotTournament = errors.New("not a tournament")
+	// ErrFileSeatingMissing means the tour has no tables imported from a
+	// file (the "fixed" method); sent with "tour".
+	ErrFileSeatingMissing = errors.New("no file seating for the tour")
+	// ErrFileSeatingAbsent means a tour's tables from a file seat numbers
+	// that don't play (withdrew, or no such participant); sent with "tour"
+	// and "numbers".
+	ErrFileSeatingAbsent = errors.New("file seating seats absent numbers")
+	// ErrFileSeatingUnseated means a tour's tables from a file leave out
+	// participants; sent with "tour" and "numbers".
+	ErrFileSeatingUnseated = errors.New("file seating leaves out participants")
+	// ErrTourAlreadySeated means the tour's seating is published or played:
+	// its plan can't change any more; sent with "tour".
+	ErrTourAlreadySeated = errors.New("tour already seated")
+	// ErrSeatingFileTour means a seating file has a tour beyond the
+	// tournament's tours; sent with "line", "tour" and "tours".
+	ErrSeatingFileTour = errors.New("seating file tour out of range")
+	// ErrSeatingFileEmpty means an imported seating file has no tables.
+	ErrSeatingFileEmpty = errors.New("seating file empty")
+	// ErrSeatingFileRow means a row of an imported seating file isn't six
+	// whole numbers from 1 (tour, table, east, south, west, north); sent
+	// with "line".
+	ErrSeatingFileRow = errors.New("invalid seating file row")
+	// ErrSeatingFileTableTwice means a tour's table comes twice in an
+	// imported seating file; sent with "line", "tour" and "table".
+	ErrSeatingFileTableTwice = errors.New("seating file table twice")
+	// ErrSeatingFileNumberTwice means a participant number is seated twice
+	// in one tour of an imported seating file; sent with "line", "tour" and
+	// "number".
+	ErrSeatingFileNumberTwice = errors.New("seating file number twice")
+	// ErrSeatingFileTableMissing means a tour of an imported seating file
+	// skips a table number (tables go 1, 2, 3, …); sent with "tour" and
+	// "table".
+	ErrSeatingFileTableMissing = errors.New("seating file table missing")
 	// ErrPlayerAndSubstitute means a member would be both a player and a
 	// substitute, which can't be.
 	ErrPlayerAndSubstitute = errors.New("a member can't be both a player and a substitute")
@@ -208,6 +241,12 @@ var Errors = map[error]APIError{
 	ErrInvalidExtraMinutes:       {http.StatusBadRequest, "invalid_extra_minutes"},
 	ErrInvalidTournamentSettings: {http.StatusBadRequest, "invalid_tournament_settings"},
 	ErrNotTournament:             {http.StatusBadRequest, "not_tournament"},
+	ErrSeatingFileEmpty:          {http.StatusBadRequest, "seating_file_empty"},
+	ErrSeatingFileTour:           {http.StatusBadRequest, "seating_file_tour"},
+	ErrSeatingFileRow:            {http.StatusBadRequest, "seating_file_row"},
+	ErrSeatingFileTableTwice:     {http.StatusBadRequest, "seating_file_table_twice"},
+	ErrSeatingFileNumberTwice:    {http.StatusBadRequest, "seating_file_number_twice"},
+	ErrSeatingFileTableMissing:   {http.StatusBadRequest, "seating_file_table_missing"},
 	ErrInvalidAuthToken:          {http.StatusBadRequest, "invalid_auth_token"},
 
 	// 401
@@ -256,6 +295,10 @@ var Errors = map[error]APIError{
 	ErrTourFinished:         {http.StatusConflict, "tour_finished"},
 	ErrTimeUp:               {http.StatusConflict, "time_is_up"},
 	ErrSettingFrozen:        {http.StatusConflict, "setting_frozen"},
+	ErrFileSeatingMissing:   {http.StatusConflict, "file_seating_missing"},
+	ErrFileSeatingAbsent:    {http.StatusConflict, "file_seating_absent"},
+	ErrFileSeatingUnseated:  {http.StatusConflict, "file_seating_unseated"},
+	ErrTourAlreadySeated:    {http.StatusConflict, "tour_already_seated"},
 }
 
 // ErrorData is sent to the client next to an error's code, e.g. a player's

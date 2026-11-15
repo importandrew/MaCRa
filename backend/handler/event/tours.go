@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -33,11 +34,14 @@ type generateTourRequest struct {
 	Seating models.SeatingMethod `json:"seating" binding:"required"`
 	// Step is an interval seating's step; missing: the number of tables.
 	Step *int `json:"step"`
+	// AvoidRepeats: a Swiss or interval seating avoids repeat meetings.
+	AvoidRepeats bool `json:"avoid_repeats"`
 }
 
 // GenerateTour drafts the next tour's seating, replacing an earlier draft
-// (POST /event/:id/tours, {"seating": "interval", "step": 2}; the step only
-// for "interval"). It needs
+// (POST /event/:id/tours, {"seating": "interval", "step": 2,
+// "avoid_repeats": true}; the step only for "interval", avoiding repeats
+// for "swiss" and "interval"; "fixed" takes the tour's tables from a file). It needs
 // models.CapRunTournament.
 func (h Handler) GenerateTour(c *gin.Context) {
 	eventID := reqctx.GetEventID(c)
@@ -53,12 +57,100 @@ func (h Handler) GenerateTour(c *gin.Context) {
 		return
 	}
 
-	tour, err := h.event.GenerateTour(c.Request.Context(), eventID, models.Seating{Method: req.Seating, Step: req.Step})
+	tour, err := h.event.GenerateTour(c.Request.Context(), eventID, models.Seating{Method: req.Seating, Step: req.Step, AvoidRepeats: req.AvoidRepeats})
 	if err != nil {
 		httperr.Error(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, tour)
+}
+
+type tourPlanRequest struct {
+	Seating models.SeatingMethod `json:"seating" binding:"required"`
+	// Step is an interval seating's step; missing: the number of tables.
+	Step         *int `json:"step"`
+	AvoidRepeats bool `json:"avoid_repeats"`
+}
+
+// SetTourPlan sets the seating a tour is to have
+// (PUT /event/:id/tours/plan/:number, {"seating": "interval", "step": 2,
+// "avoid_repeats": true}). It needs models.CapRunTournament.
+func (h Handler) SetTourPlan(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+
+	number, err := strconv.Atoi(c.Param("number"))
+	if err != nil {
+		httperr.InvalidRequest(c, err)
+		return
+	}
+	var req tourPlanRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httperr.InvalidRequest(c, err)
+		return
+	}
+
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	plan := models.TourPlan{Number: number, Seating: req.Seating, Step: req.Step, AvoidRepeats: req.AvoidRepeats}
+	if err := h.event.SetTourPlan(c.Request.Context(), eventID, plan); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// maxSeatingFile bounds an imported seating file: 172 players for 15 tours
+// take about 20 KB.
+const maxSeatingFile = 256 << 10
+
+type importSeatingFileRequest struct {
+	// CSV is the file's text: "tour,table,east,south,west,north" per table.
+	CSV string `json:"csv" binding:"required"`
+}
+
+// ImportSeatingFile stores tables for several tours from a CSV file,
+// replacing the ones imported before (PUT /event/:id/tours/file,
+// {"csv": "…"}). It needs models.CapRunTournament.
+func (h Handler) ImportSeatingFile(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxSeatingFile)
+	var req importSeatingFileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httperr.InvalidRequest(c, err)
+		return
+	}
+
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	info, err := h.event.ImportSeatingFile(c.Request.Context(), eventID, req.CSV)
+	if err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, info)
+}
+
+// DeleteSeatingFile deletes the tables imported from a file
+// (DELETE /event/:id/tours/file). It needs models.CapRunTournament.
+func (h Handler) DeleteSeatingFile(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	if err := h.event.DeleteSeatingFile(c.Request.Context(), eventID); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
 
 // CancelTour cancels the drafted or published seating of the tour not started
