@@ -29,14 +29,18 @@ func (s *Service) TourRating(ctx context.Context, eventID int) (models.TourRatin
 	if err != nil {
 		return models.TourRating{}, err
 	}
-	return tourRating(results, inProgress, participants), nil
+	settings := models.DefaultTournamentSettings()
+	if event.Tournament != nil {
+		settings = *event.Tournament
+	}
+	return tourRating(results, inProgress, participants, settings), nil
 }
 
 // tourRating builds the rating by tour from the results and the
 // participants, those without results too.
 func tourRating(
 	results []models.TourResultRow, inProgress int,
-	participants models.TournamentParticipants,
+	participants models.TournamentParticipants, settings models.TournamentSettings,
 ) models.TourRating {
 	rating := models.TourRating{Tours: []int{}, InProgress: inProgress, Rows: []models.TourRatingRow{}}
 	tourIndex := map[int]int{}
@@ -76,7 +80,12 @@ func tourRating(
 	for _, playerID := range order {
 		list = append(list, *rows[playerID])
 	}
-	rankRows(list)
+	var tb *tieBreak
+	if settings.Ties == models.TiesBreak {
+		breaker := newTieBreak(settings.TieBreakers, results)
+		tb = &breaker
+	}
+	rankRows(list, tb)
 	rating.Rows = list
 	return rating
 }
@@ -103,8 +112,9 @@ func ratingGroup(r models.TourRatingRow) int {
 
 // rankRows orders the rows by group, then TP and GP (within a group the
 // number, then the name, keeps the order stable), and gives the ranked group
-// its places: players equal in TP and GP share one.
-func rankRows(list []models.TourRatingRow) {
+// its places: players equal in TP and GP share one, or, with a tie-break
+// (tb), it orders them and each gets their own.
+func rankRows(list []models.TourRatingRow, tb *tieBreak) {
 	slices.SortStableFunc(list, func(a, b models.TourRatingRow) int {
 		return cmp.Or(
 			cmp.Compare(ratingGroup(a), ratingGroup(b)),
@@ -114,15 +124,27 @@ func rankRows(list []models.TourRatingRow) {
 			cmp.Compare(a.Name, b.Name),
 		)
 	})
-	for i := range list {
-		if ratingGroup(list[i]) != groupRanked {
-			continue
+	// Runs of ranked players equal in TP and GP: they share the place, or a
+	// tie-break orders them and each gets their own.
+	for start := 0; start < len(list); {
+		end := start + 1
+		for end < len(list) && ratingGroup(list[start]) == groupRanked && ratingGroup(list[end]) == groupRanked &&
+			list[end].TP == list[start].TP && list[end].GP == list[start].GP {
+			end++
 		}
-		rank := i + 1
-		if i > 0 && list[i-1].Rank != nil && list[i-1].TP == list[i].TP && list[i-1].GP == list[i].GP {
-			rank = *list[i-1].Rank
+		if ratingGroup(list[start]) == groupRanked {
+			if tb != nil {
+				tb.order(list[start:end])
+			}
+			for i := start; i < end; i++ {
+				rank := start + 1
+				if tb != nil {
+					rank = i + 1
+				}
+				list[i].Rank = &rank
+			}
 		}
-		list[i].Rank = &rank
+		start = end
 	}
 }
 

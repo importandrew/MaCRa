@@ -21,7 +21,33 @@ type TournamentSettings struct {
 	// ExtraHands is how many hands are played after the one in progress,
 	// with TimeUpExtraHands; 0 otherwise.
 	ExtraHands int `json:"extra_hands"`
+	// Ties is what decides between players equal in TP and GP in the
+	// rating: TiesShare (they share the place) or TiesBreak (TieBreakers in
+	// order, then the draw number: the lower first).
+	Ties string `json:"ties"`
+	// TieBreakers are the criteria of TiesBreak, in order; empty with
+	// TiesShare.
+	TieBreakers []string `json:"tie_breakers"`
 }
+
+// What decides between players equal in TP and GP.
+const (
+	TiesShare = "share"
+	TiesBreak = "break"
+)
+
+var ValidTies = []string{TiesShare, TiesBreak}
+
+// Tie-break criteria.
+const (
+	// TieHeadToHead: in the games the tied players played together, who
+	// scored more GP than the other more often.
+	TieHeadToHead = "head_to_head"
+	// TieFirstPlaces: more games won (the highest GP at the table).
+	TieFirstPlaces = "first_places"
+)
+
+var ValidTieBreakers = []string{TieHeadToHead, TieFirstPlaces}
 
 // What happens when a tour's time is up.
 const (
@@ -61,6 +87,8 @@ func DefaultTournamentSettings() TournamentSettings {
 		TourMinutes: DefaultTourMinutes,
 		TimeUp:      TimeUpFinishHand,
 		ExtraHands:  0,
+		Ties:        TiesShare,
+		TieBreakers: []string{},
 	}
 }
 
@@ -87,6 +115,26 @@ func (s TournamentSettings) Validate() error {
 	} else if s.ExtraHands != 0 {
 		return fmt.Errorf("%w: extra_hands is for %q only, got %d",
 			ErrInvalidTournamentSettings, TimeUpExtraHands, s.ExtraHands)
+	}
+	return s.validateTies()
+}
+
+// validateTies checks Ties and TieBreakers: known criteria, each once, and
+// none with TiesShare.
+func (s TournamentSettings) validateTies() error {
+	if !slices.Contains(ValidTies, s.Ties) {
+		return fmt.Errorf("%w: ties should be one of %v, got %q", ErrInvalidTournamentSettings, ValidTies, s.Ties)
+	}
+	if s.Ties == TiesShare && len(s.TieBreakers) > 0 {
+		return fmt.Errorf("%w: tie_breakers are for %q only", ErrInvalidTournamentSettings, TiesBreak)
+	}
+	seen := map[string]bool{}
+	for _, criterion := range s.TieBreakers {
+		if !slices.Contains(ValidTieBreakers, criterion) || seen[criterion] {
+			return fmt.Errorf("%w: tie_breakers should be distinct of %v, got %v",
+				ErrInvalidTournamentSettings, ValidTieBreakers, s.TieBreakers)
+		}
+		seen[criterion] = true
 	}
 	return nil
 }

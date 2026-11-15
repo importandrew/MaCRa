@@ -10,8 +10,11 @@ import {
   MIN_EXTRA_HANDS,
   MIN_TOUR_MINUTES,
   MIN_TOURS,
+  TIES_CHOICES,
   TIME_UP_RULES,
+  tiesChoice,
   type TournamentSettings,
+  withTies,
 } from '../../models/TournamentSettings';
 import { updateTournament } from '../../providers/event/eventApi';
 import { useSubmitOnce } from '../../hooks/useSubmitOnce';
@@ -46,7 +49,10 @@ export default function TournamentSettingsCard({
 
   if (!saved || !settings) return null;
 
-  const isChanged = JSON.stringify(settings) !== JSON.stringify(saved);
+  // tie_breakers may come as null: compare as an empty list.
+  const normalized = (s: TournamentSettings) =>
+    JSON.stringify({ ...s, tie_breakers: s.tie_breakers ?? [] });
+  const isChanged = normalized(settings) !== normalized(saved);
 
   const handleSave = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -150,6 +156,19 @@ export default function TournamentSettingsCard({
                   />
                 </>
               )}
+            {/* Any time: it changes only how the rating orders players
+                equal in TP and GP. */}
+            <SettingRadios
+              label={t('tournament.tiesLabel')}
+              options={TIES_CHOICES}
+              value={tiesChoice(settings)}
+              onChange={(choice) => setDraft(withTies(settings, choice))}
+              isDisabled={isFinished}
+              optionLabel={(option) => t(`tournament.ties.${option}`)}
+            />
+            {settings.ties === 'break' && (
+              <p className="text-xs text-muted">{t('tournament.tiesHint')}</p>
+            )}
           </Form>
         </Card.Content>
       </Card>

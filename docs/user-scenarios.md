@@ -315,14 +315,14 @@ Being built in stages. So far: creating a tournament, its status (preparation un
 - **Points**: the opponents get tournament points for their places as usual; with 0 / 0 the seat's tournament points go to nobody, and a place the player shares with the seat counts as usual for the others. A substitute doesn't take part in the rating: they play only so that the table is complete.
 - **Data**: a seat keeps its player (rounds, scores and results stay theirs) and a history of who sat there from which log entry on.
 - **Substitutes in the seating**: when players are missing for whole tables (someone withdrew, or the count isn't a multiple of four), the referee picks as many substitutes for the tour as are missing before generating it (those who sit at no table, or at a table of the draft being replaced). The generator seats them with the players, after them in the standings and the winds; in a tour from a file they take the numbers that don't play, lowest first. A substitute's seat is their own and counts for nobody (0 / 0); the desk shows it as "substitute".
-- **Not yet**: the tie-break setting; statistics still count a seat's hands for its player also where a substitute played them (a forfeited game is left out).
+- **Not yet**: statistics still count a seat's hands for its player also where a substitute played them (a forfeited game is left out).
 - **An incomplete table**: no skipped tour, no three-player game. A substitute must be found: the desk says "N players missing" when there are fewer free substitutes than that, and asks to pick them otherwise. An "empty seat" (a technical player, the table effectively playing three) may come later, once it's decided how to score it.
 
 ### Rating
 
 - A tournament's rating (≡ → Rating, the same page as a regular event's) is by tour: it shows the standings after the last finished tour ("Standings after tour N", and "tour N in progress" while one is live). Only finished tours count; aborted ones don't.
 - Two views of one table (place, name, TP, GP; it fits the screen): **Totals**, and **By tour** with a picker of the finished tours: the players ranked by their result in that tour (TP, then GP; equal ones share the place), so the tour's best result is on top (organizers often reward it). A tap on a row opens the player's statistics, as in any event.
-- Order of the totals: TP, then GP (official rules); players equal in both share the place (5, 5, then 7). TP for places are 4, 2, 1, 0, fixed. The event's minimum games doesn't apply.
+- Order of the totals: TP, then GP (official rules). Players equal in both: a tournament setting, "Players equal in TP and GP" (owner, 2026-11-16), any time: they **share the place** (5, 5, then 7; the default), or a **tie-break** orders them, by criteria in the order chosen — **head to head** (in the games they played together, who scored more GP than the other more often) and **first places** (games won: nobody at the table scored more GP) — then the **draw number**, the lower first (a coin toss). The choices: share; head to head, then first places; first places, then head to head; head to head; first places; the draw number only. TP for places are 4, 2, 1, 0, fixed. The event's minimum games doesn't apply.
 - Players without a place come last on a grey background, without a caption: in the totals those who haven't played a finished tour yet and those who withdrew (their results kept); in a tour, those who didn't play it. A player who withdrew stays grey also where they have a result.
 - **Download CSV**, for anyone who sees the rating: place, participant number, name, TP and GP of each tour, the totals, and whether the player withdrew (UTF-8 with a BOM, so spreadsheets read the names).
 
@@ -342,6 +342,7 @@ Being built in stages. So far: creating a tournament, its status (preparation un
 | Tour length | until that tour starts; during it, only adding time to a table |
 | Seating method of a tour | until that tour's seating is published |
 | "Players may enter penalties", "players may undo" | any time |
+| Players equal in TP and GP (share / tie-break) | any time |
 
 ### Lifecycle
 
@@ -369,4 +370,3 @@ Preparation (registration, draw, seating) → in progress (tours) → finished (
 Answered on 2026-11-16: a player who misses a tour gets 0 TP and 0 GP; in a game with a substitute the opponents get GP from the actual result and TP for their places, nobody gets the substitute's place's TP; a player sharing a place with a substitute gets their share. Still open:
 
 - A player played part of a game and left, and a substitute finished it: the referee chooses when seating the substitute (the seat's result or 0 / 0); is that enough, or should the result be split?
-- What breaks a tie after TP and GP: a tournament setting (owner, 2026-11-16): share the place, or a tie-break whose criteria and order the referee picks (head-to-head, the number of first places), the draw number last. Planned next.

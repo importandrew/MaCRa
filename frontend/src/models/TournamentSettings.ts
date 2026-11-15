@@ -10,7 +10,56 @@ export type TournamentSettings = {
   // extra_hands: hands played after the one in progress, with 'extra_hands';
   // 0 otherwise.
   extra_hands: number;
+  // ties: what decides between players equal in TP and GP: 'share' the
+  // place, or 'break' it by tie_breakers in order, then the draw number.
+  ties: 'share' | 'break';
+  tie_breakers: TieBreaker[] | null;
 };
+
+export type TieBreaker = 'head_to_head' | 'first_places';
+
+// TiesChoice is how the settings offer the tie rule: sharing, or a
+// tie-break with its criteria in order (the draw number always last).
+// Labels: tournament.ties.<choice>.
+export type TiesChoice =
+  'share' | 'h2h_first' | 'first_h2h' | 'h2h' | 'first' | 'number';
+
+export const TIES_CHOICES: TiesChoice[] = [
+  'share',
+  'h2h_first',
+  'first_h2h',
+  'h2h',
+  'first',
+  'number',
+];
+
+const TIE_BREAKERS: Record<Exclude<TiesChoice, 'share'>, TieBreaker[]> = {
+  h2h_first: ['head_to_head', 'first_places'],
+  first_h2h: ['first_places', 'head_to_head'],
+  h2h: ['head_to_head'],
+  first: ['first_places'],
+  number: [],
+};
+
+// tiesChoice reads the settings' tie rule as a choice.
+export function tiesChoice(s: TournamentSettings): TiesChoice {
+  if (s.ties !== 'break') return 'share';
+  const key = (s.tie_breakers ?? []).join(',');
+  const found = (
+    Object.keys(TIE_BREAKERS) as Exclude<TiesChoice, 'share'>[]
+  ).find((choice) => TIE_BREAKERS[choice].join(',') === key);
+  return found ?? 'number';
+}
+
+// withTies sets the settings' tie rule from a choice.
+export function withTies(
+  s: TournamentSettings,
+  choice: TiesChoice
+): TournamentSettings {
+  return choice === 'share'
+    ? { ...s, ties: 'share', tie_breakers: [] }
+    : { ...s, ties: 'break', tie_breakers: TIE_BREAKERS[choice] };
+}
 
 // TIME_UP_RULES in the order the settings list them (labels:
 // tournament.timeUp.<rule>).

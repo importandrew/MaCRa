@@ -31,7 +31,7 @@ func TestTourRating(t *testing.T) {
 		{UserID: 6, Name: "Fay", Number: new(6)},
 	}}
 
-	rating := tourRating(results, 4, participants)
+	rating := tourRating(results, 4, participants, models.DefaultTournamentSettings())
 	assert.Equal(t, []int{1, 2}, rating.Tours)
 	assert.Equal(t, 4, rating.InProgress)
 
@@ -61,7 +61,7 @@ func TestTourRating(t *testing.T) {
 
 	// Before the draw, no numbers.
 	participants.Drawn = false
-	rating = tourRating(nil, 0, participants)
+	rating = tourRating(nil, 0, participants, models.DefaultTournamentSettings())
 	assert.Empty(t, rating.Tours)
 	assert.Len(t, rating.Rows, 6)
 	for _, row := range rating.Rows {
@@ -69,5 +69,65 @@ func TestTourRating(t *testing.T) {
 		if !row.Withdrawn {
 			assert.Nil(t, row.Rank, "no place before a finished tour")
 		}
+	}
+}
+
+func TestTourRating_tieBreak(t *testing.T) {
+	// Ann and Bob end equal: 4 TP, +10 GP. Head to head they are 1:1 (Ann
+	// ahead in tour 1, Bob in tour 2); Ann has a first place, Bob none; Bob
+	// has the lower draw number.
+	results := []models.TourResultRow{
+		{Tour: 1, PlayerID: 1, Name: "Ann", TP: 4, GP: 30, Table: 1},
+		{Tour: 1, PlayerID: 2, Name: "Bob", TP: 2, GP: 10, Table: 1},
+		{Tour: 1, PlayerID: 3, Name: "Cid", TP: 1, GP: -10, Table: 1},
+		{Tour: 1, PlayerID: 4, Name: "Dan", TP: 0, GP: -30, Table: 1},
+		{Tour: 2, PlayerID: 1, Name: "Ann", TP: 0, GP: -20, Table: 1},
+		{Tour: 2, PlayerID: 2, Name: "Bob", TP: 2, GP: 0, Table: 1},
+		{Tour: 2, PlayerID: 3, Name: "Cid", TP: 1, GP: 0, Table: 1},
+		{Tour: 2, PlayerID: 4, Name: "Dan", TP: 4, GP: 20, Table: 1},
+	}
+	participants := models.TournamentParticipants{Drawn: true, Participants: []models.TournamentParticipant{
+		{UserID: 1, Name: "Ann", Number: new(3)},
+		{UserID: 2, Name: "Bob", Number: new(1)},
+		{UserID: 3, Name: "Cid", Number: new(2)},
+		{UserID: 4, Name: "Dan", Number: new(4)},
+	}}
+	ranks := func(settings models.TournamentSettings) map[string]int {
+		out := map[string]int{}
+		for _, row := range tourRating(results, 0, participants, settings).Rows {
+			out[row.Name] = *row.Rank
+		}
+		return out
+	}
+	breaking := func(criteria ...string) models.TournamentSettings {
+		s := models.DefaultTournamentSettings()
+		s.Ties, s.TieBreakers = models.TiesBreak, criteria
+		return s
+	}
+
+	assert.Equal(t, map[string]int{"Ann": 1, "Bob": 1, "Dan": 3, "Cid": 4},
+		ranks(models.DefaultTournamentSettings()), "shared")
+	assert.Equal(t, map[string]int{"Bob": 1, "Ann": 2, "Dan": 3, "Cid": 4},
+		ranks(breaking()), "the draw number only")
+	assert.Equal(t, map[string]int{"Bob": 1, "Ann": 2, "Dan": 3, "Cid": 4},
+		ranks(breaking(models.TieHeadToHead)), "1:1, then the draw number")
+	assert.Equal(t, map[string]int{"Ann": 1, "Bob": 2, "Dan": 3, "Cid": 4},
+		ranks(breaking(models.TieHeadToHead, models.TieFirstPlaces)), "first places decide")
+}
+
+func TestTournamentSettings_ties(t *testing.T) {
+	valid := models.DefaultTournamentSettings()
+	require.NoError(t, valid.Validate())
+	for name, change := range map[string]func(*models.TournamentSettings){
+		"unknown ties":        func(s *models.TournamentSettings) { s.Ties = "coin" },
+		"criteria with share": func(s *models.TournamentSettings) { s.TieBreakers = []string{models.TieHeadToHead} },
+		"unknown criterion":   func(s *models.TournamentSettings) { s.Ties, s.TieBreakers = models.TiesBreak, []string{"age"} },
+		"a criterion twice": func(s *models.TournamentSettings) {
+			s.Ties, s.TieBreakers = models.TiesBreak, []string{models.TieFirstPlaces, models.TieFirstPlaces}
+		},
+	} {
+		s := models.DefaultTournamentSettings()
+		change(&s)
+		assert.ErrorIs(t, s.Validate(), models.ErrInvalidTournamentSettings, name)
 	}
 }

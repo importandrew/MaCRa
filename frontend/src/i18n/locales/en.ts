@@ -394,6 +394,17 @@ const en = {
     tours: 'Tours',
     tourMinutes: 'Tour length, minutes',
     tourMinutesRange: 'From {{min}} to {{max}} minutes',
+    tiesLabel: 'Players equal in TP and GP',
+    ties: {
+      share: 'Share the place',
+      h2h_first: 'Head to head, then first places',
+      first_h2h: 'First places, then head to head',
+      h2h: 'Head to head',
+      first: 'First places',
+      number: 'Draw number only',
+    },
+    tiesHint:
+      'Head to head: in their games together, who scored more GP more often. First places: games won. Still equal: the lower draw number goes first.',
     timeUpLabel: 'When the time is up',
     timeUp: {
       finish_hand: 'The hand in progress is played to the end',
