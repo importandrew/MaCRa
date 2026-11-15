@@ -13,6 +13,7 @@ import {
   withdrawParticipant,
 } from '../../providers/event/tournamentApi';
 import ToursCard from './ToursCard';
+import { LinkButton } from '../LinkButton';
 import TourPlanCard from './TourPlanCard';
 import Confirm from '../Confirm';
 import LoadingTemplate from '../LoadingTemplate/LoadingTemplate';
@@ -96,6 +97,13 @@ export default function TournamentDesk() {
           <h1 className="text-2xl font-semibold truncate min-w-0">
             {t('tournamentDesk.title', { name: event.name })}
           </h1>
+          <LinkButton
+            to={`/event/${eventId}/screen`}
+            variant="secondary"
+            className="self-start"
+          >
+            {t('screen.open')}
+          </LinkButton>
           {tours.data && (
             <ToursCard
               eventId={eventId}
