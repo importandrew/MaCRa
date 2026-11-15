@@ -9,8 +9,13 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// dataTour is the key of a tour's number in an error's data.
-const dataTour = "tour"
+// Keys of the data errors carry for the client: a tour's number, a
+// player's name, the number of players missing.
+const (
+	dataTour    = "tour"
+	dataName    = "name"
+	dataMissing = "missing"
+)
 
 // tourPlans returns the tournament's plan rows by tour number (tours
 // without a row are random) and its number of tours.

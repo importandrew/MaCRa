@@ -67,7 +67,7 @@ func TestTourPlans(t *testing.T) {
 
 		// A tour's seating gets its tables and the random tours after it.
 		var got models.SeatingInput
-		_, err = repo.GenerateTour(ctx, eventID, models.Seating{Method: models.SeatingFixed},
+		_, err = repo.GenerateTour(ctx, eventID, models.Seating{Method: models.SeatingFixed}, nil,
 			func(input models.SeatingInput) ([][4]int, error) {
 				got = input
 				return inOrder(input)

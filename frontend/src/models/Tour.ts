@@ -53,6 +53,9 @@ export type TourSeat = {
   sitter: { id: number; name: string } | null;
   // forfeit: the player gets 0 TP and 0 GP for the game.
   forfeit: boolean;
+  // substitute: a substitute's own seat, completing the table for the tour
+  // (number 0; it counts for nobody).
+  substitute: boolean;
 };
 
 export type TourTable = {

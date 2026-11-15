@@ -182,6 +182,9 @@ var (
 	// ErrNotSubstitute means the user seated at a table is neither a
 	// substitute of the event nor the seat's own player.
 	ErrNotSubstitute = errors.New("not a substitute")
+	// ErrTooManySubstitutes means more substitutes were chosen for a tour
+	// than its tables need; sent with "missing", the number needed.
+	ErrTooManySubstitutes = errors.New("too many substitutes")
 	// ErrAlreadySeated means the user already sits at that seat.
 	ErrAlreadySeated = errors.New("already seated")
 	// ErrPlayerAndSubstitute means a member would be both a player and a
@@ -289,6 +292,7 @@ var Errors = map[error]APIError{
 	ErrPlayerAndSubstitute:  {http.StatusConflict, "player_and_substitute"},
 	ErrNotSubstitute:        {http.StatusConflict, "not_substitute"},
 	ErrAlreadySeated:        {http.StatusConflict, "already_seated"},
+	ErrTooManySubstitutes:   {http.StatusConflict, "too_many_substitutes"},
 	ErrParticipantsClosed:   {http.StatusConflict, "participants_closed"},
 	ErrTournamentNotStarted: {http.StatusConflict, "tournament_not_started"},
 	ErrNoPlayers:            {http.StatusConflict, "no_players"},

@@ -65,10 +65,12 @@ export const useFetchTours = (eventId: number | null) => {
 // replacing an earlier draft.
 export async function generateTour(
   eventId: number,
-  how: Seating
+  how: Seating,
+  // substitutes: chosen to complete the tables, as many as are missing.
+  substitutes: number[] = []
 ): Promise<boolean> {
   const result = await authFetch<unknown>(
-    PostRequest(eventPath(eventId, '/tours'), how)
+    PostRequest(eventPath(eventId, '/tours'), { ...how, substitutes })
   );
   return result !== null;
 }
