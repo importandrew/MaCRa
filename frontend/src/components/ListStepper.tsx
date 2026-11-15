@@ -29,7 +29,7 @@ export default function ListStepper({
       <Button
         size="sm"
         variant="tertiary"
-        className="min-w-11 px-0 text-lg md:h-10 md:min-w-12"
+        className="h-11 min-w-11 px-0 text-lg md:h-10 md:min-w-12"
         aria-label={`${label} −`}
         isDisabled={index <= 0}
         onPress={() => step(-1)}
@@ -47,7 +47,7 @@ export default function ListStepper({
       <Button
         size="sm"
         variant="tertiary"
-        className="min-w-11 px-0 text-lg md:h-10 md:min-w-12"
+        className="h-11 min-w-11 px-0 text-lg md:h-10 md:min-w-12"
         aria-label={`${label} +`}
         isDisabled={index < 0 || index >= values.length - 1}
         onPress={() => step(1)}
