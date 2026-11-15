@@ -11,12 +11,9 @@ func (r *Repo) Update(ctx context.Context, event models.Event) error {
 		UPDATE events
 		SET name = $2,
 			description = $3,
-			visibility = $4,
-			ratings_reach = $5,
-			games_reach = $6
+			visibility = $4
 		WHERE id = $1`,
-		event.ID, event.Name, event.Description,
-		event.Visibility, event.RatingsReach, event.GamesReach,
+		event.ID, event.Name, event.Description, event.Visibility,
 	)
 	if err != nil {
 		return err

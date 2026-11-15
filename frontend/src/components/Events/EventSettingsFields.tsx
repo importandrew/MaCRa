@@ -1,11 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FieldError, Input, Label, TextArea, TextField } from '@heroui/react';
-import {
-  CONTENT_REACHES,
-  type ContentReach,
-  type EventVisibility,
-} from '../../models/Event';
+import type { EventVisibility } from '../../models/Event';
 import SegmentedPicker from '../SegmentedPicker';
 import {
   type EventSettings,
@@ -13,14 +9,13 @@ import {
   isDescriptionTooLong,
   MAX_EVENT_DESCRIPTION_LENGTH,
   MAX_EVENT_NAME_LENGTH,
-  withVisibility,
 } from './eventSettings';
 
 const VISIBILITIES: EventVisibility[] = ['private', 'public'];
 
-// EventSettingsFields are the event's name, description, visibility and
-// reaches, the same when creating an event and managing it. In a finished
-// event (isFinished) only the visibility can change.
+// EventSettingsFields are the event's name, description and who sees it,
+// the same when creating an event and managing it. In a finished event
+// (isFinished) only who sees it can change.
 export default function EventSettingsFields({
   value,
   onChange,
@@ -35,13 +30,6 @@ export default function EventSettingsFields({
   afterDescription?: ReactNode;
 }) {
   const { t } = useTranslation();
-  const reachOptions = CONTENT_REACHES.map((reach) => ({
-    value: reach,
-    label: t(`reach.${reach}`),
-  }));
-  // A public reach means "everyone" only in a public event.
-  const isReachOptionDisabled = (reach: ContentReach) =>
-    isFinished || (reach === 'public' && value.visibility === 'private');
 
   return (
     <>
@@ -85,44 +73,20 @@ export default function EventSettingsFields({
       </TextField>
       <div className="w-full flex flex-col gap-2">
         {afterDescription}
-        <p className="text-muted">{t('events.visibility')}</p>
+        {/* One setting decides who sees the event (area 1): everything
+            but managing it, to everyone or to its members. */}
         <SegmentedPicker
-          label={t('events.general')}
+          label={t('events.whoSees')}
           options={VISIBILITIES.map((visibility) => ({
             value: visibility,
-            label: t(`visibility.${visibility}`),
+            label: t(`whoSees.${visibility}`),
           }))}
           selectedKey={value.visibility}
-          onSelectionChange={(visibility) =>
-            // A finished event keeps its reaches (only the visibility may
-            // change); a public reach in a private event means members anyway.
-            onChange(
-              isFinished
-                ? { ...value, visibility }
-                : withVisibility(value, visibility)
-            )
-          }
+          onSelectionChange={(visibility) => onChange({ ...value, visibility })}
         />
-        <div className="flex flex-col gap-5">
-          <SegmentedPicker
-            label={t('events.ratingsReach')}
-            options={reachOptions}
-            selectedKey={value.ratingsReach}
-            onSelectionChange={(ratingsReach) =>
-              onChange({ ...value, ratingsReach })
-            }
-            isOptionDisabled={isReachOptionDisabled}
-          />
-          <SegmentedPicker
-            label={t('events.gamesReach')}
-            options={reachOptions}
-            selectedKey={value.gamesReach}
-            onSelectionChange={(gamesReach) =>
-              onChange({ ...value, gamesReach })
-            }
-            isOptionDisabled={isReachOptionDisabled}
-          />
-        </div>
+        <p className="text-sm text-muted">
+          {t(`whoSees.hint.${value.visibility}`)}
+        </p>
       </div>
     </>
   );

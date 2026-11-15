@@ -7,8 +7,7 @@ import (
 	"github.com/importandrew/MaCRa/models"
 )
 
-// Create creates an event. Without a visibility it is private; reaches not
-// given follow the visibility (models.DefaultContentReach). Without rules it
+// Create creates an event. Without a visibility it is private. Without rules it
 // plays by the MCR standard ones; the owner may change them until the first
 // game.
 func (s *Service) Create(ctx context.Context, params models.EventCreateParams) (int, error) {
@@ -34,28 +33,13 @@ func (s *Service) Create(ctx context.Context, params models.EventCreateParams) (
 	}
 
 	event := models.Event{
-		Type:         params.Type,
-		Name:         name,
-		Description:  description,
-		OwnerUserID:  params.OwnerID,
-		Visibility:   visibility,
-		RatingsReach: models.DefaultContentReach(visibility),
-		GamesReach:   models.DefaultContentReach(visibility),
-		Rules:        models.StandardGameRules(),
-		Settings:     models.DefaultEventSettings(),
-	}
-
-	if params.RatingsReach != nil {
-		if err := validateReach(*params.RatingsReach); err != nil {
-			return 0, err
-		}
-		event.RatingsReach = *params.RatingsReach
-	}
-	if params.GamesReach != nil {
-		if err := validateReach(*params.GamesReach); err != nil {
-			return 0, err
-		}
-		event.GamesReach = *params.GamesReach
+		Type:        params.Type,
+		Name:        name,
+		Description: description,
+		OwnerUserID: params.OwnerID,
+		Visibility:  visibility,
+		Rules:       models.StandardGameRules(),
+		Settings:    models.DefaultEventSettings(),
 	}
 
 	if event.Type == models.EventTournament {

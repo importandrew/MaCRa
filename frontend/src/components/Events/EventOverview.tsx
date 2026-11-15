@@ -21,8 +21,8 @@ import JoinRequestBox from './JoinRequestBox';
 
 const iconClass = 'w-6 h-6';
 
-// namesWithRole lists the staff by name. Non-members get only the staff from
-// /members, so it is never used for players (see player_count).
+// namesWithRole lists the staff by name (players are counted instead: see
+// player_count).
 function namesWithRole(
   members: EventMember[] | null,
   role: 'referee' | 'observer'

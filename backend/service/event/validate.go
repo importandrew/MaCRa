@@ -39,13 +39,6 @@ func validateVisibility(visibility models.EventVisibility) error {
 	return nil
 }
 
-func validateReach(reach models.ContentReach) error {
-	if !slices.Contains(models.ValidContentReach, reach) {
-		return models.ErrInvalidContentReach
-	}
-	return nil
-}
-
 // checkNotFinished returns models.ErrEventAlreadyFinished for a finished
 // event: its members and settings stay as they are (only the visibility can
 // change, see Update).

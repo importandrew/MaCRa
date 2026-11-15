@@ -25,12 +25,10 @@ func TestCountPlayers(t *testing.T) {
 
 		// A regular event's owner (1) gets the player and referee roles.
 		eventID, err := repo.Create(ctx, models.Event{
-			Type:         models.EventRegular,
-			Name:         "Count",
-			OwnerUserID:  1,
-			Visibility:   models.EventVisibilityPublic,
-			RatingsReach: models.ContentReachPublic,
-			GamesReach:   models.ContentReachPublic,
+			Type:        models.EventRegular,
+			Name:        "Count",
+			OwnerUserID: 1,
+			Visibility:  models.EventVisibilityPublic,
 		})
 		require.NoError(t, err)
 		require.NoError(t, repo.AddMemberRoles(ctx, eventID, 2, []models.EventRole{models.EventPlayer}))

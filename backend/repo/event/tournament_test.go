@@ -27,8 +27,7 @@ func TestTournament(t *testing.T) {
 		defaults := models.DefaultTournamentSettings()
 		tournamentID, err := repo.Create(ctx, models.Event{
 			Type: models.EventTournament, Name: "Cup", OwnerUserID: 1,
-			Visibility: models.EventVisibilityPublic, RatingsReach: models.ContentReachPublic,
-			GamesReach: models.ContentReachPublic, Rules: models.StandardGameRules(),
+			Visibility: models.EventVisibilityPublic, Rules: models.StandardGameRules(),
 			Settings: models.DefaultEventSettings(), Tournament: &defaults,
 		})
 		require.NoError(t, err)

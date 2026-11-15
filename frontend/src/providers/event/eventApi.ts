@@ -13,7 +13,7 @@ import {
   fetchWithStatus,
 } from '../../components/Request';
 import { useFetch } from '../useFetch';
-import { Event, EventVisibility, ContentReach } from '../../models/Event';
+import { Event, EventVisibility } from '../../models/Event';
 import { EventMe } from '../../models/EventMe';
 import type { GameRules } from '../../models/GameRules';
 import type { EventSettings } from '../../models/EventSettings';
@@ -29,8 +29,6 @@ export type CreateEventPayload = {
   name: string;
   description?: string;
   visibility?: EventVisibility;
-  ratings_reach?: ContentReach;
-  games_reach?: ContentReach;
   rules?: GameRules;
 };
 
@@ -38,8 +36,6 @@ export type UpdateEventPayload = {
   name?: string;
   description?: string;
   visibility?: EventVisibility;
-  ratings_reach?: ContentReach;
-  games_reach?: ContentReach;
 };
 
 export const useFetchEvent = (id: number | null) => {

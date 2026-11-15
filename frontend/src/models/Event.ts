@@ -5,8 +5,6 @@ import type { TournamentSettings } from './TournamentSettings';
 
 export type EventVisibility = 'private' | 'public';
 
-export type ContentReach = 'public' | 'members' | 'staff';
-
 export type Event = {
   id: number;
   type: 'tournament' | 'regular';
@@ -14,8 +12,6 @@ export type Event = {
   description?: string | null;
   owner_user_id: number;
   visibility: EventVisibility;
-  ratings_reach: ContentReach;
-  games_reach: ContentReach;
   rules: GameRules;
   settings: EventSettings;
   // tournament: a tournament's own settings; null for a regular event.
@@ -41,9 +37,6 @@ export type Event = {
   // its rules can't change.
   rules_frozen?: boolean;
 };
-
-// CONTENT_REACHES in the order the pickers show them (labels: reach.* texts).
-export const CONTENT_REACHES: ContentReach[] = ['public', 'members', 'staff'];
 
 // EventStatus mirrors models.EventStatus: a tournament is prepared, then in
 // progress from its first tour, then finished; a regular event is in progress
