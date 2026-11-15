@@ -581,7 +581,8 @@ function HelpExample({
                 </p>
               ))}
             </div>
-            <Button variant="secondary" onPress={onClose}>
+            {/* shrink-0: the scrolling body squeezed it to 20 px high. */}
+            <Button variant="secondary" className="shrink-0" onPress={onClose}>
               {t('delta.backToDelta')}
             </Button>
           </Modal.Body>
@@ -685,7 +686,7 @@ export default function Delta({
               )}
             </div>
             <Modal.CloseTrigger
-              className="absolute right-3 top-1/2 z-20 -translate-y-1/2"
+              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 text-2xl"
               aria-label={t('delta.close')}
             >
               ×

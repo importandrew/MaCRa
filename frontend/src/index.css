@@ -39,6 +39,28 @@ body {
   }
 }
 
+/* The close cross of modals and drawers (the ≡ menu, Delta): HeroUI's 24 px
+   is hard to hit on a phone. A 36 px button with a bigger cross, and a tap
+   area of 44 px around it (the size touch guidelines ask for), without
+   pushing the header it sits in. Close buttons inside fields (clearing a
+   player) keep their size. */
+@layer components {
+  .modal__close-trigger,
+  .drawer__close-trigger {
+    @apply size-9 rounded-full;
+  }
+  .modal__close-trigger svg,
+  .drawer__close-trigger svg {
+    @apply size-5;
+  }
+  .modal__close-trigger::after,
+  .drawer__close-trigger::after {
+    content: '';
+    position: absolute;
+    inset: -0.25rem;
+  }
+}
+
 html,
 body,
 #root {

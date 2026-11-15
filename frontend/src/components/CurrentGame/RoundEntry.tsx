@@ -222,9 +222,11 @@ export function RoundEntryPanel({ entry }: { entry: RoundEntry }) {
 
       <div className="flex justify-center">
         <PendingButton
-          size="sm"
+          // Big and wide: the button every round ends with, tapped in a hurry
+          // (users found the small one hard to hit).
+          size="lg"
           variant="primary"
-          className={`md:px-6 ${DESKTOP_BUTTON_CLASS}`}
+          className={`min-w-32 md:px-6 ${DESKTOP_BUTTON_CLASS}`}
           isDisabled={!entry.isComplete}
           isPending={entry.isPending}
           onPress={entry.submit}
