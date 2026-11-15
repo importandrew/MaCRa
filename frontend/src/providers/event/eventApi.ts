@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import type { TourRating } from '../../models/TourRating';
 import type { TournamentSettings } from '../../models/TournamentSettings';
 import {
   GetRequest,
@@ -251,6 +252,20 @@ export const useFetchEventGames = (
     isLoadingMore,
     refetch,
     loadMore,
+  };
+};
+
+// A tournament's rating by tour.
+export const useFetchTourRating = (eventId: number | null) => {
+  const f = useFetch<TourRating>(eventId, () =>
+    publicFetch<TourRating>(GetRequest(eventPath(eventId!, '/tours/rating')))
+  );
+  return {
+    data: f.data,
+    isError: f.isError || f.isNotFound,
+    isForbidden: f.isForbidden,
+    isLoading: f.isLoading,
+    refetch: f.refetch,
   };
 };
 

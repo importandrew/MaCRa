@@ -47,6 +47,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			eventAccess.GET("/main", h.event.MainInfo)
 			eventAccess.GET("/me", h.event.GetMe)
 			eventAccess.GET("/ratings", h.event.Ratings)
+			eventAccess.GET("/tours/rating", h.event.TourRating)
 			eventAccess.GET("/games", h.event.ListGames)
 			eventAccess.GET("/members", h.event.ListMembers)
 			eventAccess.GET("/game-history", h.event.GameHistory)

@@ -34,6 +34,16 @@ func generateAndPublish(ctx context.Context, repo *Repo, eventID int) (models.To
 	return tour, repo.PublishTour(ctx, eventID)
 }
 
+// resultOf returns a player's row among the results.
+func resultOf(results []models.TourResultRow, playerID int) models.TourResultRow {
+	for _, r := range results {
+		if r.PlayerID == playerID {
+			return r
+		}
+	}
+	return models.TourResultRow{}
+}
+
 func TestTours(t *testing.T) {
 	db, err := database.NewTestDB()
 	require.NoError(t, err)
@@ -182,11 +192,21 @@ func TestTourRun(t *testing.T) {
 		rating, err := repo.ListEndedPlayerResults(ctx, eventID)
 		require.NoError(t, err)
 		assert.Empty(t, rating, "a tour's results count once it is finished")
+		results, inProgress, err := repo.TourResults(ctx, eventID)
+		require.NoError(t, err)
+		assert.Empty(t, results, "nor in the rating by tour")
+		assert.Equal(t, 1, inProgress)
 
 		require.NoError(t, repo.FinishTour(ctx, eventID))
 		rating, err = repo.ListEndedPlayerResults(ctx, eventID)
 		require.NoError(t, err)
 		assert.Len(t, rating, 4)
+		results, inProgress, err = repo.TourResults(ctx, eventID)
+		require.NoError(t, err)
+		assert.Zero(t, inProgress)
+		require.Len(t, results, 4)
+		assert.Equal(t, models.TourResultRow{Tour: 1, PlayerID: seats[0].UserID, Name: seats[0].Name, TP: 4, GP: 30, Table: 1},
+			resultOf(results, seats[0].UserID))
 
 		// The seating of tour 2 sees tour 1: who met whom, and the standings.
 		var seen models.SeatingInput
@@ -218,7 +238,14 @@ func TestTourRun(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, history.Meetings, "nothing before tour 1")
 		aborted := state.Tables[0].GameID
+		_, inProgress, err = repo.TourResults(ctx, eventID)
+		require.NoError(t, err)
+		assert.Equal(t, 2, inProgress)
 		require.NoError(t, repo.AbortTour(ctx, eventID))
+		results, inProgress, err = repo.TourResults(ctx, eventID)
+		require.NoError(t, err)
+		assert.Len(t, results, 4, "an aborted tour doesn't count")
+		assert.Zero(t, inProgress)
 		status, err := games.Status(ctx, aborted)
 		require.NoError(t, err)
 		assert.Equal(t, models.GameAborted, status)
