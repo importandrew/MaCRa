@@ -11,10 +11,12 @@ import (
 
 func (r *Repo) LastGame(ctx context.Context, playerID, eventID int) (int, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT g.id 
+		SELECT g.id
 		FROM games g
-		JOIN game_players gp ON g.id = gp.game_id
-		WHERE gp.player_id = $1 AND g.event_id = $2 AND g.status = $3
+		WHERE g.event_id = $2 AND g.status = $3
+			-- Their own game, or one they sat at as a substitute.
+			AND (EXISTS (SELECT 1 FROM game_players gp WHERE gp.game_id = g.id AND gp.player_id = $1)
+				OR EXISTS (SELECT 1 FROM game_seats s WHERE s.game_id = g.id AND s.sitter_id = $1))
 		ORDER BY g.finished_at DESC NULLS LAST
 		LIMIT 1`,
 		playerID, eventID, models.GameEnded)

@@ -48,6 +48,11 @@ export type TourSeat = {
   name: string;
   number: number;
   wind: 'east' | 'south' | 'west' | 'north';
+  // sitter: who sits at the seat instead of its player (a substitute); null
+  // while the player does.
+  sitter: { id: number; name: string } | null;
+  // forfeit: the player gets 0 TP and 0 GP for the game.
+  forfeit: boolean;
 };
 
 export type TourTable = {
@@ -58,6 +63,8 @@ export type TourTable = {
   status: 'created' | 'live' | 'ended' | 'aborted';
   // extra_minutes: time a referee added to the table.
   extra_minutes: number;
+  // log_size: the game's log entries, sent back with a change at the table.
+  log_size: number;
   // seats: east first.
   seats: TourSeat[];
   // repeats and repeat_pairs: who at the table met before, how often.
@@ -89,7 +96,12 @@ export type TourState = {
   // tables imported from a file, null without them.
   plan: TourPlan[];
   file: SeatingFileInfo | null;
+  // substitutes: the tournament's substitutes, with the table each sits at
+  // now (0: none).
+  substitutes: Substitute[];
 };
+
+export type Substitute = { id: number; name: string; table: number };
 
 // TourPlan mirrors models.TourPlan: the seating a tour is to have.
 export type TourPlan = {

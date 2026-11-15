@@ -134,6 +134,8 @@ const en = {
     invalid_player_limit: 'The player limit must be at least 1',
     invalid_tournament_settings: 'The tournament settings are invalid',
     not_tournament: 'This is for tournaments only',
+    not_substitute: 'This member isn’t a substitute of the tournament',
+    already_seated: 'They already sit at that seat',
     player_and_substitute: 'A member can’t be both a player and a substitute',
     participants_closed:
       'The first tour has started: players can’t be added or removed any more (a player withdraws instead)',
@@ -657,6 +659,33 @@ const en = {
     belowMinimum_one: 'Fewer than {{count}} game',
     belowMinimum_other: 'Fewer than {{count}} games',
     notPlayedYet: 'No games yet',
+  },
+  seat: {
+    title: 'Table {{table}}: {{name}}’s seat',
+    sitsNow: 'Sitting there now: {{name}}.',
+    who: 'Who sits there',
+    back: '{{name}}, back at the table',
+    busy: '{{name}} (at table {{table}})',
+    noSubstitutes:
+      'The tournament has no substitutes. Add them in Manage → Members with the role “substitute”.',
+    outcome: 'What {{name}} gets for the tour',
+    usual: 'The seat’s result',
+    forfeit: '0 / 0',
+    usualHint:
+      'The seat’s result counts for the player, as if they had played.',
+    forfeitHint:
+      'The player gets 0 TP and 0 GP for the tour; the seat’s TP go to nobody, the opponents keep theirs.',
+    latePenalty: 'Fine for being late',
+    noPenalty: 'None',
+    fromNextHand: 'From the next hand on. The seat’s score carries on.',
+    seat: 'Seat',
+    backButton: 'Seat back',
+    seated: 'Table {{table}}: substitute seated',
+    backDone: '{{name}} is back at the table',
+    for: 'for {{name}}',
+    forfeitMark: '0 / 0',
+    change: 'Change who sits at {{name}}’s seat',
+    changeShort: 'Seat…',
   },
   screen: {
     open: 'Common screen',

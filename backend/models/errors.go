@@ -179,6 +179,11 @@ var (
 	// skips a table number (tables go 1, 2, 3, …); sent with "tour" and
 	// "table".
 	ErrSeatingFileTableMissing = errors.New("seating file table missing")
+	// ErrNotSubstitute means the user seated at a table is neither a
+	// substitute of the event nor the seat's own player.
+	ErrNotSubstitute = errors.New("not a substitute")
+	// ErrAlreadySeated means the user already sits at that seat.
+	ErrAlreadySeated = errors.New("already seated")
 	// ErrPlayerAndSubstitute means a member would be both a player and a
 	// substitute, which can't be.
 	ErrPlayerAndSubstitute = errors.New("a member can't be both a player and a substitute")
@@ -282,6 +287,8 @@ var Errors = map[error]APIError{
 	ErrAlreadyMember:        {http.StatusConflict, "already_member"},
 	ErrEventFull:            {http.StatusConflict, "event_full"},
 	ErrPlayerAndSubstitute:  {http.StatusConflict, "player_and_substitute"},
+	ErrNotSubstitute:        {http.StatusConflict, "not_substitute"},
+	ErrAlreadySeated:        {http.StatusConflict, "already_seated"},
 	ErrParticipantsClosed:   {http.StatusConflict, "participants_closed"},
 	ErrTournamentNotStarted: {http.StatusConflict, "tournament_not_started"},
 	ErrNoPlayers:            {http.StatusConflict, "no_players"},

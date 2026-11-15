@@ -234,3 +234,42 @@ func (h Handler) AddTime(c *gin.Context) {
 	}
 	c.Status(http.StatusNoContent)
 }
+
+type seatSitterRequest struct {
+	// Seat is the seat's player (the seats keep their players' IDs).
+	Seat   int `json:"seat" binding:"required"`
+	Sitter int `json:"sitter" binding:"required"`
+	// Forfeit: the seat's player gets 0 TP and 0 GP for the game.
+	Forfeit bool `json:"forfeit"`
+	// LogSize is the number of log entries the referee saw.
+	LogSize *int `json:"log_size" binding:"required"`
+}
+
+// SeatSitter seats a substitute at a seat of a tournament game, or the
+// seat's player back, from the next log entry on
+// (POST /event/:id/game/:gameId/seat, {"seat": 5, "sitter": 9,
+// "forfeit": false, "log_size": 12}). It needs models.CapRunTournament.
+func (h Handler) SeatSitter(c *gin.Context) {
+	eventID := reqctx.GetEventID(c)
+
+	var req seatSitterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httperr.InvalidRequest(c, err)
+		return
+	}
+
+	if err := h.event.HasCapability(c.Request.Context(), eventID, reqctx.GetUserID(c), 0, models.CapRunTournament); err != nil {
+		httperr.Error(c, err)
+		return
+	}
+
+	err := h.game.SeatSitter(c.Request.Context(), models.SeatChange{
+		EventID: eventID, GameID: reqctx.GetGameID(c), SeatPlayerID: req.Seat,
+		SitterID: req.Sitter, Forfeit: req.Forfeit, SeenLogSize: *req.LogSize,
+	})
+	if err != nil {
+		httperr.Error(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}

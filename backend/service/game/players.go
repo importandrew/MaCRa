@@ -12,25 +12,13 @@ func (s *Service) Players(ctx context.Context, gameID int) (models.GamePlayers, 
 		return models.GamePlayers{}, err
 	}
 
-	east, err := s.playerRepo.Get(ctx, players.East)
+	// Seats keep their players' IDs; the names are of whoever sits there.
+	names, err := s.seatNames(ctx, gameID)
 	if err != nil {
 		return models.GamePlayers{}, err
 	}
-
-	south, err := s.playerRepo.Get(ctx, players.South)
-	if err != nil {
-		return models.GamePlayers{}, err
-	}
-
-	west, err := s.playerRepo.Get(ctx, players.West)
-	if err != nil {
-		return models.GamePlayers{}, err
-	}
-
-	north, err := s.playerRepo.Get(ctx, players.North)
-	if err != nil {
-		return models.GamePlayers{}, err
-	}
+	seat := func(id int) models.Player { return models.Player{ID: id, Name: names[id]} }
+	east, south, west, north := seat(players.East), seat(players.South), seat(players.West), seat(players.North)
 
 	gamePlayers := models.GamePlayers{
 		ID:      gameID,

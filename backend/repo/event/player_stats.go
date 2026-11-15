@@ -66,6 +66,8 @@ func (r *Repo) gameStats(ctx context.Context, eventID, playerID int, stats *mode
 			FROM player_results pr
 			JOIN games g ON g.id = pr.game_id
 			WHERE g.event_id = $1 AND g.status = $3
+				-- A forfeited seat isn't the player's game.
+				AND NOT EXISTS (SELECT 1 FROM game_players f WHERE f.game_id = pr.game_id AND f.player_id = pr.player_id AND f.forfeit)
 		)
 		SELECT count(*) AS games,
 			count(*) FILTER (WHERE place = 1) AS first,
@@ -122,7 +124,8 @@ func (r *Repo) handStats(ctx context.Context, eventID, playerID int, stats *mode
 			count(*) FILTER (WHERE r.outcome = $8 AND r.loser_id = $2) AS false_mahjongs
 		FROM rounds r
 		JOIN games g ON g.id = r.game_id
-		JOIN game_players gp ON gp.game_id = g.id AND gp.player_id = $2
+		-- Not a forfeited seat: that game isn't the player's.
+		JOIN game_players gp ON gp.game_id = g.id AND gp.player_id = $2 AND NOT gp.forfeit
 		WHERE g.event_id = $1 AND g.status = $3`,
 		eventID, playerID, models.GameEnded,
 		models.Self, models.Deal, models.Draw, models.Penalty, models.FalseMahjong)

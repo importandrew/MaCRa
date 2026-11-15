@@ -962,6 +962,63 @@ func (_c *MockGameService_Players_Call) RunAndReturn(run func(ctx context.Contex
 	return _c
 }
 
+// SeatSitter provides a mock function for the type MockGameService
+func (_mock *MockGameService) SeatSitter(ctx context.Context, seat models.SeatChange) error {
+	ret := _mock.Called(ctx, seat)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SeatSitter")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, models.SeatChange) error); ok {
+		r0 = returnFunc(ctx, seat)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockGameService_SeatSitter_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SeatSitter'
+type MockGameService_SeatSitter_Call struct {
+	*mock.Call
+}
+
+// SeatSitter is a helper method to define mock.On call
+//   - ctx context.Context
+//   - seat models.SeatChange
+func (_e *MockGameService_Expecter) SeatSitter(ctx any, seat any) *MockGameService_SeatSitter_Call {
+	return &MockGameService_SeatSitter_Call{Call: _e.mock.On("SeatSitter", ctx, seat)}
+}
+
+func (_c *MockGameService_SeatSitter_Call) Run(run func(ctx context.Context, seat models.SeatChange)) *MockGameService_SeatSitter_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 models.SeatChange
+		if args[1] != nil {
+			arg1 = args[1].(models.SeatChange)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGameService_SeatSitter_Call) Return(err error) *MockGameService_SeatSitter_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockGameService_SeatSitter_Call) RunAndReturn(run func(ctx context.Context, seat models.SeatChange) error) *MockGameService_SeatSitter_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Status provides a mock function for the type MockGameService
 func (_mock *MockGameService) Status(ctx context.Context, gameID int) (models.GameStatus, error) {
 	ret := _mock.Called(ctx, gameID)

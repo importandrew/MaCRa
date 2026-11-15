@@ -29,6 +29,10 @@ type GameRepo interface {
 	CurrentGame(ctx context.Context, playerID, eventID int) (int, error)
 	EventID(ctx context.Context, gameID int) (int, error)
 	IsPlayerInGame(ctx context.Context, gameID, playerID int) (bool, error)
+	Sitters(ctx context.Context, gameID int) (map[int]int, error)
+	SeatOf(ctx context.Context, gameID, userID int) (int, error)
+	HasPlace(ctx context.Context, gameID, userID int) (bool, error)
+	SeatSitter(ctx context.Context, seat models.SeatChange) error
 }
 
 type PlayerRepo interface {

@@ -68,11 +68,13 @@ func (r *Repo) lockMembers(ctx context.Context, eventID int, userIDs []int) erro
 // lockMembers, so the answer holds until the transaction ends.
 func (r *Repo) checkNotInLiveGame(ctx context.Context, eventID int, userIDs []int, errInGame error) error {
 	rows, err := r.db.Query(ctx, `
-		SELECT gp.player_id, u.name
+		SELECT p.player_id, u.name
 		FROM games g
-		JOIN game_players gp ON gp.game_id = g.id
-		JOIN users u ON u.id = gp.player_id
-		WHERE g.event_id = $1 AND g.status = $2 AND gp.player_id = ANY($3)
+		-- A seat's player, and whoever sits there now (a substitute).
+		JOIN (SELECT game_id, player_id FROM game_players
+			UNION SELECT game_id, sitter_id FROM game_sitters) p ON p.game_id = g.id
+		JOIN users u ON u.id = p.player_id
+		WHERE g.event_id = $1 AND g.status = $2 AND p.player_id = ANY($3)
 		ORDER BY u.name
 		LIMIT 1`,
 		eventID, models.GameLive, userIDs)

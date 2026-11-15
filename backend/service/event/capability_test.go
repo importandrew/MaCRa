@@ -239,25 +239,28 @@ func TestHasCapability_tourTablesHidden(t *testing.T) {
 		caller   int
 		roles    []models.EventRole
 		seated   bool
+		ownSeat  bool // their seat, where a substitute sits now
 		finished bool
 		game     models.GameSummary
 		want     bool
 	}{
-		"anonymous, live table":            {game: models.GameSummary{Status: models.GameLive, TourStatus: &live}},
-		"player still playing":             {caller: 5, roles: player, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}},
-		"player whose game ended":          {caller: 5, roles: player, finished: true, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
-		"the table itself":                 {caller: 5, roles: player, seated: true, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
-		"observer":                         {caller: 6, roles: []models.EventRole{models.EventObserver}, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
-		"owner":                            {caller: 10, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
-		"ended table of the live tour":     {caller: 5, roles: player, game: models.GameSummary{Status: models.GameEnded, TourStatus: &live}, want: true},
-		"another table, seating published": {game: models.GameSummary{Status: models.GameCreated, TourStatus: &published}, want: true},
-		"own table, seating drafted":       {caller: 5, roles: player, seated: true, game: models.GameSummary{Status: models.GameCreated, TourStatus: &draft}},
-		"referee, seating drafted":         {caller: 7, roles: []models.EventRole{models.EventReferee}, game: models.GameSummary{Status: models.GameCreated, TourStatus: &draft}, want: true},
-		"finished tour":                    {game: models.GameSummary{Status: models.GameEnded, TourStatus: &finished}, want: true},
+		"anonymous, live table":               {game: models.GameSummary{Status: models.GameLive, TourStatus: &live}},
+		"player still playing":                {caller: 5, roles: player, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}},
+		"player whose game ended":             {caller: 5, roles: player, finished: true, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"the table itself":                    {caller: 5, roles: player, seated: true, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"player whose seat a substitute took": {caller: 5, roles: player, ownSeat: true, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"observer":                            {caller: 6, roles: []models.EventRole{models.EventObserver}, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"owner":                               {caller: 10, game: models.GameSummary{Status: models.GameLive, TourStatus: &live}, want: true},
+		"ended table of the live tour":        {caller: 5, roles: player, game: models.GameSummary{Status: models.GameEnded, TourStatus: &live}, want: true},
+		"another table, seating published":    {game: models.GameSummary{Status: models.GameCreated, TourStatus: &published}, want: true},
+		"own table, seating drafted":          {caller: 5, roles: player, seated: true, game: models.GameSummary{Status: models.GameCreated, TourStatus: &draft}},
+		"referee, seating drafted":            {caller: 7, roles: []models.EventRole{models.EventReferee}, game: models.GameSummary{Status: models.GameCreated, TourStatus: &draft}, want: true},
+		"finished tour":                       {game: models.GameSummary{Status: models.GameEnded, TourStatus: &finished}, want: true},
 	} {
 		t.Run(name, func(t *testing.T) {
 			authCtx := eventAuthContext(event, testCase.caller, testCase.roles)
 			authCtx.IsSeatedInGame = testCase.seated
+			authCtx.HasPlaceInGame = testCase.seated || testCase.ownSeat
 			authCtx.FinishedInTour = testCase.finished
 			game := testCase.game
 			authCtx.Game = &game
@@ -266,4 +269,22 @@ func TestHasCapability_tourTablesHidden(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHasCapability_substituteAtTheTable(t *testing.T) {
+	// The substitute sitting at a seat enters rounds; the seat's player,
+	// replaced, only sees the game.
+	event := testEvent(models.EventTournament)
+	live := models.TourLive
+	game := models.GameSummary{Status: models.GameLive, TourStatus: &live}
+
+	substitute := eventAuthContext(event, 9, []models.EventRole{models.EventSubstitute})
+	substitute.IsSeatedInGame, substitute.HasPlaceInGame, substitute.Game = true, true, &game
+	assert.True(t, substitute.hasCapability(models.CapEnterRound))
+	assert.True(t, substitute.hasCapability(models.CapViewGame))
+
+	replaced := eventAuthContext(event, 5, []models.EventRole{models.EventPlayer})
+	replaced.HasPlaceInGame, replaced.Game = true, &game
+	assert.False(t, replaced.hasCapability(models.CapEnterRound))
+	assert.True(t, replaced.hasCapability(models.CapViewGame))
 }

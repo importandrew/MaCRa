@@ -24,6 +24,7 @@ func TestHUD(t *testing.T) {
 			gameID: 100,
 			linger: 0,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Status", mock.Anything, gameID).Return(models.GameEnded, nil)
 				mg.On("GameResult", mock.Anything, gameID).Return(
 					models.GameResult{
@@ -47,6 +48,7 @@ func TestHUD(t *testing.T) {
 			gameID: 100,
 			linger: 0,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.EXPECT().Status(mock.Anything, gameID).Return(models.GameLive, nil).Times(2)
 				mg.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil).Times(3)
 				mg.EXPECT().Rules(mock.Anything, gameID).Return(models.StandardGameRules(), nil).Once()
@@ -65,6 +67,7 @@ func TestHUD(t *testing.T) {
 			gameID: 100,
 			linger: 30,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				logs := []models.RoundLog{
 					{
 						ID:            1,
@@ -98,6 +101,7 @@ func TestHUD(t *testing.T) {
 			gameID: 100,
 			linger: 0,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Status", mock.Anything, gameID).Return(models.GameStatus(""), errors.New("database error"))
 			},
 			expectedErr: assert.Error,
@@ -106,6 +110,7 @@ func TestHUD(t *testing.T) {
 			gameID: 100,
 			linger: 0,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Status", mock.Anything, gameID).Return(models.GameCreated, nil)
 			},
 			expectedErr: assert.Error,
@@ -114,6 +119,7 @@ func TestHUD(t *testing.T) {
 			gameID: 100,
 			linger: 0,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Status", mock.Anything, gameID).Return(models.GameEnded, nil)
 				mg.On("GameResult", mock.Anything, gameID).Return(models.GameResult{}, errors.New("database error"))
 			},
@@ -123,6 +129,7 @@ func TestHUD(t *testing.T) {
 			gameID: 100,
 			linger: 0,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.On("Status", mock.Anything, gameID).Return(models.GameLive, nil)
 				mg.On("Players", mock.Anything, gameID).Return(defaultStartingPlayers, nil)
 				expectPlayerGets(mp)
@@ -134,6 +141,7 @@ func TestHUD(t *testing.T) {
 			gameID: 999,
 			linger: 0,
 			mockSetup: func(mg *MockGameRepo, mp *MockPlayerRepo, gameID int) {
+				expectOwnSeats(mg, gameID)
 				mg.EXPECT().Status(mock.Anything, gameID).Return(models.GameLive, nil).Once()
 				mg.EXPECT().Players(mock.Anything, gameID).Return(defaultStartingPlayers, nil).Twice()
 				mg.EXPECT().GameLog(mock.Anything, gameID).Return([]models.RoundLog{}, nil).Once()
