@@ -86,6 +86,10 @@ type MainGameInfo struct {
 type EventGames struct {
 	Games   []EventGameItem `json:"games"`
 	HasMore bool            `json:"has_more"`
+	// HiddenTour is the live tour whose tables the caller can't see yet
+	// (they play in it and their game hasn't ended, or they don't play);
+	// 0 when none is hidden.
+	HiddenTour int `json:"hidden_tour,omitempty"`
 }
 
 // EventGameItem is one game row in GET /api/event/:eventId/games.

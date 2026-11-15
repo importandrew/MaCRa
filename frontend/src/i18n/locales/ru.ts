@@ -485,6 +485,8 @@ const ru: Messages = {
     ratingTitle: 'Рейтинг — {{name}}',
     liveGames: 'Идущие игры',
     liveGamesTitle: 'Идущие игры — {{name}}',
+    tourTablesHidden:
+      'Идёт тур {{n}}: его столы видят судьи, наблюдатели, организатор и игроки, которые уже доиграли свою игру.',
     noLiveGames: 'Сейчас игр нет',
     finishedGames: 'Завершённые игры',
     finishedGamesTitle: 'Завершённые игры — {{name}}',

@@ -2640,8 +2640,8 @@ func (_c *MockEventService_JoinRequests_Call) RunAndReturn(run func(ctx context.
 }
 
 // ListGamesByStatus provides a mock function for the type MockEventService
-func (_mock *MockEventService) ListGamesByStatus(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int) (models.EventGames, error) {
-	ret := _mock.Called(ctx, eventID, status, limit, offset)
+func (_mock *MockEventService) ListGamesByStatus(ctx context.Context, eventID int, callerID int, status models.GameStatus, limit int, offset int) (models.EventGames, error) {
+	ret := _mock.Called(ctx, eventID, callerID, status, limit, offset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListGamesByStatus")
@@ -2649,16 +2649,16 @@ func (_mock *MockEventService) ListGamesByStatus(ctx context.Context, eventID in
 
 	var r0 models.EventGames
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameStatus, int, int) (models.EventGames, error)); ok {
-		return returnFunc(ctx, eventID, status, limit, offset)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, models.GameStatus, int, int) (models.EventGames, error)); ok {
+		return returnFunc(ctx, eventID, callerID, status, limit, offset)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int, models.GameStatus, int, int) models.EventGames); ok {
-		r0 = returnFunc(ctx, eventID, status, limit, offset)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int, int, models.GameStatus, int, int) models.EventGames); ok {
+		r0 = returnFunc(ctx, eventID, callerID, status, limit, offset)
 	} else {
 		r0 = ret.Get(0).(models.EventGames)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int, models.GameStatus, int, int) error); ok {
-		r1 = returnFunc(ctx, eventID, status, limit, offset)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int, int, models.GameStatus, int, int) error); ok {
+		r1 = returnFunc(ctx, eventID, callerID, status, limit, offset)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2673,14 +2673,15 @@ type MockEventService_ListGamesByStatus_Call struct {
 // ListGamesByStatus is a helper method to define mock.On call
 //   - ctx context.Context
 //   - eventID int
+//   - callerID int
 //   - status models.GameStatus
 //   - limit int
 //   - offset int
-func (_e *MockEventService_Expecter) ListGamesByStatus(ctx any, eventID any, status any, limit any, offset any) *MockEventService_ListGamesByStatus_Call {
-	return &MockEventService_ListGamesByStatus_Call{Call: _e.mock.On("ListGamesByStatus", ctx, eventID, status, limit, offset)}
+func (_e *MockEventService_Expecter) ListGamesByStatus(ctx any, eventID any, callerID any, status any, limit any, offset any) *MockEventService_ListGamesByStatus_Call {
+	return &MockEventService_ListGamesByStatus_Call{Call: _e.mock.On("ListGamesByStatus", ctx, eventID, callerID, status, limit, offset)}
 }
 
-func (_c *MockEventService_ListGamesByStatus_Call) Run(run func(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int)) *MockEventService_ListGamesByStatus_Call {
+func (_c *MockEventService_ListGamesByStatus_Call) Run(run func(ctx context.Context, eventID int, callerID int, status models.GameStatus, limit int, offset int)) *MockEventService_ListGamesByStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -2690,17 +2691,21 @@ func (_c *MockEventService_ListGamesByStatus_Call) Run(run func(ctx context.Cont
 		if args[1] != nil {
 			arg1 = args[1].(int)
 		}
-		var arg2 models.GameStatus
+		var arg2 int
 		if args[2] != nil {
-			arg2 = args[2].(models.GameStatus)
+			arg2 = args[2].(int)
 		}
-		var arg3 int
+		var arg3 models.GameStatus
 		if args[3] != nil {
-			arg3 = args[3].(int)
+			arg3 = args[3].(models.GameStatus)
 		}
 		var arg4 int
 		if args[4] != nil {
 			arg4 = args[4].(int)
+		}
+		var arg5 int
+		if args[5] != nil {
+			arg5 = args[5].(int)
 		}
 		run(
 			arg0,
@@ -2708,6 +2713,7 @@ func (_c *MockEventService_ListGamesByStatus_Call) Run(run func(ctx context.Cont
 			arg2,
 			arg3,
 			arg4,
+			arg5,
 		)
 	})
 	return _c
@@ -2718,7 +2724,7 @@ func (_c *MockEventService_ListGamesByStatus_Call) Return(eventGames models.Even
 	return _c
 }
 
-func (_c *MockEventService_ListGamesByStatus_Call) RunAndReturn(run func(ctx context.Context, eventID int, status models.GameStatus, limit int, offset int) (models.EventGames, error)) *MockEventService_ListGamesByStatus_Call {
+func (_c *MockEventService_ListGamesByStatus_Call) RunAndReturn(run func(ctx context.Context, eventID int, callerID int, status models.GameStatus, limit int, offset int) (models.EventGames, error)) *MockEventService_ListGamesByStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }

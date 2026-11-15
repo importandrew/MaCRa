@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"time"
 
@@ -18,6 +19,9 @@ type EventAuthContext struct {
 	IsOwner        bool
 	IsMember       bool
 	IsSeatedInGame bool
+	// FinishedInTour: the caller's own game in the live tour has ended (they
+	// may watch its other tables); set for a check about a game of that tour.
+	FinishedInTour bool
 	// Game is the game the capability is about, nil for an event-level check.
 	Game *models.GameSummary
 	// Now is the time the rules are checked at (the undo time limit).
@@ -48,6 +52,18 @@ func (s *Service) buildAuthContext(ctx context.Context, event models.Event, call
 			return EventAuthContext{}, err
 		}
 		authCtx.IsSeatedInGame = seated
+	}
+
+	if authCtx.Game != nil && authCtx.Game.TourStatus != nil && *authCtx.Game.TourStatus == models.TourLive &&
+		!authCtx.IsSeatedInGame && callerID != 0 {
+		tour, err := s.repo.LiveTour(ctx, event.ID, callerID)
+		switch {
+		case errors.Is(err, models.ErrTourNotFound):
+		case err != nil:
+			return EventAuthContext{}, err
+		default:
+			authCtx.FinishedInTour = tour.Finished
+		}
 	}
 
 	return authCtx, nil
@@ -143,6 +159,9 @@ func (authCtx EventAuthContext) hasCapability(capability models.Capability) bool
 		if authCtx.IsSeatedInGame {
 			return true
 		}
+		if authCtx.tourTableHidden() {
+			return false
+		}
 		return authCtx.canViewContent(authCtx.Event.GamesReach, authCtx.baseWatchGamesAccess())
 	case models.CapViewTournament:
 		return authCtx.Event.Type == models.EventTournament && authCtx.isStaff()
@@ -235,7 +254,31 @@ func (authCtx EventAuthContext) canViewGame() bool {
 	if authCtx.IsSeatedInGame {
 		return true
 	}
+	if authCtx.tourTableHidden() {
+		return false
+	}
 	return authCtx.canViewContent(authCtx.Event.GamesReach, authCtx.baseWatchGamesAccess())
+}
+
+// tourTableHidden reports whether the game is another table of a tour that
+// the caller may not see yet (docs/user-scenarios.md, area 8, "Visibility"):
+// a live game of the live tour is seen only by the staff, its table, and the
+// players whose own game in the tour has ended; a game of a seating not
+// started yet (draft or published) only by the staff and its table. Whatever
+// the games reach, so signing out doesn't get around it.
+func (authCtx EventAuthContext) tourTableHidden() bool {
+	g := authCtx.Game
+	if g == nil || g.TourStatus == nil || authCtx.IsSeatedInGame || authCtx.isStaff() {
+		return false
+	}
+	switch *g.TourStatus {
+	case models.TourLive:
+		return g.Status == models.GameLive && !authCtx.FinishedInTour
+	case models.TourDraft, models.TourPublished:
+		return true
+	default:
+		return false
+	}
 }
 
 // seatedMayAbort reports whether the event's settings let a seated player
