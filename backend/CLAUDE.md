@@ -6,7 +6,10 @@
 - Config: `jwt_key` and `mail_from` are required (`Validate` fails otherwise). If `db_url` is empty, the `PSQL_MACRA` env var is used. Mail is sent via SMTP on `127.0.0.1:25` without auth.
 - Regenerate mocks with `mockery` **v3.8.1**, the official release binary (the dev image has it in `/usr/local/bin`; never `go install` it). It reads `.mockery.yml` and writes `mocks_test.go` next to each listed interface, so add new interfaces there. Another version rewrites every mock in its own style; CI regenerates the mocks with v3.8.1 and fails if anything differs, so commit regenerated mocks with every interface change.
 - Repo tests (`repo/...`) need a real PostgreSQL in `PSQL_MACRA_TEST`. `database.DB.Test` runs migrations **up before and down after** each test, so the test DB is wiped. Never point it at real data. Service and handler tests use mocks and need no DB.
-- Use `go test -count=1 ./...` to bypass the test cache when DB state matters.
+- Run the tests as CI does: `go test -count=1 -p 1 ./...` (`-count=1` bypasses the test cache). The repo packages share the one test database and migrate it up and down around every test, so in parallel they block each other or leave it "dirty" in `schema_migrations`; reset that on the **test** database only (`drop schema public cascade; create schema public;`).
+- CI's PostgreSQL sorts text by a UTF-8 locale; a local database may use byte order (and a `SQL_ASCII` one counts `VARCHAR` length in bytes). Don't assert an order that only the collation decides.
+- golangci-lint: the official release binary of the version in `.github/workflows/backend.yml` (in the dev image's `/usr/local/bin`); never `go install` it or put another copy earlier in `PATH`. The toolchain is the Go version in `go.mod`. Changing the Go, golangci-lint or mockery version means changing CI, these notes and the dev image together: ask the owner first.
+- There is no mail server locally: a sign-up answers 200 but the verification mail fails, so mark test users verified in the dev database (`update users set email_verified_at = now() …`).
 
 ## Architecture
 
@@ -26,7 +29,15 @@ Layered, wired manually in `cmd/main.go`: `repo` (pgx SQL) → `service` (busine
 - **Event settings** (`models.EventSettings`: who may finish or abort a game) are JSONB in `events.settings`. Unlike the rules they change at any time (`PUT /event/:id/settings`) and only feed the game-level capabilities (`hasGameCapability`). The same rule as below applies to changing them.
 - **Changing `GameRules` (or `EventSettings`).** JSON decoding gives a missing key its zero value and ignores unknown keys, and live games (and games revived by an undo) are replayed by their stored rules. So every change to `GameRules` comes with a migration that writes the new value explicitly into every row of `events.rules` and `games.rules` (e.g. `UPDATE games SET rules = rules || '{"new_rule": <the old behavior>}'`): the stored JSON is always complete. Never rename a key or change what a value means: add a new key instead. Ended games don't depend on the rules: their results (`player_results`) and round scores are stored, not replayed. A change to the scoring itself (e.g. a new MCR edition) needs a rule value of its own, defaulting to the old behavior, or live games would replay with the new code.
 - Time columns are `timestamptz` without a default: every insert or update sets the value from Go as `time.Now().UTC()`, never SQL `now()`. The pool reads `timestamptz` back in UTC. `repo/database.TestTimeColumns` checks the schema.
-- DB migrations are `repo/database/migrations/NNNNNN_*.{up,down}.sql` (golang-migrate), embedded in the binary and applied automatically on startup by `database.NewDB`. Add new ones with the next sequence number and always provide a `down`.
+- DB migrations are `repo/database/migrations/NNNNNN_*.{up,down}.sql` (golang-migrate), embedded in the binary and applied automatically on startup by `database.NewDB`. Add new ones with the next sequence number and always provide a `down`. `feature/tournament` carries migrations master doesn't have yet: on master, ask the owner which number to take.
+- Concurrent requests must not be able to break an invariant: checks that depend on other rows (a member in a live game, an open event, the log size) run inside the same transaction under the same locks as the write, not before it in the service.
+- `authcookie.legacyDomain` clears an old cookie shared across subdomains on every login and logout. Keep it until the owner decides to drop it.
+
+## Style
+
+- Doc comments start with the identifier's name: `// cookieAttrs returns the domain and the Secure flag …`, never `// It returns …`; put return values into that first sentence.
+- golangci-lint is strict: `nonamedreturns` is obeyed, `unparam` is off only for tests; comments end with a period (fix the comment, don't relax the linter).
+- Errors are `ErrXxx` sentinels in `models/`, never new `XxxError` types. In tests, follow the file's style (testify `require`/`assert`, mocks via `EXPECT()`).
 
 ## One live game per player per event
 
