@@ -28,8 +28,9 @@ MaCRa (Mahjong Competitive Rules assistant) tracks MCR mahjong games: live score
 - **Permission rules** deny force pushes, `gh pr merge` and reading `.env*`, and ask before `git push` and `gh pr create`.
 - **`.claude/hooks/git-guard.js`** (PreToolUse on Bash) parses each command and blocks force pushes, pushes to `master`/`main` and PR merges, however the command is spelled.
 - **`.claude/hooks/format.js`** (PostToolUse on Edit/Write) runs `gofmt -w` on edited `.go` files and the local prettier on edited `frontend/` files. Editing a file therefore also reformats any old unformatted code in it.
+- **`opencode.jsonc`** (repository root) gives other agents (opencode) the same deny/ask/allow lists and the same formatting (`formatter: true`). It is read from the repository, so changing the rules needs no container rebuild.
 
-The rules above still apply in full. Put personal overrides in `.claude/settings.local.json`, which is gitignored. Other coding agents (e.g. opencode) don't run these hooks and permission rules: follow the rules yourself, and format every file you edit (`gofmt -w` for `.go`, `frontend/node_modules/.bin/prettier --write` for files under `frontend/`).
+The rules above still apply in full. Put personal overrides in `.claude/settings.local.json`, which is gitignored. Other coding agents (e.g. opencode) get the permission lists and formatting from `opencode.jsonc`, but they run neither the hooks nor `.claude/settings.json` itself: follow the rules yourself, and format every file you edit (`gofmt -w` for `.go`, `frontend/node_modules/.bin/prettier --write` for files under `frontend/`).
 
 ## Product behavior
 
