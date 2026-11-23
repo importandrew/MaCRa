@@ -1,0 +1,50 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // Agent rules for this repository. They mirror .claude/settings.json (the same deny, ask and
+  // allow lists) and replace .claude/hooks/format.js with OpenCode's built-in formatters.
+  // Rules are ordered: the last matching rule wins.
+  "permissions": [
+    // As with Claude Code, a command outside the allow list needs a decision.
+    { "action": "shell", "resource": "*", "effect": "ask" },
+
+    // Routine commands, allowed without asking.
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "go build *", "effect": "allow" },
+    { "action": "shell", "resource": "go test *", "effect": "allow" },
+    { "action": "shell", "resource": "go vet *", "effect": "allow" },
+    { "action": "shell", "resource": "golangci-lint run *", "effect": "allow" },
+    { "action": "shell", "resource": "mockery *", "effect": "allow" },
+    { "action": "shell", "resource": "make build *", "effect": "allow" },
+    { "action": "shell", "resource": "make build-dev *", "effect": "allow" },
+    { "action": "shell", "resource": "npm run lint *", "effect": "allow" },
+    { "action": "shell", "resource": "npm run lint:fix *", "effect": "allow" },
+    { "action": "shell", "resource": "npm run format *", "effect": "allow" },
+    { "action": "shell", "resource": "npm run build *", "effect": "allow" },
+    { "action": "shell", "resource": "npm run build-dev *", "effect": "allow" },
+
+    // Publishing needs the owner's decision.
+    { "action": "shell", "resource": "git push *", "effect": "ask" },
+    { "action": "shell", "resource": "gh pr create *", "effect": "ask" },
+
+    // Force pushes, however spelled, and merging PRs are not allowed.
+    { "action": "shell", "resource": "git push --force *", "effect": "deny" },
+    { "action": "shell", "resource": "git push * --force", "effect": "deny" },
+    { "action": "shell", "resource": "git push * --force *", "effect": "deny" },
+    { "action": "shell", "resource": "git push --force-with-lease *", "effect": "deny" },
+    { "action": "shell", "resource": "git push * --force-with-lease*", "effect": "deny" },
+    { "action": "shell", "resource": "git push -f *", "effect": "deny" },
+    { "action": "shell", "resource": "git push * -f", "effect": "deny" },
+    { "action": "shell", "resource": "git push * -f *", "effect": "deny" },
+    { "action": "shell", "resource": "git push * +*", "effect": "deny" },
+    { "action": "shell", "resource": "gh pr merge *", "effect": "deny" },
+
+    // Secrets are never read.
+    { "action": "read", "resource": "*.env", "effect": "deny" },
+    { "action": "read", "resource": "*.env.*", "effect": "deny" }
+  ],
+
+  // Format edited files with the project's own tools: gofmt for Go, prettier for the frontend.
+  "formatter": true
+}
